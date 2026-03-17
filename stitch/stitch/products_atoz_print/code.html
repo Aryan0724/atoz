@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error": "#ba1a1a",
+              "primary-fixed": "#ffd9de",
+              "on-primary-fixed-variant": "#90003b",
+              "on-tertiary-fixed-variant": "#604100",
+              "on-error-container": "#93000a",
+              "surface-tint": "#bc004f",
+              "on-secondary-container": "#00426f",
+              "tertiary-fixed-dim": "#ffba38",
+              "tertiary-container": "#9b6b00",
+              "outline-variant": "#e4bdc2",
+              "on-error": "#ffffff",
+              "surface-container": "#e8edff",
+              "on-tertiary-fixed": "#281900",
+              "on-tertiary": "#ffffff",
+              "surface-container-low": "#f1f3ff",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff",
+              "on-background": "#101b30",
+              "inverse-surface": "#263046",
+              "surface": "#f9f9ff",
+              "surface-bright": "#f9f9ff",
+              "on-secondary": "#ffffff",
+              "outline": "#8f6f73",
+              "secondary": "#0062a1",
+              "on-primary-fixed": "#3f0016",
+              "secondary-fixed-dim": "#9ccaff",
+              "primary-container": "#de2264",
+              "tertiary": "#7b5500",
+              "secondary-fixed": "#d0e4ff",
+              "on-secondary-fixed": "#001d35",
+              "surface-variant": "#d7e2ff",
+              "surface-dim": "#cfdaf6",
+              "surface-container-highest": "#d7e2ff",
+              "on-surface": "#101b30",
+              "on-surface-variant": "#5b3f43",
+              "primary": "#b7004d",
+              "on-tertiary-container": "#fffbff",
+              "primary-fixed-dim": "#ffb2bf",
+              "secondary-container": "#5eb0ff",
+              "surface-container-high": "#e0e8ff",
+              "surface-container-lowest": "#ffffff",
+              "background": "#f9f9ff",
+              "on-primary-container": "#fffbff",
+              "inverse-on-surface": "#edf0ff",
+              "on-secondary-fixed-variant": "#00497b",
+              "tertiary-fixed": "#ffdeac",
+              "inverse-primary": "#ffb2bf"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            background: rgba(249, 249, 255, 0.8);
+        }
+        .text-magenta-gradient {
+            background: linear-gradient(135deg, #b7004d 0%, #de2264 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .primary-gradient-btn {
+            background: linear-gradient(135deg, #b7004d 0%, #de2264 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<nav class="sticky top-0 z-50 glass-nav border-b border-outline-variant/10 px-6 py-4">
+<div class="max-w-screen-2xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-12">
+<span class="text-2xl font-extrabold tracking-tight text-on-surface">AtoZ Print</span>
+<div class="hidden lg:flex items-center gap-8">
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#">Products</a>
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#">Services</a>
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#">About Us</a>
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#">Contact Us</a>
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#">FAQ</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+<input class="bg-surface-container-low border-none rounded py-2 pl-10 pr-4 text-sm w-64 focus:ring-2 focus:ring-secondary/20 transition-all" placeholder="Search catalog..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors relative">
+<span class="material-symbols-outlined text-on-surface">shopping_cart</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface">person</span>
+</button>
+<button class="text-sm font-semibold text-primary px-4 py-2">Login</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="max-w-screen-2xl mx-auto px-6 py-12">
+<header class="mb-16">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="max-w-2xl">
+<span class="text-xs font-bold tracking-[0.2em] text-primary uppercase mb-4 block">Premium Corporate Solutions</span>
+<h1 class="text-5xl md:text-6xl font-extrabold tracking-tight text-on-surface mb-6 leading-[1.1]">The Product <span class="text-magenta-gradient">Catalog.</span></h1>
+<p class="text-on-surface-variant text-lg max-w-lg leading-relaxed">Precision printing and luxury gifting curated for the modern enterprise. Experience tactile excellence in every piece.</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container px-6 py-4 rounded-xl border border-outline-variant/10">
+<span class="block text-2xl font-bold text-on-surface">50 Units</span>
+<span class="text-xs text-on-surface-variant font-medium">Standard MOQ</span>
+</div>
+<div class="bg-primary/5 px-6 py-4 rounded-xl border border-primary/10">
+<span class="block text-2xl font-bold text-primary">100%</span>
+<span class="text-xs text-on-surface-variant font-medium">Customizable</span>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-col lg:flex-row gap-12">
+<!-- Sidebar -->
+<aside class="w-full lg:w-64 flex-shrink-0">
+<div class="sticky top-32 space-y-10">
+<div>
+<h3 class="text-xs font-bold tracking-widest text-on-surface uppercase mb-6">Categories</h3>
+<ul class="space-y-4">
+<li><a class="flex items-center justify-between text-sm font-semibold text-primary" href="#">All Products <span class="w-1.5 h-1.5 bg-primary rounded-full"></span></a></li>
+<li><a class="text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors" href="#">Corporate Gifting</a></li>
+<li><a class="text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors" href="#">Stationery</a></li>
+<li><a class="text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors" href="#">Event Essentials</a></li>
+<li><a class="text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors" href="#">Tech Accessories</a></li>
+<li><a class="text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors" href="#">Apparel &amp; Bags</a></li>
+</ul>
+</div>
+<div class="p-6 bg-surface-container-high rounded-xl">
+<h4 class="text-sm font-bold text-on-surface mb-2">Need a Quote?</h4>
+<p class="text-xs text-on-surface-variant mb-4 leading-relaxed">For bulk orders exceeding 500 units, contact our enterprise team.</p>
+<button class="w-full py-2 bg-on-surface text-surface text-xs font-bold rounded hover:bg-on-surface-variant transition-colors">Get Custom Quote</button>
+</div>
+</div>
+</aside>
+<!-- Product Grid -->
+<div class="flex-grow">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+<!-- Product Card: Calendars -->
+<div class="group relative bg-surface-container-lowest rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-outline-variant/5">
+<div class="aspect-[4/5] bg-surface-dim overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Minimalist desk calendar with high quality paper texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA__mhZTi33dTHAd1IxYzUFA_es2KnMz0IputXcrnNrBJonkXPX32-hUygXMNAXwSzo4_Cthm0ZXInY6VAd8LBU5480WHyWvUOfGzqfejr7T11u_IeSIjgtTeWJhEaHJFABAO2emJTpyZroEbnThnp9UPzRRYrDcYsCJMLVGjkgreDqUlX62Y-ztGUqdLD_ZIVy7SE9mUN3frtDKS9btmVlGHcxUXAWxuV-X6wjfVgGHl-51ssis1QSEs4cwa9lX0jg4pVwgmMI_fE"/>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-xl font-bold text-on-surface">Premium Calendars</h3>
+<span class="bg-secondary-container/30 text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded">250 GSM</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6 line-clamp-2">Available in Desktop and Wall variants with metallic spiral binding.</p>
+<div class="flex items-center justify-between border-t border-outline-variant/10 pt-4">
+<span class="text-xs font-bold text-primary">MOQ: 50 Units</span>
+<button class="primary-gradient-btn text-on-primary text-xs font-bold px-4 py-2 rounded-lg">Customize</button>
+</div>
+</div>
+</div>
+<!-- Product Card: Wedding Cards -->
+<div class="group relative bg-surface-container-lowest rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-outline-variant/5">
+<div class="aspect-[4/5] bg-surface-dim overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Luxury gold embossed wedding invitation cards" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8SiD8-aAsZR9eniKbXGQoD6fFbrxifEZMx6Pv-5gfvrDO7k9unzImC7-w__SZGMcobjiK3rlizN09Tfhnki3Ow2Uc_He28hPirDcI3YG4TNvdaw0v0uFqmOiPgvzKrbJz5PLOWKf03gu_uJUhvq73JOD2PJn2-Mgz9A7sg0txAyMDbU7nLNCrxP9iNBBXsnF6g2XoAv1_30e7vhD6Pa1gJ_ZsLM2NAiUYAtDF8ExB5puM2HDfWf6DukWEKF_O0Yk8wtCmLW8P5jQ"/>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-xl font-bold text-on-surface">Wedding Cards</h3>
+<span class="bg-secondary-container/30 text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded">Handcrafted</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6 line-clamp-2">Exquisite laser-cut designs with premium foil stamping and velvet textures.</p>
+<div class="flex items-center justify-between border-t border-outline-variant/10 pt-4">
+<span class="text-xs font-bold text-primary">MOQ: 50 Units</span>
+<button class="primary-gradient-btn text-on-primary text-xs font-bold px-4 py-2 rounded-lg">Customize</button>
+</div>
+</div>
+</div>
+<!-- Product Card: Employee Joining Kit -->
+<div class="group relative bg-surface-container-lowest rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-outline-variant/5">
+<div class="aspect-[4/5] bg-surface-dim overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Corporate welcome kit with notebook pen and bottle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCFZ7b84T-_KdOtSH7ODrgqP4vM8cfTXNa2qag5o60mkKY9D7Z1CTnfBzQc0r5G2OWrPZlccLgiw6-egK_du4SpbFnWSo5UurZ9C2XOOB9OZbgJCKwkbPiLRA59vTNb_PgujhSUCP17qSg6UmsjfIMnDQl0PoMSUXiKcAiD48hkySwOz4MZqle-vxQqssJg745RMRrnwtz0jqHL3wGDHO1tQicjWTszAsjXtODE-7P0rM5vAKak2EzTieVIbyvXFDznR9BZLdITrc"/>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-xl font-bold text-on-surface">Employee Kits</h3>
+<span class="bg-secondary-container/30 text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded">Curated</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6 line-clamp-2">Complete onboarding set with notebook, bottle, pen, and hoodie.</p>
+<div class="flex items-center justify-between border-t border-outline-variant/10 pt-4">
+<span class="text-xs font-bold text-primary">MOQ: 50 Units</span>
+<button class="primary-gradient-btn text-on-primary text-xs font-bold px-4 py-2 rounded-lg">Customize</button>
+</div>
+</div>
+</div>
+<!-- Product Card: Business Cards -->
+<div class="group relative bg-surface-container-lowest rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-outline-variant/5">
+<div class="aspect-[4/5] bg-surface-dim overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Elegant matte finish business cards stacked" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNQekbhjDlQ4_mFCKyzGKIHs3dZL02gED4PoW5_XmbjHUQhp7JpjNcRHsPdX479izGjTsdrioJwgR8mgkLAaOcBOzduX7Z3IQb1F50BBhIolrds8-jaA_7oqxxt_If-P2fDRqaprVCzRIFNV1S72er1_k8RpEL0LvsXeN8fcIjtJR4OfaUbDJ2hUM5eBjtOQ3XHdTt1HNMzYuiffnDAKi2bHR8z3ssgY_nxIeV1Occn_RqGOYic1cLwjcY5xY4Tl5yuHuSIqecDY8"/>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-xl font-bold text-on-surface">Business Cards</h3>
+<span class="bg-secondary-container/30 text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded">Matte/UV</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6 line-clamp-2">Standard, Square, and Mini formats with spot UV or metallic edges.</p>
+<div class="flex items-center justify-between border-t border-outline-variant/10 pt-4">
+<span class="text-xs font-bold text-primary">MOQ: 50 Units</span>
+<button class="primary-gradient-btn text-on-primary text-xs font-bold px-4 py-2 rounded-lg">Customize</button>
+</div>
+</div>
+</div>
+<!-- Product Card: Diaries with Logo -->
+<div class="group relative bg-surface-container-lowest rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-outline-variant/5">
+<div class="aspect-[4/5] bg-surface-dim overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Leather diary with embossed corporate logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-zKrLvp9fvx1dgqcQJFM4JcPBtsn7_x0Tb-E3XHSk9AmfDJzLwFtpvIMSuOOTQvPpFsDEszRsXtPvyWOmTh9SX6vxKoQ0-qfpKDD9-iPPEiSnSW1CLvov6mcjUunksLvmH9V14GyBNwOtRU0g5sdwsntUsTqG2c8yfDgqO_SDojMQ8iFlaivvJUaoK16K6IugtgcM0ES4RzmDYCwisZjz1QVahCWSYmnbqbvxfE3-uzULyevrQIva0OVb_-CxwQG1h2y3Cm0Zaj0"/>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-xl font-bold text-on-surface">Logo Diaries</h3>
+<span class="bg-secondary-container/30 text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded">Vegan Leather</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6 line-clamp-2">Premium journals with blind embossing or foil printing options.</p>
+<div class="flex items-center justify-between border-t border-outline-variant/10 pt-4">
+<span class="text-xs font-bold text-primary">MOQ: 50 Units</span>
+<button class="primary-gradient-btn text-on-primary text-xs font-bold px-4 py-2 rounded-lg">Customize</button>
+</div>
+</div>
+</div>
+<!-- Product Card: Tech (Headphones/Bottles) -->
+<div class="group relative bg-surface-container-lowest rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-outline-variant/5">
+<div class="aspect-[4/5] bg-surface-dim overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="High end wireless headphones for corporate gifting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD686TQrw04tvPPfraeNjEKuOGhNXHaT0ChQkGFiLAzmRvVFW-HLCpCeQK42vJCEbTq3flt3GtnDeyvbUi2cGGWnfgyOCG5zND2BUC9kCyiJijqotxO9ZAgsDFnyOigyAEUr1ufUJVMZX7frj9xXH5wZ8gfEPsfpM9DdDX-xpCtRqEQJ2iy5kfs8S2oYHWtY-bzOA2MMV1fOcSk1aH4cncBgveYuuI7uqEB1Z4iXB90Lq1gMKog6XBHrE5oalCBgvM391rTEc00oEg"/>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-xl font-bold text-on-surface">Premium Tech</h3>
+<span class="bg-secondary-container/30 text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded">Bluetooth</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6 line-clamp-2">Branded headphones and sleek insulated bottles for modern teams.</p>
+<div class="flex items-center justify-between border-t border-outline-variant/10 pt-4">
+<span class="text-xs font-bold text-primary">MOQ: 50 Units</span>
+<button class="primary-gradient-btn text-on-primary text-xs font-bold px-4 py-2 rounded-lg">Customize</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Load More / Pagination -->
+<div class="mt-20 flex justify-center">
+<button class="flex items-center gap-3 px-12 py-4 bg-surface-container-high text-on-surface font-bold rounded-lg hover:bg-surface-container-highest transition-all group">
+                        See All 12 Categories
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Support FAB -->
+<div class="fixed bottom-8 right-8 z-50">
+<button class="primary-gradient-btn w-14 h-14 flex items-center justify-center rounded-full shadow-xl hover:scale-110 transition-transform text-on-primary">
+<span class="material-symbols-outlined text-3xl">support_agent</span>
+</button>
+</div>
+<!-- Footer -->
+<footer class="bg-on-surface text-surface py-20 mt-20">
+<div class="max-w-screen-2xl mx-auto px-6">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+<div class="col-span-1 md:col-span-2">
+<span class="text-3xl font-extrabold tracking-tight mb-6 block">AtoZ Print</span>
+<p class="text-surface-variant/60 max-w-sm leading-relaxed mb-8">India's leading platform for precision printing and curated corporate merchandise. Bringing high-end editorial quality to every brand.</p>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-full border border-surface-variant/20 flex items-center justify-center hover:bg-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">public</span>
+</a>
+<a class="w-10 h-10 rounded-full border border-surface-variant/20 flex items-center justify-center hover:bg-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">share</span>
+</a>
+</div>
+</div>
+<div>
+<h4 class="text-xs font-bold tracking-[0.2em] uppercase text-surface-variant mb-8">Quick Access</h4>
+<ul class="space-y-4">
+<li><a class="text-sm text-surface-variant/80 hover:text-primary transition-colors" href="#">Bulk Inquiries</a></li>
+<li><a class="text-sm text-surface-variant/80 hover:text-primary transition-colors" href="#">Our Process</a></li>
+<li><a class="text-sm text-surface-variant/80 hover:text-primary transition-colors" href="#">Eco-Series</a></li>
+<li><a class="text-sm text-surface-variant/80 hover:text-primary transition-colors" href="#">Delivery Timelines</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-xs font-bold tracking-[0.2em] uppercase text-surface-variant mb-8">Support</h4>
+<ul class="space-y-4">
+<li><a class="text-sm text-surface-variant/80 hover:text-primary transition-colors" href="mailto:support@atozprint.in">support@atozprint.in</a></li>
+<li><a class="text-sm text-surface-variant/80 hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="text-sm text-surface-variant/80 hover:text-primary transition-colors" href="#">Terms &amp; Conditions</a></li>
+<li><a class="text-sm text-surface-variant/80 hover:text-primary transition-colors" href="#">FAQ</a></li>
+</ul>
+</div>
+</div>
+<div class="border-t border-surface-variant/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+<p class="text-xs text-surface-variant/40">© 2024 AtoZ Print. PAN India delivery available.</p>
+<div class="flex items-center gap-4 grayscale opacity-40">
+<span class="text-[10px] font-bold tracking-widest uppercase">Trusted by</span>
+<span class="text-xs font-extrabold">Fortune 500 Companies</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>
