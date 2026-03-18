@@ -33,13 +33,13 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto relative z-10 text-center">
            <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-pink/10 rounded-full text-brand-pink text-[10px] font-black uppercase tracking-widest mb-6">
               <MessageSquare className="h-3 w-3" />
-              Let's Talk Business
+              Let&apos;s Talk Business
            </div>
            <h1 className="text-5xl md:text-7xl font-black text-brand-dark tracking-tighter mb-6">
              Start Your <span className="text-brand-pink underline decoration-brand-cyan/30 decoration-8 underline-offset-4">Print Journey</span>
            </h1>
            <p className="text-gray-400 font-medium text-lg max-w-2xl mx-auto">
-             Whether you're a startup or an established brand, we help you bring your designs to life with professional-grade printing.
+             Whether you&apos;re a startup or an established brand, we help you bring your designs to life with professional-grade printing.
            </p>
         </div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-brand-pink/5 to-transparent -z-10"></div>
@@ -113,7 +113,7 @@ export default function ContactPage() {
            <div className="space-y-12 py-8">
               <div>
                  <h2 className="text-3xl font-black text-brand-dark mb-4 tracking-tight">Direct Connections</h2>
-                 <p className="text-gray-400 font-medium max-w-sm">We're based in the heart of Delhi's printing district, ready to serve nationwide.</p>
+                 <p className="text-gray-400 font-medium max-w-sm">We&apos;re based in the heart of Delhi&apos;s printing district, ready to serve nationwide.</p>
               </div>
 
               <div className="space-y-8">

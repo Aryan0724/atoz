@@ -73,7 +73,7 @@ export default function ShippingPage() {
               <div className="p-8 border border-gray-100 rounded-[40px] space-y-4">
                  <h4 className="font-black text-brand-dark uppercase tracking-widest text-sm">Individual Dispatch</h4>
                  <p className="text-sm text-gray-400 font-medium italic">
-                    Doing a reward campaign? We can ship individual items directly to your employees' homes across the country.
+                    Doing a reward campaign? We can ship individual items directly to your employees&apos; homes across the country.
                  </p>
               </div>
            </div>
