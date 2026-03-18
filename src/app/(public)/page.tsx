@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Box, Zap, Shield, Globe } from 'lucide-react';
 import SectionHeading from '@/components/common/SectionHeading';
 import ProductCard from '@/components/products/ProductCard';
@@ -49,9 +50,39 @@ export default function HomePage() {
             
             <div className="hidden lg:block relative">
               <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-8 border-white transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                {/* Placeholder for Hero Image */}
-                <div className="w-full aspect-[4/5] bg-gray-200 flex items-center justify-center text-gray-400 font-medium italic">
-                  Premium Product Customization Showcase
+                <div className="w-full aspect-[4/5] bg-gray-100 relative">
+                  <Image 
+                    src="/hero_showcase.png"
+                    alt="Premium Product Customization Showcase"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                  
+                  {/* Floating badges overlay */}
+                  <div className="absolute top-8 -left-6 bg-white p-4 rounded-2xl shadow-xl animate-bounce" style={{ animationDuration: '3s' }}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center">
+                        <span className="text-xl">✨</span>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Quality</p>
+                        <p className="text-sm font-black text-brand-dark">Premium Print</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="absolute bottom-12 -right-8 bg-white p-4 rounded-2xl shadow-xl animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center">
+                        <span className="text-xl">🚀</span>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Delivery</p>
+                        <p className="text-sm font-black text-brand-dark">48hr Dispatch</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               {/* Decorative elements */}
