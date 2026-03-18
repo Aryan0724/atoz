@@ -1,6 +1,7 @@
 import { Metadata, ResolvingMetadata } from 'next';
 import { supabase } from '@/lib/supabase/client';
 import ProductDetailClient from './ProductDetailClient';
+import { mockProducts } from '@/lib/data/mockProducts';
 
 type Props = {
   params: { slug: string };
@@ -11,11 +12,22 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const { data: product } = await supabase
-    .from('products')
-    .select('*')
-    .eq('slug', params.slug)
-    .single();
+  let product = null;
+
+  try {
+    const { data } = await supabase
+      .from('products')
+      .select('*')
+      .eq('slug', params.slug)
+      .single();
+    product = data;
+  } catch (e) {
+    console.warn('Metadata fetch failed, falling back to mock data:', e);
+  }
+
+  if (!product) {
+    product = mockProducts.find(p => p.slug === params.slug);
+  }
 
   if (!product) return {
     title: 'Product Not Found | A to Z Prints'
