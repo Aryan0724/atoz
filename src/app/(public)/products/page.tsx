@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import SectionHeading from '@/components/common/SectionHeading';
 import ProductCard from '@/components/products/ProductCard';
 import { SlidersHorizontal, Search, ChevronDown, Loader2 } from 'lucide-react';
@@ -17,7 +17,7 @@ const sortOptions = [
   { label: 'Price: High to Low', value: 'price-high' },
 ];
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   
@@ -166,5 +166,17 @@ export default function ProductsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <Loader2 className="h-10 w-10 text-brand-pink animate-spin" />
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }
