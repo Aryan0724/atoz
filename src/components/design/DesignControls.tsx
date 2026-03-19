@@ -1,10 +1,15 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Type, Palette, Image as ImageIcon, Upload, Trash2, Loader2, SlidersHorizontal, Box, Layers, Pencil, ArrowLeft, ArrowRight, Download } from 'lucide-react';
+import { CanvasObjectProperties } from './DesignerCanvas';
+import { uploadFile } from '@/lib/supabase/storage';
+import { 
+  Type, Palette, Image as ImageIcon, Upload, Trash2, Loader2, 
+  Layers, Pencil, ArrowLeft, ArrowRight, Download, PlusSquare, Settings2, Grid, MoveUp, MoveDown, Sparkles
+} from 'lucide-react';
 
-const colors = [
+const productColors = [
   { name: 'White', hex: '#FFFFFF' },
   { name: 'Black', hex: '#000000' },
   { name: 'Navy', hex: '#1e3a8a' },
@@ -15,197 +20,515 @@ const colors = [
   { name: 'Brand Pink', hex: '#E91E63' },
 ];
 
-const textColors = [
-  { name: 'White', hex: '#FFFFFF' },
-  { name: 'Black', hex: '#000000' },
-  { name: 'Silver', hex: '#C0C0C0' },
-  { name: 'Gold', hex: '#D4AF37' },
-  { name: 'Red', hex: '#FF0000' },
-  { name: 'Blue', hex: '#0000FF' },
+const shapes = [
+  { name: 'Circle', type: 'circle' as const, icon: <div className="h-6 w-6 rounded-full border-2 border-brand-pink" /> },
+  { name: 'Square', type: 'rect' as const, icon: <div className="h-6 w-6 border-2 border-brand-pink" /> },
+  { name: 'Triangle', type: 'triangle' as const, icon: <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[20px] border-b-brand-pink" /> },
 ];
-import { uploadFile } from '@/lib/supabase/storage';
-
-interface DesignControlsProps {
-  selectedColor: string;
-  onColorChange: (color: string) => void;
-  customText: string;
-  onTextChange: (text: string) => void;
-  textColor: string;
-  onTextColorChange: (color: string) => void;
-  fontFamily: string;
-  onFontChange: (font: string) => void;
-  fontSize: number;
-  onFontSizeChange: (size: number) => void;
-  textPosition: { x: number; y: number };
-  onTextPositionChange: (pos: { x: number; y: number }) => void;
-  textRotation: number;
-  onTextRotationChange: (rot: number) => void;
-  logoUrl: string | null;
-  onLogoUpload: (url: string | null) => void;
-  logoPosition: { x: number; y: number };
-  onLogoPositionChange: (pos: { x: number; y: number }) => void;
-  logoScale: number;
-  onLogoScaleChange: (scale: number) => void;
-  logoRotation: number;
-  onLogoRotationChange: (rot: number) => void;
-  // Advanced Typography (V2.1)
-  charSpacing: number;
-  onCharSpacingChange: (spacing: number) => void;
-  lineHeight: number;
-  onLineHeightChange: (height: number) => void;
-  textShadow: { color: string; blur: number; offsetX: number; offsetY: number };
-  onTextShadowChange: (shadow: { color: string; blur: number; offsetX: number; offsetY: number }) => void;
-  // Image Filters (V2.1)
-  brightness: number;
-  onBrightnessChange: (val: number) => void;
-  contrast: number;
-  onContrastChange: (val: number) => void;
-  isGrayscale: boolean;
-  onGrayscaleChange: (val: boolean) => void;
-  // Modes
-  isDrawingMode: boolean;
-  onDrawingModeChange: (val: boolean) => void;
-  // Actions (V2.1)
-  onDownload: () => void;
-  onUndo: () => void;
-  onRedo: () => void;
-  // New V2 Props
-  objects?: any[];
-  onAddObject?: (type: string, url?: string) => void;
-  onObjectUpdate?: (id: string, update: any) => void;
-  onRemoveObject?: (id: string) => void;
-}
 
 const fonts = [
-  { name: 'Classic Serif', family: "'Playfair Display', serif" },
-  { name: 'Modern Sans', family: "'Outfit', sans-serif" },
-  { name: 'Elegant Script', family: "'Dancing Script', cursive" },
-  { name: 'Minimalist', family: "'Outfit', sans-serif" },
+  { name: 'Inter', family: "'Inter', sans-serif" },
+  { name: 'Roboto', family: "'Roboto', sans-serif" },
+  { name: 'Open Sans', family: "'Open Sans', sans-serif" },
+  { name: 'Lato', family: "'Lato', sans-serif" },
+  { name: 'Montserrat', family: "'Montserrat', sans-serif" },
+  { name: 'Oswald', family: "'Oswald', sans-serif" },
+  { name: 'Playfair Display', family: "'Playfair Display', serif" },
+  { name: 'Merriweather', family: "'Merriweather', serif" },
+  { name: 'Lora', family: "'Lora', serif" },
+  { name: 'Dancing Script', family: "'Dancing Script', cursive" },
+  { name: 'Pacifico', family: "'Pacifico', cursive" },
+  { name: 'Caveat', family: "'Caveat', cursive" },
+  { name: 'Righteous', family: "'Righteous', cursive" },
+  { name: 'Bebas Neue', family: "'Bebas Neue', sans-serif" },
+  { name: 'Lobster', family: "'Lobster', cursive" },
 ];
 
-const patterns = [
-  { name: 'Geometric', url: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=200&auto=format' },
-  { name: 'Abstract Wave', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=200&auto=format' },
-  { name: 'Minimalist Dot', url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=200&auto=format' },
-  { name: 'Cyberpunk', url: 'https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=200&auto=format' },
-];
-
-const shapes = [
-  { name: 'Circle', type: 'circle', icon: <div className="h-6 w-6 rounded-full border-2 border-brand-pink" /> },
-  { name: 'Square', type: 'rect', icon: <div className="h-6 w-6 border-2 border-brand-pink" /> },
-  { name: 'Triangle', type: 'triangle', icon: <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[20px] border-b-brand-pink" /> },
-];
+interface DesignControlsProps {
+  productColor: string;
+  onProductColorChange: (color: string) => void;
+  activeObject: CanvasObjectProperties | null;
+  onUpdateActiveObject: (properties: Partial<CanvasObjectProperties>) => void;
+  onAddText: (text: string) => void;
+  onAddImage: (url: string) => void;
+  onAddShape: (type: 'circle' | 'rect' | 'triangle') => void;
+  onDeleteActiveObject: () => void;
+  onBringForward: () => void;
+  onSendBackward: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  onDownload: () => void;
+  layers: any[];
+}
 
 const DesignControls = ({
-  selectedColor,
-  onColorChange,
-  customText,
-  onTextChange,
-  textColor,
-  onTextColorChange,
-  fontFamily,
-  onFontChange,
-  fontSize,
-  onFontSizeChange,
-  textPosition,
-  onTextPositionChange,
-  textRotation,
-  onTextRotationChange,
-  logoUrl,
-  onLogoUpload,
-  logoPosition,
-  onLogoPositionChange,
-  logoScale,
-  onLogoScaleChange,
-  logoRotation,
-  onLogoRotationChange,
-  charSpacing,
-  onCharSpacingChange,
-  lineHeight,
-  onLineHeightChange,
-  textShadow,
-  onTextShadowChange,
-  brightness,
-  onBrightnessChange,
-  contrast,
-  onContrastChange,
-  isGrayscale,
-  onGrayscaleChange,
-  isDrawingMode,
-  onDrawingModeChange,
-  onDownload,
+  productColor,
+  onProductColorChange,
+  activeObject,
+  onUpdateActiveObject,
+  onAddText,
+  onAddImage,
+  onAddShape,
+  onDeleteActiveObject,
+  onBringForward,
+  onSendBackward,
   onUndo,
   onRedo,
-  objects = [],
-  onAddObject,
-  onObjectUpdate,
-  onRemoveObject
+  canUndo,
+  canRedo,
+  onDownload,
+  layers
 }: DesignControlsProps) => {
-  const [activeTab, setActiveTab] = React.useState<'color' | 'text' | 'logo' | 'graphics' | 'layout'>('color');
-  const [uploading, setUploading] = React.useState(false);
+  const [activeTab, setActiveTab] = useState<'add' | 'edit' | 'product' | 'layers'>('add');
+  const [uploading, setUploading] = useState(false);
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Auto-switch to edit tab when an object is selected
+  useEffect(() => {
+    if (activeObject) {
+      setActiveTab('edit');
+    } else if (activeTab === 'edit') {
+      setActiveTab('add');
+    }
+  }, [activeObject]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
     try {
-      const fileName = `logo-${Date.now()}-${file.name}`;
+      const fileName = `upload-${Date.now()}-${file.name}`;
       const publicUrl = await uploadFile('designs', fileName, file);
-      onLogoUpload(publicUrl);
+      if (publicUrl) {
+        onAddImage(publicUrl);
+        setActiveTab('edit'); // switch to edit mode once added
+      }
     } catch (error) {
-      console.error('Logo upload failed:', error);
-      alert('Failed to upload logo to storage');
+      console.error('Upload failed:', error);
+      alert('Failed to upload image. Please try again.');
     } finally {
       setUploading(false);
+      e.target.value = ''; // Reset input
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-white relative">
       {/* Dynamic Tabs */}
-      <div className="flex border-b border-gray-100 overflow-x-auto no-scrollbar">
+      <div className="flex border-b border-gray-100 overflow-x-auto no-scrollbar relative z-10 shrink-0">
         {[
-          { id: 'color', icon: <Palette className="h-5 w-5" />, label: 'Color' },
-          { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },
-          { id: 'logo', icon: <Upload className="h-5 w-5" />, label: 'Logo' },
-          { id: 'graphics', icon: <ImageIcon className="h-5 w-5" />, label: 'Graphics' },
-          { id: 'layout', icon: <SlidersHorizontal className="h-5 w-5" />, label: 'Studio' },
-        ].map((tab) => (
-          <button 
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={cn(
-              "flex-1 min-w-[70px] flex flex-col items-center py-5 transition-all relative",
-              activeTab === tab.id ? "text-brand-pink" : "text-gray-400 hover:text-brand-dark"
-            )}
-          >
-            {tab.icon}
-            <span className="text-[9px] font-black uppercase tracking-widest mt-2">{tab.label}</span>
-            {activeTab === tab.id && (
-              <span className="absolute bottom-0 left-0 w-full h-1 bg-brand-pink rounded-t-full"></span>
-            )}
-          </button>
-        ))}
+          { id: 'add', icon: <PlusSquare className="h-5 w-5" />, label: 'Add' },
+          { id: 'edit', icon: <Settings2 className="h-5 w-5" />, label: 'Edit' },
+          { id: 'layers', icon: <Layers className="h-5 w-5" />, label: 'Layers' },
+          { id: 'product', icon: <Palette className="h-5 w-5" />, label: 'Product' },
+        ].map((tab) => {
+          const disabled = tab.id === 'edit' && !activeObject;
+          return (
+            <button 
+              key={tab.id}
+              disabled={disabled}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={cn(
+                "flex-1 min-w-[70px] flex flex-col items-center py-5 transition-all relative",
+                activeTab === tab.id ? "text-brand-pink" : "text-gray-400 hover:text-brand-dark",
+                disabled && "opacity-30 cursor-not-allowed hover:text-gray-400"
+              )}
+            >
+              {tab.icon}
+              <span className="text-[9px] font-black uppercase tracking-widest mt-2">{tab.label}</span>
+              {activeTab === tab.id && (
+                <span className="absolute bottom-0 left-0 w-full h-1 bg-brand-pink rounded-t-full shadow-[0_-2px_10px_rgba(233,30,99,0.5)]"></span>
+              )}
+            </button>
+          )
+        })}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 p-8 overflow-y-auto no-scrollbar">
-        {activeTab === 'color' && (
+      {/* Content Area */}
+      <div className="flex-1 overflow-y-auto no-scrollbar p-6 pb-24">
+        
+        {/* ADD TAB */}
+        {activeTab === 'add' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-8">
+            <h3 className="text-xl font-black text-brand-dark tracking-tight">Add Elements</h3>
+            
+            <section className="space-y-3">
+              <button 
+                onClick={() => onAddText("Double click to edit")}
+                className="w-full bg-gray-50 hover:bg-brand-pink/5 hover:border-brand-pink/30 border border-transparent rounded-2xl p-6 flex flex-col items-center justify-center transition-all group"
+              >
+                <div className="h-12 w-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <Type className="h-6 w-6 text-brand-pink" />
+                </div>
+                <span className="font-bold text-sm text-brand-dark">Add Custom Text</span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Rich Typography</span>
+              </button>
+            </section>
+
+            <section className="space-y-3">
+              <label className="relative w-full bg-gray-50 hover:bg-brand-pink/5 hover:border-brand-pink/30 border border-dashed border-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center transition-all group cursor-pointer">
+                {uploading ? (
+                  <Loader2 className="h-8 w-8 text-brand-pink animate-spin" />
+                ) : (
+                  <>
+                    <div className="h-12 w-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Upload className="h-6 w-6 text-brand-pink" />
+                    </div>
+                    <span className="font-bold text-brand-dark text-sm">Upload Image</span>
+                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">PNG, JPG, SVG</span>
+                  </>
+                )}
+                <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
+              </label>
+            </section>
+
+            <section>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Basic Shapes</h4>
+              <div className="grid grid-cols-3 gap-3">
+                {shapes.map((s) => (
+                  <button
+                    key={s.name}
+                    onClick={() => onAddShape(s.type)}
+                    className="flex flex-col items-center justify-center h-24 bg-gray-50 rounded-2xl hover:bg-pink-50 hover:text-brand-pink transition-all group border border-transparent hover:border-brand-pink/20"
+                  >
+                    <div className="group-hover:scale-110 transition-transform">
+                      {s.icon}
+                    </div>
+                    <span className="text-[9px] font-bold uppercase mt-3">{s.name}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* EDIT TAB (Contextual) */}
+        {activeTab === 'edit' && activeObject && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-8">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+               <div>
+                 <h3 className="text-xl font-black text-brand-dark tracking-tight capitalize">Edit {activeObject.type.replace('i-', '')}</h3>
+                 <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mt-1">Properties Panel</p>
+               </div>
+               <button 
+                 onClick={onDeleteActiveObject}
+                 className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
+               >
+                 <Trash2 className="h-4 w-4" />
+               </button>
+            </div>
+
+            {/* TEXT CONTROLS */}
+            {(activeObject.type === 'i-text' || activeObject.type === 'text') && (
+              <div className="space-y-8">
+                <section>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Font Family</label>
+                  <div className="grid grid-cols-2 gap-2 h-40 overflow-y-auto no-scrollbar pb-2 pr-1">
+                    {fonts.map((f) => (
+                      <button
+                        key={f.family}
+                        onClick={() => onUpdateActiveObject({ fontFamily: f.family })}
+                        className={cn(
+                          "px-3 py-2 rounded-xl border text-left transition-all text-[11px] truncate",
+                          activeObject.fontFamily === f.family ? "border-brand-pink bg-pink-50 text-brand-pink shadow-sm" : "border-gray-100 hover:border-brand-pink/30 text-gray-600 bg-gray-50 hover:bg-white"
+                        )}
+                        style={{ fontFamily: f.family }}
+                      >
+                        {f.name}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <div className="flex items-center justify-between mb-4 mt-6">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Text Color</label>
+                    <div className="w-6 h-6 rounded border border-gray-200 shadow-sm" style={{ backgroundColor: activeObject.fill }} />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {['#FFFFFF', '#000000', '#E91E63', '#2563eb', '#dc2626', '#D4AF37', '#14532d'].map(color => (
+                       <button 
+                         key={color}
+                         onClick={() => onUpdateActiveObject({ fill: color })}
+                         className={cn(
+                           "w-8 h-8 rounded-full border-2 transition-transform hover:scale-110",
+                           activeObject.fill === color ? "border-brand-pink ring-2 ring-brand-pink/20 scale-110" : "border-gray-200"
+                         )}
+                         style={{ backgroundColor: color }}
+                       />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between mb-4 mt-8 w-full">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Stroke / Outline</label>
+                     <div className="flex gap-2 items-center">
+                       <input 
+                         type="range" min="0" max="10" value={activeObject.strokeWidth || 0}
+                         onChange={(e) => onUpdateActiveObject({ strokeWidth: parseInt(e.target.value) })}
+                         className="w-16 h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                       />
+                       <span className="text-[10px] font-bold text-brand-pink w-3">{activeObject.strokeWidth || 0}</span>
+                     </div>
+                  </div>
+                  <div className="flex w-full mb-3 gap-2 overflow-x-auto no-scrollbar pb-2">
+                     {['transparent', '#000000', '#FFFFFF', '#E91E63', '#2563eb', '#dc2626', '#14532d', '#D4AF37'].map(color => (
+                        <button 
+                          key={`stroke-${color}`}
+                          onClick={() => onUpdateActiveObject({ stroke: color === 'transparent' ? '' : color })}
+                          className={cn(
+                             "shrink-0 w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center",
+                             (activeObject.stroke === color || (color === 'transparent' && !activeObject.stroke)) ? "border-brand-pink ring-2 ring-brand-pink/20 scale-110" : "border-gray-200"
+                          )}
+                          style={{ backgroundColor: color === 'transparent' ? '#f9fafb' : color }}
+                        >
+                          {color === 'transparent' && <span className="text-[10px] font-black text-gray-400">Ø</span>}
+                        </button>
+                      ))}
+                  </div>
+                </section>
+
+                <section className="space-y-6">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Font Size</span>
+                      <span className="text-xs font-bold text-brand-pink">{Math.round(activeObject.fontSize || 0)}</span>
+                    </div>
+                    <input 
+                      type="range" min="10" max="200" value={activeObject.fontSize || 32}
+                      onChange={(e) => onUpdateActiveObject({ fontSize: parseInt(e.target.value) })}
+                      className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                    />
+                  </div>
+                  
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Letter Spacing</span>
+                      <span className="text-xs font-bold text-brand-pink">{activeObject.charSpacing || 0}</span>
+                    </div>
+                    <input 
+                      type="range" min="-100" max="800" value={activeObject.charSpacing || 0}
+                      onChange={(e) => onUpdateActiveObject({ charSpacing: parseInt(e.target.value) })}
+                      className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                    />
+                  </div>
+
+                  <div>
+                     <div className="flex items-center justify-between mb-2">
+                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Curve Text</span>
+                       <span className="text-xs font-bold text-brand-pink">{activeObject._curve || 0}</span>
+                     </div>
+                     <input 
+                       type="range" min="-100" max="100" value={activeObject._curve || 0}
+                       onChange={(e) => onUpdateActiveObject({ _curve: parseInt(e.target.value) })}
+                       className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                     />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Line Height</span>
+                      <span className="text-xs font-bold text-brand-pink">{activeObject.lineHeight?.toFixed(1) || 1.2}</span>
+                    </div>
+                    <input 
+                      type="range" min="0.5" max="3" step="0.1" value={activeObject.lineHeight || 1.16}
+                      onChange={(e) => onUpdateActiveObject({ lineHeight: parseFloat(e.target.value) })}
+                      className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                    />
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {/* IMAGE CONTROLS */}
+            {activeObject.type === 'image' && (
+              <div className="space-y-8">
+                <section className="mb-2">
+                  <button
+                    onClick={() => alert("Background Removal AI would trigger here. (Requires Remove.bg API integration)")}
+                    className="w-full bg-gradient-to-r from-brand-cyan to-blue-500 hover:opacity-90 text-white font-black text-[11px] rounded-xl py-4 shadow-xl shadow-cyan-500/20 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+                  >
+                    <Sparkles className="h-4 w-4" /> Remove Background (AI)
+                  </button>
+                </section>
+                <section>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Opacity</label>
+                  <div className="flex items-center gap-4">
+                    <input 
+                      type="range" min="0" max="1" step="0.05" value={activeObject.opacity ?? 1}
+                      onChange={(e) => onUpdateActiveObject({ opacity: parseFloat(e.target.value) })}
+                      className="flex-1 h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                    />
+                    <span className="text-xs font-bold text-brand-pink min-w-[30px]">{Math.round((activeObject.opacity ?? 1) * 100)}%</span>
+                  </div>
+                </section>
+
+                <section className="space-y-6">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-brand-dark border-b border-gray-100 pb-2">Image Filters</h4>
+                  
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Grayscale Mode</span>
+                    <button 
+                      onClick={() => onUpdateActiveObject({ _isGrayscale: !activeObject._isGrayscale })}
+                      className={cn(
+                        "w-12 h-6 rounded-full transition-colors relative",
+                        activeObject._isGrayscale ? "bg-brand-pink" : "bg-gray-300"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-4 h-4 rounded-full bg-white absolute top-1 transition-transform shadow-sm",
+                        activeObject._isGrayscale ? "left-7" : "left-1"
+                      )} />
+                    </button>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Brightness</span>
+                      <span className="text-xs font-bold text-brand-pink">{activeObject._brightness || 0}</span>
+                    </div>
+                    <input 
+                      type="range" min="-100" max="100" value={activeObject._brightness || 0}
+                      onChange={(e) => onUpdateActiveObject({ _brightness: parseInt(e.target.value) })}
+                      className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                    />
+                  </div>
+
+                  <div>
+                     <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Contrast</span>
+                        <span className="text-xs font-bold text-brand-pink">{activeObject._contrast || 0}</span>
+                     </div>
+                     <input 
+                        type="range" min="-100" max="100" value={activeObject._contrast || 0}
+                        onChange={(e) => onUpdateActiveObject({ _contrast: parseInt(e.target.value) })}
+                        className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                     />
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {/* SHAPE CONTROLS */}
+            {['circle', 'rect', 'triangle'].includes(activeObject.type) && (
+              <div className="space-y-8">
+                <section>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Shape Color</label>
+                  <div className="grid grid-cols-5 gap-3">
+                    {['#E91E63', '#000000', '#FFFFFF', '#2563eb', '#dc2626', '#14532d', '#94a3b8', '#D4AF37', '#6366f1', '#10b981'].map(color => (
+                        <button 
+                          key={color}
+                          onClick={() => onUpdateActiveObject({ fill: color })}
+                          className={cn(
+                            "aspect-square rounded-full border-2 transition-transform hover:scale-110 shadow-sm",
+                            activeObject.fill === color ? "border-brand-pink ring-2 ring-brand-pink/20 scale-110" : "border-gray-200"
+                          )}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                  </div>
+                </section>
+                <section>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Opacity</label>
+                  <div className="flex items-center gap-4">
+                    <input 
+                      type="range" min="0" max="1" step="0.05" value={activeObject.opacity ?? 1}
+                      onChange={(e) => onUpdateActiveObject({ opacity: parseFloat(e.target.value) })}
+                      className="flex-1 h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                    />
+                    <span className="text-xs font-bold text-brand-pink min-w-[30px]">{Math.round((activeObject.opacity ?? 1) * 100)}%</span>
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {/* LAYER ORDERING (Global for Any Selection) */}
+            <section className="pt-6 border-t border-gray-100 space-y-3">
+               <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Layer Position</h4>
+               <div className="grid grid-cols-2 gap-3">
+                 <button 
+                   onClick={onBringForward}
+                   className="flex items-center justify-center gap-2 py-3 bg-gray-50 rounded-xl hover:bg-brand-pink/10 hover:text-brand-pink text-[10px] font-bold transition-colors"
+                 >
+                   <MoveUp className="h-4 w-4" /> Bring Forward
+                 </button>
+                 <button 
+                   onClick={onSendBackward}
+                   className="flex items-center justify-center gap-2 py-3 bg-gray-50 rounded-xl hover:bg-gray-200 text-[10px] font-bold transition-colors"
+                 >
+                   <MoveDown className="h-4 w-4" /> Send Backward
+                 </button>
+               </div>
+            </section>
+          </div>
+        )}
+
+        {/* LAYERS TAB */}
+        {activeTab === 'layers' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <h3 className="text-xl font-bold text-brand-dark mb-6">Product Appearance</h3>
+             <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-black text-brand-dark tracking-tight">Layers</h3>
+                <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">{layers.length} Objects</span>
+             </div>
+             
+             {layers.length === 0 ? (
+                 <div className="text-center py-10">
+                     <Layers className="h-10 w-10 text-gray-200 mx-auto mb-3" />
+                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Canvas is empty</p>
+                 </div>
+             ) : (
+                <div className="space-y-2">
+                    {layers.map((layer, index) => {
+                       const isSelected = activeObject?.id === layer.id;
+                       return (
+                          <div 
+                             key={layer.id || index}
+                             className={cn(
+                                "flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer",
+                                isSelected ? "bg-pink-50 border-brand-pink/30 shadow-sm" : "bg-white border-gray-100 hover:border-brand-pink/30 hover:bg-gray-50"
+                             )}
+                          >
+                             <div className="flex items-center gap-3">
+                                {layer.type.includes('text') ? <Type className="h-4 w-4 text-brand-pink" /> 
+                                : layer.type === 'image' ? <ImageIcon className="h-4 w-4 text-brand-cyan" /> 
+                                : <Grid className="h-4 w-4 text-brand-dark" />}
+                                
+                                <span className={cn(
+                                   "text-[11px] font-bold truncate max-w-[150px]",
+                                   isSelected ? "text-brand-pink" : "text-gray-600"
+                                )}>
+                                   {layer.type.includes('text') ? `"${layer.text}"` : layer.type}
+                                </span>
+                             </div>
+                             {isSelected && <span className="text-[9px] font-black tracking-widest text-brand-pink uppercase">Active</span>}
+                          </div>
+                       )
+                    })}
+                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center mt-6">
+                       Top item is at the front
+                    </p>
+                </div>
+             )}
+          </div>
+        )}
+
+        {/* PRODUCT TAB */}
+        {activeTab === 'product' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <h3 className="text-xl font-black text-brand-dark tracking-tight mb-6">Product Options</h3>
             <div className="grid grid-cols-4 gap-4">
-              {colors.map((color) => (
+              {productColors.map((color) => (
                 <button
                   key={color.hex}
-                  onClick={() => onColorChange(color.hex)}
+                  onClick={() => onProductColorChange(color.hex)}
                   className={cn(
                     "group relative aspect-square rounded-2xl flex items-center justify-center transition-all",
-                    selectedColor === color.hex ? "ring-4 ring-brand-pink/20 scale-105" : "hover:scale-105 shadow-sm"
+                    productColor === color.hex ? "ring-4 ring-brand-pink/20 scale-105" : "hover:scale-105 shadow-sm"
                   )}
                   style={{ backgroundColor: color.hex, border: color.hex === '#FFFFFF' ? '1px solid #e5e7eb' : 'none' }}
                 >
-                  {selectedColor === color.hex && (
+                  {productColor === color.hex && (
                     <div className={cn(
                       "h-2 w-2 rounded-full",
                       ['#FFFFFF', '#Heather Gray'].includes(color.name) ? "bg-brand-pink" : "bg-white"
@@ -214,331 +537,38 @@ const DesignControls = ({
                 </button>
               ))}
             </div>
-          </div>
-        )}
-
-        {activeTab === 'text' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-10">
-            <h3 className="text-xl font-bold text-brand-dark">Pro Typography</h3>
-            
-            <section>
-              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Content</label>
-              <input 
-                type="text" 
-                value={customText}
-                onChange={(e) => onTextChange(e.target.value)}
-                className="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-brand-pink/20 outline-none transition-all font-bold text-brand-dark"
-                placeholder="Type your text..."
-              />
-            </section>
-
-            <section>
-              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Font Family</label>
-              <div className="grid grid-cols-1 gap-2">
-                {fonts.map((f) => (
-                  <button
-                    key={f.family}
-                    onClick={() => onFontChange(f.family)}
-                    className={cn(
-                      "px-4 py-3 rounded-xl border text-left transition-all",
-                      fontFamily === f.family ? "border-brand-pink bg-pink-50 text-brand-pink" : "border-gray-100 hover:border-brand-pink/30 text-gray-600"
-                    )}
-                    style={{ fontFamily: f.family }}
-                  >
-                    {f.name}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <label className="text-xs font-black uppercase tracking-widest text-gray-400">Font Size</label>
-                <span className="text-xs font-bold text-brand-pink">{fontSize}px</span>
-              </div>
-              <input 
-                type="range" min="12" max="64" value={fontSize}
-                onChange={(e) => onFontSizeChange(parseInt(e.target.value))}
-                className="w-full accent-brand-pink"
-              />
-            </section>
-
-            {/* Advanced Typography (V2.1) */}
-            <div className="space-y-6 pt-6 border-t border-gray-100">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-brand-dark uppercase tracking-widest">Letter Spacing</span>
-                <span className="text-xs font-bold text-brand-pink">{charSpacing}</span>
-              </div>
-              <input 
-                type="range" min="0" max="500" value={charSpacing}
-                onChange={(e) => onCharSpacingChange(parseInt(e.target.value))}
-                className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
-              />
-
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-brand-dark uppercase tracking-widest">Line Height</span>
-                <span className="text-xs font-bold text-brand-pink">{lineHeight.toFixed(2)}</span>
-              </div>
-              <input 
-                type="range" min="0.5" max="3" step="0.1" value={lineHeight}
-                onChange={(e) => onLineHeightChange(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
-              />
-
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-brand-dark uppercase tracking-widest">Text Shadow</span>
-                <button 
-                  onClick={() => onTextShadowChange(textShadow.blur > 0 ? { color: 'rgba(0,0,0,0)', blur: 0, offsetX: 0, offsetY: 0 } : { color: 'rgba(0,0,0,0.3)', blur: 5, offsetX: 2, offsetY: 2 })}
-                  className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full transition-all ${textShadow.blur > 0 ? 'bg-brand-pink text-white' : 'bg-gray-100 text-gray-400'}`}
-                >
-                  {textShadow.blur > 0 ? 'Shadow ON' : 'Shadow OFF'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'logo' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <h3 className="text-xl font-bold text-brand-dark mb-6">Brand Identity</h3>
-            {logoUrl ? (
-              <div className="bg-gray-50 rounded-3xl p-8 border border-gray-100 flex flex-col items-center">
-                <div className="w-32 h-32 relative mb-6">
-                  <img src={logoUrl} alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
-                </div>
-                <button 
-                  onClick={() => onLogoUpload(null)}
-                  className="flex items-center gap-2 text-red-500 font-bold text-sm hover:underline"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Replace Artwork
-                </button>
-              </div>
-            ) : (
-              <label className="aspect-video bg-gray-50 rounded-[40px] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-pink-50/30 hover:border-brand-pink transition-all group">
-                {uploading ? <Loader2 className="h-8 w-8 text-brand-pink animate-spin" /> : (
-                  <>
-                    <div className="w-16 h-16 rounded-3xl bg-white shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                      <Upload className="h-8 w-8 text-brand-pink" />
-                    </div>
-                    <span className="font-bold text-brand-dark">Upload High-Res Logo</span>
-                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-2">PNG/SVG Preferred</span>
-                  </>
-                )}
-                <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
-              </label>
-            )}
-
-            {(logoUrl || objects.some(o => o.type === 'image')) && (
-              <div className="space-y-6 pt-10 border-t border-gray-100 mt-10">
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Global Image Filters</h4>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-brand-dark uppercase tracking-widest">Brightness</span>
-                  <span className="text-xs font-bold text-brand-pink">{brightness}</span>
-                </div>
-                <input 
-                  type="range" min="-100" max="100" value={brightness}
-                  onChange={(e) => onBrightnessChange(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
-                />
-
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-brand-dark uppercase tracking-widest">Contrast</span>
-                  <span className="text-xs font-bold text-brand-pink">{contrast}</span>
-                </div>
-                <input 
-                  type="range" min="-100" max="100" value={contrast}
-                  onChange={(e) => onContrastChange(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
-                />
-
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-brand-dark uppercase tracking-widest">Grayscale</span>
-                  <button 
-                    onClick={() => onGrayscaleChange(!isGrayscale)}
-                    className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full transition-all ${isGrayscale ? 'bg-brand-pink text-white' : 'bg-gray-100 text-gray-400'}`}
-                  >
-                    {isGrayscale ? 'ON' : 'OFF'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'graphics' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-8">
-            <h3 className="text-xl font-bold text-brand-dark">Graphics Library</h3>
-            
-            <section>
-              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Stock Patterns</label>
-              <div className="grid grid-cols-2 gap-3">
-                {patterns.map((p) => (
-                  <button
-                    key={p.url}
-                    onClick={() => onAddObject?.('image', p.url)}
-                    className="group relative h-24 rounded-2xl overflow-hidden border border-gray-100 hover:border-brand-pink transition-all"
-                  >
-                    <img src={p.url} alt={p.name} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-brand-dark/0 group-hover:bg-brand-dark/40 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
-                      <span className="text-white text-[10px] font-bold uppercase tracking-widest">Add Pattern</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Geometric Shapes</label>
-              <div className="grid grid-cols-3 gap-3">
-                {shapes.map((s) => (
-                  <button
-                    key={s.name}
-                    onClick={() => onAddObject?.(s.type)}
-                    className="flex flex-col items-center justify-center h-20 bg-gray-50 rounded-2xl hover:bg-pink-50 hover:text-brand-pink transition-all group"
-                  >
-                    {s.icon}
-                    <span className="text-[9px] font-bold uppercase mt-2">{s.name}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {activeTab === 'layout' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-12">
-            <h3 className="text-xl font-bold text-brand-dark">Studio Tools</h3>
-            
-            {/* Drawing Mode (V2.1) */}
-            <div className="bg-gray-50 rounded-[30px] p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <Pencil className="h-4 w-4 text-brand-pink" />
-                  <span className="text-[10px] font-black text-brand-dark uppercase tracking-widest">Drawing Mode</span>
-                </div>
-                <button 
-                  onClick={() => onDrawingModeChange(!isDrawingMode)}
-                  className={`text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full transition-all ${isDrawingMode ? 'bg-brand-pink text-white shadow-lg shadow-brand-pink/20' : 'bg-white text-gray-400 border border-gray-100'}`}
-                >
-                  {isDrawingMode ? 'ON' : 'OFF'}
-                </button>
-              </div>
-              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter italic leading-relaxed">
-                Sketch directly on the product using your cursor.
-              </p>
-            </div>
-
-            {/* History & Export Actions (V2.1) */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid grid-cols-2 gap-2">
-                <button 
-                  onClick={onUndo}
-                  className="flex flex-col items-center justify-center py-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:border-brand-pink transition-all text-[9px] font-black uppercase tracking-widest text-gray-500 hover:text-brand-pink"
-                >
-                  <ArrowLeft className="h-4 w-4 mb-1" />
-                  Undo
-                </button>
-                <button 
-                  onClick={onRedo}
-                  className="flex flex-col items-center justify-center py-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:border-brand-pink transition-all text-[9px] font-black uppercase tracking-widest text-gray-500 hover:text-brand-pink"
-                >
-                   <ArrowRight className="h-4 w-4 mb-1" />
-                   Redo
-                </button>
-              </div>
-              <button 
-                onClick={onDownload}
-                className="flex flex-col items-center justify-center p-4 bg-brand-dark rounded-2xl shadow-xl shadow-brand-dark/20 hover:scale-105 active:scale-95 transition-all text-[9px] font-black uppercase tracking-widest text-white"
-              >
-                <Download className="h-5 w-5 mb-1 text-brand-cyan" />
-                Export HQ
-              </button>
-            </div>
-
-            <section className="space-y-6">
-              <div className="flex items-center gap-3">
-                <Box className="h-5 w-5 text-brand-pink" />
-                <h4 className="font-black text-[10px] uppercase tracking-widest text-gray-400">Logo Positioning</h4>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-[11px] font-bold mb-2">
-                    <span>Horizontal</span>
-                    <span className="text-brand-pink">{logoPosition.x}%</span>
-                  </div>
-                  <input type="range" min="0" max="100" value={logoPosition.x} onChange={(e) => onLogoPositionChange({...logoPosition, x: parseInt(e.target.value)})} className="w-full accent-brand-pink" />
-                </div>
-                <div>
-                  <div className="flex justify-between text-[11px] font-bold mb-2">
-                    <span>Vertical</span>
-                    <span className="text-brand-pink">{logoPosition.y}%</span>
-                  </div>
-                  <input type="range" min="0" max="100" value={logoPosition.y} onChange={(e) => onLogoPositionChange({...logoPosition, y: parseInt(e.target.value)})} className="w-full accent-brand-pink" />
-                </div>
-                <div>
-                   <div className="flex justify-between text-[11px] font-bold mb-2">
-                     <span>Scale</span>
-                     <span className="text-brand-pink">{logoScale}x</span>
-                   </div>
-                   <input type="range" min="1" max="10" step="0.5" value={logoScale} onChange={(e) => onLogoScaleChange(parseFloat(e.target.value))} className="w-full accent-brand-pink" />
-                </div>
-              </div>
-            </section>
-
-            <section className="space-y-6">
-              <div className="flex items-center gap-3">
-                <Type className="h-5 w-5 text-brand-pink" />
-                <h4 className="font-black text-[10px] uppercase tracking-widest text-gray-400">Text Layout</h4>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-[11px] font-bold mb-2">
-                    <span>Rotation</span>
-                    <span className="text-brand-pink">{textRotation}°</span>
-                  </div>
-                  <input type="range" min="-180" max="180" value={textRotation} onChange={(e) => onTextRotationChange(parseInt(e.target.value))} className="w-full accent-brand-pink" />
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                   <button onClick={() => onTextPositionChange({x: 50, y: 50})} className="py-2 bg-gray-100 rounded-lg text-[10px] font-bold hover:bg-brand-pink hover:text-white transition-colors">Center</button>
-                   <button onClick={() => onTextPositionChange({x: 50, y: 30})} className="py-2 bg-gray-100 rounded-lg text-[10px] font-bold hover:bg-brand-pink hover:text-white transition-colors">Top</button>
-                   <button onClick={() => onTextPositionChange({x: 50, y: 70})} className="py-2 bg-gray-100 rounded-lg text-[10px] font-bold hover:bg-brand-pink hover:text-white transition-colors">Bottom</button>
-                </div>
-              </div>
-            </section>
-
-            {objects.length > 0 && (
-              <section className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <ImageIcon className="h-5 w-5 text-brand-pink" />
-                  <h4 className="font-black text-[10px] uppercase tracking-widest text-gray-400">Layer Controls</h4>
-                </div>
-                <div className="space-y-3">
-                  {objects.map((obj, i) => (
-                    <div key={obj.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-                      <span className="text-[10px] font-bold truncate max-w-[120px]">Layer {i+1}: {obj.type}</span>
-                      <div className="flex items-center gap-2">
-                        <button className="text-[10px] font-bold text-gray-400 hover:text-brand-pink">Top</button>
-                        <button className="text-[10px] font-bold text-red-400 hover:text-red-500">Delete</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            <p className="text-[10px] font-bold text-gray-400 mt-6 text-center leading-relaxed">Changing product color applies to the physical production and shipping unit.</p>
           </div>
         )}
       </div>
 
-      {/* Footer Instructions */}
-      <div className="p-8 bg-brand-lightGray rounded-t-[40px] border-t border-gray-100">
-        <p className="text-[10px] font-black uppercase tracking-widest text-brand-pink mb-2">Studio Status</p>
-        <p className="text-xs text-brand-dark font-medium leading-relaxed italic opacity-70">
-          Precise control mode active. Design with confidence.
-        </p>
+      {/* Persistent Bottom Action Bar */}
+      <div className="absolute bottom-0 w-full p-4 bg-white/90 backdrop-blur-md border-t border-gray-100 flex items-center justify-between z-20">
+         <div className="flex bg-gray-100 rounded-full p-1">
+             <button 
+                onClick={onUndo}
+                disabled={!canUndo}
+                className="p-2.5 rounded-full hover:bg-white text-gray-500 disabled:opacity-30 transition-all hover:shadow-sm"
+             >
+                <ArrowLeft className="h-4 w-4" />
+             </button>
+             <button 
+                onClick={onRedo}
+                disabled={!canRedo}
+                className="p-2.5 rounded-full hover:bg-white text-gray-500 disabled:opacity-30 transition-all hover:shadow-sm"
+             >
+                <ArrowRight className="h-4 w-4" />
+             </button>
+         </div>
+         
+         <button 
+             onClick={onDownload}
+             className="flex items-center gap-2 bg-brand-dark hover:bg-black text-white px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
+         >
+             <Download className="h-4 w-4 text-brand-cyan" /> Export HQ
+         </button>
       </div>
+
     </div>
   );
 };
