@@ -58,30 +58,88 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
     
     try {
-      // Create orders for each item in cart
-      // In a real app, we might have a single order with multiple items (order_items table)
-      // but the current schema has 1 product per order record.
-      for (const item of items) {
-        await createOrder({
-          product_id: item.product.id,
-          quantity: item.quantity,
-          quality_level: item.quality_level,
-          design_data: item.design_data,
-          design_preview_url: item.design_preview_url,
-          total_price: (item.product.base_price || 0) * item.quantity,
-          shipping_address: formData as any,
-        });
+      const res = await loadRazorpayScript();
+
+      if (!res) {
+        alert("Razorpay SDK failed to load. Are you online?");
+        setIsProcessing(false);
+        return;
       }
 
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Fetch the order ID from our Next.js API
+      const result = await fetch('/api/razorpay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: total }),
+      });
+
+      if (!result.ok) {
+        alert("Server error generating order. Please try again.");
+        setIsProcessing(false);
+        return;
+      }
+
+      const orderData = await result.json();
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_mock',
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "A to Z Prints",
+        description: "Premium Print Checkout",
+        order_id: orderData.mock ? undefined : orderData.id,
+        handler: async function (response: any) {
+          try {
+            // Payment success! Save orders to database
+            for (const item of items) {
+              await createOrder({
+                product_id: item.product.id,
+                quantity: item.quantity,
+                quality_level: item.quality_level,
+                design_data: item.design_data,
+                design_preview_url: item.design_preview_url,
+                total_price: (item.product.base_price || 0) * item.quantity,
+                shipping_address: formData as any,
+              });
+            }
+            clearCart();
+            router.push('/checkout/success');
+          } catch (err) {
+            console.error('Failed to record order to DB:', err);
+            alert("Payment succeeded, but failed to save order to Database.");
+          }
+        },
+        prefill: {
+          name: formData.fullName,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        theme: {
+          color: "#e81cff", // brand-pink
+        },
+      };
+
+      const paymentObject = new (window as any).Razorpay(options);
       
-      clearCart();
-      router.push('/checkout/success');
+      paymentObject.on('payment.failed', function (response: any) {
+        alert(`Payment failed: ${response.error.description}`);
+      });
+
+      paymentObject.open();
     } catch (error) {
       console.error('Checkout failed:', error);
       alert('Order placement failed. Please try again.');

@@ -185,7 +185,8 @@ export default function CustomizePage() {
       setIsSuccess(true);
       
       setTimeout(() => {
-        router.push('/products');
+        setIsSuccess(false);
+        // The cart drawer is automatically opened by the `addItem` Zustand action!
       }, 2000);
     }, 1500);
   };
@@ -354,6 +355,12 @@ export default function CustomizePage() {
             canRedo={historyStep < history.length - 1}
             
             onDownload={() => canvasRef.current?.downloadDesign()}
+            onRemoveBackground={async () => {
+              if (canvasRef.current && canvasRef.current.removeImageBackground) {
+                return await canvasRef.current.removeImageBackground();
+              }
+              return false;
+            }}
             layers={layers}
           />
         </div>

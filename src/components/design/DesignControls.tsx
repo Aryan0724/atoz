@@ -61,6 +61,7 @@ interface DesignControlsProps {
   canUndo: boolean;
   canRedo: boolean;
   onDownload: () => void;
+  onRemoveBackground: () => Promise<boolean>;
   layers: any[];
 }
 
@@ -81,6 +82,7 @@ const DesignControls = ({
   canUndo,
   canRedo,
   onDownload,
+  onRemoveBackground,
   layers
 }: DesignControlsProps) => {
   const [activeTab, setActiveTab] = useState<'add' | 'edit' | 'product' | 'layers'>('add');
@@ -407,10 +409,17 @@ const DesignControls = ({
               <div className="space-y-8">
                 <section className="mb-2">
                   <button
-                    onClick={() => alert("Background Removal AI would trigger here. (Requires Remove.bg API integration)")}
-                    className="w-full bg-gradient-to-r from-brand-cyan to-blue-500 hover:opacity-90 text-white font-black text-[11px] rounded-xl py-4 shadow-xl shadow-cyan-500/20 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+                    onClick={async () => {
+                      setUploading(true);
+                      const success = await onRemoveBackground();
+                      setUploading(false);
+                      if (!success) alert("Failed to remove background. Please check API Key in .env.local");
+                    }}
+                    disabled={uploading}
+                    className="w-full bg-gradient-to-r from-brand-cyan to-blue-500 hover:opacity-90 disabled:opacity-50 text-white font-black text-[11px] rounded-xl py-4 shadow-xl shadow-cyan-500/20 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
                   >
-                    <Sparkles className="h-4 w-4" /> Remove Background (AI)
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} 
+                    {uploading ? 'Processing AI...' : 'Remove Background (AI)'}
                   </button>
                 </section>
                 <section>

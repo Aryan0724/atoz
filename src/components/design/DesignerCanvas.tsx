@@ -62,6 +62,7 @@ export interface DesignerCanvasRef {
   zoomIn: () => void;
   zoomOut: () => void;
   resetZoom: () => void;
+  removeImageBackground: () => Promise<boolean>;
 }
 
 const getObjectProperties = (obj: any): CanvasObjectProperties => {
@@ -660,6 +661,62 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       if (!canvas) return;
       canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
       setZoomLevel(1);
+    },
+    removeImageBackground: async () => {
+      if (!canvas) return false;
+      const activeObj = canvas.getActiveObject() as fabric.Image;
+      if (!activeObj || activeObj.type !== 'image') return false;
+
+      try {
+        const base64 = activeObj.toDataURL({ format: 'png', quality: 1 });
+        const response = await fetch('/api/remove-bg', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: base64 })
+        });
+
+        if (!response.ok) throw new Error('Failed to remove background API');
+        
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+
+        return new Promise<boolean>((resolve) => {
+          fabric.Image.fromURL(data.resultBase64, (newImg) => {
+            // Copy exact properties to new transparent image
+            newImg.set({
+              left: activeObj.left, top: activeObj.top,
+              originX: activeObj.originX, originY: activeObj.originY,
+              scaleX: activeObj.scaleX, scaleY: activeObj.scaleY,
+              angle: activeObj.angle, opacity: activeObj.opacity,
+              crossOrigin: 'anonymous',
+              //@ts-ignore
+              id: activeObj.id || `img_${Date.now()}`,
+              _isGrayscale: (activeObj as any)._isGrayscale,
+              _brightness: (activeObj as any)._brightness,
+              _contrast: (activeObj as any)._contrast,
+              _naturalWidth: newImg.width, _naturalHeight: newImg.height
+            });
+
+            if (activeObj.filters && activeObj.filters.length > 0) {
+              newImg.filters = activeObj.filters;
+              newImg.applyFilters();
+            }
+
+            const index = canvas.getObjects().indexOf(activeObj);
+            canvas.remove(activeObj);
+            canvas.insertAt(newImg, index, false);
+            canvas.setActiveObject(newImg);
+            canvas.renderAll();
+            
+            onObjectsUpdated?.();
+            onHistoryChange?.();
+            resolve(true);
+          }, { crossOrigin: 'anonymous' });
+        });
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
     }
   }));
 
