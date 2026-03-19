@@ -20,6 +20,7 @@ import { Product } from '@/lib/supabase/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 export default function ProductManagerPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -55,7 +56,7 @@ export default function ProductManagerPage() {
         .eq('id', id);
 
       if (error) {
-        alert('Error deleting product');
+        toast.error('Error deleting product');
       } else {
         setProducts(products.filter(p => p.id !== id));
       }

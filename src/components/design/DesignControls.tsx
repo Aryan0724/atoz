@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { CanvasObjectProperties } from './DesignerCanvas';
 import { uploadFile } from '@/lib/supabase/storage';
+import toast from 'react-hot-toast';
 import { 
   Type, Palette, Image as ImageIcon, Upload, Trash2, Loader2, 
   Layers, Pencil, ArrowLeft, ArrowRight, Download, PlusSquare, Settings2, Grid, MoveUp, MoveDown, Sparkles, Eye, EyeOff, Lock, Unlock
@@ -111,7 +112,7 @@ const DesignControls = ({
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload image. Please try again.');
+      toast.error('Failed to upload image. Please try again.');
     } finally {
       setUploading(false);
       e.target.value = ''; // Reset input
@@ -413,7 +414,7 @@ const DesignControls = ({
                       setUploading(true);
                       const success = await onRemoveBackground();
                       setUploading(false);
-                      if (!success) alert("Failed to remove background. Please check API Key in .env.local");
+                      if (!success) toast.error("Failed to remove background. Ensure the image is clear and you are online.");
                     }}
                     disabled={uploading}
                     className="w-full bg-gradient-to-r from-brand-cyan to-blue-500 hover:opacity-90 disabled:opacity-50 text-white font-black text-[11px] rounded-xl py-4 shadow-xl shadow-cyan-500/20 transition-all uppercase tracking-widest flex items-center justify-center gap-2"

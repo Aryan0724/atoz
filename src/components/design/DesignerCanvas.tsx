@@ -668,20 +668,19 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       if (!activeObj || activeObj.type !== 'image') return false;
 
       try {
-        const base64 = activeObj.toDataURL({ format: 'png', quality: 1 });
-        const response = await fetch('/api/remove-bg', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: base64 })
-        });
-
-        if (!response.ok) throw new Error('Failed to remove background API');
+        const base64 = activeObj.toDataURL({ format: 'png', quality: 1, multiplier: 1 });
+        const res = await fetch(base64);
+        const blob = await res.blob();
         
-        const data = await response.json();
-        if (data.error) throw new Error(data.error);
+        // Dynamically import to prevent Next.js SSR Webpack build crashes
+        const { removeBackground } = await import('@imgly/background-removal');
+        
+        // Process image entirely within the browser! (Free, unlimited)
+        const transparentBlob = await removeBackground(blob);
+        const transparentUrl = URL.createObjectURL(transparentBlob);
 
         return new Promise<boolean>((resolve) => {
-          fabric.Image.fromURL(data.resultBase64, (newImg) => {
+          fabric.Image.fromURL(transparentUrl, (newImg) => {
             // Copy exact properties to new transparent image
             newImg.set({
               left: activeObj.left, top: activeObj.top,

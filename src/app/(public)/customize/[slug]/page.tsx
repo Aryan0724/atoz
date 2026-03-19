@@ -84,14 +84,62 @@ export default function CustomizePage() {
     setTotalPrice(base);
   }, [layers, viewData, activeView, product]);
 
-  // Initial History Save
+  // Initial History Save and Auto-Load
   useEffect(() => {
     if (!loading && history.length === 0) {
       setTimeout(() => {
+        const saved = localStorage.getItem(`atoz_autosave_${id}_${activeView}`);
+        if (saved) {
+           try {
+              const parsed = JSON.parse(saved);
+              canvasRef.current?.loadJson(parsed);
+              setHistory([parsed]);
+              setHistoryStep(0);
+              return;
+           } catch { }
+        }
         handleHistoryChange();
       }, 500);
     }
-  }, [loading]);
+  }, [loading, activeView]);
+
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept if user is typing in a standard HTML input
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+
+      const isMac = navigator.userAgent.includes('Mac');
+      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+
+      if (e.key === 'Delete') {
+        canvasRef.current?.deleteActiveObject();
+      }
+
+      if (cmdOrCtrl && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+
+      if (cmdOrCtrl && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      }
+
+      if (cmdOrCtrl && (e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        canvasRef.current?.zoomIn();
+      }
+
+      if (cmdOrCtrl && e.key === '-') {
+        e.preventDefault();
+        canvasRef.current?.zoomOut();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [historyStep, history]);
 
   const handleHistoryChange = () => {
     if (isHistoryUpdate.current) return;
@@ -105,6 +153,9 @@ export default function CustomizePage() {
       return newHistory;
     });
     setHistoryStep(prev => Math.min(prev + 1, 29));
+    
+    // Auto-Save Canvas State
+    localStorage.setItem(`atoz_autosave_${id}_${activeView}`, JSON.stringify(json));
   };
 
   const handleUndo = () => {

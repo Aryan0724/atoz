@@ -17,6 +17,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { createOrder } from '@/lib/supabase/orderActions';
+import toast from 'react-hot-toast';
 
 type Step = 'shipping' | 'review' | 'payment';
 
@@ -75,7 +76,7 @@ export default function CheckoutPage() {
       const res = await loadRazorpayScript();
 
       if (!res) {
-        alert("Razorpay SDK failed to load. Are you online?");
+        toast.error("Razorpay SDK failed to load. Are you online?");
         setIsProcessing(false);
         return;
       }
@@ -88,7 +89,7 @@ export default function CheckoutPage() {
       });
 
       if (!result.ok) {
-        alert("Server error generating order. Please try again.");
+        toast.error("Server error generating order. Please try again.");
         setIsProcessing(false);
         return;
       }
@@ -120,7 +121,7 @@ export default function CheckoutPage() {
             router.push('/checkout/success');
           } catch (err) {
             console.error('Failed to record order to DB:', err);
-            alert("Payment succeeded, but failed to save order to Database.");
+            toast.error("Payment succeeded, but failed to save order to Database.");
           }
         },
         prefill: {
@@ -136,13 +137,13 @@ export default function CheckoutPage() {
       const paymentObject = new (window as any).Razorpay(options);
       
       paymentObject.on('payment.failed', function (response: any) {
-        alert(`Payment failed: ${response.error.description}`);
+        toast.error(`Payment failed: ${response.error.description}`);
       });
 
       paymentObject.open();
     } catch (error) {
       console.error('Checkout failed:', error);
-      alert('Order placement failed. Please try again.');
+      toast.error('Order placement failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }

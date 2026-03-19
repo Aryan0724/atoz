@@ -16,6 +16,7 @@ import {
 import { supabase } from '@/lib/supabase/client';
 import { uploadFile } from '@/lib/supabase/storage';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function EditProductPage() {
 
       if (error) {
         console.error('Error fetching product:', error);
-        alert('Product not found');
+        toast.error('Product not found');
         router.push('/admin/products');
       } else {
         setFormData(data);
@@ -57,7 +58,7 @@ export default function EditProductPage() {
       setFormData((prev: any) => ({ ...prev, images: [...prev.images, publicUrl] }));
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload image');
+      toast.error('Failed to upload image');
     } finally {
       setUploading(false);
     }
@@ -66,7 +67,7 @@ export default function EditProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.images.length === 0) {
-      alert('Please upload at least one product image');
+      toast.error('Please upload at least one product image');
       return;
     }
     setSaving(true);
@@ -77,7 +78,7 @@ export default function EditProductPage() {
       .eq('id', formData.id);
 
     if (error) {
-      alert(`Error updating product: ${error.message}`);
+      toast.error(`Error updating product: ${error.message}`);
     } else {
       router.push('/admin/products');
     }

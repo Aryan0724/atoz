@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { 
   ArrowLeft, 
@@ -21,6 +22,7 @@ import {
   Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -56,7 +58,7 @@ export default function OrderDetailPage() {
       .eq('id', id);
 
     if (error) {
-      alert(`Error updating status: ${error.message}`);
+      toast.error(`Error updating status: ${error.message}`);
     } else {
       setOrder({ ...order, status: newStatus });
     }
@@ -313,5 +315,3 @@ export default function OrderDetailPage() {
     </div>
   );
 }
-
-import Link from 'next/link';

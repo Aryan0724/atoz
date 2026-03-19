@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 type Order = {
   id: string;
@@ -66,7 +67,7 @@ export default function AdminOrdersPage() {
       .eq('id', orderId);
 
     if (error) {
-      alert('Failed to update status');
+      toast.error('Failed to update status');
     } else {
       setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
     }

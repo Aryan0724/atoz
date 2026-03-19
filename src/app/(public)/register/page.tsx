@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { ArrowLeft, Github, Chrome, Loader2, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function RegisterPage() {
         }
       }
 
-      alert('Account created! Please check your email for verification (or sign in if verification is disabled).');
+      toast.success('Account created! Please check your email for verification (or sign in if verification is disabled).');
       router.push('/login');
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
