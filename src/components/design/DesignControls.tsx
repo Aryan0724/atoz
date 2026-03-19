@@ -6,7 +6,7 @@ import { CanvasObjectProperties } from './DesignerCanvas';
 import { uploadFile } from '@/lib/supabase/storage';
 import { 
   Type, Palette, Image as ImageIcon, Upload, Trash2, Loader2, 
-  Layers, Pencil, ArrowLeft, ArrowRight, Download, PlusSquare, Settings2, Grid, MoveUp, MoveDown, Sparkles
+  Layers, Pencil, ArrowLeft, ArrowRight, Download, PlusSquare, Settings2, Grid, MoveUp, MoveDown, Sparkles, Eye, EyeOff, Lock, Unlock
 } from 'lucide-react';
 
 const productColors = [
@@ -49,6 +49,7 @@ interface DesignControlsProps {
   onProductColorChange: (color: string) => void;
   activeObject: CanvasObjectProperties | null;
   onUpdateActiveObject: (properties: Partial<CanvasObjectProperties>) => void;
+  onUpdateObjectById?: (id: string, properties: Partial<CanvasObjectProperties>) => void;
   onAddText: (text: string) => void;
   onAddImage: (url: string) => void;
   onAddShape: (type: 'circle' | 'rect' | 'triangle') => void;
@@ -68,6 +69,7 @@ const DesignControls = ({
   onProductColorChange,
   activeObject,
   onUpdateActiveObject,
+  onUpdateObjectById,
   onAddText,
   onAddImage,
   onAddShape,
@@ -287,6 +289,65 @@ const DesignControls = ({
                         </button>
                       ))}
                   </div>
+
+                  <div className="flex items-center justify-between mb-2 mt-6 w-full">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Drop Shadow</label>
+                     <div className="flex gap-2 items-center">
+                       <input 
+                         type="range" min="0" max="25" value={activeObject.shadow?.blur || 0}
+                         onChange={(e) => {
+                           const val = parseInt(e.target.value);
+                           onUpdateActiveObject({ 
+                             shadow: val === 0 ? undefined : { color: activeObject.shadow?.color || 'rgba(0,0,0,0.4)', blur: val, offsetX: activeObject.shadow?.offsetX || val/2, offsetY: activeObject.shadow?.offsetY || val/2 } 
+                           });
+                         }}
+                         className="w-16 h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                       />
+                       <span className="text-[10px] font-bold text-brand-pink w-3">{activeObject.shadow?.blur || 0}</span>
+                     </div>
+                  </div>
+                  {activeObject.shadow?.blur && activeObject.shadow.blur > 0 && (
+                    <>
+                      <div className="flex items-center justify-between mb-2 mt-4 w-full">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Shadow Color</label>
+                        <div className="flex gap-2">
+                          {['#000000', '#FFFFFF', '#E91E63', '#2563eb'].map(color => (
+                            <button
+                              key={`shadow-color-${color}`}
+                              onClick={() => onUpdateActiveObject({ shadow: { ...activeObject.shadow!, color: color } })}
+                              className={cn(
+                                "w-6 h-6 rounded-full border-2 transition-transform hover:scale-110",
+                                activeObject.shadow?.color === color ? "border-brand-pink ring-2 ring-brand-pink/20 scale-110" : "border-gray-200"
+                              )}
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mb-2 mt-4 w-full">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Offset X</label>
+                        <div className="flex gap-2 items-center">
+                          <input
+                            type="range" min="-20" max="20" value={activeObject.shadow?.offsetX || 0}
+                            onChange={(e) => onUpdateActiveObject({ shadow: { ...activeObject.shadow!, offsetX: parseInt(e.target.value) } })}
+                            className="w-16 h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                          />
+                          <span className="text-[10px] font-bold text-brand-pink w-3">{activeObject.shadow?.offsetX || 0}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mb-2 mt-4 w-full">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Offset Y</label>
+                        <div className="flex gap-2 items-center">
+                          <input
+                            type="range" min="-20" max="20" value={activeObject.shadow?.offsetY || 0}
+                            onChange={(e) => onUpdateActiveObject({ shadow: { ...activeObject.shadow!, offsetY: parseInt(e.target.value) } })}
+                            className="w-16 h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                          />
+                          <span className="text-[10px] font-bold text-brand-pink w-3">{activeObject.shadow?.offsetY || 0}</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </section>
 
                 <section className="space-y-6">
@@ -499,10 +560,30 @@ const DesignControls = ({
                                    isSelected ? "text-brand-pink" : "text-gray-600"
                                 )}>
                                    {layer.type.includes('text') ? `"${layer.text}"` : layer.type}
-                                </span>
-                             </div>
-                             {isSelected && <span className="text-[9px] font-black tracking-widest text-brand-pink uppercase">Active</span>}
-                          </div>
+                                 </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 ml-auto">
+                                 {isSelected && <span className="text-[9px] font-black tracking-widest text-brand-pink uppercase mr-2">Active</span>}
+                                 {onUpdateObjectById && (
+                                    <>
+                                       <button 
+                                          title="Toggle Visibility"
+                                          onClick={(e) => { e.stopPropagation(); onUpdateObjectById(layer.id, { visible: layer.visible === false ? true : false }); }}
+                                          className={cn("p-1.5 rounded border transition-all hover:scale-110", layer.visible === false ? "bg-gray-100 border-gray-200 text-gray-400" : "bg-white border-gray-100 text-brand-dark hover:border-brand-pink/30")}
+                                       >
+                                          {layer.visible === false ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                                       </button>
+                                       <button 
+                                          title="Lock/Unlock Layer"
+                                          onClick={(e) => { e.stopPropagation(); onUpdateObjectById(layer.id, { locked: !layer.locked }); }}
+                                          className={cn("p-1.5 rounded border transition-all hover:scale-110", layer.locked ? "bg-pink-50 border-brand-pink/30 text-brand-pink" : "bg-white border-gray-100 text-gray-400 hover:text-brand-dark hover:border-brand-pink/30")}
+                                       >
+                                          {layer.locked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+                                       </button>
+                                    </>
+                                 )}
+                              </div>
+                           </div>
                        )
                     })}
                     <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center mt-6">

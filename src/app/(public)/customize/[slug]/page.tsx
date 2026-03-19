@@ -342,6 +342,7 @@ export default function CustomizePage() {
             onAddText={(text) => canvasRef.current?.addText(text)}
             onAddImage={(url) => canvasRef.current?.addImage(url)}
             onAddShape={(type) => canvasRef.current?.addShape(type)}
+            onUpdateObjectById={(id, props) => canvasRef.current?.updateObjectById(id, props)}
             
             onDeleteActiveObject={() => canvasRef.current?.deleteActiveObject()}
             onBringForward={() => canvasRef.current?.bringForward()}

@@ -28,6 +28,8 @@ export interface CanvasObjectProperties {
   stroke?: string;
   strokeWidth?: number;
   _curve?: number;
+  locked?: boolean;
+  visible?: boolean;
 }
 
 interface DesignerCanvasProps {
@@ -49,6 +51,7 @@ export interface DesignerCanvasRef {
   addImage: (url: string) => void;
   addShape: (type: 'circle' | 'rect' | 'triangle') => void;
   updateActiveObject: (properties: Partial<CanvasObjectProperties>) => void;
+  updateObjectById: (id: string, properties: Partial<CanvasObjectProperties>) => void;
   deleteActiveObject: () => void;
   bringForward: () => void;
   sendBackward: () => void;
@@ -72,6 +75,8 @@ const getObjectProperties = (obj: any): CanvasObjectProperties => {
     top: obj.top,
     scaleX: obj.scaleX,
     scaleY: obj.scaleY,
+    locked: obj.lockMovementX || false,
+    visible: obj.visible !== false,
   };
 
   if (obj.type === 'i-text' || obj.type === 'text') {
@@ -531,6 +536,28 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       onObjectModified?.(getObjectProperties(activeObj));
       onHistoryChange?.();
     },
+    updateObjectById: (id: string, properties: Partial<CanvasObjectProperties>) => {
+      if (!canvas) return;
+      const targetObj = canvas.getObjects().find((obj: any) => obj.id === id);
+      if (!targetObj) return;
+
+      if (properties.visible !== undefined) targetObj.set('visible', properties.visible);
+      if (properties.locked !== undefined) {
+        targetObj.set({
+          lockMovementX: properties.locked,
+          lockMovementY: properties.locked,
+          lockRotation: properties.locked,
+          lockScalingX: properties.locked,
+          lockScalingY: properties.locked,
+          hasControls: !properties.locked, // Hide the transform borders
+          hoverCursor: properties.locked ? 'default' : 'move'
+        });
+      }
+
+      canvas.renderAll();
+      onObjectsUpdated?.(); // Update layers panel
+      onHistoryChange?.();
+    },
     deleteActiveObject: () => {
       if (!canvas) return;
       const activeObjects = canvas.getActiveObjects();
@@ -565,7 +592,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     },
     getJson: () => {
       if (!canvas) return null;
-      return canvas.toJSON(['id', '_isGrayscale', '_brightness', '_contrast', '_naturalWidth', '_naturalHeight', 'selectable', 'evented']); 
+      return canvas.toJSON(['id', '_isGrayscale', '_brightness', '_contrast', '_naturalWidth', '_naturalHeight', 'selectable', 'evented', 'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'hasControls', 'hoverCursor', 'visible']); 
     },
     loadJson: (json: any) => {
       if (!canvas) return;
