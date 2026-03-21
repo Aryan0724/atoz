@@ -1,4 +1,6 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/lib/supabase/types';
@@ -8,21 +10,36 @@ interface ProductCardProps {
   product: Product;
 }
 
+const categoryGradients: Record<string, string> = {
+  'Apparel': 'from-pink-400 to-rose-500',
+  'Drinkware': 'from-cyan-400 to-blue-500',
+  'Stationery': 'from-amber-400 to-orange-500',
+  'Lifestyle': 'from-emerald-400 to-teal-500',
+  'Corporate Gifting': 'from-violet-400 to-purple-500',
+  'Corporate': 'from-slate-400 to-gray-600',
+  'Electronics': 'from-blue-400 to-indigo-500',
+};
+
 const ProductCard = ({ product }: ProductCardProps) => {
+  const [imgError, setImgError] = useState(false);
+  const gradient = categoryGradients[product.category] || 'from-gray-400 to-gray-600';
+
   return (
     <div className="group bg-white rounded-3xl overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-100">
       <Link href={`/products/${product.slug}`} className="block relative">
         <div className="aspect-[4/5] bg-gray-100 relative overflow-hidden">
-          {product.images && product.images.length > 0 ? (
+          {product.images && product.images.length > 0 && !imgError ? (
             <Image
               src={product.images[0]}
               alt={product.name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-110"
+              onError={() => setImgError(true)}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400 italic">
-              {product.name}
+            <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center text-white p-6`}>
+              <span className="text-6xl font-black opacity-30 mb-2">{product.name.charAt(0)}</span>
+              <span className="text-sm font-bold text-center opacity-70">{product.name}</span>
             </div>
           )}
           

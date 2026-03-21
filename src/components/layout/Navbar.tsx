@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, User as UserIcon, ShoppingCart, Menu, X, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/lib/store/useCart';
@@ -69,8 +70,14 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 flex items-center">
-            <div className="h-10 w-40 bg-gray-200 flex items-center justify-center font-bold text-brand-pink text-xl italic">
-              A to Z Prints
+            <div className="relative h-14 w-40">
+              <Image 
+                src="/logo.png" 
+                alt="AtoZ Print" 
+                fill 
+                className="object-contain mix-blend-multiply"
+                priority
+              />
             </div>
           </Link>
 
@@ -114,6 +121,7 @@ const Navbar = () => {
               </form>
               <button 
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
+                aria-label={isSearchOpen ? "Close search bar" : "Open search bar"}
                 className={cn(
                   "p-2 transition-colors",
                   isSearchOpen ? "text-brand-pink" : "text-brand-dark hover:text-brand-pink"
@@ -125,6 +133,7 @@ const Navbar = () => {
             
             <button 
               onClick={() => setOpen(true)}
+              aria-label="Open cart"
               className="p-2 text-brand-dark hover:text-brand-pink transition-colors relative"
             >
               <ShoppingCart className="h-5 w-5" />
@@ -155,6 +164,7 @@ const Navbar = () => {
           <div className="lg:hidden flex items-center space-x-4">
             <button 
               onClick={() => setOpen(true)}
+              aria-label="Open mobile cart"
               className="p-2 text-brand-dark hover:text-brand-pink transition-colors relative"
             >
               <ShoppingCart className="h-6 w-6" />
@@ -166,6 +176,7 @@ const Navbar = () => {
             </button>
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               className="p-2 rounded-md text-brand-dark hover:text-brand-pink focus:outline-none"
             >
               {isMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
@@ -212,13 +223,13 @@ const Navbar = () => {
                   </button>
                 </>
               ) : (
-                <Link 
-                  href="/login" 
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block w-full bg-brand-pink text-white text-center px-6 py-4 rounded-xl text-lg font-bold hover:shadow-lg transition-all"
-                >
-                  Sign In to Brand
-                </Link>
+                  <Link 
+                    href="/login" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full bg-brand-pink text-white text-center px-6 py-4 rounded-xl text-lg font-bold hover:shadow-lg transition-all"
+                  >
+                    Sign In to AtoZ Print
+                  </Link>
               )}
             </div>
           </div>

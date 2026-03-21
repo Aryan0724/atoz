@@ -5,29 +5,11 @@ import { Truck, MapPin, Clock, ShieldCheck } from 'lucide-react';
 export default function ShippingPage() {
   const steps = [
     {
-      title: "Processing",
-      days: "1-2 Days",
-      desc: "Design approval and production queue assignment.",
-      icon: <Clock className="text-brand-pink" />
-    },
-    {
-      title: "Production",
-      days: "2-4 Days",
-      desc: "Printing, quality check, and premium packaging.",
-      icon: <ShieldCheck className="text-brand-cyan" />
-    },
-    {
-      title: "Dispatch",
-      days: "1 Day",
-      desc: "Sorting and handover to our tier-1 logistics partners.",
+      title: "Logistics",
+      days: "5-10 Days",
+      desc: "Real-time tracked delivery to your doorstep PAN India.",
       icon: <Truck className="text-brand-pink" />
     },
-    {
-      title: "Transit",
-      days: "2-4 Days",
-      desc: "Real-time tracked delivery to your doorstep.",
-      icon: <MapPin className="text-brand-cyan" />
-    }
   ];
 
   return (
@@ -36,7 +18,7 @@ export default function ShippingPage() {
         <SectionHeading 
           badge="Logistics"
           title="Shipping & Delivery"
-          subtitle="Pan-India delivery with real-time tracking and premium protection."
+          subtitle="PAN India delivery with real-time tracking and premium protection. Standard delivery in 5-10 working days."
           align="left"
         />
 

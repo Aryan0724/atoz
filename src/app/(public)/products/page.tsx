@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import SectionHeading from '@/components/common/SectionHeading';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import ProductCard from '@/components/products/ProductCard';
 import { SlidersHorizontal, Search, ChevronDown, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
@@ -85,6 +86,7 @@ function ProductsContent() {
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+        <Breadcrumbs items={[{ label: 'Products' }]} />
         <SectionHeading 
           badge="Product Catalog"
           title="Premium Customizable Gear"

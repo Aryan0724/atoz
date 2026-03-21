@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase/client';
 import { uploadFile } from '@/lib/supabase/storage';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -106,13 +107,11 @@ export default function EditProductPage() {
 
   return (
     <div className="p-12 max-w-5xl mx-auto pb-32">
-      <Link 
-        href="/admin/products"
-        className="inline-flex items-center gap-2 text-gray-400 font-bold text-sm mb-12 hover:text-brand-pink transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Products
-      </Link>
+      <Breadcrumbs items={[
+        { label: 'Admin' },
+        { label: 'Products', href: '/admin/products' },
+        { label: 'Edit Product' }
+      ]} />
 
       <header className="mb-12">
         <h1 className="text-4xl font-black text-brand-dark tracking-tighter mb-2">Edit <span className="text-brand-pink">Product</span></h1>

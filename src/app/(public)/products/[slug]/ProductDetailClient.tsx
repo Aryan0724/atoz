@@ -18,6 +18,9 @@ import {
   Loader2
 } from 'lucide-react';
 import ProductCard from '@/components/products/ProductCard';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
+import SizeChart from '@/components/products/SizeChart';
+import PricingTierTable from '@/components/products/PricingTierTable';
 import { mockProducts } from '@/lib/data/mockProducts';
 import { supabase } from '@/lib/supabase/client';
 import { Product } from '@/lib/supabase/types';
@@ -33,6 +36,7 @@ export default function ProductDetailClient() {
   const [loading, setLoading] = useState(true);
   const [selectedQuality, setSelectedQuality] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -117,13 +121,13 @@ export default function ProductDetailClient() {
     <div className="bg-white min-h-screen">
       {/* Breadcrumbs */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <nav className="flex items-center space-x-2 text-sm font-medium text-gray-400">
-          <Link href="/" className="hover:text-brand-pink">Home</Link>
-          <ChevronRight className="h-4 w-4" />
-          <Link href="/products" className="hover:text-brand-pink">Products</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-brand-dark">{product.name}</span>
-        </nav>
+        <Breadcrumbs 
+          items={[
+            { label: 'Products', href: '/products' }, 
+            { label: product.name }
+          ]} 
+          className="mb-0"
+        />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
@@ -183,9 +187,20 @@ export default function ProductDetailClient() {
 
             {/* Quality Options */}
             <div className="mb-10">
-              <label className="block text-sm font-bold text-brand-dark mb-4 uppercase tracking-wider">
-                Select Quality Level
-              </label>
+              <div className="flex items-center justify-between mb-4">
+                <label className="block text-sm font-bold text-brand-dark uppercase tracking-wider">
+                  Select Quality Level
+                </label>
+                {product.category === 'Apparel' && (
+                  <button 
+                    onClick={() => setIsSizeChartOpen(true)}
+                    className="text-xs font-black text-brand-pink uppercase tracking-widest hover:underline flex items-center gap-1.5"
+                  >
+                    <div className="w-4 h-4 rounded-full border-2 border-brand-pink flex items-center justify-center text-[8px]">?</div>
+                    Size Guide
+                  </button>
+                )}
+              </div>
               <div className="flex flex-wrap gap-3">
                 {product.quality_levels?.map((level) => (
                   <button
@@ -230,9 +245,17 @@ export default function ProductDetailClient() {
                   </button>
                 </div>
                 <div className="text-sm font-bold text-gray-400">
-                   Total Estimate: <span className="text-brand-dark text-lg ml-1">₹{quantity * (product.base_price || 0)}</span>
+                   Base Rate: <span className="text-brand-dark text-lg ml-1">₹{product.base_price}</span>
                 </div>
               </div>
+            </div>
+
+            {/* Pricing Tiers */}
+            <div className="mb-12">
+              <PricingTierTable 
+                basePrice={product.base_price || 0} 
+                currentQuantity={quantity}
+              />
             </div>
 
             {/* Action Buttons */}
@@ -318,6 +341,11 @@ export default function ProductDetailClient() {
           </div>
         )}
       </div>
+      <SizeChart 
+        isOpen={isSizeChartOpen} 
+        onClose={() => setIsSizeChartOpen(false)} 
+        category={product.category || 'Product'}
+      />
     </div>
   );
 }

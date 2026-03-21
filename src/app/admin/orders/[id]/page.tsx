@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -92,13 +93,11 @@ export default function OrderDetailPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-           <button 
-             onClick={() => router.back()}
-             className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-brand-dark transition-colors mb-4"
-           >
-             <ArrowLeft className="h-3 w-3" />
-             Back to Orders
-           </button>
+           <Breadcrumbs items={[
+             { label: 'Admin' },
+             { label: 'Orders', href: '/admin/orders' },
+             { label: `Order #${(id as string).slice(0, 8)}` }
+           ]} className="mb-4" />
            <h1 className="text-4xl font-black text-brand-dark mb-2">Order Details</h1>
            <div className="flex items-center gap-3">
               <span className="text-xs font-bold text-gray-400 font-mono tracking-tight">{order.id}</span>

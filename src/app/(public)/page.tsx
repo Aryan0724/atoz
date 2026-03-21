@@ -113,7 +113,7 @@ export default function HomePage() {
       <section className="py-24 bg-brand-lightGray">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold text-brand-dark">Why Choose AtoZ Prints?</h2>
+            <h2 className="text-4xl font-extrabold text-brand-dark">Why Choose AtoZ Print?</h2>
             <p className="mt-4 text-gray-500 max-w-2xl mx-auto text-lg">
               Scale your business with our robust infrastructure designed for speed, quality, and reliability.
             </p>
@@ -125,7 +125,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-bold mb-4">White Label</h3>
               <p className="text-gray-500 leading-relaxed">
-                Ship products under your own brand. No mention of AtoZ Prints anywhere on the package.
+                Ship products under your own brand. No mention of AtoZ Print anywhere on the package.
               </p>
             </div>
             
@@ -228,7 +228,7 @@ export default function HomePage() {
             Ready to Build Your <span className="text-brand-pink">Printing Empire?</span>
           </h2>
           <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
-            Join 10,000+ businesses and creators who trust AtoZ Prints for their custom merchandise.
+            Join 10,000+ businesses and creators who trust AtoZ Print for their custom merchandise.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-6">
             <Link href="/register" className="px-10 py-5 bg-brand-pink text-white font-bold text-xl rounded-full hover:scale-105 active:scale-95 transition-all shadow-xl shadow-pink-900/20">

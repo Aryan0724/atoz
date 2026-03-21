@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
@@ -6,15 +6,23 @@ import Footer from "@/components/layout/Footer";
 import CartDrawer from "@/components/layout/CartDrawer";
 import TopBanner from "@/components/layout/TopBanner";
 import SupportWidget from "@/components/layout/SupportWidget";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ["latin"] });
 
 const siteConfig = {
-  name: "A to Z Prints",
-  description: "Premium customized printing & corporate gifting brand in India. High-quality prints for packaging, apparel, and merchandise.",
-  url: "https://atozprints.com", // Placeholder
-  ogImage: "/og-image.png", // Placeholder
+  name: "AtoZ Print",
+  description: "India's trusted premium printing & corporate gifting partner. Delivering high-quality, affordable, and reliable printing solutions across PAN India.",
+  url: "https://atozprint.in",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#E91E63",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export const metadata: Metadata = {
@@ -23,9 +31,9 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  keywords: ["Printing", "Customized Prints", "Cooperate Gifting", "Dropshipping India", "A to Z Prints"],
-  authors: [{ name: "A to Z Prints Team" }],
-  creator: "A to Z Prints",
+  keywords: ["Printing", "Customized Prints", "Corporate Gifting", "Dropshipping India", "AtoZ Print", "Quality Printing", "Bulk Orders India"],
+  authors: [{ name: "AtoZ Print Team" }],
+  creator: "AtoZ Print",
   openGraph: {
     type: "website",
     locale: "en_IN",
@@ -33,26 +41,12 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     siteName: siteConfig.name,
-    images: [
-      {
-        url: siteConfig.ogImage,
-        width: 1200,
-        height: 630,
-        alt: siteConfig.name,
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    images: [siteConfig.ogImage],
     creator: "@atozprints",
-  },
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
   },
   manifest: "/site.webmanifest",
 };
@@ -67,10 +61,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <TopBanner />
         <Navbar />
-        <main className="min-h-screen">
+        <main className="min-h-screen pb-16 lg:pb-0">
           {children}
         </main>
         <Footer />
+        <MobileBottomNav />
         <CartDrawer />
         <SupportWidget />
         <Toaster position="bottom-right" />

@@ -21,6 +21,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 export default function ProductManagerPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -75,8 +76,9 @@ export default function ProductManagerPage() {
 
   return (
     <div className="p-12 max-w-7xl mx-auto">
-      <header className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <header className="mb-12 flex flex-col md:flex-row md:items-start md:justify-between gap-6">
         <div>
+          <Breadcrumbs items={[{ label: 'Admin' }, { label: 'Products' }]} />
           <h1 className="text-4xl font-black text-brand-dark tracking-tighter mb-2">Manage <span className="text-brand-pink">Inventory</span></h1>
           <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Total Products: {products.length}</p>
         </div>

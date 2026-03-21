@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -10,9 +11,16 @@ const Footer = () => {
     <footer className="bg-brand-dark text-gray-300 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
         <div className="col-span-1 lg:col-span-2">
-          <div className="text-white font-bold text-2xl italic mb-6">A to Z Prints</div>
-          <p className="text-gray-400 mb-6 max-w-sm">
-            Premium customized printing & corporate gifting solutions for startups, SMEs, and large institutions across India. Quality you can trust, delivered with speed.
+          <div className="relative h-20 w-48 mb-6 -ml-4">
+            <Image 
+              src="/logo.png" 
+              alt="AtoZ Print" 
+              fill 
+              className="object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" 
+            />
+          </div>
+          <p className="text-gray-400 mb-6 max-w-sm font-medium leading-relaxed">
+            AtoZ Print is a complete printing and corporate gifting solutions provider offering premium-quality customized products for businesses, corporates, events, and individuals across India.
           </p>
           <div className="flex space-x-4 mb-8">
             <a href="#" className="h-10 w-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-brand-pink transition-colors">
@@ -87,7 +95,7 @@ const Footer = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center">
         <p className="text-sm text-gray-500 mb-4 md:mb-0">
-          © {new Date().getFullYear()} AtoZ Print. All rights reserved. Registered Trademark.
+          © {new Date().getFullYear()} AtoZ Print – All Rights Reserved.
         </p>
         <div className="flex space-x-6 text-sm text-gray-500">
           <Link href="/terms" className="hover:text-gray-300 transition-colors">Terms of Service</Link>

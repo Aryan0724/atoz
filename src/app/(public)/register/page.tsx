@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { ArrowLeft, Github, Chrome, Loader2, AlertCircle } from 'lucide-react';
@@ -86,8 +87,13 @@ export default function RegisterPage() {
           <ArrowLeft className="mr-2 h-5 w-5" />
           Back to Home
         </Link>
-        <div className="h-10 w-48 bg-white shadow-sm border border-gray-100 rounded-xl flex items-center justify-center font-bold text-brand-pink text-xl italic mx-auto mb-6">
-          A to Z Prints
+        <div className="relative h-20 w-48 mx-auto mb-6">
+          <Image 
+            src="/logo.png" 
+            alt="A to Z Prints" 
+            fill 
+            className="object-contain mix-blend-multiply" 
+          />
         </div>
         <h2 className="text-center text-3xl font-black text-brand-dark tracking-tight">
           Create your empire today

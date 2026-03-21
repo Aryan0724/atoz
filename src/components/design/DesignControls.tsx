@@ -5,9 +5,10 @@ import { cn } from '@/lib/utils';
 import { CanvasObjectProperties } from './DesignerCanvas';
 import { uploadFile } from '@/lib/supabase/storage';
 import toast from 'react-hot-toast';
+import { canvasTemplates } from '@/lib/data/canvasTemplates';
 import { 
   Type, Palette, Image as ImageIcon, Upload, Trash2, Loader2, 
-  Layers, Pencil, ArrowLeft, ArrowRight, Download, PlusSquare, Settings2, Grid, MoveUp, MoveDown, Sparkles, Eye, EyeOff, Lock, Unlock
+  Layers, Pencil, ArrowLeft, ArrowRight, Download, PlusSquare, Settings2, Grid, MoveUp, MoveDown, Sparkles, Eye, EyeOff, Lock, Unlock, LayoutTemplate
 } from 'lucide-react';
 
 const productColors = [
@@ -63,6 +64,7 @@ interface DesignControlsProps {
   canRedo: boolean;
   onDownload: () => void;
   onRemoveBackground: () => Promise<boolean>;
+  onLoadTemplate?: (json: any) => void;
   layers: any[];
 }
 
@@ -84,9 +86,10 @@ const DesignControls = ({
   canRedo,
   onDownload,
   onRemoveBackground,
+  onLoadTemplate,
   layers
 }: DesignControlsProps) => {
-  const [activeTab, setActiveTab] = useState<'add' | 'edit' | 'product' | 'layers'>('add');
+  const [activeTab, setActiveTab] = useState<'add' | 'edit' | 'product' | 'layers' | 'templates'>('add');
   const [uploading, setUploading] = useState(false);
 
   // Auto-switch to edit tab when an object is selected
@@ -124,6 +127,7 @@ const DesignControls = ({
       {/* Dynamic Tabs */}
       <div className="flex border-b border-gray-100 overflow-x-auto no-scrollbar relative z-10 shrink-0">
         {[
+          { id: 'templates', icon: <LayoutTemplate className="h-5 w-5" />, label: 'Templates' },
           { id: 'add', icon: <PlusSquare className="h-5 w-5" />, label: 'Add' },
           { id: 'edit', icon: <Settings2 className="h-5 w-5" />, label: 'Edit' },
           { id: 'layers', icon: <Layers className="h-5 w-5" />, label: 'Layers' },
@@ -154,6 +158,32 @@ const DesignControls = ({
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-6 pb-24">
         
+        {/* TEMPLATES TAB */}
+        {activeTab === 'templates' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-8">
+            <div>
+              <h3 className="text-xl font-black text-brand-dark tracking-tight">Quick Start</h3>
+              <p className="text-xs text-gray-500 mt-1">Start your design with a pre-configured template.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {canvasTemplates.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => {
+                     onLoadTemplate?.(t.json);
+                     setActiveTab('layers');
+                     toast.success('Template loaded!');
+                  }}
+                  className="bg-gray-50 hover:bg-pink-50 hover:border-brand-pink/30 border border-transparent rounded-2xl p-6 flex flex-col items-center justify-center transition-all group"
+                >
+                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{t.preview}</div>
+                  <span className="font-bold text-[10px] uppercase tracking-widest text-brand-dark text-center">{t.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ADD TAB */}
         {activeTab === 'add' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-8">

@@ -19,9 +19,9 @@ export default function ReturnsPage() {
                  <RefreshCcw className="h-8 w-8 text-brand-pink" />
               </div>
               <div className="space-y-4">
-                 <h2 className="text-2xl font-black text-brand-dark uppercase tracking-tight">Our Quality Guarantee</h2>
+                 <h2 className="text-2xl font-black text-brand-dark uppercase tracking-tight">Our Return Policy</h2>
                  <p className="text-lg text-gray-500 leading-relaxed font-medium">
-                    Since every product at AtoZ Print is custom-made with your logo/design, we cannot accept general returns. However, we guarantee a FREE REPLACEMENT if:
+                    As products are customized, returns are not accepted unless there is a manufacturing defect. However, we provide a replacement only in case of print or manufacturing defects.
                  </p>
                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[

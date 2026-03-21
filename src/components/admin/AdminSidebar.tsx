@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { 
   BarChart3, 
@@ -29,10 +30,15 @@ export default function AdminSidebar() {
     <aside className="w-72 bg-white border-r border-gray-100 flex flex-col sticky top-0 h-screen overflow-y-auto">
       <div className="p-8">
         <div className="flex items-center gap-3 mb-10">
-          <div className="w-10 h-10 bg-brand-dark rounded-xl flex items-center justify-center text-white">
-            <Settings className="h-6 w-6" />
+          <div className="relative h-10 w-32">
+            <Image 
+              src="/logo.png" 
+              alt="A to Z Prints" 
+              fill 
+              className="object-contain mix-blend-multiply" 
+            />
           </div>
-          <span className="text-xl font-black text-brand-dark tracking-tighter">Admin <span className="text-brand-pink">Console</span></span>
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Console</span>
         </div>
 
         <nav className="space-y-2">

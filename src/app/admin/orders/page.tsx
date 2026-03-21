@@ -21,6 +21,7 @@ import {
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 type Order = {
   id: string;
@@ -107,6 +108,7 @@ export default function AdminOrdersPage() {
   return (
     <div className="p-12 max-w-7xl mx-auto">
       <header className="mb-12">
+        <Breadcrumbs items={[{ label: 'Admin' }, { label: 'Orders' }]} />
         <h1 className="text-4xl font-black text-brand-dark tracking-tighter mb-2">Order <span className="text-brand-pink">Fullfillment</span></h1>
         <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Managing {orders.length} Customer Orders</p>
       </header>
