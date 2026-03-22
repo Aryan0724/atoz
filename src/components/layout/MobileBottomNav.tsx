@@ -14,6 +14,10 @@ export default function MobileBottomNav() {
   const [mounted, setMounted] = useState(false);
   const [hasSession, setHasSession] = useState(false);
 
+  if (pathname.startsWith('/customize')) {
+    return null;
+  }
+
   useEffect(() => {
     setMounted(true);
     const checkSession = async () => {
@@ -36,8 +40,8 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-100 z-50 pb-safe">
-      <nav className="flex items-center justify-around h-16 px-2">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/85 backdrop-blur-xl shadow-[0_-8px_30px_rgba(0,0,0,0.06)] border-t border-white/50 z-50 pb-safe">
+      <nav className="flex items-center justify-around h-16 px-2 relative">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -46,11 +50,14 @@ export default function MobileBottomNav() {
               key={item.href} 
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center w-full h-full space-y-1 min-w-[64px] min-h-[44px]", // 44x44px min touch target
-                isActive ? "text-brand-pink" : "text-gray-400 hover:text-brand-dark transition-colors"
+                "flex flex-col items-center justify-center w-full h-full space-y-1 min-w-[64px] min-h-[44px] relative transition-all duration-300", 
+                isActive ? "text-brand-pink scale-105" : "text-gray-400 hover:text-brand-dark"
               )}
             >
-              <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
+              {isActive && (
+                <span className="absolute -top-1 w-1 h-1 rounded-full bg-brand-pink animate-in zoom-in" />
+              )}
+              <Icon className="h-5 w-5 mb-0.5" strokeWidth={isActive ? 2.5 : 2} />
               <span className="text-[10px] font-bold tracking-wider">{item.name}</span>
             </Link>
           );
@@ -59,12 +66,12 @@ export default function MobileBottomNav() {
         {/* Cart Item - Trigger Drawer */}
         <button 
           onClick={() => setOpen(true)}
-          className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-brand-dark transition-colors relative min-w-[64px] min-h-[44px]"
+          className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-brand-dark relative min-w-[64px] min-h-[44px] transition-all duration-300 active:scale-95"
         >
           <div className="relative">
-            <ShoppingCart className="h-5 w-5" strokeWidth={2} />
+            <ShoppingCart className="h-5 w-5 mb-0.5" strokeWidth={2} />
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 h-4 w-4 bg-brand-pink text-white text-[10px] flex items-center justify-center rounded-full font-black shadow-sm">
+              <span className="absolute -top-2 -right-2 h-4 w-4 bg-brand-pink text-white text-[10px] flex items-center justify-center rounded-full font-black shadow-md animate-in zoom-in duration-300">
                 {cartCount}
               </span>
             )}
@@ -76,11 +83,14 @@ export default function MobileBottomNav() {
         <Link 
           href={hasSession ? "/dashboard" : "/login"}
           className={cn(
-            "flex flex-col items-center justify-center w-full h-full space-y-1 min-w-[64px] min-h-[44px]",
-            pathname.includes('/dashboard') || pathname.includes('/login') ? "text-brand-pink" : "text-gray-400 hover:text-brand-dark transition-colors"
+            "flex flex-col items-center justify-center w-full h-full space-y-1 min-w-[64px] min-h-[44px] relative transition-all duration-300",
+            pathname.includes('/dashboard') || pathname.includes('/login') ? "text-brand-pink scale-105" : "text-gray-400 hover:text-brand-dark"
           )}
         >
-          <UserIcon className="h-5 w-5" strokeWidth={pathname.includes('/dashboard') ? 2.5 : 2} />
+          {(pathname.includes('/dashboard') || pathname.includes('/login')) && (
+            <span className="absolute -top-1 w-1 h-1 rounded-full bg-brand-pink animate-in zoom-in" />
+          )}
+          <UserIcon className="h-5 w-5 mb-0.5" strokeWidth={pathname.includes('/dashboard') ? 2.5 : 2} />
           <span className="text-[10px] font-bold tracking-wider">
             {hasSession ? "Profile" : "Login"}
           </span>

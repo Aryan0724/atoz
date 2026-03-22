@@ -65,7 +65,7 @@ const Navbar = () => {
   const cartCount = mounted ? getItemCount() : 0;
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100/50 shadow-[0_4px_30px_rgba(0,0,0,0.03)] transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
@@ -88,8 +88,8 @@ const Navbar = () => {
                 key={link.href} 
                 href={link.href} 
                 className={cn(
-                  "text-sm font-semibold transition-colors relative",
-                  pathname === link.href ? "text-brand-pink" : "text-brand-dark hover:text-brand-pink"
+                  "text-sm font-bold tracking-wide transition-all relative group",
+                  pathname === link.href ? "text-brand-pink" : "text-brand-dark/80 hover:text-brand-pink"
                 )}
               >
                 {link.name}
@@ -187,8 +187,8 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-gray-100 animate-in slide-in-from-top duration-200">
-          <div className="px-4 pt-4 pb-8 space-y-2">
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-xl animate-in slide-in-from-top-2 duration-300 ease-out z-40">
+          <div className="px-4 pt-4 pb-8 space-y-2 max-h-[calc(100vh-80px)] overflow-y-auto">
             {navLinks.map((link) => (
               <Link 
                 key={link.href}

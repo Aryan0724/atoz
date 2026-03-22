@@ -10,27 +10,27 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white pt-16 pb-24 lg:pt-32 lg:pb-40">
+      <section className="relative overflow-hidden bg-white pt-10 pb-16 md:pt-16 md:pb-24 lg:pt-32 lg:pb-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
-            <div>
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-pink-50 text-brand-pink text-sm font-bold mb-8 animate-fade-in">
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-pink-50 text-brand-pink text-xs md:text-sm font-bold mb-6 md:mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <span className="flex h-2 w-2 rounded-full bg-brand-pink mr-3 animate-pulse"></span>
                 India&apos;s #1 Print-on-Demand Partner
               </div>
-              <h1 className="text-5xl lg:text-7xl font-extrabold text-brand-dark leading-tight mb-8">
-                Your Design. <br />
+              <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold text-brand-dark leading-tight mb-6 md:mb-8 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150 fill-mode-both">
+                Your Design. <br className="hidden lg:block" />
                 <span className="text-brand-pink italic">Our Impression.</span>
               </h1>
-              <p className="text-xl text-gray-500 mb-10 max-w-lg leading-relaxed">
+              <p className="text-lg md:text-xl text-gray-500 mb-8 md:mb-10 max-w-lg mx-auto lg:mx-0 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
                 Launch your own brand or create premium corporate gifts with zero inventory. High-quality customization tailored for your business needs.
               </p>
-              <div className="flex flex-col sm:flex-row gap-5">
-                <Link href="/products" className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-brand-pink text-white font-bold text-lg hover:shadow-2xl hover:shadow-pink-200 transform hover:-translate-y-1 transition-all duration-200">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center lg:justify-start animate-in fade-in slide-in-from-bottom-10 duration-700 delay-500 fill-mode-both">
+                <Link href="/products" className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 rounded-full bg-brand-pink text-white font-bold text-lg hover:shadow-xl hover:shadow-pink-200 transform hover:-translate-y-1 transition-all duration-300">
                   Start Designing
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
-                <Link href="/pricing" className="inline-flex items-center justify-center px-8 py-4 rounded-full border-2 border-gray-100 text-brand-dark font-bold text-lg hover:bg-gray-50 transition-all duration-200">
+                <Link href="/pricing" className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 rounded-full border-2 border-gray-100 text-brand-dark font-bold text-lg hover:bg-gray-50 active:bg-gray-100 transition-all duration-300">
                   Bulk Pricing
                 </Link>
               </div>
@@ -94,7 +94,9 @@ export default function HomePage() {
       </section>
 
       {/* Brand Trust Marquee */}
-      <section className="py-12 bg-white border-y border-gray-100 overflow-hidden">
+      <section className="py-8 md:py-12 bg-white border-y border-gray-100 overflow-hidden relative mt-8 md:mt-0">
+        <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
         <div className="flex animate-marquee whitespace-nowrap items-center gap-12 sm:gap-24 opacity-40 hover:opacity-100 transition-opacity">
           {[
             "CREATIVE AD AGENCY", "GLOBAL TECH CORP", "STARTUP HUB", "EVENT MASTERS", 
@@ -110,51 +112,51 @@ export default function HomePage() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-24 bg-brand-lightGray">
+      <section className="py-16 md:py-24 bg-brand-lightGray">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold text-brand-dark">Why Choose AtoZ Print?</h2>
-            <p className="mt-4 text-gray-500 max-w-2xl mx-auto text-lg">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-brand-dark">Why Choose AtoZ Print?</h2>
+            <p className="mt-4 text-gray-500 max-w-2xl mx-auto text-base md:text-lg">
               Scale your business with our robust infrastructure designed for speed, quality, and reliability.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-float hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform">
                 <Shield className="h-7 w-7 text-brand-pink" />
               </div>
-              <h3 className="text-xl font-bold mb-4">White Label</h3>
-              <p className="text-gray-500 leading-relaxed">
+              <h3 className="text-xl font-bold mb-3 md:mb-4">White Label</h3>
+              <p className="text-gray-500 leading-relaxed text-sm md:text-base">
                 Ship products under your own brand. No mention of AtoZ Print anywhere on the package.
               </p>
             </div>
             
-            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="w-14 h-14 bg-cyan-100 rounded-2xl flex items-center justify-center mb-8">
+            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-float hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-cyan-100 rounded-2xl flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform">
                 <Box className="h-7 w-7 text-brand-cyan" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Print on Demand</h3>
-              <p className="text-gray-500 leading-relaxed">
+              <h3 className="text-xl font-bold mb-3 md:mb-4">Print on Demand</h3>
+              <p className="text-gray-500 leading-relaxed text-sm md:text-base">
                 No inventory risks. We print items only after you make a sale. Start small, scale fast.
               </p>
             </div>
             
-            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="w-14 h-14 bg-yellow-100 rounded-2xl flex items-center justify-center mb-8">
+            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-float hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-yellow-100 rounded-2xl flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform">
                 <Zap className="h-7 w-7 text-yellow-600" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Fast Fulfillment</h3>
-              <p className="text-gray-500 leading-relaxed">
+              <h3 className="text-xl font-bold mb-3 md:mb-4">Fast Fulfillment</h3>
+              <p className="text-gray-500 leading-relaxed text-sm md:text-base">
                 Industry-leading turnaround. Most orders are printed and shipped within 48-72 hours.
               </p>
             </div>
             
-            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-8">
+            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-float hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform">
                 <Globe className="h-7 w-7 text-blue-600" />
               </div>
-              <h3 className="text-xl font-bold mb-4">India Wide</h3>
-              <p className="text-gray-500 leading-relaxed">
+              <h3 className="text-xl font-bold mb-3 md:mb-4">India Wide</h3>
+              <p className="text-gray-500 leading-relaxed text-sm md:text-base">
                 We deliver to over 19,000+ pin codes across India with premium logistics partners.
               </p>
             </div>
@@ -217,24 +219,24 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-brand-dark relative overflow-hidden">
+      <section className="py-20 md:py-24 bg-brand-dark relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-brand-pink rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-brand-cyan rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
         </div>
         
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-8">
-            Ready to Build Your <span className="text-brand-pink">Printing Empire?</span>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 md:mb-8 leading-tight">
+            Ready to Build Your <br className="md:hidden" /><span className="text-brand-pink">Printing Empire?</span>
           </h2>
-          <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-400 mb-10 md:mb-12 max-w-2xl mx-auto px-4">
             Join 10,000+ businesses and creators who trust AtoZ Print for their custom merchandise.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <Link href="/register" className="px-10 py-5 bg-brand-pink text-white font-bold text-xl rounded-full hover:scale-105 active:scale-95 transition-all shadow-xl shadow-pink-900/20">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
+            <Link href="/register" className="w-full sm:w-auto px-10 py-4 md:py-5 bg-brand-pink text-white font-bold text-lg md:text-xl rounded-full hover:scale-105 active:scale-95 transition-all shadow-xl shadow-pink-900/20">
               Create Free Account
             </Link>
-            <Link href="/contact" className="px-10 py-5 bg-white text-brand-dark font-bold text-xl rounded-full hover:bg-gray-100 transition-all">
+            <Link href="/contact" className="w-full sm:w-auto px-10 py-4 md:py-5 bg-white text-brand-dark font-bold text-lg md:text-xl rounded-full hover:bg-gray-100 transition-all">
               Talk to Sales
             </Link>
           </div>

@@ -22,8 +22,7 @@ const categoryGradients: Record<string, string> = {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const [imgError, setImgError] = useState(false);
-  const gradient = categoryGradients[product.category] || 'from-gray-400 to-gray-600';
-
+  const gradient = product.category ? (categoryGradients[product.category] || 'from-gray-400 to-gray-600') : 'from-gray-400 to-gray-600';
   return (
     <div className="group bg-white rounded-3xl overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-100">
       <Link href={`/products/${product.slug}`} className="block relative">
@@ -51,7 +50,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         <div className="p-6">
           <div className="text-xs font-bold text-brand-pink uppercase tracking-widest mb-2">
-            {product.category}
+            {product.category || 'Uncategorized'}
           </div>
           <h3 className="text-xl font-bold text-brand-dark mb-2 group-hover:text-brand-pink transition-colors">
             {product.name}

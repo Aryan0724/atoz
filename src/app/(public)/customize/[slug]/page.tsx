@@ -214,12 +214,15 @@ export default function CustomizePage() {
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* LEFT SIDE RAIL */}
-        <SidebarRail activeTab={activeTab} onTabChange={(tab) => activeTab === tab ? setActiveTab(null) : setActiveTab(tab)} />
+        {/* LEFT SIDE RAIL - Hidden on Mobile */}
+        <div className="hidden md:flex shrink-0">
+          <SidebarRail activeTab={activeTab} onTabChange={(tab) => activeTab === tab ? setActiveTab(null) : setActiveTab(tab)} />
+        </div>
 
-        {/* SIDEBAR PANEL */}
-        <SidebarPanel 
-          activeTab={activeTab}
+        {/* SIDEBAR PANEL - Desktop */}
+        <div className="hidden md:block">
+          <SidebarPanel 
+            activeTab={activeTab}
           onClose={() => setActiveTab(null)}
           productColor={selectedColor}
           onProductColorChange={setSelectedColor}
@@ -232,7 +235,8 @@ export default function CustomizePage() {
           onUpdateObject={handleUpdateObjectById}
           layers={layers}
           productCategory={product.category || "Apparel"}
-        />
+          />
+        </div>
 
         {/* MAIN DESIGN AREA */}
         <main className="flex-1 flex flex-col relative overflow-hidden">
@@ -343,17 +347,43 @@ export default function CustomizePage() {
         </main>
       </div>
 
-      {/* MOBILE UI HANDLED SIMILARLY WITHOUT RAIL */}
-      <div className="md:hidden flex-shrink-0 bg-white border-t border-gray-100 p-2 safe-area-bottom">
-          <div className="flex items-center justify-around">
+      {/* MOBILE UI */}
+      <div className="md:hidden flex flex-col flex-shrink-0 bg-white border-t border-gray-100 z-50 pb-safe relative">
+          {/* Mobile Panel Drawer */}
+          {mobilePanel && (
+            <div className="absolute inset-x-0 bottom-full bg-white z-[60] h-[60vh] shadow-[0_-8px_30px_rgba(0,0,0,0.1)] rounded-t-3xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-full duration-300">
+               <div className="flex-1 overflow-y-auto w-full flex flex-col relative bg-white">
+                 <SidebarPanel 
+                   activeTab={mobilePanel}
+                   onClose={() => setMobilePanel(null)}
+                   productColor={selectedColor}
+                   onProductColorChange={setSelectedColor}
+                   onAddText={(text) => canvasRef.current?.addText(text)}
+                   onAddImage={(url) => canvasRef.current?.addImage(url)}
+                   onAddShape={(type) => canvasRef.current?.addShape(type)}
+                   onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
+                   onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
+                   onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
+                   onUpdateObject={handleUpdateObjectById}
+                   layers={layers}
+                   productCategory={product.category || "Apparel"}
+                 />
+               </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-around p-2 bg-white relative z-50">
             {mobileTools.map(tool => (
               <button 
                 key={tool.id}
-                onClick={() => setMobilePanel(tool.id)}
-                className="flex flex-col items-center gap-1 p-2"
+                onClick={() => setMobilePanel(mobilePanel === tool.id ? null : tool.id)}
+                className={cn(
+                  "flex flex-col items-center gap-1 p-2 w-[64px] rounded-xl transition-all",
+                  mobilePanel === tool.id ? "text-brand-pink bg-pink-50/50 scale-105" : "text-gray-500 hover:text-brand-dark"
+                )}
               >
                 {tool.icon}
-                <span className="text-[10px] font-bold text-gray-500">{tool.label}</span>
+                <span className="text-[10px] font-bold tracking-tight">{tool.label}</span>
               </button>
             ))}
           </div>
