@@ -56,13 +56,14 @@ export default function AboutPage() {
               To deliver high-quality, affordable, and reliable printing solutions that empower businesses to grow their physical presence.
             </p>
           </div>
-          <div className="p-12 bg-brand-dark rounded-[48px] space-y-6 text-white">
-            <Globe className="h-12 w-12 text-brand-cyan" />
+          <div className="p-12 glass-morphism rounded-[48px] space-y-6 text-white bg-brand-dark/90">
+            <Globe className="h-12 w-12 text-brand-cyan animate-pulse-slow" />
             <h2 className="text-3xl font-black uppercase tracking-tight">Our Vision</h2>
             <p className="text-lg text-gray-300 font-medium leading-relaxed">
               To become one of India’s most trusted and preferred print brands, recognized for excellence and transparency.
             </p>
           </div>
+
           <div className="p-12 bg-white border border-gray-100 rounded-[48px] space-y-6">
             <ShieldCheck className="h-12 w-12 text-brand-pink" />
             <h2 className="text-3xl font-black text-brand-dark uppercase tracking-tight">Our Values</h2>
@@ -138,13 +139,14 @@ export default function AboutPage() {
               { title: "Events", desc: "Customized lanyards, menus, and invites.", icon: <Sparkles /> },
               { title: "Individuals", desc: "Personalized gifts with professional touch.", icon: <Zap /> }
             ].map((pillar, idx) => (
-              <div key={idx} className="p-10 border border-gray-100 rounded-[48px] hover:shadow-2xl hover:shadow-gray-100 transition-all flex flex-col items-center group">
-                 <div className="h-12 w-12 bg-gray-50 rounded-xl flex items-center justify-center text-brand-dark mb-6 group-hover:bg-brand-dark group-hover:text-white transition-all">
+              <div key={idx} className="p-10 border border-gray-100 rounded-[48px] hover:shadow-2xl hover:shadow-gray-100 transition-all flex flex-col items-center group glass-morphism bg-white/40">
+                 <div className="h-12 w-12 bg-gray-50 rounded-xl flex items-center justify-center text-brand-dark mb-6 group-hover:bg-brand-dark group-hover:text-white transition-all animate-float">
                     {React.cloneElement(pillar.icon as React.ReactElement, { className: "h-6 w-6" })}
                  </div>
                  <h3 className="text-lg font-black text-brand-dark mb-2">{pillar.title}</h3>
                  <p className="text-gray-400 font-medium text-xs leading-relaxed">{pillar.desc}</p>
               </div>
+
             ))}
          </div>
       </section>

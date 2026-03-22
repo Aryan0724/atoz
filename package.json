@@ -15,6 +15,7 @@
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "fabric": "^5.3.0",
+    "framer-motion": "^12.38.0",
     "lucide-react": "^0.446.0",
     "next": "14.2.16",
     "razorpay": "^2.9.4",

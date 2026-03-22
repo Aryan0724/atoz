@@ -137,6 +137,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   onLowQualityWarning
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const productColorRef = useRef(productColor);
   
@@ -284,20 +285,111 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     });
 
     fabricCanvas.on('mouse:up', function(opt) {
-      // on mouse up we want to recalculate new interaction
-      // for all objects, so we call setViewportTransform
       fabricCanvas.setViewportTransform(fabricCanvas.viewportTransform!);
       (fabricCanvas as any).isDragging = false;
       fabricCanvas.selection = true;
     });
 
+    // MOBILE TOUCH GESTURES (Pinch-to-zoom & Panning)
+    let touchStartDist = 0;
+    let touchStartScale = 1;
+
+    fabricCanvas.on('touch:gesture', function(opt: any) {
+      if (opt.e.touches && opt.e.touches.length === 2) {
+        // Pinch logic can be handled here if fabric-gestures is enabled
+        // but often we manual handle for better control
+      }
+    });
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        const dist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        touchStartDist = dist;
+        touchStartScale = fabricCanvas.getZoom();
+        e.preventDefault();
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && touchStartDist > 0) {
+        const dist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        const scale = (dist / touchStartDist) * touchStartScale;
+        
+        // Midpoint for zoom
+        const midX = (e.touches[0].pageX + e.touches[1].pageX) / 2;
+        const midY = (e.touches[0].pageY + e.touches[1].pageY) / 2;
+        
+        // Convert to canvas relative coordinates
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (rect) {
+          const x = midX - rect.left;
+          const y = midY - rect.top;
+          
+          let newZoom = scale;
+          if (newZoom > 5) newZoom = 5;
+          if (newZoom < 0.5) newZoom = 0.5;
+          
+          fabricCanvas.zoomToPoint({ x, y }, newZoom);
+          setZoomLevel(newZoom);
+        }
+        e.preventDefault();
+      }
+    };
+
+    const handleTouchEnd = () => {
+      touchStartDist = 0;
+    };
+
+    const el = canvasRef.current;
+    if (el) {
+      el.addEventListener('touchstart', handleTouchStart, { passive: false });
+      el.addEventListener('touchmove', handleTouchMove, { passive: false });
+      el.addEventListener('touchend', handleTouchEnd);
+    }
+
     setCanvas(fabricCanvas);
 
     return () => {
+      if (el) {
+        el.removeEventListener('touchstart', handleTouchStart);
+        el.removeEventListener('touchmove', handleTouchMove);
+        el.removeEventListener('touchend', handleTouchEnd);
+      }
       fabricCanvas.dispose();
       setCanvas(null);
     };
   }, []);
+
+  // Responsive Canvas Sizing
+  useEffect(() => {
+    if (!canvas || !containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (!entries || !entries[0]) return;
+      const { width } = entries[0].contentRect;
+      if (width === 0) return;
+
+      const BASE_WIDTH = 500;
+      const BASE_HEIGHT = 625;
+      const scale = width / BASE_WIDTH;
+      
+      canvas.setWidth(width);
+      canvas.setHeight(BASE_HEIGHT * scale);
+      canvas.setZoom(scale * zoomLevel);
+      
+      canvas.calcOffset();
+      canvas.renderAll();
+    });
+
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
+  }, [canvas, zoomLevel]);
 
   // Sync isDrawingMode
   useEffect(() => {
@@ -1206,7 +1298,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   }, [canvas, onHistoryChange, onObjectsUpdated]);
 
   return (
-    <div className="relative w-full max-w-[500px] aspect-[4/5] bg-gray-50 rounded-[30px] overflow-hidden border border-gray-100 shadow-2xl flex items-center justify-center group isolate ring-1 ring-black/5" style={{ touchAction: 'none' }}>
+    <div ref={containerRef} className="relative w-full max-w-[500px] aspect-[4/5] bg-gray-50 rounded-[30px] overflow-hidden border border-gray-100 shadow-2xl flex items-center justify-center group isolate ring-1 ring-black/5" style={{ touchAction: 'none' }}>
       
       <div className="absolute inset-0 bg-transparent flex items-center justify-center" style={{ pointerEvents: 'none' }}>
         <div style={{ pointerEvents: 'auto' }}>

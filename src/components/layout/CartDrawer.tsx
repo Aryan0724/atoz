@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { X, ShoppingBag, Trash2, ArrowRight, Minus, Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, ShoppingBag, Trash2, ArrowRight, Minus, Plus, Zap } from 'lucide-react';
 import { useCart } from '@/lib/store/useCart';
 import { cn } from '@/lib/utils';
 
@@ -15,159 +16,199 @@ const CartDrawer = () => {
     setMounted(true);
   }, []);
 
+  if (!mounted) return null;
+
   return (
-    <>
-      {/* Backdrop */}
-      <div 
-        className={cn(
-          "fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] transition-opacity duration-300",
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        )}
-        onClick={() => setOpen(false)}
-      />
-
-      {/* Drawer */}
-      <div 
-        className={cn(
-          "fixed top-0 right-0 h-full w-full max-w-md bg-white z-[101] shadow-2xl transition-transform duration-300 ease-out flex flex-col",
-          isOpen ? "translate-x-0" : "translate-x-full"
-        )}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-8 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-pink-100 rounded-xl flex items-center justify-center text-brand-pink">
-              <ShoppingBag className="h-5 w-5" />
-            </div>
-            <h2 className="text-xl font-bold text-brand-dark">
-              Your Cart {mounted && `(${getItemCount()})`}
-            </h2>
-          </div>
-          <button 
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-brand-dark/40 backdrop-blur-md z-[100] cursor-pointer"
             onClick={() => setOpen(false)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
+          />
 
-        {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar">
-          {!mounted ? (
-            <div className="h-full flex flex-col items-center justify-center p-8">
-              <div className="h-8 w-8 border-2 border-brand-pink/30 border-t-brand-pink rounded-full animate-spin"></div>
-            </div>
-          ) : items.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center px-4">
-              <div className="relative mb-8">
-                <div className="absolute inset-0 bg-brand-pink/10 rounded-full blur-2xl animate-pulse"></div>
-                <div className="relative w-24 h-24 bg-gray-50 rounded-[32px] flex items-center justify-center border border-gray-100 shadow-inner">
-                  <ShoppingBag className="h-10 w-10 text-gray-200" />
+          {/* Drawer */}
+          <motion.div 
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 h-full w-full max-w-lg bg-white/90 backdrop-blur-2xl z-[101] shadow-[-20px_0_80px_rgba(0,0,0,0.1)] flex flex-col border-l border-white/20"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-8 py-10 border-b border-gray-100/50">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 bg-brand-pink/10 rounded-[22px] flex items-center justify-center text-brand-pink shadow-inner">
+                  <ShoppingBag className="h-7 w-7" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-brand-dark tracking-tight">
+                    Review Cart
+                  </h2>
+                  <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                    {getItemCount()} {getItemCount() === 1 ? 'Product' : 'Products'} added
+                  </p>
                 </div>
               </div>
-              <h3 className="text-2xl font-black text-brand-dark mb-3 tracking-tight">Your cart is empty</h3>
-              <p className="text-gray-400 font-medium mb-10 max-w-[240px]">Customize your first high-quality print to see it appear here.</p>
               <button 
                 onClick={() => setOpen(false)}
-                className="group px-10 py-5 bg-brand-dark text-white font-black rounded-full hover:shadow-2xl hover:bg-brand-pink transition-all flex items-center gap-3"
+                className="w-12 h-12 flex items-center justify-center hover:bg-gray-100/80 rounded-2xl transition-all active:scale-90"
               >
-                Start Designing
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <X className="h-7 w-7 text-brand-dark" />
               </button>
             </div>
-          ) : (
-            <div className="space-y-6">
-              {items.map((item) => (
-                <div key={item.id} className="flex gap-4 group">
-                  <div className="w-24 h-24 bg-gray-100 rounded-2xl relative overflow-hidden flex-shrink-0">
-                    {item.design_preview_url ? (
-                      <Image 
-                        src={item.design_preview_url} 
-                        alt={item.product.name} 
-                        fill 
-                        className="object-cover"
-                      />
-                    ) : (
-                      <Image 
-                        src={item.product.images?.[0] || ''} 
-                        alt={item.product.name} 
-                        fill 
-                        className="object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-1">
-                      <h4 className="font-bold text-brand-dark truncate">{item.product.name}</h4>
-                      <button 
-                        onClick={() => removeItem(item.id)}
-                        className="text-gray-300 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+
+            {/* Cart Items */}
+            <div className="flex-1 overflow-y-auto px-8 py-8 custom-scrollbar">
+              {items.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <motion.div 
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="relative mb-10"
+                  >
+                    <div className="absolute inset-0 bg-brand-pink/20 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="relative w-32 h-32 bg-gray-50/50 rounded-[40px] flex items-center justify-center border border-gray-100 shadow-xl overflow-hidden">
+                       <ShoppingBag className="h-12 w-12 text-gray-200" />
+                       <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-50">
+                          <Zap className="w-6 h-6 text-brand-pink animate-bounce" />
+                       </div>
                     </div>
-                    <p className="text-xs text-brand-pink font-bold uppercase tracking-wider mb-2">
-                       {item.quality_level} Quality
-                    </p>
-                    <div className="flex items-center justify-between mt-auto">
-                      <div className="flex items-center border border-gray-100 rounded-full px-2 py-1">
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="p-1 hover:text-brand-pink transition-colors disabled:opacity-30"
-                          disabled={item.quantity <= item.product.moq}
-                        >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="p-1 hover:text-brand-pink transition-colors"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </button>
+                  </motion.div>
+                  <h3 className="text-3xl font-black text-brand-dark mb-4 tracking-tighter italic uppercase underline decoration-brand-pink decoration-8 underline-offset-4">Empty Canvas</h3>
+                  <p className="text-gray-400 font-bold mb-12 max-w-[280px] leading-relaxed">Your creativity is waiting. Add some high-end prints to your collection.</p>
+                  <button 
+                    onClick={() => setOpen(false)}
+                    className="group px-12 py-6 bg-brand-dark text-white font-black rounded-3xl hover:shadow-[0_20px_40px_rgba(235,51,126,0.3)] hover:bg-brand-pink transition-all flex items-center gap-4"
+                  >
+                    Explore Catalog
+                    <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-500" />
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {items.map((item, idx) => (
+                    <motion.div 
+                      key={item.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="flex gap-6 group relative"
+                    >
+                      <div className="w-28 h-32 bg-gray-50 rounded-[28px] relative overflow-hidden flex-shrink-0 border border-gray-100 transition-transform duration-500 group-hover:scale-105 shadow-sm">
+                        {item.design_preview_url ? (
+                          <Image 
+                            src={item.design_preview_url} 
+                            alt={item.product.name} 
+                            fill 
+                            className="object-cover"
+                          />
+                        ) : (
+                          <Image 
+                            src={item.product.images?.[0] || ''} 
+                            alt={item.product.name} 
+                            fill 
+                            className="object-cover"
+                          />
+                        )}
                       </div>
-                      <span className="font-bold text-brand-dark">₹{(item.product.base_price || 0) * item.quantity}</span>
-                    </div>
-                    {item.quantity < item.product.moq && (
-                       <p className="text-[10px] text-red-500 font-bold mt-2 uppercase tracking-tight">
-                         Min. Order is {item.product.moq} units
-                       </p>
-                    )}
+                      <div className="flex-1 flex flex-col justify-between py-1">
+                        <div>
+                          <div className="flex justify-between items-start">
+                            <h4 className="text-lg font-black text-brand-dark group-hover:text-brand-pink transition-colors line-clamp-1 tracking-tight">
+                              {item.product.name}
+                            </h4>
+                            <button 
+                              onClick={() => removeItem(item.id)}
+                              className="text-gray-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-xl transition-all"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                             <div className="w-1.5 h-1.5 bg-brand-pink rounded-full animate-pulse" />
+                             <p className="text-[10px] text-brand-pink font-black uppercase tracking-[0.15em]">
+                                {item.quality_level} Premium Quality
+                             </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-end justify-between mt-4">
+                          <div className="flex items-center bg-gray-50/80 backdrop-blur-sm border border-gray-100 rounded-2xl p-1 shadow-inner">
+                            <button 
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-xl hover:text-brand-pink transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                              disabled={item.quantity <= item.product.moq}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </button>
+                            <span className="px-3 text-sm font-black text-brand-dark min-w-[40px] text-center">{item.quantity}</span>
+                            <button 
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-xl hover:text-brand-pink transition-all"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <div className="text-right">
+                             <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Total</div>
+                             <span className="text-xl font-black text-brand-dark tracking-tighter italic">₹{(item.product.base_price || 0) * item.quantity}</span>
+                          </div>
+                        </div>
+                        {item.quantity < item.product.moq && (
+                           <div className="mt-3 py-1 px-3 bg-red-50 text-[10px] text-red-500 font-black rounded-lg uppercase tracking-tight flex items-center gap-1.5 border border-red-100">
+                             <Zap className="w-3 h-3" />
+                             Min. Order is {item.product.moq} units
+                           </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            {items.length > 0 && (
+              <div className="p-8 bg-white border-t border-gray-100/50 space-y-6 shadow-[0_-20px_40px_rgba(0,0,0,0.02)]">
+                <div className="flex justify-between items-center bg-gray-50/50 p-6 rounded-[24px] border border-gray-100">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Grand Total</span>
+                    <span className="text-3xl font-black text-brand-dark tracking-tighter italic">₹{getTotalPrice()}</span>
+                  </div>
+                  <div className="h-10 w-px bg-gray-200" />
+                  <div className="text-right">
+                    <span className="text-xs font-black text-brand-pink uppercase tracking-widest block mb-1">Status</span>
+                    <span className="text-xs font-bold text-gray-400">Ready to Ship</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        {mounted && items.length > 0 && (
-          <div className="p-6 border-t border-gray-100 space-y-4">
-            <div className="flex justify-between items-center text-lg">
-              <span className="text-gray-500">Subtotal</span>
-              <span className="font-black text-2xl text-brand-dark">₹{getTotalPrice()}</span>
-            </div>
-            <p className="text-sm text-gray-400">
-              Taxes and shipping calculated at checkout.
-            </p>
-            <Link 
-              href="/checkout"
-              onClick={() => setOpen(false)}
-              className="w-full bg-brand-pink text-white flex items-center justify-center py-5 rounded-3xl font-black text-xl hover:shadow-2xl hover:shadow-pink-200 transition-all active:scale-95 group"
-            >
-              Checkout
-              <ArrowRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <button 
-              onClick={() => setOpen(false)}
-              className="w-full text-center text-gray-400 font-bold hover:text-brand-dark transition-colors py-2"
-            >
-              Continue Shopping
-            </button>
-          </div>
-        )}
-      </div>
-    </>
+                
+                <div className="flex gap-4">
+                  <Link 
+                    href="/checkout"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 bg-brand-pink text-white flex items-center justify-center py-6 rounded-3xl font-black text-xl hover:shadow-[0_20px_40px_rgba(235,51,126,0.3)] hover:scale-[1.02] transition-all active:scale-95 group"
+                  >
+                    Checkout
+                    <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform duration-500" />
+                  </Link>
+                </div>
+                <button 
+                  onClick={() => setOpen(false)}
+                  className="w-full text-center text-sm font-black text-gray-400 uppercase tracking-[0.2em] hover:text-brand-dark transition-colors py-2"
+                >
+                  Continue Shopping
+                </button>
+              </div>
+            )}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 

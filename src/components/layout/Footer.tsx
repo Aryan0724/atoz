@@ -23,16 +23,17 @@ const Footer = () => {
             AtoZ Print is a complete printing and corporate gifting solutions provider offering premium-quality customized products for businesses, corporates, events, and individuals across India.
           </p>
           <div className="flex space-x-4 mb-8">
-            <a href="#" className="h-10 w-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-brand-pink transition-colors">
+            <a href="#" className="h-10 w-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center hover:bg-brand-pink hover:border-brand-pink hover:-translate-y-1 transition-all duration-300">
               <Facebook className="h-5 w-5" />
             </a>
-            <a href="#" className="h-10 w-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-brand-pink transition-colors">
+            <a href="#" className="h-10 w-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center hover:bg-brand-pink hover:border-brand-pink hover:-translate-y-1 transition-all duration-300">
               <Twitter className="h-5 w-5" />
             </a>
-            <a href="#" className="h-10 w-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-brand-pink transition-colors">
+            <a href="#" className="h-10 w-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center hover:bg-brand-pink hover:border-brand-pink hover:-translate-y-1 transition-all duration-300">
               <Instagram className="h-5 w-5" />
             </a>
           </div>
+
           
           <div className="mt-8 border-t border-white/5 pt-8">
             <h4 className="text-white font-bold text-sm uppercase tracking-widest mb-4">Stay Impactful</h4>
@@ -57,11 +58,12 @@ const Footer = () => {
         <div>
           <h4 className="text-white font-bold mb-6">Quick Links</h4>
           <ul className="space-y-4">
-            <li><Link href="/products" className="hover:text-brand-pink transition-colors">Shop Products</Link></li>
-            <li><Link href="/services" className="hover:text-brand-pink transition-colors">Design Services</Link></li>
-            <li><Link href="/pricing" className="hover:text-brand-pink transition-colors">Bulk Pricing</Link></li>
-            <li><Link href="/about" className="hover:text-brand-pink transition-colors">Our Story</Link></li>
+            <li><Link href="/products" className="hover:text-brand-pink hover:translate-x-1 inline-block transition-all duration-300">Shop Products</Link></li>
+            <li><Link href="/services" className="hover:text-brand-pink hover:translate-x-1 inline-block transition-all duration-300">Design Services</Link></li>
+            <li><Link href="/pricing" className="hover:text-brand-pink hover:translate-x-1 inline-block transition-all duration-300">Bulk Pricing</Link></li>
+            <li><Link href="/about" className="hover:text-brand-pink hover:translate-x-1 inline-block transition-all duration-300">Our Story</Link></li>
           </ul>
+
         </div>
 
         <div>

@@ -65,7 +65,7 @@ const Navbar = () => {
   const cartCount = mounted ? getItemCount() : 0;
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100/50 shadow-[0_4px_30px_rgba(0,0,0,0.03)] transition-all duration-300">
+    <nav className="sticky top-0 z-50 glass-morphism transition-all duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
@@ -147,17 +147,19 @@ const Navbar = () => {
             {mounted && user ? (
               <div className="flex items-center gap-4 border-l border-gray-100 pl-6">
                 <Link href="/dashboard" className="flex items-center gap-2 group">
-                   <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center text-brand-pink group-hover:bg-brand-pink group-hover:text-white transition-all">
+                   <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center text-brand-pink group-hover:bg-brand-pink group-hover:text-white transition-all duration-500 hover:rotate-6">
                       <UserIcon className="h-4 w-4" />
                    </div>
                    <span className="text-sm font-bold text-brand-dark group-hover:text-brand-pink transition-colors">Dashboard</span>
                 </Link>
               </div>
             ) : (
-              <Link href="/login" className="bg-brand-pink text-white px-8 py-2.5 rounded-full text-sm font-bold hover:shadow-lg hover:shadow-pink-200 transition-all duration-200 active:scale-95">
-                Sign In
+              <Link href="/login" className="bg-brand-pink text-white px-8 py-2.5 rounded-full text-sm font-bold hover:shadow-glow transition-all duration-300 active:scale-95 group overflow-hidden relative">
+                <span className="relative z-10">Sign In</span>
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               </Link>
             )}
+
           </div>
 
           {/* Mobile Menu Button */}

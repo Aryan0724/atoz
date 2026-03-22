@@ -124,14 +124,14 @@ const DesignControls = ({
 
   return (
     <div className="flex flex-col h-full bg-white relative">
-      {/* Dynamic Tabs */}
-      <div className="flex border-b border-gray-100 overflow-x-auto no-scrollbar relative z-10 shrink-0">
+      {/* Dynamic Tabs - Scrollable on Mobile */}
+      <div className="flex border-b border-gray-100 overflow-x-auto no-scrollbar relative z-10 shrink-0 bg-white">
         {[
-          { id: 'templates', icon: <LayoutTemplate className="h-5 w-5" />, label: 'Templates' },
-          { id: 'add', icon: <PlusSquare className="h-5 w-5" />, label: 'Add' },
-          { id: 'edit', icon: <Settings2 className="h-5 w-5" />, label: 'Edit' },
-          { id: 'layers', icon: <Layers className="h-5 w-5" />, label: 'Layers' },
-          { id: 'product', icon: <Palette className="h-5 w-5" />, label: 'Product' },
+          { id: 'templates', icon: <LayoutTemplate className="h-5 w-5 md:h-6 md:w-6" />, label: 'Templates' },
+          { id: 'add', icon: <PlusSquare className="h-5 w-5 md:h-6 md:w-6" />, label: 'Add' },
+          { id: 'edit', icon: <Settings2 className="h-5 w-5 md:h-6 md:w-6" />, label: 'Edit' },
+          { id: 'layers', icon: <Layers className="h-5 w-5 md:h-6 md:w-6" />, label: 'Layers' },
+          { id: 'product', icon: <Palette className="h-5 w-5 md:h-6 md:w-6" />, label: 'Product' },
         ].map((tab) => {
           const disabled = tab.id === 'edit' && !activeObject;
           return (
@@ -140,13 +140,13 @@ const DesignControls = ({
               disabled={disabled}
               onClick={() => setActiveTab(tab.id as any)}
               className={cn(
-                "flex-1 min-w-[70px] flex flex-col items-center py-5 transition-all relative",
+                "flex-1 min-w-[80px] md:min-w-[70px] flex flex-col items-center py-4 md:py-5 transition-all relative",
                 activeTab === tab.id ? "text-brand-pink" : "text-gray-400 hover:text-brand-dark",
-                disabled && "opacity-30 cursor-not-allowed hover:text-gray-400"
+                disabled && "opacity-30 cursor-not-allowed"
               )}
             >
               {tab.icon}
-              <span className="text-[9px] font-black uppercase tracking-widest mt-2">{tab.label}</span>
+              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest mt-2">{tab.label}</span>
               {activeTab === tab.id && (
                 <span className="absolute bottom-0 left-0 w-full h-1 bg-brand-pink rounded-t-full shadow-[0_-2px_10px_rgba(233,30,99,0.5)]"></span>
               )}
@@ -663,28 +663,28 @@ const DesignControls = ({
         )}
       </div>
 
-      {/* Persistent Bottom Action Bar */}
-      <div className="absolute bottom-0 w-full p-4 bg-white/90 backdrop-blur-md border-t border-gray-100 flex items-center justify-between z-20">
-         <div className="flex bg-gray-100 rounded-full p-1">
+      {/* Persistent Bottom Action Bar - Optimized for Mobile */}
+      <div className="absolute bottom-0 w-full p-3 md:p-4 bg-white/95 backdrop-blur-md border-t border-gray-100 flex items-center justify-between z-20">
+         <div className="flex bg-gray-100/80 rounded-full p-1 border border-gray-200/50">
              <button 
                 onClick={onUndo}
                 disabled={!canUndo}
-                className="p-2.5 rounded-full hover:bg-white text-gray-500 disabled:opacity-30 transition-all hover:shadow-sm"
+                className="p-3 md:p-2.5 rounded-full hover:bg-white text-gray-500 disabled:opacity-30 transition-all active:scale-90"
              >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
              </button>
              <button 
                 onClick={onRedo}
                 disabled={!canRedo}
-                className="p-2.5 rounded-full hover:bg-white text-gray-500 disabled:opacity-30 transition-all hover:shadow-sm"
+                className="p-3 md:p-2.5 rounded-full hover:bg-white text-gray-500 disabled:opacity-30 transition-all active:scale-90"
              >
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 md:h-5 md:w-5" />
              </button>
          </div>
          
          <button 
              onClick={onDownload}
-             className="flex items-center gap-2 bg-brand-dark hover:bg-black text-white px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
+             className="flex items-center gap-2 bg-brand-dark hover:bg-black text-white px-6 py-3 md:py-2.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
          >
              <Download className="h-4 w-4 text-brand-cyan" /> Export HQ
          </button>
