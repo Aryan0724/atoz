@@ -14,13 +14,13 @@ interface SidebarRailProps {
 }
 
 const navItems: { id: SidebarTab; icon: React.ReactNode; label: string }[] = [
+  { id: 'templates', icon: <LayoutGrid className="h-5 w-5" />, label: 'Templates' },
+  { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },
+  { id: 'graphics', icon: <Square className="h-5 w-5" />, label: 'Elements' },
+  { id: 'library', icon: <ImageIcon className="h-5 w-5" />, label: 'Photos' },
   { id: 'uploads', icon: <Upload className="h-5 w-5" />, label: 'Upload' },
   { id: 'ai', icon: <Sparkles className="h-5 w-5" />, label: 'AI' },
-  { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Add text' },
-  { id: 'library', icon: <FolderHeart className="h-5 w-5" />, label: 'My library' },
-  { id: 'graphics', icon: <Square className="h-5 w-5" />, label: 'Graphics' },
-  { id: 'templates', icon: <LayoutGrid className="h-5 w-5" />, label: 'My templates' },
-  { id: 'shutterstock', icon: <ImageIcon className="h-5 w-5" />, label: 'Shutterstock' },
+  { id: 'shutterstock', icon: <FolderHeart className="h-5 w-5" />, label: 'Stock' },
 ];
 
 const SidebarRail = ({ activeTab, onTabChange }: SidebarRailProps) => {

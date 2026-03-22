@@ -35,6 +35,7 @@ export interface CanvasObjectProperties {
 
 interface DesignerCanvasProps {
   productImage: string;
+  productColor?: string;
   isDrawingMode?: boolean;
   drawingColor?: string;
   drawingWidth?: number;
@@ -52,6 +53,7 @@ export interface DesignerCanvasRef {
   addImage: (url: string) => void;
   addShape: (type: 'circle' | 'rect' | 'triangle' | 'star' | 'heart' | 'line') => void;
   addIcon: (iconName: string) => void;
+  addSvgGraphic: (svgString: string, name: string) => void;
   updateActiveObject: (properties: Partial<CanvasObjectProperties>) => void;
   updateObjectById: (id: string, properties: Partial<CanvasObjectProperties>) => void;
   setTextShadow: (options: { color: string; blur: number; offsetX: number; offsetY: number } | null) => void;
@@ -122,6 +124,7 @@ const getObjectProperties = (obj: any): CanvasObjectProperties => {
 
 const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(({
   productImage,
+  productColor,
   isDrawingMode = false,
   drawingColor = '#E91E63',
   drawingWidth = 5,
@@ -135,7 +138,12 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+  const productColorRef = useRef(productColor);
   
+  useEffect(() => {
+    productColorRef.current = productColor;
+  }, [productColor]);
+
   // Safe Zone parameters
   const safeZoneMargin = 60; 
 
@@ -173,21 +181,27 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
     const saveHistory = () => {
       if (isApplyingHistory) return;
-      const json = JSON.stringify(fabricCanvas.toObject(['id', 'selectable', 'evented', 'name']));
-      
-      if (historyIndex < history.length - 1) {
-        history.splice(historyIndex + 1);
+      try {
+        const json = JSON.stringify(fabricCanvas.toObject(['id', 'selectable', 'evented', 'name']));
+        
+        if (historyIndex < history.length - 1) {
+          history.splice(historyIndex + 1);
+        }
+        
+        history.push(json);
+        if (history.length > 50) history.shift();
+        else historyIndex++;
+      } catch (err) {
+        // Silently ignore serialization errors (e.g. partially-initialized SVG groups)
+        console.warn('DesignerCanvas: Could not save history state:', err);
       }
-      
-      history.push(json);
-      if (history.length > 50) history.shift();
-      else historyIndex++;
     };
 
     // Events that trigger history saving
     fabricCanvas.on('object:added', (e) => {
       if ((e.target as any)?.id === 'safe_zone_indicator') return;
-      saveHistory();
+      // Defer to next frame so complex objects (SVG groups, etc.) are fully initialized
+      requestAnimationFrame(() => saveHistory());
     });
     fabricCanvas.on('object:modified', saveHistory);
     fabricCanvas.on('object:removed', (e) => {
@@ -300,11 +314,20 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   useEffect(() => {
     if (!canvas || !productImage) return;
 
-    console.log(`DesignerCanvas: Loading product base image: ${productImage}`);
+    let modifiedUrl = productImage;
+    const isSvgMock = productImage.startsWith('data:image/svg+xml');
     
+    if (isSvgMock && productColor && productColor.toUpperCase() !== '#FFFFFF') {
+       try {
+         const decoded = decodeURIComponent(productImage.substring(productImage.indexOf(',') + 1));
+         const recolored = decoded.replace(/fill="#fff"/g, `fill="${productColor}"`);
+         modifiedUrl = `data:image/svg+xml;utf8,${encodeURIComponent(recolored)}`;
+       } catch(e) {
+         console.warn("Could not modify SVG fill", e);
+       }
+    }
 
-
-    fabric.Image.fromURL(productImage, (img) => {
+    fabric.Image.fromURL(modifiedUrl, (img) => {
       if (!img) {
         console.error(`DesignerCanvas: Failed to load image object for ${productImage}`);
         return;
@@ -352,8 +375,27 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
       const existingBase = canvas.getObjects().find(obj => (obj as any).id === 'product_base_image');
       if (existingBase) canvas.remove(existingBase);
+      const existingFill = canvas.getObjects().find(obj => (obj as any).id === 'product_color_fill');
+      if (existingFill) canvas.remove(existingFill);
 
-      canvas.insertAt(img, 0, false);
+      if (!isSvgMock && productColor && productColor.toUpperCase() !== '#FFFFFF') {
+         const fillRect = new fabric.Rect({
+           left: canvas.width! / 2,
+           top: canvas.height! / 2,
+           originX: 'center', originY: 'center',
+           width: img.getScaledWidth() * 0.98,
+           height: img.getScaledHeight() * 0.98,
+           fill: productColor,
+           selectable: false, evented: false,
+           //@ts-ignore
+           id: 'product_color_fill'
+         });
+         canvas.insertAt(fillRect, 0, false);
+         canvas.insertAt(img, 1, false);
+      } else {
+         canvas.insertAt(img, 0, false);
+      }
+      
       canvas.renderAll();
 
       // Implement DPI Checker & Alignment Guides
@@ -448,7 +490,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
       console.log("DesignerCanvas: Product base image successfully rendered with contrast shadow");
     }, { crossOrigin: 'anonymous' });
-  }, [canvas, productImage]);
+  }, [canvas, productImage, productColor]);
 
   // Guidelines and Object Checking Logic
   useEffect(() => {
@@ -750,12 +792,48 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         onHistoryChange?.();
       });
     },
+    addSvgGraphic: (svgString: string, name: string) => {
+      if (!canvas) return;
+      fabric.loadSVGFromString(svgString, (objects, options) => {
+        const obj = fabric.util.groupSVGElements(objects, options);
+        obj.set({
+          left: canvas.width! / 2,
+          top: canvas.height! / 2,
+          originX: 'center',
+          originY: 'center',
+          cornerStyle: 'circle',
+          cornerColor: '#E91E63',
+          borderColor: '#E91E63',
+          padding: 10,
+          //@ts-ignore
+          id: `graphic_${Date.now()}`,
+          //@ts-ignore
+          name: name,
+        });
+        // Scale to a reasonable print size (160px)
+        const targetSize = 160;
+        const scale = targetSize / Math.max(obj.width || 1, obj.height || 1);
+        obj.scale(scale);
+        canvas.add(obj);
+        canvas.setActiveObject(obj);
+        canvas.renderAll();
+        onObjectsUpdated?.();
+        onHistoryChange?.();
+      });
+    },
     updateActiveObject: (properties: Partial<CanvasObjectProperties>) => {
       if (!canvas) return;
       const activeObj = canvas.getActiveObject();
       if (!activeObj) return;
 
-      if (properties.fill !== undefined) activeObj.set('fill', properties.fill);
+      if (properties.fill !== undefined) {
+        activeObj.set('fill', properties.fill);
+        if (activeObj.type === 'group') {
+          (activeObj as fabric.Group).getObjects().forEach(child => {
+            child.set('fill', properties.fill);
+          });
+        }
+      }
       if (properties.opacity !== undefined) activeObj.set('opacity', properties.opacity);
       if (properties.angle !== undefined) activeObj.set('angle', properties.angle);
       

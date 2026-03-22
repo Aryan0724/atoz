@@ -65,6 +65,27 @@ const TopToolbar = ({
 
       <div className="h-8 w-px bg-gray-100 mx-2" />
 
+      <div className="h-8 w-px bg-gray-100 mx-2" />
+
+      {/* COLOR PICKER - Available for all vector objects */}
+      {!isImage && (
+        <>
+          <div className="relative w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 shadow-sm overflow-hidden shrink-0 hover:border-brand-pink transition-colors" title="Change Color">
+            <input 
+              type="color" 
+              value={activeObject.fill || '#000000'} 
+              onChange={(e) => onUpdateActiveObject({ fill: e.target.value })}
+              className="absolute inset-[-10px] w-20 h-20 cursor-pointer opacity-0"
+            />
+            <div 
+              className="w-full h-full pointer-events-none" 
+              style={{ backgroundColor: activeObject.fill || '#000000' }} 
+            />
+          </div>
+          <div className="h-8 w-px bg-gray-100 mx-2" />
+        </>
+      )}
+
       {/* TEXT SPECIFIC CONTACTUAL TOOLS */}
       {isText && (
         <>
@@ -110,14 +131,7 @@ const TopToolbar = ({
              </button>
           </div>
 
-          <button 
-            className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-100 bg-white shadow-sm hover:border-brand-pink/30 hover:text-brand-pink transition-all"
-            onClick={() => onUpdateActiveObject({ fill: '#E91E63' })}
-          >
-            <div className="h-5 w-5 rounded-sm shadow-inner" style={{ backgroundColor: activeObject.fill }} />
-          </button>
-
-          <div className="h-8 w-px bg-gray-100 mx-1" />
+           <div className="h-8 w-px bg-gray-100 mx-1" />
 
           {/* EFFECTS HUB */}
           <div className="relative group">

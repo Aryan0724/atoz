@@ -47,33 +47,33 @@ export default function SizeChart({ isOpen, onClose, category }: SizeChartProps)
                 <tbody className="text-sm text-brand-dark">
                   <tr className="border-b border-gray-50 hover:bg-brand-lightGray transition-colors">
                     <td className="px-6 py-4 font-black">S</td>
-                    <td className="px-6 py-4">19"</td>
-                    <td className="px-6 py-4">27"</td>
-                    <td className="px-6 py-4">7.5"</td>
+                    <td className="px-6 py-4">19&quot;</td>
+                    <td className="px-6 py-4">27&quot;</td>
+                    <td className="px-6 py-4">7.5&quot;</td>
                   </tr>
                   <tr className="border-b border-gray-50 bg-gray-50/30 hover:bg-brand-lightGray transition-colors">
                     <td className="px-6 py-4 font-black">M</td>
-                    <td className="px-6 py-4">20"</td>
-                    <td className="px-6 py-4">28"</td>
-                    <td className="px-6 py-4">8"</td>
+                    <td className="px-6 py-4">20&quot;</td>
+                    <td className="px-6 py-4">28&quot;</td>
+                    <td className="px-6 py-4">8&quot;</td>
                   </tr>
                   <tr className="border-b border-gray-50 hover:bg-brand-lightGray transition-colors">
                     <td className="px-6 py-4 font-black">L</td>
-                    <td className="px-6 py-4">21"</td>
-                    <td className="px-6 py-4">29"</td>
-                    <td className="px-6 py-4">8.5"</td>
+                    <td className="px-6 py-4">21&quot;</td>
+                    <td className="px-6 py-4">29&quot;</td>
+                    <td className="px-6 py-4">8.5&quot;</td>
                   </tr>
                   <tr className="border-b border-gray-50 bg-gray-50/30 hover:bg-brand-lightGray transition-colors">
                     <td className="px-6 py-4 font-black">XL</td>
-                    <td className="px-6 py-4">22"</td>
-                    <td className="px-6 py-4">30"</td>
-                    <td className="px-6 py-4">9"</td>
+                    <td className="px-6 py-4">22&quot;</td>
+                    <td className="px-6 py-4">30&quot;</td>
+                    <td className="px-6 py-4">9&quot;</td>
                   </tr>
                   <tr className="hover:bg-brand-lightGray transition-colors">
                     <td className="px-6 py-4 font-black">XXL</td>
-                    <td className="px-6 py-4">23.5"</td>
-                    <td className="px-6 py-4">31"</td>
-                    <td className="px-6 py-4">9.5"</td>
+                    <td className="px-6 py-4">23.5&quot;</td>
+                    <td className="px-6 py-4">31&quot;</td>
+                    <td className="px-6 py-4">9.5&quot;</td>
                   </tr>
                 </tbody>
               </table>

@@ -67,9 +67,10 @@ export default function CustomizePage() {
   const [isFinishing, setIsFinishing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const [activeView, setActiveView] = useState<'front' | 'back' | 'side' | '3d'>('front');
+  const [activeView, setActiveView] = useState<'front' | 'back' | 'side' | 'sleeve_l' | 'sleeve_r' | 'neck' | '3d'>('front');
   const [isPanning, setIsPanning] = useState(false);
-  const [viewData, setViewData] = useState<{ front: any, back: any, side: any }>({ front: null, back: null, side: null });
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [viewData, setViewData] = useState<{ front: any, back: any, side: any, sleeve_l: any, sleeve_r: any, neck: any }>({ front: null, back: null, side: null, sleeve_l: null, sleeve_r: null, neck: null });
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
   const [activeTab, setActiveTab] = useState<SidebarTab | null>('graphics');
@@ -126,7 +127,7 @@ export default function CustomizePage() {
     setLayers([...freshLayers]);
   };
 
-  const handleViewChange = (newView: 'front' | 'back' | 'side' | '3d') => {
+  const handleViewChange = (newView: 'front' | 'back' | 'side' | 'sleeve_l' | 'sleeve_r' | 'neck' | '3d') => {
     if (newView === activeView) return;
     
     // Save current view data if it's a 2D view
@@ -136,6 +137,7 @@ export default function CustomizePage() {
     }
     
     setActiveView(newView);
+    setIsPreviewMode(newView === '3d');
     
     // Load new view data if it's a 2D view
     if (newView !== '3d') {
@@ -192,8 +194,20 @@ export default function CustomizePage() {
 
         <div className="flex items-center gap-2">
           <div className="bg-[#f0f0e8] p-1 rounded-xl flex items-center">
-            <button className="px-6 py-1.5 bg-brand-olive text-white text-[11px] font-black rounded-lg shadow-sm tracking-tight uppercase">Edit</button>
-            <button className="px-6 py-1.5 text-gray-500 text-[11px] font-black tracking-tight uppercase">Preview</button>
+            <button 
+              onClick={() => { if (isPreviewMode) { handleViewChange('front'); } }}
+              className={cn(
+                "px-6 py-1.5 text-[11px] font-black rounded-lg tracking-tight uppercase transition-all",
+                !isPreviewMode ? "bg-brand-olive text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
+              )}
+            >Edit</button>
+            <button 
+              onClick={() => { if (!isPreviewMode) { handleViewChange('3d'); } }}
+              className={cn(
+                "px-6 py-1.5 text-[11px] font-black rounded-lg tracking-tight uppercase transition-all",
+                isPreviewMode ? "bg-brand-olive text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
+              )}
+            >Preview</button>
           </div>
           <button className="p-2 text-gray-400 hover:text-brand-dark transition-colors"><LayoutGrid className="h-5 w-5" /></button>
         </div>
@@ -213,9 +227,11 @@ export default function CustomizePage() {
           onAddImage={(url) => canvasRef.current?.addImage(url)}
           onAddShape={(type) => canvasRef.current?.addShape(type)}
           onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
+          onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
           onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
           onUpdateObject={handleUpdateObjectById}
           layers={layers}
+          productCategory={product.category || "Apparel"}
         />
 
         {/* MAIN DESIGN AREA */}
@@ -256,6 +272,7 @@ export default function CustomizePage() {
                 <DesignerCanvas 
                   ref={canvasRef}
                   productImage={activeView === 'front' ? (product.images?.[0] || '') : (activeView === 'back' ? (product.images?.[1] || product.images?.[0] || '') : (product.images?.[2] || product.images?.[0] || ''))}
+                  productColor={selectedColor}
                   onObjectSelected={setActiveObject}
                   onSelectionCleared={() => setActiveObject(null)}
                   onObjectModified={setActiveObject}
@@ -300,7 +317,7 @@ export default function CustomizePage() {
                ].map((v) => (
                  <button
                    key={v.id}
-                   onClick={() => setActiveView(v.id as any)}
+                   onClick={() => handleViewChange(v.id as any)}
                    className={cn(
                      "px-5 py-2 rounded-full text-[11px] font-black tracking-tight leading-none transition-all",
                      activeView === v.id 
