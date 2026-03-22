@@ -14,10 +14,6 @@ export default function MobileBottomNav() {
   const [mounted, setMounted] = useState(false);
   const [hasSession, setHasSession] = useState(false);
 
-  if (pathname.startsWith('/customize')) {
-    return null;
-  }
-
   useEffect(() => {
     setMounted(true);
     const checkSession = async () => {
@@ -31,6 +27,10 @@ export default function MobileBottomNav() {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  if (pathname.startsWith('/customize')) {
+    return null;
+  }
 
   const cartCount = mounted ? getItemCount() : 0;
 
