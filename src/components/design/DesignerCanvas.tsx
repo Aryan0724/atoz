@@ -328,7 +328,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         const midY = (e.touches[0].pageY + e.touches[1].pageY) / 2;
         
         // Convert to canvas relative coordinates
-        const rect = canvasRef.current?.getBoundingClientRect();
+        const rect = containerRef.current?.getBoundingClientRect();
         if (rect) {
           const x = midX - rect.left;
           const y = midY - rect.top;
@@ -348,7 +348,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       touchStartDist = 0;
     };
 
-    const el = canvasRef.current;
+    const el = containerRef.current;
     if (el) {
       el.addEventListener('touchstart', handleTouchStart, { passive: false });
       el.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -434,26 +434,26 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         evented: false,
         originX: 'center',
         originY: 'center',
-        left: canvas.width! / 2,
-        top: canvas.height! / 2,
+        left: 250,
+        top: 312.5,
         crossOrigin: 'anonymous',
         //@ts-ignore
         id: 'product_base_image'
       });
       
-      const canvasAspect = canvas.width! / canvas.height!;
+      const canvasAspect = 500 / 625;
       const imgAspect = img.width! / img.height!;
       
-      // Calculate scale to fit within canvas (contain) preserving aspect ratio
+      // Calculate scale to fit within logical canvas (contain) preserving aspect ratio
       const padding = 40; // 40px padding around the image
-      const availableWidth = canvas.width! - padding * 2;
-      const availableHeight = canvas.height! - padding * 2;
+      const availableWidth = 500 - padding * 2;
+      const availableHeight = 625 - padding * 2;
       
       const widthScale = availableWidth / img.width!;
       const heightScale = availableHeight / img.height!;
       const scale = Math.min(widthScale, heightScale);
       
-      console.log(`DesignerCanvas: Applying scale ${scale} at center (${canvas.width!/2}, ${canvas.height!/2})`);
+      console.log(`DesignerCanvas: Applying scale ${scale} at center (250, 312.5)`);
       
       img.scale(scale);
       
@@ -474,8 +474,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
       if (!isSvgMock && productColor && productColor.toUpperCase() !== '#FFFFFF') {
          const fillRect = new fabric.Rect({
-           left: canvas.width! / 2,
-           top: canvas.height! / 2,
+           left: 250,
+           top: 312.5,
            originX: 'center', originY: 'center',
            width: img.getScaledWidth() * 0.98,
            height: img.getScaledHeight() * 0.98,
@@ -530,17 +530,17 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
       const centerX = obj.getCenterPoint().x;
       const centerY = obj.getCenterPoint().y;
-      const canvasCenter = canvas.getCenter();
+      const canvasLogicalCenter = { left: 250, top: 312.5 };
 
       // Remove old lines
       if (vLine) canvas.remove(vLine);
       if (hLine) canvas.remove(hLine);
 
       // Vertical Center Alignment
-      if (Math.abs(centerX - canvasCenter.left) < SNAP_THRESHOLD) {
-        if (obj.originX === 'center') obj.set({ left: canvasCenter.left }).setCoords();
+      if (Math.abs(centerX - canvasLogicalCenter.left) < SNAP_THRESHOLD) {
+        if (obj.originX === 'center') obj.set({ left: canvasLogicalCenter.left }).setCoords();
         
-        vLine = new fabric.Line([canvasCenter.left, 0, canvasCenter.left, canvas.height!], {
+        vLine = new fabric.Line([canvasLogicalCenter.left, 0, canvasLogicalCenter.left, 625], {
           stroke: GUIDELINE_COLOR,
           strokeWidth: GUIDELINE_WIDTH,
           selectable: false,
@@ -553,10 +553,10 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       }
 
       // Horizontal Center Alignment
-      if (Math.abs(centerY - canvasCenter.top) < SNAP_THRESHOLD) {
-        if (obj.originY === 'center') obj.set({ top: canvasCenter.top }).setCoords();
+      if (Math.abs(centerY - canvasLogicalCenter.top) < SNAP_THRESHOLD) {
+        if (obj.originY === 'center') obj.set({ top: canvasLogicalCenter.top }).setCoords();
 
-        hLine = new fabric.Line([0, canvasCenter.top, canvas.width!, canvasCenter.top], {
+        hLine = new fabric.Line([0, canvasLogicalCenter.top, 500, canvasLogicalCenter.top], {
           stroke: GUIDELINE_COLOR,
           strokeWidth: GUIDELINE_WIDTH,
           selectable: false,
@@ -688,8 +688,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     addText: (text: string) => {
       if (!canvas) return;
       const t = new fabric.IText(text, {
-        left: canvas.width! / 2,
-        top: canvas.height! / 2,
+        left: 250,
+        top: 312.5,
         fontFamily: 'Inter',
         fontSize: 32,
         fill: '#000000',
@@ -708,8 +708,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       if (!canvas) return;
       fabric.Image.fromURL(url, (img) => {
         img.set({
-          left: canvas.width! / 2,
-          top: canvas.height! / 2,
+          left: 250,
+          top: 312.5,
           originX: 'center',
           originY: 'center',
           crossOrigin: 'anonymous',
@@ -737,8 +737,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       if (!canvas) return;
       let shape: fabric.Object | undefined;
       const commonProps = {
-        left: canvas.width! / 2,
-        top: canvas.height! / 2,
+        left: 250,
+        top: 312.5,
         fill: '#5b5b42',
         originX: 'center',
         originY: 'center',
@@ -804,8 +804,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       fabric.loadSVGFromString(svgString, (objects, options) => {
         const obj = fabric.util.groupSVGElements(objects, options);
         obj.set({
-          left: canvas.width! / 2,
-          top: canvas.height! / 2,
+          left: 250,
+          top: 312.5,
           originX: 'center',
           originY: 'center',
           cornerStyle: 'circle',
@@ -1241,13 +1241,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   return (
     <div ref={containerRef} className="relative w-full max-w-[500px] aspect-[4/5] bg-gray-50 rounded-[30px] overflow-hidden border border-gray-100 shadow-2xl flex items-center justify-center group isolate ring-1 ring-black/5" style={{ touchAction: 'none' }}>
-      
-      <div className="absolute inset-0 bg-transparent flex items-center justify-center" style={{ pointerEvents: 'none' }}>
-        <div style={{ pointerEvents: 'auto' }}>
-          <canvas ref={canvasRef} className="max-w-full h-auto drop-shadow-sm" />
-        </div>
-      </div>
-
+      <canvas ref={canvasRef} className="max-w-full h-auto drop-shadow-sm" />
     </div>
   );
 });

@@ -316,6 +316,7 @@ export default function CustomizePage() {
                   frontDesign={designPreviews.front}
                   backDesign={designPreviews.back}
                   productName={product.name}
+                  productColor={selectedColor}
                 />
               </div>
             ) : (

@@ -10,6 +10,7 @@ interface ThreeDPreviewProps {
   frontDesign?: string | null;
   backDesign?: string | null;
   productName?: string;
+  productColor?: string;
   onClose?: () => void;
 }
 
@@ -19,6 +20,7 @@ const ThreeDPreview: React.FC<ThreeDPreviewProps> = ({
   frontDesign,
   backDesign,
   productName = 'Product',
+  productColor = '#FFFFFF',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [rotateX, setRotateX] = useState(0);
@@ -80,6 +82,22 @@ const ThreeDPreview: React.FC<ThreeDPreviewProps> = ({
     return () => cancelAnimationFrame(frame);
   }, [autoRotate]);
 
+  const getColoredImageUrl = useCallback((url: string) => {
+    let modifiedUrl = url;
+    const isSvgMock = url.startsWith('data:image/svg+xml');
+    
+    if (isSvgMock && productColor && productColor.toUpperCase() !== '#FFFFFF') {
+       try {
+         const decoded = decodeURIComponent(url.substring(url.indexOf(',') + 1));
+         const recolored = decoded.replace(/fill="#fff"/g, `fill="${productColor}"`);
+         modifiedUrl = `data:image/svg+xml;utf8,${encodeURIComponent(recolored)}`;
+       } catch(e) {
+         console.warn("Could not modify SVG fill in preview", e);
+       }
+    }
+    return modifiedUrl;
+  }, [productColor]);
+
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center select-none">
       {/* Instruction */}
@@ -118,9 +136,9 @@ const ThreeDPreview: React.FC<ThreeDPreviewProps> = ({
           }}
         >
           {/* FRONT SIDE */}
-          <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl bg-white" style={{ backfaceVisibility: 'hidden' }}>
+          <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl" style={{ backfaceVisibility: 'hidden', backgroundColor: productColor }}>
             <Image
-              src={productImage}
+              src={getColoredImageUrl(productImage)}
               alt={productName}
               fill
               className="object-cover pointer-events-none"
@@ -142,14 +160,15 @@ const ThreeDPreview: React.FC<ThreeDPreviewProps> = ({
 
           {/* BACK SIDE */}
           <div 
-            className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl bg-white" 
+            className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl" 
             style={{ 
               backfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)',
+              backgroundColor: productColor
             }}
           >
             <Image
-              src={productBackImage || productImage}
+              src={getColoredImageUrl(productBackImage || productImage)}
               alt={`${productName} back`}
               fill
               className="object-cover pointer-events-none"

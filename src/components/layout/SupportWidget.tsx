@@ -3,9 +3,15 @@
 import React from 'react';
 import { MessageSquare, X } from 'lucide-react';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function SupportWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  if (pathname.startsWith('/customize')) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-8 left-8 z-[100]">
