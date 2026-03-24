@@ -101,4 +101,28 @@ body {
   .card-premium {
     @apply bg-white rounded-[32px] border border-gray-100 shadow-sm transition-all duration-500 ease-out hover:shadow-2xl hover:shadow-gray-200/60 hover:-translate-y-2;
   }
+
+  .ink-gradient {
+    background: linear-gradient(135deg, #E91E63 0%, #bc004f 100%);
+  }
+
+  .glass-panel {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .depth-card {
+    box-shadow: 0 20px 40px rgba(16, 27, 48, 0.04), 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+
+  .depth-card:hover {
+    @apply -translate-y-2;
+    box-shadow: 0 30px 60px rgba(16, 27, 48, 0.08);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(233, 30, 99, 0.2);
+  }
 }

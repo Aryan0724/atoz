@@ -65,37 +65,37 @@ const Navbar = () => {
   const cartCount = mounted ? getItemCount() : 0;
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 transition-all duration-500">
+    <nav className="sticky top-0 w-full z-50 glass-panel border-b border-outline-variant/10 transition-all duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link href="/" className="flex-shrink-0 flex items-center">
-            <div className="relative h-14 w-40">
+          <Link href="/" className="flex-shrink-0 flex items-center gap-3">
+            <div className="relative h-10 w-10">
               <Image 
-                src="/logo.png" 
+                src="https://lh3.googleusercontent.com/aida/ADBb0uieUJFbF7eBfo3s9pG1y2TlX8vEgBOlDc2r6osyyhQrpBhPJBb2OrYNpTpNBlnZYUNuwT9vKX9oH1Ju5DNO8RVLbkQKEM7pP1hX4igIK40j4AOLet64Ox8MQ3sPlzwva8m9YHQm8QZdAoN1M9Emnxt_4w7tNfYSjaZmJUmtDOwV9zJqNiIkPppyantJzHBApTVu9gR6sUF1UYCMnTIU2DpWGGZcntcWxx6vdpWvXIHBjlB0izvN6V_n579yAkT-QrLXPowqLSITtw" 
                 alt="AtoZ Print" 
                 fill 
                 className="object-contain"
                 priority
               />
             </div>
+            <span className="text-xl font-black tracking-tighter font-headline text-on-surface hidden sm:block">AtoZ Print</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-10">
+          <div className="hidden lg:flex items-center gap-10">
             {navLinks.map((link) => (
               <Link 
                 key={link.href} 
                 href={link.href} 
                 className={cn(
-                  "text-sm font-bold tracking-wide transition-all relative group",
-                  pathname === link.href ? "text-brand-pink" : "text-brand-dark/80 hover:text-brand-pink"
+                  "text-sm font-bold tracking-tight transition-all relative group py-1",
+                  pathname === link.href 
+                    ? "text-primary border-b-2 border-primary" 
+                    : "text-on-surface/70 hover:text-primary"
                 )}
               >
                 {link.name}
-                {pathname === link.href && (
-                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-brand-pink rounded-full animate-in slide-in-from-left duration-300"></span>
-                )}
               </Link>
             ))}
           </div>
@@ -106,8 +106,8 @@ const Navbar = () => {
               <form 
                 onSubmit={handleSearch}
                 className={cn(
-                  "flex items-center transition-all duration-300 overflow-hidden bg-brand-lightGray rounded-full",
-                  isSearchOpen ? "w-64 px-4 py-1.5 border border-brand-pink/20" : "w-0 p-0"
+                  "flex items-center transition-all duration-300 overflow-hidden bg-surface-variant/20 rounded-full",
+                  isSearchOpen ? "w-64 px-4 py-1.5 border border-primary/20" : "w-0 p-0"
                 )}
               >
                 <input 
@@ -124,7 +124,7 @@ const Navbar = () => {
                 aria-label={isSearchOpen ? "Close search bar" : "Open search bar"}
                 className={cn(
                   "p-2 transition-colors",
-                  isSearchOpen ? "text-brand-pink" : "text-brand-dark hover:text-brand-pink"
+                  isSearchOpen ? "text-primary" : "text-on-surface hover:text-primary"
                 )}
               >
                 {isSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
@@ -134,29 +134,28 @@ const Navbar = () => {
             <button 
               onClick={() => setOpen(true)}
               aria-label="Open cart"
-              className="p-2 text-brand-dark hover:text-brand-pink transition-colors relative"
+              className="p-2 text-on-surface hover:text-primary transition-colors relative"
             >
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 h-4 w-4 bg-brand-pink text-white text-[10px] flex items-center justify-center rounded-full animate-in zoom-in duration-300">
+                <span className="absolute top-0 right-0 h-4 w-4 bg-primary text-white text-[10px] flex items-center justify-center rounded-full animate-in zoom-in duration-300">
                   {cartCount}
                 </span>
               )}
             </button>
             
             {mounted && user ? (
-              <div className="flex items-center gap-4 border-l border-gray-100 pl-6">
+              <div className="flex items-center gap-4 border-l border-outline-variant/20 pl-6">
                 <Link href="/dashboard" className="flex items-center gap-2 group">
-                   <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center text-brand-pink group-hover:bg-brand-pink group-hover:text-white transition-all duration-500 hover:rotate-6">
+                   <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500 hover:rotate-6">
                       <UserIcon className="h-4 w-4" />
                    </div>
-                   <span className="text-sm font-bold text-brand-dark group-hover:text-brand-pink transition-colors">Dashboard</span>
+                   <span className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Dashboard</span>
                 </Link>
               </div>
             ) : (
-              <Link href="/login" className="bg-brand-pink text-white px-8 py-2.5 rounded-full text-sm font-bold hover:shadow-glow transition-all duration-300 active:scale-95 group overflow-hidden relative">
-                <span className="relative z-10">Sign In</span>
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+              <Link href="/login" className="ink-gradient text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:shadow-primary/30 hover:scale-105 transition-all duration-300 active:scale-95">
+                Sign In
               </Link>
             )}
 
@@ -167,11 +166,11 @@ const Navbar = () => {
             <button 
               onClick={() => setOpen(true)}
               aria-label="Open mobile cart"
-              className="p-2 text-brand-dark hover:text-brand-pink transition-colors relative"
+              className="p-2 text-on-surface hover:text-primary transition-colors relative"
             >
               <ShoppingCart className="h-6 w-6" />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 h-4 w-4 bg-brand-pink text-white text-[10px] flex items-center justify-center rounded-full">
+                <span className="absolute top-0 right-0 h-4 w-4 bg-primary text-white text-[10px] flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}
@@ -179,7 +178,7 @@ const Navbar = () => {
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-              className="p-2 rounded-md text-brand-dark hover:text-brand-pink focus:outline-none"
+              className="p-2 rounded-md text-on-surface hover:text-primary focus:outline-none"
             >
               {isMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
             </button>
@@ -189,7 +188,7 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-xl animate-in slide-in-from-top-2 duration-300 ease-out z-40">
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-outline-variant/10 shadow-xl animate-in slide-in-from-top-2 duration-300 ease-out z-40">
           <div className="px-4 pt-4 pb-8 space-y-2 max-h-[calc(100vh-80px)] overflow-y-auto">
             {navLinks.map((link) => (
               <Link 
@@ -198,7 +197,7 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
                 className={cn(
                   "block px-4 py-3 text-lg font-medium rounded-xl transition-all",
-                  pathname === link.href ? "text-brand-pink bg-pink-50" : "text-brand-dark hover:bg-gray-50"
+                  pathname === link.href ? "text-primary bg-primary/5 font-bold" : "text-on-surface hover:bg-surface"
                 )}
               >
                 {link.name}
@@ -211,9 +210,9 @@ const Navbar = () => {
                   <Link 
                     href="/dashboard" 
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-4 bg-gray-50 rounded-xl text-brand-dark font-bold"
+                    className="flex items-center gap-3 px-4 py-4 bg-surface rounded-xl text-on-surface font-bold"
                   >
-                    <UserIcon className="h-5 w-5 text-brand-pink" />
+                    <UserIcon className="h-5 w-5 text-primary" />
                     My Dashboard
                   </Link>
                   <button 
@@ -228,9 +227,9 @@ const Navbar = () => {
                   <Link 
                     href="/login" 
                     onClick={() => setIsMenuOpen(false)}
-                    className="block w-full bg-brand-pink text-white text-center px-6 py-4 rounded-xl text-lg font-bold hover:shadow-lg transition-all"
+                    className="block w-full ink-gradient text-white text-center px-6 py-4 rounded-xl text-lg font-bold hover:shadow-lg transition-all"
                   >
-                    Sign In to AtoZ Print
+                    Sign In
                   </Link>
               )}
             </div>

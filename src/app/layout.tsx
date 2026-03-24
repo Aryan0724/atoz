@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -9,7 +9,15 @@ import SupportWidget from "@/components/layout/SupportWidget";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { Toaster } from 'react-hot-toast';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: '--font-inter',
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: '--font-manrope',
+});
 
 const siteConfig = {
   name: "AtoZ Print",
@@ -59,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${manrope.variable} font-body antialiased`}>
         <TopBanner />
         <Navbar />
         <main className="min-h-screen pb-16 lg:pb-0">

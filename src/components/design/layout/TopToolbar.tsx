@@ -56,7 +56,7 @@ const TopToolbar = ({
   const isImage = activeObject.type === 'image';
 
   return (
-    <div className="h-14 border-b border-gray-100 bg-white flex items-center px-4 gap-2 z-20 shadow-sm animate-in slide-in-from-top duration-300">
+    <div className="min-h-14 h-auto md:h-14 border-b border-gray-100 bg-white flex flex-wrap md:flex-nowrap items-center px-4 py-2 md:py-0 gap-2 z-20 shadow-sm animate-in slide-in-from-top duration-300 overflow-x-auto no-scrollbar">
       
       {/* OBJECT TYPE LABEL */}
       <div className="px-3 py-1.5 bg-gray-50 rounded-lg text-[10px] font-black uppercase tracking-widest text-brand-dark mr-2 border border-gray-100">

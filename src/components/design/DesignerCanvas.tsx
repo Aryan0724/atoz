@@ -162,6 +162,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       selectionColor: 'rgba(24, 144, 255, 0.05)',
       selectionBorderColor: '#1890ff',
       selectionLineWidth: 1,
+      allowTouchScrolling: false,
     });
 
     fabric.Object.prototype.set({

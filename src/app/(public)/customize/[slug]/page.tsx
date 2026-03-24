@@ -283,8 +283,9 @@ export default function CustomizePage() {
         {/* MAIN DESIGN AREA */}
         <main className="flex-1 flex flex-col relative overflow-hidden">
           {/* CONTEXTUAL TOOLBAR */}
-          <div className="absolute top-0 left-0 right-0 z-20 flex justify-center p-4">
-            <TopToolbar 
+          <div className="absolute top-0 left-0 right-0 z-20 flex flex-wrap justify-center p-2 md:p-4 pointer-events-none">
+            <div className="pointer-events-auto">
+              <TopToolbar 
                 activeObject={activeObject}
                 onUpdateActiveObject={(props) => canvasRef.current?.updateActiveObject(props)}
                 onDeleteActiveObject={() => canvasRef.current?.deleteActiveObject()}
@@ -295,11 +296,12 @@ export default function CustomizePage() {
                 onLockToggle={() => canvasRef.current?.toggleLock()}
                 onSetTextShadow={(options) => canvasRef.current?.setTextShadow(options)}
                 onSetTextOutline={(options) => canvasRef.current?.setTextOutline(options)}
-            />
+              />
+            </div>
           </div>
 
           {/* CANVAS STAGE */}
-          <div className="flex-1 flex items-center justify-center pt-16 pb-28 px-8 relative overflow-hidden">
+          <div className="flex-1 flex items-center justify-center pt-20 md:pt-16 pb-32 md:pb-28 px-2 md:px-8 relative overflow-hidden">
             {isOutOfBounds && (
               <div className="absolute top-24 left-1/2 -translate-x-1/2 z-40 bg-orange-500 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl animate-bounce">
                 Outside Print Area
@@ -356,7 +358,7 @@ export default function CustomizePage() {
             </div>
 
             {/* MULTI-VIEW SELECTOR - Center Bottom */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40 overflow-x-auto max-w-[90vw] pb-2 no-scrollbar">
+            <div className="absolute bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40 overflow-x-auto max-w-[95vw] pb-2 no-scrollbar px-4">
                {[
                  { id: 'front', label: 'Front side' },
                  { id: 'back', label: 'Back side' },
@@ -383,17 +385,17 @@ export default function CustomizePage() {
                ))}
             </div>
 
-            {/* SAVE PRODUCT BUTTON - Bottom Right */}
-            <div className="absolute bottom-8 right-8 z-40">
-               <div className="flex flex-col items-end gap-2">
-                 <div className="bg-white/80 backdrop-blur-md px-4 py-2 rounded-xl border border-gray-100 flex flex-col items-end">
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{selectedQuality} Quality • Total</span>
-                    <span className="text-xl font-black text-brand-dark tracking-tighter">₹{totalPrice}</span>
+            {/* SAVE PRODUCT BUTTON - Bottom Right (Desktop) / Floating (Mobile) */}
+            <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 z-40">
+               <div className="flex flex-col items-end gap-1.5 md:gap-2">
+                 <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 md:px-4 md:py-2 rounded-xl border border-gray-100 flex flex-col items-end shadow-sm">
+                    <span className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest">{selectedQuality} Quality</span>
+                    <span className="text-sm md:text-xl font-black text-brand-dark tracking-tighter">₹{totalPrice}</span>
                  </div>
                  <button 
                    onClick={handleFinishDesign}
                    disabled={isFinishing}
-                   className="px-10 py-3 bg-brand-olive text-white text-[11px] font-black uppercase tracking-widest rounded-xl shadow-[0_8px_25px_rgba(91,91,66,0.3)] transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
+                   className="px-6 py-2.5 md:px-10 md:py-3 bg-brand-olive text-white text-[9px] md:text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg md:shadow-[0_8px_25px_rgba(91,91,66,0.3)] transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
                  >
                    {isFinishing ? "Saving..." : "Save product"}
                  </button>
@@ -432,14 +434,14 @@ export default function CustomizePage() {
             </div>
           )}
 
-          <div className="flex items-center justify-around p-2 bg-white relative z-50">
+          <div className="flex items-center justify-between px-1 py-2 bg-white relative z-50 overflow-x-auto no-scrollbar">
             {mobileTools.map(tool => (
               <button 
                 key={tool.id}
                 onClick={() => setMobilePanel(mobilePanel === tool.id ? null : tool.id)}
                 className={cn(
-                  "flex flex-col items-center gap-1 p-2 w-[64px] rounded-xl transition-all",
-                  mobilePanel === tool.id ? "text-brand-pink bg-pink-50/50 scale-105" : "text-gray-500 hover:text-brand-dark"
+                  "flex flex-col items-center gap-1 p-1.5 min-w-[60px] rounded-xl transition-all",
+                  mobilePanel === tool.id ? "text-brand-pink bg-pink-50/50 scale-105" : "text-gray-500"
                 )}
               >
                 {tool.icon}
