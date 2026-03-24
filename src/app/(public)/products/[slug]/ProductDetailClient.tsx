@@ -25,6 +25,7 @@ import { mockProducts } from '@/lib/data/mockProducts';
 import { supabase } from '@/lib/supabase/client';
 import { Product } from '@/lib/supabase/types';
 import { toast } from 'react-hot-toast';
+import { cn } from '@/lib/utils';
 
 export default function ProductDetailClient() {
   const params = useParams();
@@ -37,6 +38,7 @@ export default function ProductDetailClient() {
   const [selectedQuality, setSelectedQuality] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -134,13 +136,14 @@ export default function ProductDetailClient() {
         <div className="lg:grid lg:grid-cols-2 lg:gap-16">
           {/* Image Gallery */}
           <div className="relative">
-            <div className="aspect-[4/5] bg-gray-100 rounded-3xl overflow-hidden shadow-sm border border-gray-100">
-              {product.images?.[0] ? (
+            <div className="aspect-[4/5] bg-gray-50 rounded-[40px] overflow-hidden shadow-sm border border-gray-100/50 p-12 transition-all duration-500">
+              {product.images?.[selectedImageIndex] ? (
                 <Image 
-                  src={product.images[0]} 
+                  src={product.images[selectedImageIndex]} 
                   alt={product.name} 
                   fill 
-                  className="object-cover"
+                  className="object-contain"
+                  priority
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 font-medium italic">
@@ -148,6 +151,29 @@ export default function ProductDetailClient() {
                 </div>
               )}
             </div>
+
+            {/* Thumbnail Gallery */}
+            {product.images && product.images.length > 1 && (
+              <div className="mt-6 flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+                {product.images.map((image, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={cn(
+                      "relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden border-2 transition-all p-2 bg-gray-50",
+                      selectedImageIndex === index ? "border-brand-pink shadow-md" : "border-transparent hover:border-gray-200"
+                    )}
+                  >
+                    <Image 
+                      src={image} 
+                      alt={`${product.name} ${index + 1}`} 
+                      fill 
+                      className="object-contain" 
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
             
             {/* Feature Badges */}
             <div className="mt-8 grid grid-cols-3 gap-4">
@@ -245,7 +271,9 @@ export default function ProductDetailClient() {
                   </button>
                 </div>
                 <div className="text-sm font-bold text-gray-400">
-                   Base Rate: <span className="text-brand-dark text-lg ml-1">₹{product.base_price}</span>
+                   Base Rate: <span className="text-brand-dark text-lg ml-1">
+                     ₹{Math.round((product.base_price || 0) * ([1, 1.2, 1.5, 2][Math.max(0, product.quality_levels?.indexOf(selectedQuality) ?? 0)] || 1))}
+                   </span>
                 </div>
               </div>
             </div>
@@ -253,7 +281,7 @@ export default function ProductDetailClient() {
             {/* Pricing Tiers */}
             <div className="mb-12">
               <PricingTierTable 
-                basePrice={product.base_price || 0} 
+                basePrice={Math.round((product.base_price || 0) * ([1, 1.2, 1.5, 2][Math.max(0, product.quality_levels?.indexOf(selectedQuality) ?? 0)] || 1))} 
                 currentQuantity={quantity}
               />
             </div>

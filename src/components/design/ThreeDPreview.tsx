@@ -6,14 +6,18 @@ import { RotateCcw, Move3d } from 'lucide-react';
 
 interface ThreeDPreviewProps {
   productImage: string;
-  designDataUrl?: string | null;
+  productBackImage?: string;
+  frontDesign?: string | null;
+  backDesign?: string | null;
   productName?: string;
   onClose?: () => void;
 }
 
 const ThreeDPreview: React.FC<ThreeDPreviewProps> = ({
   productImage,
-  designDataUrl,
+  productBackImage,
+  frontDesign,
+  backDesign,
   productName = 'Product',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -34,7 +38,12 @@ const ThreeDPreview: React.FC<ThreeDPreviewProps> = ({
     const dy = e.clientY - lastPos.current.y;
     lastPos.current = { x: e.clientX, y: e.clientY };
 
-    setRotateY(prev => Math.max(-45, Math.min(45, prev + dx * 0.4)));
+    setRotateY(prev => {
+      let next = prev + dx * 0.4;
+      if (next > 180) next -= 360;
+      if (next < -180) next += 360;
+      return next;
+    });
     setRotateX(prev => Math.max(-30, Math.min(30, prev - dy * 0.4)));
   }, [isDragging]);
 
@@ -108,8 +117,8 @@ const ThreeDPreview: React.FC<ThreeDPreviewProps> = ({
             aspectRatio: '1',
           }}
         >
-          {/* Product Image */}
-          <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl">
+          {/* FRONT SIDE */}
+          <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl bg-white" style={{ backfaceVisibility: 'hidden' }}>
             <Image
               src={productImage}
               alt={productName}
@@ -117,28 +126,54 @@ const ThreeDPreview: React.FC<ThreeDPreviewProps> = ({
               className="object-cover pointer-events-none"
               draggable={false}
             />
+            {frontDesign && (
+              <div
+                className="absolute inset-[18%] pointer-events-none"
+                style={{
+                  backgroundImage: `url(${frontDesign})`,
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.9,
+                }}
+              />
+            )}
           </div>
 
-          {/* Design Overlay */}
-          {designDataUrl && (
-            <div
-              className="absolute inset-[15%] pointer-events-none"
-              style={{
-                backgroundImage: `url(${designDataUrl})`,
-                backgroundSize: 'contain',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                mixBlendMode: 'multiply',
-                opacity: 0.9,
-              }}
+          {/* BACK SIDE */}
+          <div 
+            className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl bg-white" 
+            style={{ 
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+            }}
+          >
+            <Image
+              src={productBackImage || productImage}
+              alt={`${productName} back`}
+              fill
+              className="object-cover pointer-events-none"
+              draggable={false}
             />
-          )}
+            {backDesign && (
+              <div
+                className="absolute inset-[15%] pointer-events-none"
+                style={{
+                  backgroundImage: `url(${backDesign})`,
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 0.9,
+                }}
+              />
+            )}
+          </div>
 
           {/* Highlight / rim light effect */}
           <div
             className="absolute inset-0 rounded-2xl pointer-events-none"
             style={{
-              background: `linear-gradient(${135 + rotateY}deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.08) 100%)`,
+              background: `linear-gradient(${135 + rotateY}deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.05) 100%)`,
             }}
           />
         </div>

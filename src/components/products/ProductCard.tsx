@@ -37,13 +37,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
     >
 
       <Link href={`/products/${product.slug}`} className="block">
-        <div className="aspect-[4/5] bg-gray-50 relative overflow-hidden">
+        <div className="aspect-[4/5] bg-gray-50 relative overflow-hidden p-8">
           {product.images && product.images.length > 0 && !imgError ? (
             <Image
               src={product.images[0]}
               alt={product.name}
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              className="object-contain transition-transform duration-700 group-hover:scale-105"
               onError={() => setImgError(true)}
             />
           ) : (

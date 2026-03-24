@@ -164,7 +164,11 @@ interface SidebarPanelProps {
   onLoadTemplate?: (json: any) => void;
   onUpdateObject?: (id: string, props: Partial<CanvasObjectProperties>) => void;
   layers: any[];
+  selectedQuality?: string;
+  onQualityChange?: (quality: string) => void;
   productCategory?: string;
+  qualityLevels?: string[];
+  basePrice?: number;
 }
 
 const SidebarPanel = ({ 
@@ -180,25 +184,38 @@ const SidebarPanel = ({
   onLoadTemplate,
   onUpdateObject,
   layers,
-  productCategory = 'Apparel'
+  selectedQuality,
+  onQualityChange,
+  productCategory = 'Apparel',
+  qualityLevels = ['Standard', 'Premium', 'Luxury'],
+  basePrice = 0
 }: SidebarPanelProps) => {
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
   // Configure defaults based on product category
-  const isBottle = productCategory.toLowerCase().includes('bottle') || productCategory.toLowerCase().includes('mug');
-  const isPrint = productCategory.toLowerCase().includes('print') || productCategory.toLowerCase().includes('canvas');
+  const catLower = productCategory.toLowerCase();
+  const isBottle = catLower.includes('bottle') || catLower.includes('mug') || catLower.includes('drinkware');
+  const isPrint = catLower.includes('print') || catLower.includes('canvas');
+  const isStationery = catLower.includes('stationery');
+  const isApparel = catLower.includes('apparel');
+  const isLifestyle = catLower.includes('lifestyle');
+  const isCorporate = catLower.includes('corporate');
 
   // Filter available categories based on product type
   const availableTemplateCats = React.useMemo(() => {
     return templateCategories.filter(cat => {
       if (cat === 'All') return true;
-      if (isBottle) return ['Minimal', 'Art', 'Vintage'].includes(cat);
+      if (isBottle) return ['Drinkware', 'Minimal', 'Art', 'Vintage'].includes(cat);
       if (isPrint) return ['Art', 'Minimal', 'Vintage'].includes(cat);
-      return ['Streetwear', 'Vintage', 'Sports', 'Minimal'].includes(cat);
+      if (isStationery) return ['Stationery', 'Minimal', 'Corporate'].includes(cat);
+      if (isApparel) return ['Apparel', 'Streetwear', 'Vintage', 'Sports'].includes(cat);
+      if (isLifestyle) return ['Lifestyle', 'Minimal', 'Vintage'].includes(cat);
+      if (isCorporate) return ['Corporate', 'Minimal', 'Stationery'].includes(cat);
+      return ['Minimal', 'Vintage', 'Art'].includes(cat);
     });
-  }, [isBottle, isPrint]);
+  }, [isBottle, isPrint, isStationery, isApparel, isLifestyle, isCorporate]);
 
   const availableGraphicCats = React.useMemo(() => {
     return podGraphicCategories.filter(cat => {
@@ -208,8 +225,8 @@ const SidebarPanel = ({
     });
   }, [isBottle, isPrint]);
   
-  const defaultTemplateCat = isBottle ? 'Minimal' : (isPrint ? 'Art' : 'Streetwear');
-  const defaultGraphicCat = isBottle ? 'Shapes' : (isPrint ? 'Nature' : 'Streetwear & Y2K');
+  const defaultTemplateCat = isBottle ? 'Drinkware' : (isStationery ? 'Stationery' : (isApparel ? 'Apparel' : (isLifestyle ? 'Lifestyle' : (isCorporate ? 'Corporate' : 'Minimal'))));
+  const defaultGraphicCat = isBottle ? 'Shapes' : (isPrint ? 'Nature' : 'Popular');
 
   const [activeTemplateCat, setActiveTemplateCat] = useState(defaultTemplateCat);
   const [activeIconCat, setActiveIconCat] = useState(iconCategories[0].name);
@@ -245,6 +262,7 @@ const SidebarPanel = ({
   };
 
   const currentTitle: Record<string, string> = {
+    'product': 'Product Settings',
     'uploads': 'My Uploads',
     'ai': 'AI Generator',
     'text': 'Text',
@@ -270,7 +288,7 @@ const SidebarPanel = ({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar">
+      <div className="flex-1 overflow-y-auto">
 
         {/* ─── TEMPLATES TAB ──────────────────────────────────── */}
         {activeTab === 'templates' && (
@@ -604,6 +622,84 @@ const SidebarPanel = ({
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* ─── PRODUCT SETTINGS TAB ──────────────────────────── */}
+        {activeTab === 'product' && (
+          <div className="p-5 space-y-6">
+            <div className="space-y-4">
+              <SectionLabel>Product Quality</SectionLabel>
+              <div className="grid grid-cols-1 gap-2">
+                {qualityLevels.map((q, index) => {
+                  const multipliers = [1, 1.2, 1.5, 2];
+                  const multiplier = multipliers[Math.max(0, index)] || 1;
+                  const price = Math.round(basePrice * multiplier);
+                  const bonus = price - basePrice;
+                  const bonusStr = bonus > 0 ? `+ ₹${bonus}` : '+ ₹0';
+
+                  const descriptions: Record<string, string> = {
+                     'Basic': 'Standard everyday use',
+                     'Standard': 'Durable, cost-effective',
+                     'Premium': 'Soft-touch, high density',
+                     'Luxury': 'Ultra-soft, heavy fabric'
+                  };
+
+                  return (
+                  <button
+                    key={q}
+                    onClick={() => onQualityChange?.(q)}
+                    className={cn(
+                      "flex items-center justify-between p-3.5 rounded-xl border-2 transition-all text-left",
+                      selectedQuality === q 
+                        ? "border-brand-olive bg-[#f7f7f2]" 
+                        : "border-gray-100 hover:border-gray-200"
+                    )}
+                  >
+                    <div>
+                      <p className="text-xs font-black text-[#1a1a1a]">{q}</p>
+                      <p className="text-[10px] text-gray-400 font-medium">{descriptions[q] || 'Upgraded materials'}</p>
+                    </div>
+                    <span className="text-[10px] font-black text-brand-olive whitespace-nowrap">{bonusStr}</span>
+                  </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <SectionLabel>Surface Color</SectionLabel>
+              <div className="grid grid-cols-5 gap-3">
+                {[
+                  '#FFFFFF', '#000000', '#2D3436', '#636E72', '#B2BEC3',
+                  '#D63031', '#E84393', '#6C5CE7', '#0984E3', '#00B894',
+                  '#FDCB6E', '#E17055', '#55E6C1', '#25CCF7', '#5B5B42'
+                ].map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => onProductColorChange(color)}
+                    className={cn(
+                      "aspect-square rounded-full border-2 transition-all relative group",
+                      productColor === color ? "border-brand-olive scale-110" : "border-gray-100 hover:scale-110"
+                    )}
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  >
+                    {productColor === color && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Check className={cn("h-3 w-3", color === '#FFFFFF' ? "text-black" : "text-white")} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 italic">
+               <p className="text-[10px] text-gray-500 leading-relaxed">
+                  * Pricing is estimated based on the selected quality level and print area coverage.
+               </p>
+            </div>
           </div>
         )}
 

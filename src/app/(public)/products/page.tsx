@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import SectionHeading from '@/components/common/SectionHeading';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import ProductCard from '@/components/products/ProductCard';
-import { Search, ChevronDown, Loader2, Filter, X, Sparkles } from 'lucide-react';
+import { Search, ChevronDown, Loader2, Filter, X, Sparkles, LayoutGrid, Shirt, Coffee, PenTool, Star, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase/client';
 import { Product } from '@/lib/supabase/types';
@@ -105,33 +106,56 @@ function ProductsContent() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <motion.div 
-             initial={{ opacity: 0, y: 30 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ duration: 0.8 }}
-             className="flex flex-col lg:flex-row lg:items-end justify-between gap-10"
-          >
-            <div className="max-w-3xl">
-               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-pink/5 border border-brand-pink/10 text-brand-pink text-[10px] font-black uppercase tracking-[0.2em] mb-6">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
+            <motion.div 
+               initial={{ opacity: 0, x: -30 }}
+               animate={{ opacity: 1, x: 0 }}
+               transition={{ duration: 0.8 }}
+               className="max-w-2xl"
+            >
+               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-pink/5 border border-brand-pink/10 text-brand-pink text-[10px] font-black uppercase tracking-[0.2em] mb-8">
                   <Sparkles className="w-3.5 h-3.5" />
-                  Premium Catalog
+                  Professional Printing Solutions
                </div>
-               <h1 className="text-5xl lg:text-7xl font-black text-brand-dark tracking-tighter mb-8 italic leading-[0.95]">
-                  Curated <span className="text-brand-pink underline decoration-brand-pink decoration-wavy decoration-8 underline-offset-8">Masterpieces</span> <br/>
-                  For Your Brand.
+               <h1 className="text-5xl lg:text-8xl font-black text-brand-dark tracking-tighter mb-8 leading-[0.85]">
+                  Your <span className="text-brand-pink underline decoration-brand-cyan/20 decoration-8 underline-offset-[12px]">Vision,</span> <br/>
+                  Perfectly Printed.
                </h1>
-               <p className="text-xl text-gray-400 font-bold max-w-2xl leading-relaxed">
-                  Discover a selection of high-end customizable gear, engineered for excellence and designed to make your brand stand out from the crowd.
+               <p className="text-lg text-gray-400 font-bold leading-relaxed max-w-xl">
+                  High-end customizable gear engineered for excellence. Designed to make your brand stand out with consistent quality and fast turnaround.
                </p>
-            </div>
-            <div className="flex items-center gap-4">
-               <div className="h-20 w-px bg-gray-100 hidden lg:block mx-10" />
-               <div className="flex flex-col">
-                  <span className="text-4xl font-black text-brand-dark italic tracking-tighter">{products.length}+</span>
-                  <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Products</span>
+               
+               <div className="mt-12 flex items-center gap-8">
+                  <div className="flex flex-col">
+                     <span className="text-3xl font-black text-brand-dark tracking-tighter">{products.length}+</span>
+                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Products</span>
+                  </div>
+                  <div className="h-10 w-px bg-gray-100" />
+                  <div className="flex flex-col">
+                     <span className="text-3xl font-black text-brand-pink tracking-tighter">48h</span>
+                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Quick Dispatch</span>
+                  </div>
                </div>
-            </div>
-          </motion.div>
+            </motion.div>
+
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.8 }}
+               animate={{ opacity: 1, scale: 1 }}
+               transition={{ duration: 1, delay: 0.2 }}
+               className="relative lg:w-1/2 flex justify-center"
+            >
+               <div className="relative w-full max-w-md aspect-square">
+                  <div className="absolute inset-0 bg-gradient-to-br from-brand-pink/20 to-brand-cyan/20 rounded-full blur-3xl animate-pulse-slow opacity-50" />
+                  <Image 
+                    src="/hero_premium.png" 
+                    alt="Premium Print Showcase"
+                    fill
+                    className="object-contain relative z-10 drop-shadow-2xl animate-float"
+                    priority
+                  />
+               </div>
+            </motion.div>
+          </div>
         </div>
       </div>
 
@@ -181,19 +205,27 @@ function ProductsContent() {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            {categories.map((cat) => (
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            {[
+              { name: 'All', icon: LayoutGrid },
+              { name: 'Apparel', icon: Shirt },
+              { name: 'Drinkware', icon: Coffee },
+              { name: 'Stationery', icon: PenTool },
+              { name: 'Lifestyle', icon: Star },
+              { name: 'Corporate Gifting', icon: Briefcase },
+            ].map((cat) => (
               <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                key={cat.name}
+                onClick={() => setSelectedCategory(cat.name)}
                 className={cn(
-                  "px-8 py-3.5 rounded-2xl text-xs font-black uppercase tracking-[0.15em] transition-all duration-300",
-                  selectedCategory === cat 
-                    ? "bg-brand-pink text-white shadow-2xl shadow-pink-200" 
-                    : "bg-white text-brand-dark hover:bg-gray-50 border border-gray-100"
+                  "px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-3 border",
+                  selectedCategory === cat.name 
+                    ? "bg-brand-dark text-white border-brand-dark shadow-xl shadow-gray-200 -translate-y-1" 
+                    : "bg-white text-brand-dark border-gray-100 hover:border-brand-pink/30 hover:bg-gray-50"
                 )}
               >
-                {cat}
+                <cat.icon className={cn("w-4 h-4", selectedCategory === cat.name ? "text-brand-cyan" : "text-brand-pink")} />
+                {cat.name}
               </button>
             ))}
           </div>

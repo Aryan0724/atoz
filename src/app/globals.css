@@ -37,12 +37,14 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d4;
+  background: #c1c1c1;
   border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #A0A0A0; /* hover color */
+  background: #8e8e8e;
 }
 
 @layer utilities {

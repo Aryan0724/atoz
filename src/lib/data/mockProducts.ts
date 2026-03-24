@@ -20,6 +20,20 @@ export const TSHIRT_SVG = svgUri(
   '</svg>'
 );
 
+export const TSHIRT_BACK_SVG = svgUri(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 625" width="500" height="625">' +
+  // Outline (Same as front)
+  '<path d="M 180 50 Q 250 70 320 50 L 410 80 L 480 180 L 380 230 L 380 580 L 120 580 L 120 230 L 20 180 L 90 80 Z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/>' +
+  // Higher neckline for back
+  '<path d="M 180 50 Q 250 70 320 50" fill="none" stroke="#000" stroke-width="1"/>' +
+  // Shoulder seams
+  '<path d="M 90 80 Q 120 150 120 230" fill="none" stroke="#000" stroke-width="1"/>' +
+  '<path d="M 410 80 Q 380 150 380 230" fill="none" stroke="#000" stroke-width="1"/>' +
+  // "BACK" indicator (subtle)
+  '<text x="250" y="320" text-anchor="middle" font-size="24" fill="#eee" font-family="sans-serif" font-weight="bold" opacity="0.3">BACK SIDE</text>' +
+  '</svg>'
+);
+
 // ── MUG ─────────────────────────────────────────────────────────────────
 export const MUG_SVG = svgUri(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">' +
@@ -292,7 +306,8 @@ export const mockProducts: Product[] = [
     base_price: 299,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Luxury Box'],
-    images: [TSHIRT_SVG, TSHIRT_SVG, TSHIRT_SVG],
+    images: [TSHIRT_SVG, TSHIRT_BACK_SVG, TSHIRT_SVG],
+    supported_views: ['front', 'back', 'sleeve_l', 'sleeve_r', 'neck'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -309,6 +324,7 @@ export const mockProducts: Product[] = [
     delivery_days: '5-7 Working Days',
     packaging_options: ['Safe-ship Box', 'Gift Wrap'],
     images: [MUG_SVG, MUG_SVG, MUG_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -325,6 +341,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-9 Working Days',
     packaging_options: ['Standard', 'Executive Sleeve'],
     images: [NOTEBOOK_SVG, NOTEBOOK_SVG, NOTEBOOK_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -341,6 +358,7 @@ export const mockProducts: Product[] = [
     delivery_days: '10-12 Working Days',
     packaging_options: ['Standard', 'Branded Box'],
     images: [POUCH_SVG, POUCH_SVG, POUCH_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -357,6 +375,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [CALENDAR_SVG, CALENDAR_SVG, CALENDAR_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -373,6 +392,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [CARD_SVG, CARD_SVG, CARD_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -389,6 +409,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [BUSINESS_CARD_SVG, BUSINESS_CARD_SVG, BUSINESS_CARD_SVG],
+    supported_views: ['front', 'back'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -405,6 +426,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [BOX_SVG, BOX_SVG, BOX_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -421,6 +443,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [NOTEBOOK_SVG, NOTEBOOK_SVG, NOTEBOOK_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -437,6 +460,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [HEADPHONE_SVG, HEADPHONE_SVG, HEADPHONE_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -453,6 +477,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [TOTE_BAG_SVG, TOTE_BAG_SVG, TOTE_BAG_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -469,6 +494,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [ID_CARD_SVG, ID_CARD_SVG, ID_CARD_SVG],
+    supported_views: ['front', 'back'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -485,6 +511,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [LETTERHEAD_SVG, LETTERHEAD_SVG, LETTERHEAD_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -501,6 +528,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [PEN_SVG, PEN_SVG, PEN_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -517,6 +545,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: [BOTTLE_SVG, BOTTLE_SVG, BOTTLE_SVG],
+    supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
   }

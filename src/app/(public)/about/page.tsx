@@ -56,11 +56,12 @@ export default function AboutPage() {
               To deliver high-quality, affordable, and reliable printing solutions that empower businesses to grow their physical presence.
             </p>
           </div>
-          <div className="p-12 glass-morphism rounded-[48px] space-y-6 text-white bg-brand-dark/90">
-            <Globe className="h-12 w-12 text-brand-cyan animate-pulse-slow" />
-            <h2 className="text-3xl font-black uppercase tracking-tight">Our Vision</h2>
-            <p className="text-lg text-gray-300 font-medium leading-relaxed">
-              To become one of India’s most trusted and preferred print brands, recognized for excellence and transparency.
+          <div className="p-12 bg-brand-dark rounded-[48px] space-y-6 text-white shadow-2xl shadow-brand-dark/20 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-cyan/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700" />
+            <Globe className="h-12 w-12 text-brand-cyan animate-pulse-slow relative z-10" />
+            <h2 className="text-3xl font-black uppercase tracking-tight relative z-10">Our Vision</h2>
+            <p className="text-lg text-gray-200 font-medium leading-relaxed relative z-10">
+              To become one of India&apos;s most trusted and preferred print brands, recognized for excellence and transparency.
             </p>
           </div>
 
@@ -82,12 +83,20 @@ export default function AboutPage() {
       {/* Narrative Section */}
       <section className="max-w-7xl mx-auto px-6 py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-           <div className="relative">
-              <div className="aspect-square bg-brand-lightGray rounded-[64px] overflow-hidden rotate-3 hover:rotate-0 transition-transform duration-700 shadow-2xl">
-                 <div className="w-full h-full bg-gradient-to-br from-brand-pink/20 to-brand-cyan/20 flex items-center justify-center p-20 text-center">
-                    <span className="text-4xl font-black text-brand-dark/40 italic">Premium Custom Printing USP</span>
+           <div className="relative group">
+              <div className="aspect-square bg-white rounded-[64px] overflow-hidden rotate-3 group-hover:rotate-0 transition-transform duration-700 shadow-2xl border border-gray-100 p-4">
+                 <div className="relative w-full h-full rounded-[48px] overflow-hidden">
+                    <Image 
+                      src="/hero_premium.png" 
+                      alt="Premium Printing Showcase"
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-1000"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                  </div>
               </div>
+              {/* Decorative Elements */}
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-brand-pink/10 rounded-full blur-3xl -z-10 group-hover:bg-brand-pink/20 transition-colors" />
            </div>
 
            <div className="space-y-8">

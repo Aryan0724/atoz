@@ -141,20 +141,115 @@ export default function HomePage() {
       </section>
 
       {/* Brand Trust Marquee - Sticky & Premium */}
-      <section className="py-10 bg-white border-y border-gray-100 overflow-hidden relative shadow-sm z-20">
-        <div className="absolute inset-y-0 left-0 w-24 md:w-48 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
-        <div className="absolute inset-y-0 right-0 w-24 md:w-48 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-        <div className="flex animate-marquee whitespace-nowrap items-center gap-16 sm:gap-32 opacity-50 hover:opacity-100 transition-opacity duration-500">
-          {[
-            "CREATIVE AD AGENCY", "GLOBAL TECH CORP", "STARTUP HUB", "EVENT MASTERS", 
-            "RETAIL GIANTS", "EDU INSTITUTION", "MEDIA HOUSE", "FASHION HUB",
-            "CREATIVE AD AGENCY", "GLOBAL TECH CORP", "STARTUP HUB", "EVENT MASTERS"
-          ].map((brand, idx) => (
-            <div key={idx} className="flex items-center gap-6 group">
-              <div className="w-2.5 h-2.5 rounded-full bg-brand-pink/50 group-hover:bg-brand-pink group-hover:scale-150 transition-all duration-300 shadow-[0_0_15px_rgba(233,30,99,0.5)]"></div>
-              <span className="text-base font-black text-brand-dark tracking-[0.4em] uppercase">{brand}</span>
+      <section className="py-16 bg-white border-y border-gray-100 overflow-hidden relative shadow-sm z-20">
+        <div className="max-w-7xl mx-auto px-4 mb-10 text-center">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Trusted by Global Industry Leaders</p>
+        </div>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 w-32 md:w-64 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute inset-y-0 right-0 w-32 md:w-64 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+          <div className="flex animate-marquee whitespace-nowrap items-center gap-20 sm:gap-40 opacity-30 hover:opacity-100 transition-opacity duration-700">
+            {[
+              "CREATIVE AD AGENCY", "GLOBAL TECH CORP", "STARTUP HUB", "EVENT MASTERS", 
+              "RETAIL GIANTS", "EDU INSTITUTION", "MEDIA HOUSE", "FASHION HUB",
+              "CREATIVE AD AGENCY", "GLOBAL TECH CORP", "STARTUP HUB", "EVENT MASTERS"
+            ].map((brand, idx) => (
+              <div key={idx} className="flex items-center gap-8 group">
+                <div className="w-3 h-3 rounded-full bg-brand-pink/40 group-hover:bg-brand-pink transition-all duration-300 shadow-[0_0_20px_rgba(233,30,99,0.4)]"></div>
+                <span className="text-xl font-black text-brand-dark tracking-[0.5em] uppercase hover:text-brand-pink transition-colors cursor-default">{brand}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Statistics Section - Credibility */}
+      <section className="py-24 bg-brand-dark relative overflow-hidden text-white z-10">
+         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 text-center">
+               {[
+                 { label: "Orders Shipped", value: "1.2M+", sub: "Across India" },
+                 { label: "Design Templates", value: "500+", sub: "Item Specific" },
+                 { label: "Unique Products", value: "250+", sub: "Premium Quality" },
+                 { label: "Average Rating", value: "4.9/5", sub: "10K+ Reviews" }
+               ].map((stat, idx) => (
+                 <motion.div 
+                   key={idx}
+                   initial={{ opacity: 0, scale: 0.8 }}
+                   whileInView={{ opacity: 1, scale: 1 }}
+                   viewport={{ once: true }}
+                   transition={{ duration: 0.5, delay: idx * 0.1 }}
+                 >
+                   <p className="text-4xl md:text-6xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500">{stat.value}</p>
+                   <p className="text-sm font-black uppercase tracking-widest text-brand-pink mb-1">{stat.label}</p>
+                   <p className="text-[11px] text-gray-400 font-medium uppercase tracking-tight">{stat.sub}</p>
+                 </motion.div>
+               ))}
             </div>
-          ))}
+         </div>
+      </section>
+      
+      {/* Testimonials Section */}
+      <section className="py-24 md:py-32 bg-[#fafafa] relative z-10 overflow-hidden">
+        <div className="absolute top-1/2 left-0 w-64 h-64 bg-brand-pink/5 blur-[100px] rounded-full"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeading 
+            badge="Social Proof"
+            title="Trusted by Creators & Brands"
+            subtitle="Join thousands of entrepreneurs who have scaled their dream brands with AtoZ Print."
+            align="center"
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+            {[
+              {
+                name: "Rohit Sharma",
+                role: "D2C Brand Founder",
+                content: "The quality of prints on hoodies is unmatched. AtoZ has been my backend partner for 2 years, and they never miss a deadline.",
+                rating: 5,
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
+              },
+              {
+                name: "Ananya Iyer",
+                role: "Corporate Gifting Lead",
+                content: "Finding a reliable source for high-quality corporate swag in India was hard until we found AtoZ. Their bulk dashboard is seamless.",
+                rating: 5,
+                image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
+              },
+              {
+                name: "Vikram Malhotra",
+                role: "Independent Artist",
+                content: "As an artist, color accuracy is everything. The direct-to-garment printing quality here is the best I've seen in the industry.",
+                rating: 5,
+                image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80"
+              }
+            ].map((t, idx) => (
+              <motion.div 
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.15 }}
+                className="card-premium p-8 rounded-[40px]"
+              >
+                <div className="flex gap-1 mb-6 text-amber-400">
+                  {[...Array(5)].map((_, i) => <Zap key={i} className="w-4 h-4 fill-current" />)}
+                </div>
+                <p className="text-lg font-medium text-gray-600 mb-8 italic leading-relaxed">
+                  &quot;{t.content}&quot;
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl overflow-hidden relative border-2 border-white shadow-sm">
+                    <img src={t.image} alt={t.name} className="object-cover w-full h-full" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-brand-dark">{t.name}</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-tighter">{t.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 

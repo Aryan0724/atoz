@@ -174,7 +174,123 @@ export const canvasTemplates = [
         }
       ]
     }
+  },
+  {
+    id: 'bottle-signature',
+    name: 'Signature Label',
+    category: 'Minimal',
+    preview: '🍾',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'rect', left: 250, top: 250, originX: 'center', originY: 'center',
+          width: 320, height: 400, fill: 'transparent', stroke: '#1A1A1A', strokeWidth: 2, id: 'frame-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 180, originX: 'center', originY: 'center',
+          text: 'PREMIUM', fontSize: 18, fontWeight: 'black', fontFamily: 'Montserrat',
+          charSpacing: 500, fill: '#1A1A1A', id: 'txt-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 250, originX: 'center', originY: 'center',
+          text: 'PURE', fontSize: 72, fontWeight: 'black', fontFamily: 'Oswald',
+          fill: '#1A1A1A', id: 'txt-2'
+        },
+        {
+          type: 'i-text', left: 250, top: 320, originX: 'center', originY: 'center',
+          text: 'Source. Nature. Life.', fontSize: 14, fontWeight: 'italic', fontFamily: 'Lora',
+          fill: '#555555', id: 'txt-3'
+        }
+      ]
+    }
+  },
+  {
+    id: 'corporate-identity',
+    name: 'Brand Standard',
+    category: 'Corporate',
+    preview: '💼',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'rect', left: 100, top: 50, width: 300, height: 10, fill: '#5B5B42', id: 'bar-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 200, originX: 'center', originY: 'center',
+          text: 'COMPANY', fontSize: 32, fontWeight: 'black', fontFamily: 'Inter',
+          fill: '#1A1A1A', charSpacing: 200, id: 'corp-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 240, originX: 'center', originY: 'center',
+          text: 'I D E N T I T Y', fontSize: 12, fontWeight: 'bold', fontFamily: 'Inter',
+          fill: '#999999', charSpacing: 600, id: 'corp-2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'eco-bottle',
+    name: 'Eco Warrior',
+    category: 'Drinkware',
+    preview: '💧',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 220, originX: 'center', originY: 'center',
+          text: 'PURE', fontSize: 80, fontWeight: 'black', fontFamily: 'Bebas Neue',
+          fill: '#2E7D32', id: 'eco-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 280, originX: 'center', originY: 'center',
+          text: 'STAY HYDRATED', fontSize: 18, fontWeight: 'bold', fontFamily: 'Inter',
+          fill: '#1B5E20', charSpacing: 300, id: 'eco-2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'minimal-notebook',
+    name: 'Ideas & Notes',
+    category: 'Stationery',
+    preview: '📓',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'rect', left: 250, top: 120, width: 40, height: 40, rx: 8, ry: 8, originX: 'center', originY: 'center',
+          fill: '#5B5B42', id: 'nb-rect'
+        },
+        {
+          type: 'i-text', left: 250, top: 250, originX: 'center', originY: 'center',
+          text: 'JOURNAL', fontSize: 48, fontWeight: 'black', fontFamily: 'Oswald',
+          fill: '#1A1A1A', charSpacing: 400, id: 'nb-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 310, originX: 'center', originY: 'center',
+          text: 'EST 2024', fontSize: 14, fontWeight: 'bold', fontFamily: 'Inter',
+          fill: '#999999', charSpacing: 200, id: 'nb-2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'lifestyle-pouch',
+    name: 'Daily Essentials',
+    category: 'Lifestyle',
+    preview: '👝',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 250, originX: 'center', originY: 'center',
+          text: 'ESSENTIALS', fontSize: 42, fontWeight: 'black', fontFamily: 'Bebas Neue',
+          fill: '#1A1A1A', stroke: '#1A1A1A', strokeWidth: 1, id: 'ls-1'
+        }
+      ]
+    }
   }
 ];
 
-export const templateCategories = ['All', 'Streetwear', 'Vintage', 'Sports', 'Minimal', 'Art'];
+export const templateCategories = ['All', 'Apparel', 'Drinkware', 'Stationery', 'Lifestyle', 'Corporate', 'Vintage', 'Minimal', 'Art'];

@@ -74,6 +74,7 @@ export interface DesignerCanvasRef {
   undo: () => void;
   redo: () => void;
   setPanning: (enabled: boolean) => void;
+  getDesignDataUrl: () => string;
 }
 
 const getObjectProperties = (obj: any): CanvasObjectProperties => {
@@ -490,96 +491,6 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       
       canvas.renderAll();
 
-      // Implement DPI Checker & Alignment Guides
-      const GUIDELINE_COLOR = '#4F46E5';
-      const GUIDELINE_WIDTH = 1;
-      const SNAP_THRESHOLD = 5;
-
-      let vLine: fabric.Line | null = null;
-      let hLine: fabric.Line | null = null;
-
-      const checkQuality = () => {
-        const objects = canvas.getObjects();
-        let lowResFound = false;
-        const INCHES = 14; 
-        const ppiOnCanvas = canvas.width! / INCHES;
-
-        objects.forEach((obj: any) => {
-          if (obj.type === 'image' && obj._element) {
-            const currentWidth = obj.getScaledWidth();
-            const physicalWidth = currentWidth / ppiOnCanvas;
-            const dpi = obj._element.naturalWidth / physicalWidth;
-            if (dpi < 150) lowResFound = true;
-          }
-        });
-        if (onLowQualityWarning) onLowQualityWarning(lowResFound);
-      };
-
-      canvas.on('object:modified', checkQuality);
-      canvas.on('object:added', checkQuality);
-      canvas.on('object:removed', checkQuality);
-
-      canvas.on('object:moving', (e) => {
-        const obj = e.target;
-        if (!obj) return;
-
-        const centerX = obj.getCenterPoint().x;
-        const centerY = obj.getCenterPoint().y;
-        const canvasCenter = canvas.getCenter();
-
-        // Remove old lines
-        if (vLine) canvas.remove(vLine);
-        if (hLine) canvas.remove(hLine);
-
-        // Vertical Center Alignment
-        if (Math.abs(centerX - canvasCenter.left) < SNAP_THRESHOLD) {
-          obj.set({ left: canvasCenter.left - (obj.width! * obj.scaleX! / 2) + (obj.originX === 'center' ? (obj.width! * obj.scaleX! / 2) : 0) }).setCoords();
-          // Simplified snap for now
-          if (obj.originX === 'center') obj.set({ left: canvasCenter.left });
-          
-          vLine = new fabric.Line([canvasCenter.left, 0, canvasCenter.left, canvas.height!], {
-            stroke: GUIDELINE_COLOR,
-            strokeWidth: GUIDELINE_WIDTH,
-            selectable: false,
-            evented: false,
-            opacity: 0.5,
-            //@ts-ignore
-            id: 'guide-v'
-          });
-          canvas.add(vLine);
-        }
-
-        // Horizontal Center Alignment
-        if (Math.abs(centerY - canvasCenter.top) < SNAP_THRESHOLD) {
-          if (obj.originY === 'center') obj.set({ top: canvasCenter.top });
-
-          hLine = new fabric.Line([0, canvasCenter.top, canvas.width!, canvasCenter.top], {
-            stroke: GUIDELINE_COLOR,
-            strokeWidth: GUIDELINE_WIDTH,
-            selectable: false,
-            evented: false,
-            opacity: 0.5,
-            //@ts-ignore
-            id: 'guide-h'
-          });
-          canvas.add(hLine);
-        }
-
-        canvas.renderAll();
-      });
-
-      canvas.on('mouse:up', () => {
-        const objects = canvas.getObjects();
-        objects.forEach(obj => {
-          if ((obj as any).id === 'guide-v' || (obj as any).id === 'guide-h') {
-            canvas.remove(obj);
-          }
-        });
-        vLine = null;
-        hLine = null;
-        canvas.renderAll();
-      });
-
       console.log("DesignerCanvas: Product base image successfully rendered with contrast shadow");
     }, { crossOrigin: 'anonymous' });
   }, [canvas, productImage, productColor]);
@@ -590,93 +501,85 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
     let vLine: fabric.Line | null = null;
     let hLine: fabric.Line | null = null;
+    const GUIDELINE_COLOR = '#4F46E5';
+    const GUIDELINE_WIDTH = 1;
+    const SNAP_THRESHOLD = 5;
 
-    const drawLine = (x1: number, y1: number, x2: number, y2: number) => {
-      return new fabric.Line([x1, y1, x2, y2], {
-        stroke: '#00e5ff', // Cyan smart guide
-        strokeWidth: 1,
-        selectable: false,
-        evented: false,
-        opacity: 0.8
-      });
-    };
+    const checkQuality = () => {
+      const objects = canvas.getObjects();
+      let lowResFound = false;
+      const INCHES = 14; 
+      const ppiOnCanvas = canvas.width! / INCHES;
 
-    const checkBoundsAndQuality = (activeObject: fabric.Object) => {
-      // 1. Check out of bounds
-      activeObject.setCoords();
-      const br = activeObject.getBoundingRect();
-      
-      // The safe zone area is [margin, margin] to [width-margin, height-margin]
-      const isOut = (
-        br.left < safeZoneMargin ||
-        br.top < safeZoneMargin ||
-        br.left + br.width > canvas.width! - safeZoneMargin ||
-        br.top + br.height > canvas.height! - safeZoneMargin
-      );
-      
-      onOutOfBoundsWarning?.(isOut);
-
-      // 2. Check Image DPI / Quality
-      if (activeObject.type === 'image') {
-        const img = activeObject as fabric.Image;
-        const currentWidth = img.getScaledWidth();
-        // @ts-ignore custom prop
-        const nWidth = img._naturalWidth || img.width;
-        
-        // If scaled to be > 1.5x its natural 1:1 pixels, flag low quality (simplified dpi logic)
-        if (nWidth && currentWidth > nWidth * 1.5) {
-          onLowQualityWarning?.(true);
-        } else {
-          onLowQualityWarning?.(false);
+      objects.forEach((obj: any) => {
+        if (obj.type === 'image' && obj._element) {
+          const currentWidth = obj.getScaledWidth();
+          const physicalWidth = currentWidth / ppiOnCanvas;
+          const dpi = obj._element.naturalWidth / physicalWidth;
+          if (dpi < 150) lowResFound = true;
         }
-      }
+      });
+      if (onLowQualityWarning) onLowQualityWarning(lowResFound);
     };
 
-    const handleObjectMoving = (e: fabric.IEvent) => {
+    const handleObjectMoving = (e: any) => {
       const obj = e.target;
       if (!obj) return;
+      if (['product_base_image', 'product_color_fill', 'guide-v', 'guide-h', 'safe_zone_indicator'].includes(obj.id)) return;
 
-      // Smart Snapping to Center
-      const snapOffset = 15;
-      const centerX = canvas.width! / 2;
-      const centerY = canvas.height! / 2;
+      const centerX = obj.getCenterPoint().x;
+      const centerY = obj.getCenterPoint().y;
+      const canvasCenter = canvas.getCenter();
 
-      // Current object center
-      const objCx = obj.left! + (obj.originX === 'center' ? 0 : obj.getScaledWidth() / 2);
-      const objCy = obj.top! + (obj.originY === 'center' ? 0 : obj.getScaledHeight() / 2);
+      // Remove old lines
+      if (vLine) canvas.remove(vLine);
+      if (hLine) canvas.remove(hLine);
 
-      // Snap X
-      if (Math.abs(objCx - centerX) < snapOffset) {
-        obj.set('left', obj.originX === 'center' ? centerX : centerX - obj.getScaledWidth() / 2);
-        if (!vLine) {
-          vLine = drawLine(centerX, 0, centerX, canvas.height!);
-          canvas.add(vLine);
-        }
-      } else {
-        if (vLine) { canvas.remove(vLine); vLine = null; }
+      // Vertical Center Alignment
+      if (Math.abs(centerX - canvasCenter.left) < SNAP_THRESHOLD) {
+        if (obj.originX === 'center') obj.set({ left: canvasCenter.left }).setCoords();
+        
+        vLine = new fabric.Line([canvasCenter.left, 0, canvasCenter.left, canvas.height!], {
+          stroke: GUIDELINE_COLOR,
+          strokeWidth: GUIDELINE_WIDTH,
+          selectable: false,
+          evented: false,
+          opacity: 0.5,
+          //@ts-ignore
+          id: 'guide-v'
+        });
+        canvas.add(vLine);
       }
 
-      // Snap Y
-      if (Math.abs(objCy - centerY) < snapOffset) {
-        obj.set('top', obj.originY === 'center' ? centerY : centerY - obj.getScaledHeight() / 2);
-        if (!hLine) {
-          hLine = drawLine(0, centerY, canvas.width!, centerY);
-          canvas.add(hLine);
-        }
-      } else {
-        if (hLine) { canvas.remove(hLine); hLine = null; }
+      // Horizontal Center Alignment
+      if (Math.abs(centerY - canvasCenter.top) < SNAP_THRESHOLD) {
+        if (obj.originY === 'center') obj.set({ top: canvasCenter.top }).setCoords();
+
+        hLine = new fabric.Line([0, canvasCenter.top, canvas.width!, canvasCenter.top], {
+          stroke: GUIDELINE_COLOR,
+          strokeWidth: GUIDELINE_WIDTH,
+          selectable: false,
+          evented: false,
+          opacity: 0.5,
+          //@ts-ignore
+          id: 'guide-h'
+        });
+        canvas.add(hLine);
       }
 
-      checkBoundsAndQuality(obj);
+      canvas.renderAll();
     };
 
-    const handleObjectScaling = (e: fabric.IEvent) => {
-      if (e.target) checkBoundsAndQuality(e.target);
-    };
-
-    const cleanupLines = () => {
-      if (vLine) { canvas.remove(vLine); vLine = null; }
-      if (hLine) { canvas.remove(hLine); hLine = null; }
+    const handleMouseUp = () => {
+      const objects = canvas.getObjects();
+      objects.forEach(obj => {
+        if ((obj as any).id === 'guide-v' || (obj as any).id === 'guide-h') {
+          canvas.remove(obj);
+        }
+      });
+      vLine = null;
+      hLine = null;
+      canvas.renderAll();
     };
 
     // Zoom Handling (Wheel)
@@ -696,18 +599,29 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       }
     };
 
+    const handleObjectScaling = (e: any) => {
+      const obj = e.target;
+      if (obj) checkQuality();
+    };
+
+    canvas.on('object:modified', checkQuality);
+    canvas.on('object:added', checkQuality);
+    canvas.on('object:removed', checkQuality);
     canvas.on('object:moving', handleObjectMoving);
     canvas.on('object:scaling', handleObjectScaling);
-    canvas.on('before:render', cleanupLines);
+    canvas.on('mouse:up', handleMouseUp);
     canvas.on('mouse:wheel', handleWheel);
 
     return () => {
+      canvas.off('object:modified', checkQuality);
+      canvas.off('object:added', checkQuality);
+      canvas.off('object:removed', checkQuality);
       canvas.off('object:moving', handleObjectMoving);
       canvas.off('object:scaling', handleObjectScaling);
-      canvas.off('before:render', cleanupLines);
+      canvas.off('mouse:up', handleMouseUp);
       canvas.off('mouse:wheel', handleWheel);
     };
-  }, [canvas, onOutOfBoundsWarning, onLowQualityWarning]);
+  }, [canvas, onLowQualityWarning, setZoomLevel]);
 
   // Main Events
   useEffect(() => {
@@ -1080,23 +994,30 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     },
     getJson: () => {
       if (!canvas) return null;
-      return canvas.toJSON(['id', '_isGrayscale', '_brightness', '_contrast', '_naturalWidth', '_naturalHeight', 'selectable', 'evented', 'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'hasControls', 'hoverCursor', 'visible']); 
+      // Filter out system objects before saving
+      const objects = canvas.getObjects().filter(obj => 
+        !['product_base_image', 'product_color_fill', 'guide-v', 'guide-h', 'safe_zone_indicator'].includes((obj as any).id)
+      );
+      return { objects: objects.filter(obj => obj != null && typeof obj.toObject === 'function').map(obj => obj.toObject(['id', 'selectable', 'evented', 'name'])) };
     },
     loadJson: (json: any) => {
-      if (!canvas) return;
+      if (!canvas || !json) return;
+      
+      // Store background objects to restore them after loading
+      const bgObjects = canvas.getObjects().filter(obj => 
+        ['product_base_image', 'product_color_fill', 'guide-v', 'guide-h', 'safe_zone_indicator'].includes((obj as any).id)
+      );
+      
       canvas.loadFromJSON(json, () => {
-        canvas.getObjects().forEach((obj: any) => {
-          if (obj.type === 'image' && (obj._isGrayscale || obj._brightness !== 0 || obj._contrast !== 0)) {
-            applyImageFilters(obj, {
-              grayscale: obj._isGrayscale,
-              brightness: obj._brightness,
-              contrast: obj._contrast
-            });
-          }
-          if ((obj as any).id === 'safe_zone_indicator') {
-            obj.sendToBack();
-          }
-        });
+        // Remove any background objects that might have been part of the JSON (just in case)
+        const newBgObjects = canvas.getObjects().filter(obj => 
+          ['product_base_image', 'product_color_fill', 'guide-v', 'guide-h', 'safe_zone_indicator'].includes((obj as any).id)
+        );
+        newBgObjects.forEach(obj => canvas.remove(obj));
+        
+        // Restore original background objects at the bottom of the stack
+        bgObjects.reverse().forEach(obj => canvas.insertAt(obj, 0, false));
+        
         canvas.renderAll();
         onObjectsUpdated?.();
       });
@@ -1104,9 +1025,15 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     getLayers: () => {
       if (!canvas) return [];
       return canvas.getObjects()
-        .filter((obj: any) => obj.id !== 'safe_zone_indicator' && obj.type !== 'image') // filter out bg if needed, or safe zone
-        .map(obj => getObjectProperties(obj))
-        .reverse(); 
+        .filter(obj => !['product_base_image', 'product_color_fill', 'guide-v', 'guide-h', 'safe_zone_indicator'].includes((obj as any).id))
+        .map(obj => ({
+          id: (obj as any).id || `obj_${Math.random()}`,
+          type: obj.type,
+          //@ts-ignore
+          name: obj.name || (obj.type === 'i-text' ? obj.text : obj.type),
+          visible: obj.visible,
+          locked: obj.lockMovementX
+        })).reverse();
     },
     downloadDesign: () => {
       if (!canvas) return;
@@ -1132,146 +1059,160 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     },
     zoomIn: () => {
       if (!canvas) return;
-      let zoom = canvas.getZoom() * 1.1;
+      let zoom = canvas.getZoom();
+      zoom *= 1.1;
       if (zoom > 5) zoom = 5;
-      canvas.zoomToPoint({ x: canvas.width! / 2, y: canvas.height! / 2 }, zoom);
+      canvas.setZoom(zoom);
       setZoomLevel(zoom);
     },
     zoomOut: () => {
-       if (!canvas) return;
-       let zoom = canvas.getZoom() / 1.1;
-       if (zoom < 0.5) zoom = 0.5;
-       canvas.zoomToPoint({ x: canvas.width! / 2, y: canvas.height! / 2 }, zoom);
-       setZoomLevel(zoom);
+      if (!canvas) return;
+      let zoom = canvas.getZoom();
+      zoom /= 1.1;
+      if (zoom < 0.5) zoom = 0.5;
+      canvas.setZoom(zoom);
+      setZoomLevel(zoom);
     },
     resetZoom: () => {
       if (!canvas) return;
+      canvas.setZoom(1);
       canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
       setZoomLevel(1);
     },
     duplicateActiveObject: () => {
-      const activeObject = canvas?.getActiveObject();
-      if (!activeObject || (activeObject as any).id === 'safe_zone_indicator') return;
-
-      activeObject.clone((cloned: any) => {
-        canvas?.discardActiveObject();
+      if (!canvas) return;
+      const active = canvas.getActiveObject();
+      if (!active || (active as any).id === 'product_base_image') return;
+      
+      active.clone((cloned: any) => {
+        canvas.discardActiveObject();
         cloned.set({
-          left: (cloned.left || 0) + 20,
-          top: (cloned.top || 0) + 20,
-          id: `${cloned.type}_${Date.now()}`,
+          left: active.left! + 20,
+          top: active.top! + 20,
           evented: true,
+          id: `clone_${Date.now()}`
         });
-
         if (cloned.type === 'activeSelection') {
           cloned.canvas = canvas;
-          cloned.forEachObject((obj: any) => {
-            canvas?.add(obj);
-          });
+          cloned.forEachObject((obj: any) => canvas.add(obj));
           cloned.setCoords();
         } else {
-          canvas?.add(cloned);
+          canvas.add(cloned);
         }
-
-        canvas?.setActiveObject(cloned);
-        canvas?.requestRenderAll();
+        canvas.setActiveObject(cloned);
+        canvas.requestRenderAll();
         onObjectsUpdated?.();
-        onHistoryChange?.();
       });
     },
     toggleLock: () => {
-      const activeObject = canvas?.getActiveObject();
-      if (!activeObject || (activeObject as any).id === 'safe_zone_indicator') return;
-
-      const isLocked = !(activeObject.selectable);
-      activeObject.set({
-        selectable: !activeObject.selectable,
-        evented: !activeObject.evented,
-        hasControls: !activeObject.hasControls,
-        lockMovementX: !activeObject.lockMovementX,
-        lockMovementY: !activeObject.lockMovementY,
-        lockRotation: !activeObject.lockRotation,
-        lockScalingX: !activeObject.lockScalingX,
-        lockScalingY: !activeObject.lockScalingY,
-      } as any);
-
-      canvas?.discardActiveObject();
-      canvas?.requestRenderAll();
-      onObjectsUpdated?.();
-      onHistoryChange?.();
+      if (!canvas) return;
+      const active = canvas.getActiveObject();
+      if (!active) return;
+      const isLocked = !active.lockMovementX;
+      active.set({
+        lockMovementX: isLocked,
+        lockMovementY: isLocked,
+        lockScalingX: isLocked,
+        lockScalingY: isLocked,
+        lockRotation: isLocked,
+        hasControls: !isLocked
+      });
+      canvas.renderAll();
+      onObjectModified?.(getObjectProperties(active));
     },
     removeImageBackground: async () => {
       if (!canvas) return false;
-      const activeObj = canvas.getActiveObject() as fabric.Image;
-      if (!activeObj || activeObj.type !== 'image') return false;
-
+      const active = canvas.getActiveObject();
+      if (!active || active.type !== 'image') return false;
+      
+      const img = active as fabric.Image;
+      const url = img.getSrc();
+      
       try {
-        const base64 = activeObj.toDataURL({ format: 'png', quality: 1, multiplier: 1 });
-        const res = await fetch(base64);
-        const blob = await res.blob();
-        
-        // Dynamically import to prevent Next.js SSR Webpack build crashes
+        // Dynamic import for background removal to avoid bundling heavy lib in main chunk
         const { removeBackground } = await import('@imgly/background-removal');
+        const config = {};
         
-        // Process image entirely within the browser! (Free, unlimited)
-        const transparentBlob = await removeBackground(blob);
-        const transparentUrl = URL.createObjectURL(transparentBlob);
-
+        const blob = await removeBackground(url, config);
+        const reader = new FileReader();
         return new Promise<boolean>((resolve) => {
-          fabric.Image.fromURL(transparentUrl, (newImg) => {
-            // Copy exact properties to new transparent image
-            newImg.set({
-              left: activeObj.left, top: activeObj.top,
-              originX: activeObj.originX, originY: activeObj.originY,
-              scaleX: activeObj.scaleX, scaleY: activeObj.scaleY,
-              angle: activeObj.angle, opacity: activeObj.opacity,
-              crossOrigin: 'anonymous',
-              //@ts-ignore
-              id: activeObj.id || `img_${Date.now()}`,
-              _isGrayscale: (activeObj as any)._isGrayscale,
-              _brightness: (activeObj as any)._brightness,
-              _contrast: (activeObj as any)._contrast,
-              _naturalWidth: newImg.width, _naturalHeight: newImg.height
-            });
-
-            if (activeObj.filters && activeObj.filters.length > 0) {
-              newImg.filters = activeObj.filters;
-              newImg.applyFilters();
-            }
-
-            const index = canvas.getObjects().indexOf(activeObj);
-            canvas.remove(activeObj);
-            canvas.insertAt(newImg, index, false);
-            canvas.setActiveObject(newImg);
-            canvas.renderAll();
-            
-            onObjectsUpdated?.();
-            onHistoryChange?.();
-            resolve(true);
-          }, { crossOrigin: 'anonymous' });
+          reader.onload = (e) => {
+            const result = e.target?.result as string;
+            if (result) {
+               fabric.Image.fromURL(result, (newImg) => {
+                  newImg.set({
+                    left: img.left,
+                    top: img.top,
+                    scaleX: img.scaleX,
+                    scaleY: img.scaleY,
+                    angle: img.angle,
+                    originX: img.originX,
+                    originY: img.originY,
+                    //@ts-ignore
+                    id: img.id
+                  });
+                  canvas.remove(img);
+                  canvas.add(newImg);
+                  canvas.setActiveObject(newImg);
+                  canvas.renderAll();
+                  onObjectsUpdated?.();
+                  resolve(true);
+               });
+            } else resolve(false);
+          };
+          reader.readAsDataURL(blob);
         });
       } catch (err) {
-        console.error(err);
+        console.error("Background removal failed:", err);
         return false;
       }
     },
     undo: () => {
-      (canvas as any)?.undo?.();
+      if (!canvas) return;
+      (canvas as any).undo?.();
+      onObjectsUpdated?.();
     },
     redo: () => {
-      (canvas as any)?.redo?.();
+      if (!canvas) return;
+      (canvas as any).redo?.();
+      onObjectsUpdated?.();
     },
     setPanning: (enabled: boolean) => {
       if (!canvas) return;
       (canvas as any).isPanning = enabled;
       canvas.selection = !enabled;
       canvas.defaultCursor = enabled ? 'grab' : 'default';
-      canvas.getObjects().forEach(obj => {
-        if (obj.name !== 'safeZone') {
-          obj.selectable = !enabled;
-          obj.evented = !enabled;
-        }
-      });
       canvas.renderAll();
+    },
+    getDesignDataUrl: () => {
+      if (!canvas) return '';
+      
+      const objects = canvas.getObjects();
+      
+      // Filter out background/system objects
+      const bgObjects = objects.filter(obj => 
+        ['product_base_image', 'product_color_fill', 'guide-v', 'guide-h', 'safe_zone_indicator'].includes((obj as any).id)
+      );
+      
+      // If no design elements, return empty
+      if (objects.length === bgObjects.length) return '';
+
+      // Hide background objects temporarily
+      bgObjects.forEach(obj => obj.set('visible', false));
+      canvas.renderAll(); // Ensure they are hidden in the buffer
+      
+      // Get design data URL of just the design elements
+      const dataUrl = canvas.toDataURL({
+        format: 'png',
+        quality: 1,
+        multiplier: 2
+      });
+      
+      // Restore visibility
+      bgObjects.forEach(obj => obj.set('visible', true));
+      canvas.renderAll();
+      
+      return dataUrl;
     }
   }));
 

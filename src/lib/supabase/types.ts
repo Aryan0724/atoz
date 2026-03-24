@@ -49,6 +49,7 @@ export interface Database {
           delivery_days: string | null
           packaging_options: string[] | null
           images: string[] | null
+          supported_views: string[] | null
           is_active: boolean
           created_at: string
         }

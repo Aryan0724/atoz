@@ -9,7 +9,11 @@ import {
   MessageSquare, 
   Clock, 
   Globe,
-  Loader2
+  Loader2,
+  ShieldCheck,
+  Award,
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -31,15 +35,16 @@ export default function ContactPage() {
       {/* Hero Header */}
       <section className="relative pt-24 pb-16 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10 text-center">
-           <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-pink/10 rounded-full text-brand-pink text-[10px] font-black uppercase tracking-widest mb-6">
-              <MessageSquare className="h-3 w-3" />
-              Let&apos;s Talk Business
+           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-pink/5 border border-brand-pink/10 text-brand-pink text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+              <Sparkles className="w-3.5 h-3.5" />
+              Strategic Partnerships
            </div>
-           <h1 className="text-5xl md:text-7xl font-black text-brand-dark tracking-tighter mb-6">
-             Start Your <span className="text-brand-pink underline decoration-brand-cyan/30 decoration-8 underline-offset-4">Print Journey</span>
+           <h1 className="text-5xl md:text-7xl font-black text-brand-dark tracking-tighter mb-8 leading-[0.95]">
+             Elevate Your <br/>
+             <span className="text-brand-pink underline decoration-brand-cyan/20 decoration-8 underline-offset-[12px]">Brand Identity.</span>
            </h1>
-           <p className="text-gray-400 font-medium text-lg max-w-2xl mx-auto">
-             Whether you&apos;re a startup or an established brand, we help you bring your designs to life with professional-grade printing.
+           <p className="text-gray-400 font-bold text-xl leading-relaxed max-w-2xl mx-auto">
+             Get expert advice on custom branding, bulk production, and global logistics. Our specialists are ready to assist you in making a lasting impression.
            </p>
         </div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-brand-pink/5 to-transparent -z-10"></div>
@@ -151,13 +156,22 @@ export default function ContactPage() {
                  </div>
               </div>
 
-              <div className="pt-12 border-t border-gray-100 flex items-center gap-4">
-                 <div className="flex -space-x-3">
-                    <div className="w-12 h-12 rounded-full border-4 border-white bg-brand-pink flex items-center justify-center text-white text-xs font-black">AZ</div>
-                    <div className="w-12 h-12 rounded-full border-4 border-white bg-brand-cyan flex items-center justify-center text-white text-xs font-black">PR</div>
-                    <div className="w-12 h-12 rounded-full border-4 border-white bg-brand-dark flex items-center justify-center text-white text-xs font-black">HQ</div>
-                 </div>
-                 <p className="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Trusted by 500+ Businesses</p>
+              <div className="pt-12 border-t border-gray-100 flex items-center gap-6">
+                <div className="flex -space-x-4">
+                  <div className="w-14 h-14 rounded-full border-4 border-white bg-brand-dark flex items-center justify-center text-brand-cyan shadow-xl ring-1 ring-gray-100 relative z-0">
+                    <ShieldCheck className="w-7 h-7" />
+                  </div>
+                  <div className="w-14 h-14 rounded-full border-4 border-white bg-brand-pink flex items-center justify-center text-white shadow-xl ring-1 ring-gray-100 relative z-10 transition-transform hover:scale-110">
+                    <Award className="w-7 h-7" />
+                  </div>
+                  <div className="w-14 h-14 rounded-full border-4 border-white bg-brand-cyan flex items-center justify-center text-brand-dark shadow-xl ring-1 ring-gray-100 relative z-20 transition-transform hover:scale-110">
+                    <CheckCircle2 className="w-7 h-7" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-brand-dark tracking-tight uppercase">Trusted by 500+ Corporate Partners</h3>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Excellence in production & delivery</p>
+                </div>
               </div>
            </div>
         </div>

@@ -4,49 +4,32 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter, notFound } from 'next/navigation';
 import { useCart } from '@/lib/store/useCart';
 import DesignerCanvas, { CanvasObjectProperties, DesignerCanvasRef } from '@/components/design/DesignerCanvas';
-import SidebarRail, { SidebarTab } from '@/components/design/layout/SidebarRail';
+import SidebarRail from '@/components/design/layout/SidebarRail';
 import SidebarPanel from '@/components/design/layout/SidebarPanel';
 import TopToolbar from '@/components/design/layout/TopToolbar';
 import ThreeDPreview from '@/components/design/ThreeDPreview';
-import { ArrowLeft, Check, Loader2, ChevronLeft, ChevronRight, Save, Share2, ShoppingCart, HelpCircle, Info, Upload, X, Layers, Palette, Type, Image as ImageIcon, Shapes, LayoutGrid, ZoomIn, ZoomOut, Maximize, MousePointer2, Hand, RotateCcw } from 'lucide-react';
+import {
+  ArrowLeft, Check, Loader2, ChevronLeft, ChevronRight, Save, Share2, ShoppingCart, HelpCircle, Info, Upload, X, Layers, Palette, Type, Image as ImageIcon, Shapes, LayoutGrid, ZoomIn, ZoomOut, Maximize, MousePointer2, Hand, RotateCcw,
+  Square, Sparkles, Eye, View, Move, Maximize2, Minimize2, Undo2, Redo2, Wand2, Search, AlertCircle, Plus, Clock, Monitor, Smartphone, Package, Heart
+} from 'lucide-react';
+
+export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { Product } from '@/lib/supabase/types';
 import { mockProducts } from '@/lib/data/mockProducts';
 import { cn } from '@/lib/utils';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 
 // Mobile bottom tool items
 const mobileTools: { id: SidebarTab; icon: React.ReactNode; label: string }[] = [
+  { id: 'product', icon: <Palette className="h-5 w-5" />, label: 'Product' },
   { id: 'templates', icon: <LayoutGrid className="h-5 w-5" />, label: 'Templates' },
   { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },
+  { id: 'graphics', icon: <Square className="h-5 w-5" />, label: 'Elements' },
   { id: 'uploads', icon: <Upload className="h-5 w-5" />, label: 'Upload' },
-  { id: 'graphics', icon: <Shapes className="h-5 w-5" />, label: 'Graphics' },
   { id: 'ai', icon: <Sparkles className="h-5 w-5" />, label: 'AI' },
 ];
-
-function Sparkles(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-      <path d="M5 3v4" />
-      <path d="M19 17v4" />
-      <path d="M3 5h4" />
-      <path d="M17 19h4" />
-    </svg>
-  )
-}
 
 export default function CustomizePage() {
   const params = useParams();
@@ -72,8 +55,10 @@ export default function CustomizePage() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [viewData, setViewData] = useState<{ front: any, back: any, side: any, sleeve_l: any, sleeve_r: any, neck: any }>({ front: null, back: null, side: null, sleeve_l: null, sleeve_r: null, neck: null });
   const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [selectedQuality, setSelectedQuality] = useState<string>('Standard');
+  const [designPreviews, setDesignPreviews] = useState<{ front: string; back: string }>({ front: '', back: '' });
 
-  const [activeTab, setActiveTab] = useState<SidebarTab | null>('graphics');
+  const [activeTab, setActiveTab] = useState<SidebarTab | null>('product');
   const [mobilePanel, setMobilePanel] = useState<SidebarTab | null>(null);
   const { addItem } = useCart();
 
@@ -110,12 +95,28 @@ export default function CustomizePage() {
   useEffect(() => {
     if (!product) return;
     let base = product.base_price || 0;
-    const hasFrontDesign = (activeView === 'front' && layers.length > 0) || (activeView !== 'front' && viewData.front?.objects?.length > 0);
-    const hasBackDesign = (activeView === 'back' && layers.length > 0) || (activeView !== 'back' && viewData.back?.objects?.length > 0);
-    if (hasFrontDesign) base += 5;
-    if (hasBackDesign) base += 5;
+    
+    // Quality adjustments (INR values) using multipliers
+    const qualityLevels = product.quality_levels || ['Standard', 'Premium', 'Luxury'];
+    const qualityIndex = qualityLevels.indexOf(selectedQuality);
+    const multipliers = [1, 1.2, 1.5, 2];
+    const multiplier = multipliers[Math.max(0, qualityIndex) >= multipliers.length ? 0 : Math.max(0, qualityIndex)] || 1;
+    
+    // Apply quality multiplier to base price
+    base = Math.round(base * multiplier);
+
+    // Design adjustments
+    const currentJson = canvasRef.current?.getJson();
+    const currentObjects = currentJson?.objects || [];
+    
+    const hasFrontDesign = activeView === 'front' ? currentObjects.length > 0 : (viewData.front?.objects?.length > 0);
+    const hasBackDesign = activeView === 'back' ? currentObjects.length > 0 : (viewData.back?.objects?.length > 0);
+    
+    if (hasFrontDesign) base += 50;
+    if (hasBackDesign) base += 50;
+    
     setTotalPrice(base);
-  }, [layers, viewData, activeView, product]);
+  }, [layers, viewData, activeView, product, selectedQuality]);
 
   const handleUpdateObjectById = (id: string, props: Partial<CanvasObjectProperties>) => {
     canvasRef.current?.updateObjectById(id, props);
@@ -134,6 +135,13 @@ export default function CustomizePage() {
     if (activeView !== '3d') {
       const currentJson = canvasRef.current?.getJson();
       setViewData(prev => ({ ...prev, [activeView]: currentJson }));
+      
+      // Capture design image for 3D preview (important for front/back sync)
+      const currentDesign = canvasRef.current?.getDesignDataUrl() || '';
+      if (activeView === 'front' || activeView === 'back') {
+        console.log(`[Customizer] Captured ${activeView} design. Length: ${currentDesign.length}`);
+        setDesignPreviews(prev => ({ ...prev, [activeView]: currentDesign }));
+      }
     }
     
     setActiveView(newView);
@@ -146,10 +154,38 @@ export default function CustomizePage() {
          setActiveObject(null);
          handleObjectsUpdated();
       }, 50);
+    } else {
+      // If switching TO 3D, ensure we have the latest design captured for the current view
+      const currentDesign = canvasRef.current?.getDesignDataUrl() || '';
+      if (activeView === 'front' || activeView === 'back') {
+        setDesignPreviews(prev => ({ ...prev, [activeView]: currentDesign }));
+      }
     }
   };
 
   const handleFinishDesign = () => {
+    // Check if there are any design elements
+    const currentJson = canvasRef.current?.getJson();
+    const currentObjects = currentJson?.objects || [];
+    
+    const hasFrontDesign = activeView === 'front' ? currentObjects.length > 0 : (viewData.front?.objects?.length > 0);
+    const hasBackDesign = activeView === 'back' ? currentObjects.length > 0 : (viewData.back?.objects?.length > 0);
+    const hasAnyDesign = hasFrontDesign || hasBackDesign;
+
+    if (!hasAnyDesign) {
+      toast.error("Please add a design element before saving!", {
+        style: {
+          background: '#1a1a1a',
+          color: '#fff',
+          fontSize: '11px',
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em'
+        }
+      });
+      return;
+    }
+
     setIsFinishing(true);
     const finalDesignJson = canvasRef.current?.getJson();
     const finalViewData = { ...viewData, [activeView === '3d' ? 'front' : activeView]: finalDesignJson };
@@ -159,7 +195,7 @@ export default function CustomizePage() {
         id: `${product!.id}-custom-${Date.now()}`,
         product: product!,
         quantity: product!.moq,
-        quality_level: 'Premium',
+        quality_level: selectedQuality,
         design_data: { color: selectedColor, canvasState: finalViewData },
         design_preview_url: product!.images?.[0]
       });
@@ -179,7 +215,9 @@ export default function CustomizePage() {
   if (!product) return notFound();
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-[#f7f7f2] overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex flex-col bg-[#f7f7f2] overflow-hidden">
+      {/* Toast notifications rendered inside the overlay */}
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
       {/* TOP BAR - Matches Screenshot */}
       <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 z-50 flex-shrink-0">
         <div className="flex items-center gap-4">
@@ -223,18 +261,22 @@ export default function CustomizePage() {
         <div className="hidden md:block">
           <SidebarPanel 
             activeTab={activeTab}
-          onClose={() => setActiveTab(null)}
-          productColor={selectedColor}
-          onProductColorChange={setSelectedColor}
-          onAddText={(text) => canvasRef.current?.addText(text)}
-          onAddImage={(url) => canvasRef.current?.addImage(url)}
-          onAddShape={(type) => canvasRef.current?.addShape(type)}
-          onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
-          onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
-          onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
-          onUpdateObject={handleUpdateObjectById}
-          layers={layers}
-          productCategory={product.category || "Apparel"}
+            onClose={() => setActiveTab(null)}
+            productColor={selectedColor}
+            onProductColorChange={setSelectedColor}
+            selectedQuality={selectedQuality}
+            onQualityChange={setSelectedQuality}
+            onAddText={(text) => canvasRef.current?.addText(text)}
+            onAddImage={(url) => canvasRef.current?.addImage(url)}
+            onAddShape={(type) => canvasRef.current?.addShape(type)}
+            onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
+            onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
+            onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
+            onUpdateObject={handleUpdateObjectById}
+            layers={layers}
+            productCategory={product.category || "Apparel"}
+            qualityLevels={product.quality_levels || ['Standard', 'Premium', 'Luxury']}
+            basePrice={product.base_price || 0}
           />
         </div>
 
@@ -257,7 +299,7 @@ export default function CustomizePage() {
           </div>
 
           {/* CANVAS STAGE */}
-          <div className="flex-1 flex items-center justify-center p-8 relative">
+          <div className="flex-1 flex items-center justify-center pt-16 pb-28 px-8 relative overflow-hidden">
             {isOutOfBounds && (
               <div className="absolute top-24 left-1/2 -translate-x-1/2 z-40 bg-orange-500 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl animate-bounce">
                 Outside Print Area
@@ -267,7 +309,10 @@ export default function CustomizePage() {
             {activeView === '3d' ? (
               <div className="w-full max-w-2xl aspect-square relative">
                 <ThreeDPreview
-                  productImage={product.images?.[2] || product.images?.[0] || ''}
+                  productImage={product.images?.[0] || ''}
+                  productBackImage={product.images?.[1] || product.images?.[0] || ''}
+                  frontDesign={designPreviews.front}
+                  backDesign={designPreviews.back}
                   productName={product.name}
                 />
               </div>
@@ -311,19 +356,23 @@ export default function CustomizePage() {
             </div>
 
             {/* MULTI-VIEW SELECTOR - Center Bottom */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40">
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40 overflow-x-auto max-w-[90vw] pb-2 no-scrollbar">
                {[
                  { id: 'front', label: 'Front side' },
                  { id: 'back', label: 'Back side' },
                  { id: 'sleeve_l', label: 'Sleeve left' },
                  { id: 'sleeve_r', label: 'Sleeve right' },
                  { id: 'neck', label: 'Neck label inner' },
-               ].map((v) => (
+               ].filter(v => 
+                 !product.supported_views || 
+                 product.supported_views.includes(v.id) || 
+                 (v.id === 'front' && product.supported_views.length === 0)
+               ).map((v) => (
                  <button
                    key={v.id}
                    onClick={() => handleViewChange(v.id as any)}
                    className={cn(
-                     "px-5 py-2 rounded-full text-[11px] font-black tracking-tight leading-none transition-all",
+                     "px-5 py-2 rounded-full text-[11px] font-black tracking-tight leading-none transition-all flex-shrink-0",
                      activeView === v.id 
                        ? "bg-brand-olive text-white shadow-[0_4px_12px_rgba(91,91,66,0.2)]" 
                        : "bg-white text-gray-500 hover:bg-gray-50 shadow-soft border border-gray-100"
@@ -336,12 +385,19 @@ export default function CustomizePage() {
 
             {/* SAVE PRODUCT BUTTON - Bottom Right */}
             <div className="absolute bottom-8 right-8 z-40">
-               <button 
-                 onClick={handleFinishDesign}
-                 className="px-10 py-3 bg-brand-lime hover:opacity-90 text-brand-dark text-[11px] font-black uppercase tracking-widest rounded-xl shadow-[0_8px_25px_rgba(163,255,102,0.4)] transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-               >
-                 Save product
-               </button>
+               <div className="flex flex-col items-end gap-2">
+                 <div className="bg-white/80 backdrop-blur-md px-4 py-2 rounded-xl border border-gray-100 flex flex-col items-end">
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{selectedQuality} Quality • Total</span>
+                    <span className="text-xl font-black text-brand-dark tracking-tighter">₹{totalPrice}</span>
+                 </div>
+                 <button 
+                   onClick={handleFinishDesign}
+                   disabled={isFinishing}
+                   className="px-10 py-3 bg-brand-olive text-white text-[11px] font-black uppercase tracking-widest rounded-xl shadow-[0_8px_25px_rgba(91,91,66,0.3)] transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
+                 >
+                   {isFinishing ? "Saving..." : "Save product"}
+                 </button>
+               </div>
             </div>
           </div>
         </main>
@@ -358,6 +414,8 @@ export default function CustomizePage() {
                    onClose={() => setMobilePanel(null)}
                    productColor={selectedColor}
                    onProductColorChange={setSelectedColor}
+                   selectedQuality={selectedQuality}
+                   onQualityChange={setSelectedQuality}
                    onAddText={(text) => canvasRef.current?.addText(text)}
                    onAddImage={(url) => canvasRef.current?.addImage(url)}
                    onAddShape={(type) => canvasRef.current?.addShape(type)}
@@ -367,6 +425,8 @@ export default function CustomizePage() {
                    onUpdateObject={handleUpdateObjectById}
                    layers={layers}
                    productCategory={product.category || "Apparel"}
+                   qualityLevels={product.quality_levels || ['Standard', 'Premium', 'Luxury']}
+                   basePrice={product.base_price || 0}
                  />
                </div>
             </div>

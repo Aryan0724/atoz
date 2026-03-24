@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import { TrendingDown, Info } from 'lucide-react';
+import { TrendingDown, Info, ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Tier {
   min_quantity: number;
@@ -49,20 +50,31 @@ export default function PricingTierTable({ basePrice, tiers, currentQuantity }: 
           return (
             <div 
               key={idx} 
-              className={`relative p-4 rounded-2xl transition-all duration-300 border ${
+              className={`relative p-5 rounded-3xl transition-all duration-500 border group flex flex-col justify-between min-h-[140px] ${
                 isSelected 
-                ? 'bg-brand-dark text-white border-brand-dark shadow-xl shadow-gray-200' 
-                : 'bg-white text-brand-dark border-gray-100'
+                ? 'bg-brand-dark text-white border-brand-dark shadow-2xl shadow-brand-dark/20 -translate-y-1' 
+                : 'bg-white text-brand-dark border-gray-100 hover:border-brand-pink/30 hover:shadow-xl hover:shadow-gray-100'
               }`}
             >
-              <div className={`text-[10px] font-black uppercase tracking-tighter mb-1 ${isSelected ? 'text-brand-cyan' : 'text-brand-pink'}`}>
-                {tier.min_quantity}+ Units
+              <div>
+                <div className={`text-[10px] font-black uppercase tracking-widest mb-2 ${isSelected ? 'text-brand-cyan' : 'text-brand-pink'}`}>
+                  {tier.min_quantity}+ Units
+                </div>
+                <div className="text-2xl font-black tracking-tighter mb-1">₹{tier.price}</div>
+                <div className={`text-[10px] font-medium opacity-60 ${isSelected ? 'text-white' : 'text-gray-400'}`}>per unit</div>
               </div>
-              <div className="text-xl font-black tracking-tighter">₹{tier.price}</div>
-              <div className={`text-[10px] font-medium opacity-60 ${isSelected ? 'text-white' : 'text-gray-400'}`}>per unit</div>
+
+              <div className="mt-4 pt-4 border-t border-gray-100/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button className={cn(
+                  "w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                  isSelected ? "bg-brand-pink text-white" : "bg-brand-dark text-white"
+                )}>
+                  Get Started
+                </button>
+              </div>
               
               {isSelected && (
-                <div className="absolute -top-2 -right-2 bg-brand-cyan text-brand-dark text-[8px] font-black px-2 py-0.5 rounded-full ring-2 ring-white">
+                <div className="absolute -top-2 -right-2 bg-brand-cyan text-brand-dark text-[8px] font-black px-3 py-1 rounded-full ring-4 ring-white animate-pulse">
                   ACTIVE
                 </div>
               )}
