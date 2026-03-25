@@ -68,7 +68,14 @@ export default function ProductDetailClient() {
         return;
       }
 
-      setProduct(productData);
+      // Enrich with mock images for realistic preview
+      const mockMatch = mockProducts.find(m => m.slug === slug || m.id === productData.id);
+      const enrichedProduct = {
+        ...productData,
+        images: mockMatch?.images || productData.images
+      };
+
+      setProduct(enrichedProduct);
       setSelectedQuality(productData.quality_levels?.[0] || 'Standard');
       setQuantity(productData.moq || 1);
 

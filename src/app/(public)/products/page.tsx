@@ -60,7 +60,15 @@ function ProductsContent() {
       if (error || !data || data.length === 0) {
         setProducts(mockProducts);
       } else {
-        setProducts(data);
+        // Merge Supabase data with mock images to ensure realistic thumbnails
+        const enrichedProducts = data.map(dbProduct => {
+          const mockMatch = mockProducts.find(m => m.slug === dbProduct.slug || m.id === dbProduct.id);
+          return {
+            ...dbProduct,
+            images: mockMatch ? mockMatch.images : dbProduct.images
+          };
+        });
+        setProducts(enrichedProducts);
       }
       setLoading(false);
     };
@@ -147,8 +155,8 @@ function ProductsContent() {
                <div className="relative w-full max-w-md aspect-square">
                   <div className="absolute inset-0 bg-gradient-to-br from-brand-pink/20 to-brand-cyan/20 rounded-full blur-3xl animate-pulse-slow opacity-50" />
                   <Image 
-                    src="/hero_premium.png" 
-                    alt="Premium Print Showcase"
+                    src="https://images.unsplash.com/photo-1626497748470-28192a60bb7b?q=80&w=2000&auto=format&fit=crop" 
+                    alt="Premium Gear Showcase"
                     fill
                     className="object-contain relative z-10 drop-shadow-2xl animate-float"
                     priority

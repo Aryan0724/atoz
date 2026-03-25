@@ -306,7 +306,7 @@ export const mockProducts: Product[] = [
     base_price: 299,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Luxury Box'],
-    images: [TSHIRT_SVG, TSHIRT_BACK_SVG, TSHIRT_SVG],
+    images: ['/images/products/tshirt.png'],
     supported_views: ['front', 'back', 'sleeve_l', 'sleeve_r', 'neck'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -323,7 +323,7 @@ export const mockProducts: Product[] = [
     base_price: 149,
     delivery_days: '5-7 Working Days',
     packaging_options: ['Safe-ship Box', 'Gift Wrap'],
-    images: [MUG_SVG, MUG_SVG, MUG_SVG],
+    images: ['/images/products/mug.png'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -340,7 +340,7 @@ export const mockProducts: Product[] = [
     base_price: 199,
     delivery_days: '7-9 Working Days',
     packaging_options: ['Standard', 'Executive Sleeve'],
-    images: [NOTEBOOK_SVG, NOTEBOOK_SVG, NOTEBOOK_SVG],
+    images: ['/images/products/notebook.png'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -357,7 +357,7 @@ export const mockProducts: Product[] = [
     base_price: 349,
     delivery_days: '10-12 Working Days',
     packaging_options: ['Standard', 'Branded Box'],
-    images: [POUCH_SVG, POUCH_SVG, POUCH_SVG],
+    images: ['/images/products/notebook.png'], // Reusing notebook as fallback for pouch
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -374,7 +374,7 @@ export const mockProducts: Product[] = [
     base_price: 199,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [CALENDAR_SVG, CALENDAR_SVG, CALENDAR_SVG],
+    images: ['https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -391,7 +391,7 @@ export const mockProducts: Product[] = [
     base_price: 85,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [CARD_SVG, CARD_SVG, CARD_SVG],
+    images: ['https://images.unsplash.com/photo-1620735397141-33449206257d?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -408,7 +408,7 @@ export const mockProducts: Product[] = [
     base_price: 5,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [BUSINESS_CARD_SVG, BUSINESS_CARD_SVG, BUSINESS_CARD_SVG],
+    images: ['https://images.unsplash.com/photo-1593642532400-2682810df593?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front', 'back'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -425,7 +425,7 @@ export const mockProducts: Product[] = [
     base_price: 1499,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [BOX_SVG, BOX_SVG, BOX_SVG],
+    images: ['https://images.unsplash.com/photo-1549463591-147823d18a2e?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -442,7 +442,7 @@ export const mockProducts: Product[] = [
     base_price: 249,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [NOTEBOOK_SVG, NOTEBOOK_SVG, NOTEBOOK_SVG],
+    images: ['https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -459,7 +459,7 @@ export const mockProducts: Product[] = [
     base_price: 999,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [HEADPHONE_SVG, HEADPHONE_SVG, HEADPHONE_SVG],
+    images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -476,7 +476,7 @@ export const mockProducts: Product[] = [
     base_price: 499,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [TOTE_BAG_SVG, TOTE_BAG_SVG, TOTE_BAG_SVG],
+    images: ['https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -493,7 +493,7 @@ export const mockProducts: Product[] = [
     base_price: 45,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [ID_CARD_SVG, ID_CARD_SVG, ID_CARD_SVG],
+    images: ['https://images.unsplash.com/photo-1611532736597-de2d4265fba3?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front', 'back'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -510,7 +510,7 @@ export const mockProducts: Product[] = [
     base_price: 8,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [LETTERHEAD_SVG, LETTERHEAD_SVG, LETTERHEAD_SVG],
+    images: ['https://images.unsplash.com/photo-1586075010620-2d5ff63494bb?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -527,7 +527,7 @@ export const mockProducts: Product[] = [
     base_price: 15,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [PEN_SVG, PEN_SVG, PEN_SVG],
+    images: ['https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -544,7 +544,7 @@ export const mockProducts: Product[] = [
     base_price: 599,
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
-    images: [BOTTLE_SVG, BOTTLE_SVG, BOTTLE_SVG],
+    images: ['https://images.unsplash.com/photo-1519750783826-e2420f4d687f?q=80&w=2000&auto=format&fit=crop'],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()

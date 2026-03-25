@@ -276,38 +276,12 @@ const Features = () => {
   );
 };
 
+import ProductCard from '@/components/products/ProductCard';
+import { mockProducts } from '@/lib/data/mockProducts';
+
 // --- Categories Section ---
 const Categories = () => {
-  const cats = [
-    { 
-      name: "Premium Cotton T-Shirt", 
-      tag: "Apparel", 
-      price: "$12.99", 
-      min: "50 Units", 
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuB5Ef6_VFGAD6gOJv_6Rfel_EdW5rMsw7bMgAtMtXC0EPoQzsLQBnXrZ9pOdDjaFUUwGu8s5X9RyKspiEE30ffCViuMmSBNs07AjREht2NqqlLbrqUlaeP5XDYLykEoRL3jn6IlTfd-zcmfnapE11X648DuolW14ucqv4PQoUK1xbVnONNwZaVmvB_PlD2P6Du8kswSs8vPPvfE00zx7BKa4UH3SeqLprjzOjUqP5ICPWI3I9L-QFwAzTIHOQ06PoEcBJBx7bvka1A" 
-    },
-    { 
-      name: "Matte Ceramic Mug", 
-      tag: "Drinkware", 
-      price: "$5.49", 
-      min: "100 Units", 
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuB1vfD7DXX0OZnt_m-2rcp4EojUJYf6Lsu2vylypR7ex7c8iCrjXZ9sNY3u7ZKGXbKCe5vebH9jNNT8_j8dnZkORSw_PZv_gm8G4jdXXBZr-CNdU10LOobWsPx9v322wIBBbMtR0Hm_DPD871REPznLTLHvz73Myp0ZpwnFvTp2Ff8-YT2t_ERA5wDTa2bkZOzfXKS-nPlYjJEMpvcJnGsTVHoDptwDPGPXwwdErdm_NH-0rx36hd8HPBKFFQ7XDhfQDB5s8QFiY3k" 
-    },
-    { 
-      name: "Corporate Hardcover Notebook", 
-      tag: "Stationery", 
-      price: "$8.99", 
-      min: "50 Units", 
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDvIkmGSRBqel8aMnTy44Pc9FD4skKQ5D6rDPva2R2JKHxmAGGot1mQT4PMvAqVefSUmOs3ts2SQ0yf1A7gmZjh_1kDR_Ohl0wWRiU3AQGaOpE4UfzCs8eoRGx30MXiLbfdejxMvIC4tB_ytIC8VYTJP4gzQ6cTroznW9yKWWIH1rbWD_N3_VCpn0su7c2fYyMnlXXOAk5_SnJBj5kWu95ip8i6iC6BSTfqLuLf8_uQCgiKhjPoFMOliITk8npJzxz3ZrcHkbVjOuQ" 
-    },
-    { 
-      name: "Tech Accessories Pouch", 
-      tag: "Lifestyle", 
-      price: "$14.49", 
-      min: "50 Units", 
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEHM5NkWZ9aprNWm7h5dGologeU_E3rtcaagk7z12SRH8HPcXVrr85Pbsa02U-y6PVAMypVWWdUJ5X2HS0AkhYqCXd8YECMaR0xsda2Cv1W1rKpmZTTuSLuBtCL1Yl-dKc5R0cEqMLeOxZ6lHRhTYUkrGbxdRIbuKgA1P9BLOxDjUJXb864ul4KWb61kwJlU1w71DpasrhanAOpG9xMWLNAdTft5jq9La5if5I9M2KesWBwz9ynfmY1HELpU7QNBAonwNbjU3beP8" 
-    },
-  ];
+  const displayProducts = mockProducts.slice(0, 4);
 
   return (
     <section className="py-24 bg-surface-variant/10">
@@ -323,35 +297,8 @@ const Categories = () => {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {cats.map((p, idx) => (
-            <motion.div 
-              key={idx}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className="depth-card bg-white p-4 rounded-3xl"
-            >
-              <div className="relative rounded-2xl overflow-hidden aspect-square mb-6 bg-surface">
-                <Image className="w-full h-full object-cover" src={p.img} alt={p.name} fill />
-                <div className="absolute top-4 left-4 glass-panel px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest z-10">
-                  Min. {p.min}
-                </div>
-              </div>
-              <div className="px-2 pb-2">
-                <span className="text-primary font-bold text-[10px] uppercase tracking-widest">{p.tag}</span>
-                <h4 className="font-headline text-xl font-extrabold mb-4">{p.name}</h4>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-xs text-on-surface-variant font-medium">Starting from</span>
-                    <div className="text-lg font-black">{p.price}</div>
-                  </div>
-                  <button className="w-10 h-10 rounded-full border border-outline-variant/30 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all">
-                    <ShoppingCart className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+          {displayProducts.map((p) => (
+            <ProductCard key={p.id} product={p} />
           ))}
         </div>
       </div>

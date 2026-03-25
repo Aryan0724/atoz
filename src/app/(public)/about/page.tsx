@@ -87,8 +87,8 @@ export default function AboutPage() {
               <div className="aspect-square bg-white rounded-[64px] overflow-hidden rotate-3 group-hover:rotate-0 transition-transform duration-700 shadow-2xl border border-gray-100 p-4">
                  <div className="relative w-full h-full rounded-[48px] overflow-hidden">
                     <Image 
-                      src="/hero_premium.png" 
-                      alt="Premium Printing Showcase"
+                      src="https://images.unsplash.com/photo-1598425237654-4fc758e50a93?q=80&w=2000&auto=format&fit=crop" 
+                      alt="Premium Printing Facility"
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-1000"
                     />
