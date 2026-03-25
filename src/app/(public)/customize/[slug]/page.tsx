@@ -189,6 +189,7 @@ export default function CustomizePage() {
     setIsFinishing(true);
     const finalDesignJson = canvasRef.current?.getJson();
     const finalViewData = { ...viewData, [activeView === '3d' ? 'front' : activeView]: finalDesignJson };
+    const finalDesignPreview = canvasRef.current?.getDesignDataUrl() || '';
     
     setTimeout(() => {
       addItem({
@@ -197,7 +198,7 @@ export default function CustomizePage() {
         quantity: product!.moq,
         quality_level: selectedQuality,
         design_data: { color: selectedColor, canvasState: finalViewData },
-        design_preview_url: product!.images?.[0]
+        design_preview_url: finalDesignPreview || product!.images?.[0]
       });
       setIsFinishing(false);
       setIsSuccess(true);

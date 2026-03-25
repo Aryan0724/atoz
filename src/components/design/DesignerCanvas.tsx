@@ -1205,8 +1205,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       // Get design data URL of just the design elements
       const dataUrl = canvas.toDataURL({
         format: 'png',
-        quality: 1,
-        multiplier: 2
+        quality: 0.8,
+        multiplier: 1
       });
       
       // Restore visibility

@@ -104,7 +104,21 @@ const CartDrawer = () => {
   if (!mounted) return null;
 
   const handleCheckoutClick = () => {
-    setShowDesignModal(true);
+    // Check if any items are missing design data
+    // Design data is missing if design_data is empty or placeholder (design_data is an object with color and canvasState)
+    const itemsMissingDesign = items.filter(item => {
+      // If it's a customization design_data will have canvasState
+      // If added from product page, design_data is {}
+      const hasDesign = item.design_data && Object.keys(item.design_data).length > 0;
+      return !hasDesign;
+    });
+
+    if (itemsMissingDesign.length > 0) {
+      setShowDesignModal(true);
+    } else {
+      setOpen(false);
+      router.push('/checkout');
+    }
   };
 
   const handleDesignChoice = (choice: 'design' | 'import' | 'plain') => {
