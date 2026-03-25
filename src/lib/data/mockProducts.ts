@@ -307,6 +307,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Luxury Box'],
     images: ['/images/products/tshirt.png'],
+    template_images: [TSHIRT_SVG, TSHIRT_BACK_SVG],
     supported_views: ['front', 'back', 'sleeve_l', 'sleeve_r', 'neck'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -324,6 +325,7 @@ export const mockProducts: Product[] = [
     delivery_days: '5-7 Working Days',
     packaging_options: ['Safe-ship Box', 'Gift Wrap'],
     images: ['/images/products/mug.png'],
+    template_images: [MUG_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -341,6 +343,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-9 Working Days',
     packaging_options: ['Standard', 'Executive Sleeve'],
     images: ['/images/products/notebook.png'],
+    template_images: [NOTEBOOK_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -358,6 +361,7 @@ export const mockProducts: Product[] = [
     delivery_days: '10-12 Working Days',
     packaging_options: ['Standard', 'Branded Box'],
     images: ['/images/products/notebook.png'], // Reusing notebook as fallback for pouch
+    template_images: [POUCH_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -375,6 +379,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [CALENDAR_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -392,6 +397,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1620735397141-33449206257d?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [CARD_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -409,6 +415,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1593642532400-2682810df593?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [BUSINESS_CARD_SVG],
     supported_views: ['front', 'back'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -426,6 +433,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1549463591-147823d18a2e?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [BOX_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -443,6 +451,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [NOTEBOOK_SVG], // Reusing notebook as base for diary
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -460,6 +469,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [HEADPHONE_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -477,6 +487,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [TOTE_BAG_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -494,6 +505,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1611532736597-de2d4265fba3?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [ID_CARD_SVG],
     supported_views: ['front', 'back'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -511,6 +523,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1586075010620-2d5ff63494bb?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [LETTERHEAD_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -528,6 +541,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [PEN_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()
@@ -545,6 +559,7 @@ export const mockProducts: Product[] = [
     delivery_days: '7-10 Working Days',
     packaging_options: ['Standard', 'Premium Packaging'],
     images: ['https://images.unsplash.com/photo-1519750783826-e2420f4d687f?q=80&w=2000&auto=format&fit=crop'],
+    template_images: [BOTTLE_SVG],
     supported_views: ['front'],
     is_active: true,
     created_at: new Date().toISOString()

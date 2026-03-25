@@ -75,7 +75,15 @@ export default function CustomizePage() {
           .single();
 
         if (error || !data) throw new Error(error?.message || 'Product not found');
-        setProduct(data);
+        
+        // Enrich with mock templates for design canvas
+        const mockMatch = mockProducts.find(m => m.slug === id || m.id === data.id);
+        const enrichedProduct = {
+          ...data,
+          template_images: mockMatch?.template_images || data.template_images
+        };
+        
+        setProduct(enrichedProduct);
         setTotalPrice(data.base_price || 0);
       } catch (err) {
         const mockProduct = mockProducts.find(p => p.slug === id);
@@ -324,7 +332,12 @@ export default function CustomizePage() {
               <div className="w-full max-w-2xl aspect-[4/5] flex items-center justify-center transition-all duration-700 ease-out">
                 <DesignerCanvas 
                   ref={canvasRef}
-                  productImage={activeView === 'front' ? (product.images?.[0] || '') : (activeView === 'back' ? (product.images?.[1] || product.images?.[0] || '') : (product.images?.[2] || product.images?.[0] || ''))}
+                  productImage={(() => {
+                    const bgImages = (product as any).template_images?.length > 0 ? (product as any).template_images : product.images;
+                    if (activeView === 'front') return bgImages?.[0] || '';
+                    if (activeView === 'back') return bgImages?.[1] || bgImages?.[0] || '';
+                    return bgImages?.[2] || bgImages?.[0] || '';
+                  })()}
                   productColor={selectedColor}
                   onObjectSelected={setActiveObject}
                   onSelectionCleared={() => setActiveObject(null)}
