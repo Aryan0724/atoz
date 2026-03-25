@@ -16,6 +16,7 @@ export interface Database {
           phone: string | null
           company_name: string | null
           gst_number: string | null
+          role: string | null
           created_at: string
         }
         Insert: {
@@ -24,6 +25,7 @@ export interface Database {
           phone?: string | null
           company_name?: string | null
           gst_number?: string | null
+          role?: string | null
           created_at?: string
         }
         Update: {
@@ -32,6 +34,7 @@ export interface Database {
           phone?: string | null
           company_name?: string | null
           gst_number?: string | null
+          role?: string | null
           created_at?: string
         }
       }

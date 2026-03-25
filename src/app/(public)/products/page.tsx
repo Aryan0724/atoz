@@ -155,10 +155,10 @@ function ProductsContent() {
                <div className="relative w-full max-w-md aspect-square">
                   <div className="absolute inset-0 bg-gradient-to-br from-brand-pink/20 to-brand-cyan/20 rounded-full blur-3xl animate-pulse-slow opacity-50" />
                   <Image 
-                    src="https://images.unsplash.com/photo-1626497748470-28192a60bb7b?q=80&w=2000&auto=format&fit=crop" 
+                    src="https://images.unsplash.com/photo-1629197520635-16570fbd0bb3?q=80&w=2000&auto=format&fit=crop" 
                     alt="Premium Gear Showcase"
                     fill
-                    className="object-contain relative z-10 drop-shadow-2xl animate-float"
+                    className="object-contain relative z-10 drop-shadow-2xl hover:scale-105 transition-transform duration-700 cursor-zoom-in"
                     priority
                   />
                </div>

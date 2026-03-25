@@ -8,6 +8,7 @@ import TopBanner from "@/components/layout/TopBanner";
 import SupportWidget from "@/components/layout/SupportWidget";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { Toaster } from 'react-hot-toast';
+import AuthProvider from "@/components/providers/AuthProvider";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -68,16 +69,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${manrope.variable} font-body antialiased`}>
-        <TopBanner />
-        <Navbar />
-        <main className="min-h-screen pb-16 lg:pb-0">
-          {children}
-        </main>
-        <Footer />
-        <MobileBottomNav />
-        <CartDrawer />
-        <SupportWidget />
-        <Toaster position="bottom-right" />
+        <AuthProvider>
+          <TopBanner />
+          <Navbar />
+          <main className="min-h-screen pb-16 lg:pb-0">
+            {children}
+          </main>
+          <Footer />
+          <MobileBottomNav />
+          <CartDrawer />
+          <SupportWidget />
+          <Toaster position="bottom-right" />
+        </AuthProvider>
       </body>
     </html>
   );

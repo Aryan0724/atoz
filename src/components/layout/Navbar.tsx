@@ -7,8 +7,8 @@ import { Search, User as UserIcon, ShoppingCart, Menu, X, LogOut } from 'lucide-
 import { cn } from '@/lib/utils';
 import { useCart } from '@/lib/store/useCart';
 import { usePathname, useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -16,7 +16,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { setOpen, getItemCount } = useCart();
   const [mounted, setMounted] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const { user, signOut } = useAuth();
 
   const navLinks = [
     { name: 'Products', href: '/products' },
@@ -28,20 +28,6 @@ const Navbar = () => {
   // Avoid hydration mismatch and setup Auth listener
   React.useEffect(() => {
     setMounted(true);
-    
-    // Initial user check
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    checkUser();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -57,8 +43,7 @@ const Navbar = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
+    await signOut();
     setIsMenuOpen(false);
   };
 
