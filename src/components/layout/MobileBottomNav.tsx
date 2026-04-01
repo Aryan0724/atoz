@@ -57,8 +57,8 @@ export default function MobileBottomNav() {
               {isActive && (
                 <span className="absolute -top-1 w-1 h-1 rounded-full bg-brand-pink animate-in zoom-in" />
               )}
-              <Icon className="h-5 w-5 mb-0.5" strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[10px] font-bold tracking-wider">{item.name}</span>
+              <Icon className="h-6 w-6 mb-1" strokeWidth={isActive ? 2.5 : 2} />
+              <span className="text-[11px] font-bold tracking-wider">{item.name}</span>
             </Link>
           );
         })}
@@ -69,14 +69,14 @@ export default function MobileBottomNav() {
           className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-brand-dark relative min-w-[64px] min-h-[44px] transition-all duration-300 active:scale-95"
         >
           <div className="relative">
-            <ShoppingCart className="h-5 w-5 mb-0.5" strokeWidth={2} />
+            <ShoppingCart className="h-6 w-6 mb-1" strokeWidth={2} />
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 h-4 w-4 bg-brand-pink text-white text-[10px] flex items-center justify-center rounded-full font-black shadow-md animate-in zoom-in duration-300">
+              <span className="absolute -top-2.5 -right-2.5 h-4.5 w-4.5 min-w-[18px] min-h-[18px] bg-brand-pink text-white text-[10px] flex items-center justify-center rounded-full font-black shadow-md animate-in zoom-in duration-300">
                 {cartCount}
               </span>
             )}
           </div>
-          <span className="text-[10px] font-bold tracking-wider">Cart</span>
+          <span className="text-[11px] font-bold tracking-wider">Cart</span>
         </button>
 
         {/* Profile/Login */}
@@ -90,8 +90,8 @@ export default function MobileBottomNav() {
           {(pathname.includes('/dashboard') || pathname.includes('/login')) && (
             <span className="absolute -top-1 w-1 h-1 rounded-full bg-brand-pink animate-in zoom-in" />
           )}
-          <UserIcon className="h-5 w-5 mb-0.5" strokeWidth={pathname.includes('/dashboard') ? 2.5 : 2} />
-          <span className="text-[10px] font-bold tracking-wider">
+          <UserIcon className="h-6 w-6 mb-1" strokeWidth={pathname.includes('/dashboard') ? 2.5 : 2} />
+          <span className="text-[11px] font-bold tracking-wider">
             {hasSession ? "Profile" : "Login"}
           </span>
         </Link>

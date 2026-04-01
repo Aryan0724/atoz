@@ -130,16 +130,23 @@ const Navbar = () => {
             </button>
             
             {mounted && user ? (
-              <div className="flex items-center gap-4 border-l border-outline-variant/20 pl-6">
+              <div className="flex items-center gap-6 border-l border-outline-variant/20 pl-6">
                 <Link href="/dashboard" className="flex items-center gap-2 group">
                    <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500 hover:rotate-6">
                       <UserIcon className="h-4 w-4" />
                    </div>
-                   <span className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Dashboard</span>
+                   <span className="text-sm font-black text-on-surface group-hover:text-primary transition-colors tracking-tight italic">Dashboard</span>
                 </Link>
+                <button 
+                  onClick={handleSignOut}
+                  className="p-2 text-on-surface/40 hover:text-red-500 transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
               </div>
             ) : (
-              <Link href="/login" className="ink-gradient text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:shadow-primary/30 hover:scale-105 transition-all duration-300 active:scale-95">
+              <Link href="/login" className="bg-brand-dark text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.25em] shadow-2xl hover:bg-brand-pink hover:shadow-brand-pink/20 transition-all duration-300 hover:-translate-y-0.5 italic">
                 Sign In
               </Link>
             )}

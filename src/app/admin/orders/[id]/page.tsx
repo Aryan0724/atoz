@@ -22,7 +22,7 @@ import {
   Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 export default function OrderDetailPage() {
@@ -34,18 +34,71 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     async function fetchOrder() {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*, profiles(*), products(*)')
-        .eq('id', id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*, profiles(*), products(*)')
+          .eq('id', id)
+          .single();
 
-      if (error) {
-        console.error('Error fetching order:', error);
-      } else {
+        if (error || !data) throw new Error('not found');
         setOrder(data);
+      } catch {
+        // Mock fallback for demo mode
+        const mockOrders: Record<string, any> = {
+          'ORD-1001': {
+            id: 'ORD-1001', status: 'processing', payment_status: 'paid',
+            total_price: 15600, quantity: 50, quality_level: 'Premium',
+            created_at: new Date().toISOString(),
+            design_data: { color: '#FFFFFF', print_method: 'DTG' },
+            design_preview_url: null,
+            shipping_address: { line1: '12 MG Road', city: 'Bangalore', state: 'Karnataka', postal_code: '560001' },
+            razorpay_payment_id: 'pay_demo_001',
+            profiles: { full_name: 'Aditya Raj', email: 'aditya@example.com', company_name: 'Raj Enterprises', gst_number: '29AABCT1332L1ZB', created_at: new Date().toISOString() },
+            products: { name: 'Custom Premium T-Shirt', slug: 'custom-premium-tshirt', category: 'Apparel', base_price: 299, delivery_days: '5–7 business days', images: ['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400'] },
+          },
+          'ORD-1002': {
+            id: 'ORD-1002', status: 'shipped', payment_status: 'paid',
+            total_price: 8400, quantity: 30, quality_level: 'Standard',
+            created_at: new Date(Date.now() - 86400000).toISOString(),
+            design_data: { color: '#000000', print_method: 'Screen Print' },
+            design_preview_url: null,
+            shipping_address: { line1: '45 Linking Road', city: 'Mumbai', state: 'Maharashtra', postal_code: '400050' },
+            razorpay_payment_id: 'pay_demo_002',
+            profiles: { full_name: 'Priya Sharma', email: 'priya@example.com', company_name: null, gst_number: null, created_at: new Date().toISOString() },
+            products: { name: 'Branded Ceramic Mug', slug: 'branded-ceramic-mug', category: 'Drinkware', base_price: 249, delivery_days: '3–5 business days', images: ['https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400'] },
+          },
+          'ORD-1003': {
+            id: 'ORD-1003', status: 'pending', payment_status: 'pending',
+            total_price: 22000, quantity: 100, quality_level: 'Luxury',
+            created_at: new Date(Date.now() - 172800000).toISOString(),
+            design_data: { color: '#003366', print_method: 'Embroidery' },
+            design_preview_url: null,
+            shipping_address: { line1: '7 Connaught Place', city: 'New Delhi', state: 'Delhi', postal_code: '110001' },
+            razorpay_payment_id: null,
+            profiles: { full_name: 'Rohan Mehra', email: 'rohan@example.com', company_name: 'Mehra Corp', gst_number: '07AABCM1234L1ZX', created_at: new Date().toISOString() },
+            products: { name: 'Corporate Polo T-Shirt', slug: 'corporate-polo-tshirt', category: 'Apparel', base_price: 199, delivery_days: '7–10 business days', images: ['https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=400'] },
+          },
+          'ORD-1004': {
+            id: 'ORD-1004', status: 'delivered', payment_status: 'paid',
+            total_price: 5900, quantity: 25, quality_level: 'Standard',
+            created_at: new Date(Date.now() - 259200000).toISOString(),
+            design_data: { color: '#FFFFFF', print_method: 'DTG' },
+            design_preview_url: null,
+            shipping_address: { line1: '88 Anna Salai', city: 'Chennai', state: 'Tamil Nadu', postal_code: '600002' },
+            razorpay_payment_id: 'pay_demo_004',
+            profiles: { full_name: 'Sneha Kapur', email: 'sneha@example.com', company_name: null, gst_number: null, created_at: new Date().toISOString() },
+            products: { name: 'Custom Notebook', slug: 'custom-notebook', category: 'Stationery', base_price: 199, delivery_days: '3–5 business days', images: ['https://images.unsplash.com/photo-1544816155-12df9643f363?w=400'] },
+          },
+        };
+
+        const mockOrder = mockOrders[id as string];
+        if (mockOrder) {
+          setOrder(mockOrder);
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     if (id) fetchOrder();

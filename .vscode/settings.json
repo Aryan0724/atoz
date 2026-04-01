@@ -1,0 +1,8 @@
+{
+  "ralphLoop.maxIterations": 50,
+  "ralphLoop.defaultMode": "Fast",
+  "ralphLoop.defaultModel": "Gemini 3 Flash",
+  "ralphLoop.promptFile": "prompt.md",
+  "ralphLoop.taskFile": "PRD.md",
+  "ralphLoop.progressFile": "progress.txt"
+}

@@ -7,7 +7,7 @@ import CartDrawer from "@/components/layout/CartDrawer";
 import TopBanner from "@/components/layout/TopBanner";
 import SupportWidget from "@/components/layout/SupportWidget";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from 'sonner';
 import AuthProvider from "@/components/providers/AuthProvider";
 
 const inter = Inter({ 

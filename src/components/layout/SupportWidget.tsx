@@ -67,9 +67,9 @@ export default function SupportWidget() {
       
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="h-16 w-16 bg-brand-pink text-white rounded-full shadow-2xl shadow-pink-200 flex items-center justify-center hover:scale-110 active:scale-95 transition-all group"
+        className="h-14 w-14 bg-brand-pink text-white rounded-full shadow-2xl shadow-pink-200 flex items-center justify-center hover:scale-110 active:scale-95 transition-all group"
       >
-        {isOpen ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6 group-hover:rotate-12 transition-transform" />}
+        {isOpen ? <X className="h-5 w-5" /> : <MessageSquare className="h-5 w-5 group-hover:rotate-12 transition-transform" />}
         <span className="absolute -top-1 -right-1 flex h-4 w-4">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan opacity-75"></span>
           <span className="relative inline-flex rounded-full h-4 w-4 bg-brand-cyan"></span>

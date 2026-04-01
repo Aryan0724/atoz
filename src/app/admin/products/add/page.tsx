@@ -15,7 +15,8 @@ import {
 import { supabase } from '@/lib/supabase/client';
 import { uploadFile } from '@/lib/supabase/storage';
 import Link from 'next/link';
-import { toast } from 'react-hot-toast';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -28,14 +29,17 @@ export default function AddProductPage() {
     base_price: 0,
     category: 'Packaging',
     moq: 1,
-    delivery_days: 7,
+    delivery_days: '7-10 Days',
     images: [] as string[],
+    template_images: [] as string[],
     quality_levels: ['Standard', 'Premium'],
     customization_fields: ['Logo', 'Text Color'],
-    packaging_options: ['Standard Box']
+    packaging_options: ['Standard Box'],
+    supported_views: ['front'],
+    specifications: {}
   });
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isTemplate = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -43,7 +47,17 @@ export default function AddProductPage() {
     try {
       const fileName = `${Date.now()}-${file.name}`;
       const publicUrl = await uploadFile('products', fileName, file);
-      setFormData(prev => ({ ...prev, images: [...prev.images, publicUrl] }));
+      
+      if (isTemplate) {
+        setFormData(prev => ({ 
+          ...prev, 
+          template_images: [...prev.template_images, publicUrl],
+          images: [...prev.images, publicUrl] // Add to gallery too
+        }));
+      } else {
+        setFormData(prev => ({ ...prev, images: [...prev.images, publicUrl] }));
+      }
+      toast.success(isTemplate ? 'Template uploaded' : 'Image uploaded');
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload image');
@@ -187,11 +201,12 @@ export default function AddProductPage() {
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Delivery Days</label>
                   <input 
-                    type="number" 
+                    type="text" 
                     required
                     value={formData.delivery_days}
-                    onChange={(e) => setFormData({ ...formData, delivery_days: parseInt(e.target.value) })}
+                    onChange={(e) => setFormData({ ...formData, delivery_days: e.target.value })}
                     className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-transparent focus:bg-white focus:border-brand-pink/20 transition-all outline-none font-bold text-brand-dark"
+                    placeholder="e.g. 7-10 Days"
                   />
                 </div>
              </div>
@@ -240,26 +255,57 @@ export default function AddProductPage() {
 
           <div className="bg-white p-10 rounded-[40px] border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center">
              <div className="w-full grid grid-cols-2 gap-4 mb-6">
-                {formData.images.map((url, idx) => (
-                  <div key={idx} className="aspect-square relative rounded-2xl overflow-hidden border border-gray-100">
-                    <img src={url} alt="Preview" className="w-full h-full object-cover" />
-                    <button 
-                      type="button"
-                      onClick={() => setFormData(p => ({ ...p, images: p.images.filter((_, i) => i !== idx) }))}
-                      className="absolute top-2 right-2 p-1 bg-brand-dark/50 text-white rounded-full hover:bg-brand-pink transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-                {formData.images.length < 4 && (
+                {formData.images.map((url, idx) => {
+                  const isTemplate = formData.template_images.includes(url);
+                  return (
+                    <div key={idx} className="aspect-square relative rounded-2xl overflow-hidden border border-gray-100 group">
+                      <img src={url} alt="Preview" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const newTemplates = isTemplate 
+                              ? formData.template_images.filter(t => t !== url)
+                              : [...formData.template_images, url];
+                            setFormData(f => ({ ...f, template_images: newTemplates }));
+                          }}
+                          className={cn(
+                            "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest transition-all",
+                            isTemplate ? "bg-brand-cyan text-white" : "bg-white text-brand-dark"
+                          )}
+                        >
+                          {isTemplate ? 'Template ✓' : 'Set as Template'}
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setFormData(p => ({ 
+                              ...p, 
+                              images: p.images.filter((_, i) => i !== idx),
+                              template_images: p.template_images.filter(t => t !== url)
+                            }))
+                          }}
+                          className="px-3 py-1 bg-red-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      {isTemplate && (
+                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-brand-cyan text-white text-[7px] font-black uppercase tracking-widest rounded-md">
+                          Canvas
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                {formData.images.length < 6 && (
                   <label className="aspect-square rounded-2xl border-2 border-dashed border-gray-100 hover:border-brand-pink/30 transition-colors flex flex-col items-center justify-center cursor-pointer group">
-                    <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e)} disabled={uploading} />
                     {uploading ? (
                       <Loader2 className="h-8 w-8 text-brand-pink animate-spin" />
                     ) : (
                       <>
-                        <Plus className="h-8 w-8 text-gray-200 group-hover:text-brand-pink transition-colors" />
+                        <ImageIcon className="h-8 w-8 text-gray-200 group-hover:text-brand-pink transition-colors" />
                         <span className="text-[10px] font-black text-gray-300 uppercase mt-2">Add Photo</span>
                       </>
                     )}

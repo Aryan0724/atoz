@@ -9,5 +9,8 @@ export const supabase = createBrowserClient(
 )
 
 export function createClient() {
+  if (supabaseAnonKey.includes('mock_signature')) {
+    console.warn('⚠️ WARNING: Using MOCK Supabase keys. Database calls will likely HANG or fail.');
+  }
   return supabase
 }

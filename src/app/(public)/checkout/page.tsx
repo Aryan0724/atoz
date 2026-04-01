@@ -21,7 +21,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { createOrder } from '@/lib/supabase/orderActions';
-import toast from 'react-hot-toast';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { supabase } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
 type Step = 'shipping' | 'review' | 'payment';
 
@@ -41,10 +43,46 @@ export default function CheckoutPage() {
     state: '',
     pincode: '',
   });
+  const [promoCode, setPromoCode] = useState('');
+  const [isPromoValid, setIsPromoValid] = useState<boolean | null>(null);
+  const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>('standard');
+
+  const { user } = useAuth();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (user) {
+      loadUserProfile();
+    }
+  }, [user]);
+
+  const loadUserProfile = async () => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
+        .single();
+
+      if (error) throw error;
+
+      if (profile) {
+        const address = profile.addresses?.[0] || {};
+        setFormData(prev => ({
+          ...prev,
+          fullName: profile.full_name || prev.fullName,
+          email: profile.email || prev.email,
+          phone: profile.phone || prev.phone,
+          address: address.street || prev.address,
+          city: address.city || prev.city,
+          state: address.state || prev.state,
+          pincode: address.pincode || prev.pincode,
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to load profile for checkout:', err);
+    }
+  };
 
   if (!mounted) return null;
 
@@ -54,9 +92,21 @@ export default function CheckoutPage() {
   }
 
   const subtotal = getTotalPrice();
-  const shipping = subtotal > 5000 ? 0 : 250;
-  const tax = Math.round(subtotal * 0.18);
-  const total = subtotal + shipping + tax;
+  const promoDiscount = isPromoValid ? Math.round(subtotal * 0.1) : 0; // 10% discount for demo
+  const baseShipping = subtotal > 5000 ? 0 : 250;
+  const shipping = shippingMethod === 'express' ? baseShipping + 500 : baseShipping;
+  const tax = Math.round((subtotal - promoDiscount) * 0.18);
+  const total = subtotal - promoDiscount + shipping + tax;
+
+  const handlePromoApply = () => {
+    if (promoCode.toUpperCase() === 'ATOZ10') {
+      setIsPromoValid(true);
+      toast.success("Promo Code Applied! 10% Discount.");
+    } else {
+      setIsPromoValid(false);
+      toast.error("Invalid Promo Code.");
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -171,7 +221,7 @@ export default function CheckoutPage() {
              Back to Store
           </Link>
           <div className="flex items-end gap-4">
-             <h1 className="text-6xl font-black text-brand-dark tracking-tighter italic leading-none">Checkout <br/><span className="text-brand-pink/40">Portal</span></h1>
+             <h1 className="text-6xl font-black text-brand-dark tracking-tighter leading-none uppercase">Checkout <span className="text-brand-pink underline-offset-8 decoration-8 decoration-brand-pink/10 underline">Portal</span></h1>
              <div className="h-2 w-20 bg-brand-pink rounded-full mb-2"></div>
           </div>
         </div>
@@ -186,19 +236,19 @@ export default function CheckoutPage() {
                     const isCompleted = steps.findIndex(x => x.id === step) > idx;
 
                     return (
-                       <div key={s.id} className="relative z-10 flex flex-col items-center">
+                        <div key={s.id} className="relative z-10 flex flex-col items-center">
                           <button 
                             onClick={() => (isCompleted || isActive) && setStep(s.id as Step)}
                             className={cn(
-                              "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 border-2",
-                              isActive ? "bg-brand-dark text-white border-brand-dark scale-125 shadow-2xl shadow-brand-dark/20" : 
-                              isCompleted ? "bg-brand-pink text-white border-brand-pink" : "bg-white text-gray-300 border-gray-100"
+                              "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 border-2",
+                              isActive ? "bg-brand-dark text-white border-brand-dark scale-110 shadow-xl shadow-brand-dark/10" : 
+                              isCompleted ? "bg-brand-pink text-white border-brand-pink shadow-lg shadow-brand-pink/10" : "bg-white text-gray-300 border-gray-100"
                             )}
                           >
-                             {isCompleted ? <Check className="w-6 h-6" /> : s.icon}
+                             {isCompleted ? <Check className="w-5 h-5" /> : s.icon}
                           </button>
                           <span className={cn(
-                            "absolute top-16 text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-colors",
+                            "absolute top-14 text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-colors",
                             isActive ? "text-brand-dark" : "text-gray-300"
                           )}>{s.label}</span>
                        </div>
@@ -225,8 +275,8 @@ export default function CheckoutPage() {
                           <MapPin className="text-brand-pink w-6 h-6" />
                        </div>
                        <div>
-                          <h2 className="text-2xl font-black text-brand-dark italic uppercase tracking-tight">Shipping Identity</h2>
-                          <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">Where should we deliver your masterpieces?</p>
+                          <h2 className="text-2xl font-black text-brand-dark uppercase tracking-tight">Shipping Identity</h2>
+                          <p className="text-gray-500 font-bold text-xs uppercase tracking-widest mt-1">Delivery coordinates for your order</p>
                        </div>
                     </div>
 
@@ -293,13 +343,56 @@ export default function CheckoutPage() {
                        </div>
                     </div>
 
+                    {/* Shipping Method Selector */}
+                    <div className="space-y-6 pt-10 border-t border-gray-100">
+                      <div className="flex items-center gap-3">
+                         <Truck className="w-5 h-5 text-brand-pink" />
+                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Logistics Tier</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button 
+                          onClick={() => setShippingMethod('standard')}
+                          className={cn(
+                            "group p-6 rounded-[32px] border-2 transition-all text-left",
+                            shippingMethod === 'standard' ? "border-brand-pink bg-pink-50/20" : "border-gray-50 bg-gray-50/50 hover:border-gray-200"
+                          )}
+                        >
+                           <div className="flex items-center justify-between mb-4">
+                              <div className={cn("w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors", shippingMethod === 'standard' ? "border-brand-pink bg-brand-pink text-white" : "border-gray-300 group-hover:border-brand-pink")}>
+                                 {shippingMethod === 'standard' && <Check className="w-4 h-4" />}
+                              </div>
+                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Standard</span>
+                           </div>
+                           <div className="font-black text-brand-dark text-lg uppercase italic leading-tight">Sea-Bridge Logistics</div>
+                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">7-10 Working Days</p>
+                        </button>
+                        <button 
+                          onClick={() => setShippingMethod('express')}
+                          className={cn(
+                            "group p-6 rounded-[32px] border-2 transition-all text-left relative overflow-hidden",
+                            shippingMethod === 'express' ? "border-brand-cyan bg-cyan-50/20" : "border-gray-50 bg-gray-50/50 hover:border-gray-200"
+                          )}
+                        >
+                           <div className="absolute top-0 right-0 px-3 py-1.5 bg-brand-cyan text-white text-[8px] font-black uppercase tracking-widest rounded-bl-2xl">Urgent</div>
+                           <div className="flex items-center justify-between mb-4">
+                              <div className={cn("w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors", shippingMethod === 'express' ? "border-brand-cyan bg-brand-cyan text-white" : "border-gray-300 group-hover:border-brand-cyan")}>
+                                 {shippingMethod === 'express' && <Check className="w-4 h-4" />}
+                              </div>
+                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Express</span>
+                           </div>
+                           <div className="font-black text-brand-dark text-lg uppercase italic leading-tight">Air-Lift Deployment</div>
+                           <p className="text-[10px] text-brand-cyan font-black uppercase tracking-widest mt-2">3-5 Working Days (+₹500)</p>
+                        </button>
+                      </div>
+                    </div>
+
                     <button 
                       onClick={() => setStep('review')}
                       disabled={!formData.email || !formData.fullName || !formData.address}
-                      className="w-full py-6 bg-brand-dark text-white font-black rounded-[24px] text-xl uppercase tracking-[0.2em] hover:bg-brand-pink shadow-2xl shadow-brand-dark/20 transition-all flex items-center justify-center gap-4 disabled:opacity-30 disabled:grayscale italic"
+                      className="w-full py-5 bg-brand-dark text-white font-black rounded-2xl text-base uppercase tracking-[0.2em] hover:bg-brand-pink shadow-xl shadow-brand-dark/10 transition-all flex items-center justify-center gap-4 disabled:opacity-30 disabled:grayscale italic group"
                     >
                       Step Two: Review
-                      <ChevronRight className="h-6 w-6" />
+                      <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </motion.div>
                 )}
@@ -327,10 +420,10 @@ export default function CheckoutPage() {
                          <div key={item.id} className="group relative flex gap-8 p-8 rounded-[32px] bg-gray-50/50 border border-gray-100 hover:border-brand-pink/20 transition-all">
                            <div className="w-32 h-32 relative rounded-[24px] overflow-hidden shadow-2xl flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
                              <Image 
-                              src={item.design_preview_url || item.product.images?.[0] || ''} 
-                              alt={item.product.name} 
-                              fill 
-                              className="object-cover" 
+                               src={item.design_preview_url || item.product.images?.[0] || ''} 
+                               alt={item.product.name} 
+                               fill 
+                               className="object-cover" 
                              />
                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                            </div>
@@ -355,21 +448,21 @@ export default function CheckoutPage() {
                        ))}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-6 pt-6">
-                       <button 
-                         onClick={() => setStep('shipping')}
-                         className="px-10 py-6 border-2 border-gray-100 text-brand-dark font-black rounded-3xl hover:bg-gray-50 transition-all uppercase tracking-widest text-sm"
-                       >
-                         Edit Details
-                       </button>
-                       <button 
-                         onClick={() => setStep('payment')}
-                         className="flex-1 px-12 py-6 bg-brand-dark text-white font-black rounded-3xl text-xl uppercase tracking-[0.2em] hover:bg-brand-pink shadow-2xl shadow-brand-dark/20 transition-all flex items-center justify-center gap-4 italic"
-                       >
-                         Step Three: Payment
-                         <ChevronRight className="h-6 w-6" />
-                       </button>
-                    </div>
+                       <div className="flex flex-col sm:flex-row gap-5 pt-8">
+                        <button 
+                          onClick={() => setStep('shipping')}
+                          className="px-6 py-3 border-2 border-gray-100 text-brand-dark/40 font-black rounded-2xl hover:bg-gray-50 hover:text-brand-dark hover:border-gray-200 transition-all uppercase tracking-[0.2em] text-[9px] italic"
+                        >
+                          Edit Details
+                        </button>
+                        <button 
+                          onClick={() => setStep('payment')}
+                          className="flex-1 px-8 py-5 bg-brand-dark text-white font-black rounded-2xl text-base uppercase tracking-[0.2em] hover:bg-brand-pink shadow-xl shadow-brand-dark/10 hover:shadow-brand-pink/20 transition-all flex items-center justify-center gap-4 italic group"
+                        >
+                          Step Three: Payment
+                          <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                     </div>
                   </motion.div>
                 )}
 
@@ -386,8 +479,8 @@ export default function CheckoutPage() {
                           <CreditCard className="text-brand-lime w-6 h-6" />
                        </div>
                        <div>
-                          <h2 className="text-2xl font-black text-brand-dark italic uppercase tracking-tight">Finalize Transaction</h2>
-                          <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">Secure portal for global payments</p>
+                          <h2 className="text-2xl font-black text-brand-dark uppercase tracking-tight">Finalize Transaction</h2>
+                          <p className="text-gray-500 font-bold text-xs uppercase tracking-widest mt-1">Verified secure global payment gateway</p>
                        </div>
                     </div>
                     
@@ -413,13 +506,13 @@ export default function CheckoutPage() {
                           </div>
                           
                           <div className="mt-8 pt-8 border-t border-brand-pink/10 relative z-10 grid grid-cols-2 gap-4">
-                             <div className="flex items-center gap-2 text-[10px] font-black text-brand-pink uppercase tracking-widest">
+                             <div className="flex items-center gap-2 text-[10px] font-black text-brand-pink uppercase tracking-widest opacity-70">
                                 <ShieldCheck className="w-4 h-4" />
-                                PCI-DSS Compliant
+                                Payment Security (PCI-DSS)
                              </div>
-                             <div className="flex items-center gap-2 text-[10px] font-black text-brand-pink uppercase tracking-widest">
+                             <div className="flex items-center gap-2 text-[10px] font-black text-brand-pink uppercase tracking-widest opacity-70">
                                 <Sparkles className="w-4 h-4" />
-                                Zero Hidden Fees
+                                Verified Merchant
                              </div>
                           </div>
 
@@ -427,26 +520,26 @@ export default function CheckoutPage() {
                        </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="flex flex-col sm:flex-row gap-4">
                        <button 
                          onClick={() => setStep('review')}
-                         className="px-10 py-6 border-2 border-gray-100 text-brand-dark font-black rounded-3xl hover:bg-gray-50 transition-all uppercase tracking-widest text-sm"
+                         className="px-8 py-4 border-2 border-gray-100 text-brand-dark font-black rounded-2xl hover:bg-gray-50 transition-all uppercase tracking-[0.2em] text-[10px]"
                        >
                          Review Items
                        </button>
                        <button 
                          onClick={handlePlaceOrder}
                          disabled={isProcessing}
-                         className="flex-1 px-12 py-7 bg-brand-pink text-white font-black text-2xl rounded-3xl hover:shadow-[0_20px_50px_rgba(232,28,255,0.3)] transform hover:-translate-y-1 transition-all flex items-center justify-center gap-4 disabled:opacity-50 italic group"
+                         className="flex-1 px-10 py-5 bg-brand-pink text-white font-black text-lg rounded-2xl hover:shadow-2xl shadow-brand-pink/10 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-4 disabled:opacity-50 italic group"
                        >
                          {isProcessing ? (
                            <>
-                             <div className="h-6 w-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
-                             Securing Transaction...
+                             <div className="h-5 w-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+                             Securing...
                            </>
                          ) : (
                            <>
-                             <Check className="h-7 w-7 group-hover:scale-125 transition-transform" />
+                             <Check className="h-6 w-6 group-hover:scale-110 transition-transform" />
                              Deploy Payment (₹{total.toLocaleString()})
                            </>
                          )}
@@ -467,30 +560,63 @@ export default function CheckoutPage() {
                   <Package className="h-6 w-6 text-brand-pink opacity-50" />
                 </h3>
 
-                <div className="space-y-8 font-bold text-xs uppercase tracking-[0.2em] mb-12">
-                   <div className="flex justify-between items-center text-white/40">
-                      <span>Curated Total</span>
+                <div className="space-y-8 font-bold text-[10px] uppercase tracking-[0.2em] mb-12 border-t border-white/5 pt-12">
+                   <div className="flex justify-between items-center text-white/60">
+                      <span>Subtotal</span>
                       <span className="text-white font-black tracking-tight">₹{subtotal.toLocaleString()}</span>
                    </div>
-                   <div className="flex justify-between items-center text-white/40">
-                      <span>Logistics</span>
+                   {isPromoValid && (
+                     <div className="flex justify-between items-center text-brand-pink">
+                        <span>Discount (ATOZ10)</span>
+                        <span className="font-black tracking-tight">-₹{promoDiscount.toLocaleString()}</span>
+                     </div>
+                   )}
+                   <div className="flex justify-between items-center text-white/60">
+                      <span>Shipping ({shippingMethod})</span>
                       <span className={cn("font-black tracking-tight", shipping === 0 ? "text-brand-lime" : "text-white")}>
-                        {shipping === 0 ? 'COMPLIMENTARY' : `₹${shipping}`}
+                        {shipping === 0 ? 'FREE' : `₹${shipping}`}
                       </span>
                    </div>
-                   <div className="flex justify-between items-center text-white/40">
-                      <span>Government Tax (18%)</span>
+                   <div className="flex justify-between items-center text-white/60">
+                      <span>GST (18%)</span>
                       <span className="text-white font-black tracking-tight">₹{tax.toLocaleString()}</span>
                    </div>
-                   <div className="pt-10 border-t border-white/10 flex flex-col gap-2">
-                      <span className="text-brand-pink/60 text-[10px] font-black">Contract Amount</span>
-                      <div className="flex justify-between items-end">
-                         <span className="text-3xl font-black tracking-tighter flex items-center gap-1 leading-none">
-                            <span className="text-brand-cyan text-lg mb-1">₹</span>
-                            {total.toLocaleString()}
-                         </span>
-                         <span className="text-[10px] text-white/20 mb-1 italic tracking-widest">INR</span>
-                      </div>
+                   <div className="pt-10 border-t border-white/10 flex flex-col gap-3">
+                       <div className="flex items-center gap-2">
+                          <div className="h-1.5 w-1.5 rounded-full bg-brand-pink animate-pulse" />
+                          <span className="text-brand-pink/60 text-[9px] font-black uppercase tracking-[0.25em]">Grand Total</span>
+                       </div>
+                       <div className="flex justify-between items-end">
+                          <div className="flex items-baseline gap-1">
+                             <span className="text-brand-cyan text-xl font-black mb-1">₹</span>
+                             <span className="text-5xl font-black tracking-tighter leading-none text-white drop-shadow-2xl">
+                                {total.toLocaleString()}
+                             </span>
+                          </div>
+                          <div className="text-right pb-1">
+                             <span className="text-[8px] text-white/20 font-black tracking-[0.3em] block">SECURE PAYMENT</span>
+                             <span className="text-[10px] text-brand-pink font-black tracking-widest">INR</span>
+                          </div>
+                       </div>
+                    </div>
+                </div>
+
+                {/* Promo Code Input */}
+                <div className="mb-12">
+                   <div className="flex gap-2">
+                     <input 
+                       type="text" 
+                       placeholder="PROMO CODE" 
+                       value={promoCode}
+                       onChange={(e) => setPromoCode(e.target.value)}
+                       className="bg-white/10 border border-white/10 rounded-xl px-4 py-3 flex-1 text-xs font-black placeholder:text-white/20 text-white focus:bg-white/20 transition-all outline-none"
+                     />
+                     <button 
+                       onClick={handlePromoApply}
+                       className="bg-brand-pink text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-brand-pink transition-all"
+                     >
+                       Apply
+                     </button>
                    </div>
                 </div>
 
@@ -501,7 +627,7 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                          <p className="text-[10px] font-black uppercase tracking-widest leading-normal">Encryption Secure</p>
-                         <p className="text-[9px] text-white/30 font-bold tracking-tight mt-0.5">SSL Protocol v3.0 Enabled</p>
+                         <p className="text-[9px] text-white/30 font-bold tracking-tight mt-0.5">Secure SSL/TLS Protocol Enabled</p>
                       </div>
                    </div>
                    <div className="flex items-center gap-4 group/item">

@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   Sparkles
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function ContactPage() {
   const [loading, setLoading] = React.useState(false);

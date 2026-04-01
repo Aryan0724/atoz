@@ -6,155 +6,109 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  category: string;
+  base_price: number;
+  moq: number;
+  delivery_days: string | number;
+  images: string[];
+  quality_levels?: string[];
+  customization_fields?: string[];
+  packaging_options?: string[];
+  template_images?: string[];
+  supported_views?: string[];
+  features?: string[];
+  specifications?: any;
+  stock_quantity?: number;
+  is_active?: boolean;
+  created_at?: string;
+}
+
+export interface Order {
+  id: string;
+  user_id: string;
+  total_price: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  payment_status?: 'unpaid' | 'paid' | 'failed' | 'refunded';
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
+  shipping_address: any;
+  created_at: string;
+  items?: OrderItem[];
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string;
+  quantity: number;
+  unit_price: number;
+  quality_level: string;
+  design_data: any;
+  created_at?: string;
+  product?: Product;
+}
+
+export interface Profile {
+  id: string;
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  avatar_url?: string;
+  company_name?: string;
+  gst_number?: string;
+  role: 'customer' | 'admin';
+  addresses?: any[];
+  payment_methods?: any[];
+  wishlist?: string[];
+  created_at?: string;
+}
+
+export interface CmsContent {
+  id: string;
+  slug: string;
+  title: string;
+  type: 'Page' | 'Blog' | 'Campaign';
+  status: 'draft' | 'published';
+  content?: string;
+  author_id?: string;
+  author_name?: string;
+  last_modified?: string;
+  created_at?: string;
+}
+
 export interface Database {
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string
-          full_name: string | null
-          phone: string | null
-          company_name: string | null
-          gst_number: string | null
-          role: string | null
-          created_at: string
-        }
-        Insert: {
-          id: string
-          full_name?: string | null
-          phone?: string | null
-          company_name?: string | null
-          gst_number?: string | null
-          role?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          full_name?: string | null
-          phone?: string | null
-          company_name?: string | null
-          gst_number?: string | null
-          role?: string | null
-          created_at?: string
-        }
-      }
       products: {
-        Row: {
-          id: string
-          name: string
-          slug: string
-          description: string | null
-          category: string | null
-          quality_levels: string[] | null
-          customization_fields: string[] | null
-          moq: number
-          base_price: number | null
-          delivery_days: string | null
-          packaging_options: string[] | null
-          images: string[] | null
-          template_images: string[] | null
-          supported_views: string[] | null
-          is_active: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          slug: string
-          description?: string | null
-          category?: string | null
-          quality_levels?: string[] | null
-          customization_fields?: string[] | null
-          moq?: number
-          base_price?: number | null
-          delivery_days?: string | null
-          packaging_options?: string[] | null
-          images?: string[] | null
-          template_images?: string[] | null
-          is_active?: boolean
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          slug?: string
-          description?: string | null
-          category?: string | null
-          quality_levels?: string[] | null
-          customization_fields?: string[] | null
-          moq?: number
-          base_price?: number | null
-          delivery_days?: string | null
-          packaging_options?: string[] | null
-          images?: string[] | null
-          template_images?: string[] | null
-          is_active?: boolean
-          created_at?: string
-        }
-      }
+        Row: Product;
+        Insert: Omit<Product, 'id' | 'created_at'>;
+        Update: Partial<Product>;
+      };
+      profiles: {
+        Row: Profile;
+        Insert: Profile;
+        Update: Partial<Profile>;
+      };
       orders: {
-        Row: {
-          id: string
-          user_id: string | null
-          product_id: string | null
-          quantity: number
-          quality_level: string | null
-          design_data: Json | null
-          design_preview_url: string | null
-          customization_details: Json | null
-          total_price: number | null
-          status: string | null
-          payment_status: string | null
-          razorpay_order_id: string | null
-          shipping_address: Json | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id?: string | null
-          product_id?: string | null
-          quantity: number
-          quality_level?: string | null
-          design_data?: Json | null
-          design_preview_url?: string | null
-          customization_details?: Json | null
-          total_price?: number | null
-          status?: string | null
-          payment_status?: string | null
-          razorpay_order_id?: string | null
-          shipping_address?: Json | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string | null
-          product_id?: string | null
-          quantity?: number
-          quality_level?: string | null
-          design_data?: Json | null
-          design_preview_url?: string | null
-          customization_details?: Json | null
-          total_price?: number | null
-          status?: string | null
-          payment_status?: string | null
-          razorpay_order_id?: string | null
-          shipping_address?: Json | null
-          created_at?: string
-        }
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-  }
+        Row: Order;
+        Insert: Omit<Order, 'id' | 'created_at'>;
+        Update: Partial<Order>;
+      };
+      order_items: {
+        Row: OrderItem;
+        Insert: Omit<OrderItem, 'id' | 'created_at'>;
+        Update: Partial<OrderItem>;
+      };
+      cms_content: {
+        Row: CmsContent;
+        Insert: Omit<CmsContent, 'id' | 'created_at' | 'last_modified'>;
+        Update: Partial<CmsContent>;
+      };
+    };
+  };
 }
-
-export type Product = Database['public']['Tables']['products']['Row']
-export type Profile = Database['public']['Tables']['profiles']['Row']
-export type Order = Database['public']['Tables']['orders']['Row']

@@ -13,6 +13,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'customer' | 'admin'>('customer');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,14 +23,37 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (authError) throw authError;
 
-      router.push('/dashboard');
+      if (user) {
+        // Fetch profile to verify role
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          // If no profile found but user exists, they might be an admin without a profile row yet
+          // or a newly registered user whose profile creation failed.
+          // For security, we require a profile row.
+          await supabase.auth.signOut();
+          throw new Error('Your account profile could not be verified. Please contact support.');
+        }
+
+        if (profile?.role !== role) {
+          await supabase.auth.signOut();
+          throw new Error(`This account is not registered as a ${role.charAt(0).toUpperCase() + role.slice(1)}`);
+        }
+
+        // Successful login with correct role
+        router.push(role === 'admin' ? '/admin' : '/dashboard');
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {
@@ -121,6 +145,31 @@ export default function LoginPage() {
             <p className="text-gray-400 font-bold uppercase tracking-widest text-xs italic">Continue your creative journey</p>
           </div>
 
+          <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl mb-10 border border-gray-100 shadow-inner">
+             <button 
+               onClick={() => setRole('customer')}
+               className={cn(
+                 "flex-1 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all",
+                 role === 'customer' 
+                   ? "bg-white text-brand-dark shadow-sm border border-gray-100" 
+                   : "text-gray-400 hover:text-brand-dark"
+               )}
+             >
+                Customer Login
+             </button>
+             <button 
+               onClick={() => setRole('admin')}
+               className={cn(
+                 "flex-1 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all",
+                 role === 'admin' 
+                   ? "bg-white text-brand-pink shadow-sm border border-gray-100" 
+                   : "text-gray-400 hover:text-brand-pink"
+               )}
+             >
+                Admin Gateway
+             </button>
+          </div>
+
           {error && (
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
@@ -136,11 +185,11 @@ export default function LoginPage() {
             <div className="space-y-2">
                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Registered Email</label>
                <input 
-                 type="email" 
+                 type="text" 
                  required
                  value={email}
                  onChange={(e) => setEmail(e.target.value)}
-                 className="w-full px-6 py-4 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-pink focus:ring-4 focus:ring-brand-pink/5 outline-none transition-all font-bold text-brand-dark placeholder:text-gray-300 shadow-inner" 
+                 className="w-full px-6 py-3.5 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-pink focus:ring-4 focus:ring-brand-pink/5 outline-none transition-all font-bold text-brand-dark placeholder:text-gray-300 shadow-inner" 
                  placeholder="name@company.com" 
                />
             </div>
@@ -156,22 +205,26 @@ export default function LoginPage() {
                  value={password}
                  onChange={(e) => setPassword(e.target.value)}
                  placeholder="••••••••" 
-                 className="w-full px-6 py-4 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-pink focus:ring-4 focus:ring-brand-pink/5 outline-none transition-all font-bold text-brand-dark placeholder:text-gray-300 shadow-inner" 
+                 className="w-full px-6 py-3.5 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-pink focus:ring-4 focus:ring-brand-pink/5 outline-none transition-all font-bold text-brand-dark placeholder:text-gray-300 shadow-inner" 
                />
             </div>
 
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="w-full py-6 bg-brand-dark text-white rounded-[24px] text-xl font-black uppercase tracking-widest hover:bg-brand-pink shadow-2xl shadow-brand-dark/20 transition-all active:scale-95 disabled:opacity-50 mt-4 italic flex items-center justify-center gap-3"
-            >
-              {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : (
-                <>
-                  <Fingerprint className="w-6 h-6" />
-                  Sign In
-                </>
-              )}
-            </button>
+            <div className="flex flex-col gap-4 mt-6">
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full py-4.5 bg-brand-dark text-white rounded-[24px] text-lg font-black uppercase tracking-widest hover:bg-brand-pink shadow-2xl shadow-brand-dark/20 transition-all active:scale-95 disabled:opacity-50 italic flex items-center justify-center gap-3"
+              >
+                {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : (
+                  <>
+                    <Fingerprint className="w-6 h-6" />
+                    Sign In
+                  </>
+                )}
+              </button>
+
+
+            </div>
           </form>
 
           <div className="mt-12">

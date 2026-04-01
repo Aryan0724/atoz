@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { CanvasObjectProperties } from '../DesignerCanvas';
+import { CanvasObjectProperties } from '@/types/canvas';
 import { 
   Type, Trash2, MoveUp, MoveDown, Layers, ChevronDown, 
   Bold, Italic, AlignLeft, AlignCenter, AlignRight, Sparkles, Loader2,

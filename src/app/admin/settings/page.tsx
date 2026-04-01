@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Settings, Info, Save, Loader2 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function AdminSettingsPage() {
   const [loading, setLoading] = React.useState(false);

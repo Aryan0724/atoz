@@ -1,7 +1,9 @@
 import { Metadata, ResolvingMetadata } from 'next';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import ProductDetailClient from './ProductDetailClient';
 import { mockProducts } from '@/lib/data/mockProducts';
+import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 
 type Props = {
   params: { slug: string };
@@ -12,6 +14,7 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
+  const supabase = createClient();
   let product = null;
 
   try {
@@ -55,6 +58,32 @@ export async function generateMetadata(
   };
 }
 
-export default function ProductDetailPage() {
-  return <ProductDetailClient />;
+export default async function ProductDetailPage({ params }: Props) {
+  const supabase = createClient();
+  
+  const { data: product } = await supabase
+    .from('products')
+    .select('*')
+    .eq('slug', params.slug)
+    .single();
+
+  const finalProduct = product || mockProducts.find(p => p.slug === params.slug);
+
+  if (!finalProduct) {
+     return (
+        <div className="min-h-screen flex items-center justify-center">
+            <h1 className="text-2xl font-bold">Product not found.</h1>
+        </div>
+     );
+  }
+
+  return (
+    <Suspense fallback={
+       <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 text-brand-pink animate-spin" />
+       </div>
+    }>
+      <ProductDetailClient product={finalProduct} />
+    </Suspense>
+  );
 }

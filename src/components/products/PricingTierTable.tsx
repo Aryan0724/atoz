@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { TrendingDown, Info, ArrowRight } from 'lucide-react';
+import { TrendingDown, Info, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Tier {
@@ -16,66 +16,80 @@ interface PricingTierTableProps {
 }
 
 export default function PricingTierTable({ basePrice, tiers, currentQuantity }: PricingTierTableProps) {
-  // Default tiers if none provided (e.g., 5%, 10%, 15% off)
   const defaultTiers: Tier[] = [
-    { min_quantity: 50, price: basePrice },
+    { min_quantity: 50,  price: basePrice },
     { min_quantity: 100, price: Math.round(basePrice * 0.9) },
     { min_quantity: 250, price: Math.round(basePrice * 0.85) },
     { min_quantity: 500, price: Math.round(basePrice * 0.8) },
   ];
 
   const activeTiers = tiers || defaultTiers;
-
-  // Find current price based on quantity
-  const currentTierPrice = [...activeTiers].reverse().find(t => currentQuantity >= t.min_quantity)?.price || basePrice;
+  const savingPct = Math.round((1 - activeTiers[activeTiers.length - 1].price / activeTiers[0].price) * 100);
 
   return (
-    <div className="bg-brand-lightGray/30 rounded-[32px] p-8 border border-gray-100 shadow-inner">
-      <div className="flex items-center justify-between mb-6">
-        <h4 className="text-sm font-black text-brand-dark uppercase tracking-widest flex items-center gap-2">
-          <TrendingDown className="h-4 w-4 text-brand-pink" />
+    <div className="bg-gray-50/70 rounded-[28px] p-6 border border-gray-100">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <h4 className="text-xs font-black text-brand-dark uppercase tracking-widest flex items-center gap-2">
+          <TrendingDown className="h-3.5 w-3.5 text-brand-pink" />
           Bulk Pricing Tiers
         </h4>
-        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+        <div className="flex items-center gap-1.5 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
           <Info className="h-3 w-3" />
           GST Extra
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {/* Tier Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {activeTiers.map((tier, idx) => {
-          const isSelected = currentQuantity >= tier.min_quantity && 
-                             (idx === activeTiers.length - 1 || currentQuantity < activeTiers[idx + 1].min_quantity);
-          
+          const isActive = currentQuantity >= tier.min_quantity &&
+            (idx === activeTiers.length - 1 || currentQuantity < activeTiers[idx + 1].min_quantity);
+          const discountPct = idx > 0 ? Math.round((1 - tier.price / activeTiers[0].price) * 100) : 0;
+
           return (
-            <div 
-              key={idx} 
-              className={`relative p-5 rounded-3xl transition-all duration-500 border group flex flex-col justify-between min-h-[140px] ${
-                isSelected 
-                ? 'bg-brand-dark text-white border-brand-dark shadow-2xl shadow-brand-dark/20 -translate-y-1' 
-                : 'bg-white text-brand-dark border-gray-100 hover:border-brand-pink/30 hover:shadow-xl hover:shadow-gray-100'
-              }`}
+            <div
+              key={idx}
+              className={cn(
+                "relative rounded-[18px] p-4 border transition-all duration-300 flex flex-col gap-2",
+                isActive
+                  ? "bg-brand-dark text-white border-brand-dark shadow-lg shadow-brand-dark/20 -translate-y-1"
+                  : "bg-white text-brand-dark border-gray-100 hover:border-brand-pink/30 hover:shadow-md"
+              )}
             >
-              <div>
-                <div className={`text-[10px] font-black uppercase tracking-widest mb-2 ${isSelected ? 'text-brand-cyan' : 'text-brand-pink'}`}>
-                  {tier.min_quantity}+ Units
+              {/* Active indicator */}
+              {isActive && (
+                <div className="absolute -top-2 -right-2 w-5 h-5 bg-brand-cyan rounded-full flex items-center justify-center shadow-md">
+                  <Check className="w-3 h-3 text-brand-dark" strokeWidth={3} />
                 </div>
-                <div className="text-2xl font-black tracking-tighter mb-1">₹{tier.price}</div>
-                <div className={`text-[10px] font-medium opacity-60 ${isSelected ? 'text-white' : 'text-gray-400'}`}>per unit</div>
+              )}
+
+              {/* Quantity label */}
+              <div className={cn(
+                "text-[9px] font-black uppercase tracking-[0.15em]",
+                isActive ? "text-brand-cyan" : "text-brand-pink"
+              )}>
+                {tier.min_quantity}+ units
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-100/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className={cn(
-                  "w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                  isSelected ? "bg-brand-pink text-white" : "bg-brand-dark text-white"
-                )}>
-                  Get Started
-                </button>
+              {/* Price */}
+              <div className="flex items-baseline gap-0.5">
+                <span className={cn("text-xs font-bold opacity-60", isActive ? "text-white" : "text-brand-dark")}>₹</span>
+                <span className="text-2xl font-black tracking-tighter leading-none">{tier.price}</span>
               </div>
-              
-              {isSelected && (
-                <div className="absolute -top-2 -right-2 bg-brand-cyan text-brand-dark text-[8px] font-black px-3 py-1 rounded-full ring-4 ring-white animate-pulse">
-                  ACTIVE
+
+              {/* Per unit label */}
+              <div className={cn("text-[8px] font-bold uppercase tracking-widest leading-tight", isActive ? "text-white/50" : "text-gray-400")}>
+                per unit
+              </div>
+
+              {/* Discount badge */}
+              {discountPct > 0 && (
+                <div className={cn(
+                  "text-[8px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full w-fit",
+                  isActive ? "bg-brand-pink text-white" : "bg-brand-pink/10 text-brand-pink"
+                )}>
+                  Save {discountPct}%
                 </div>
               )}
             </div>
@@ -83,10 +97,11 @@ export default function PricingTierTable({ basePrice, tiers, currentQuantity }: 
         })}
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-4 text-xs font-bold text-gray-500">
-        <div className="h-[1px] flex-1 bg-gray-100"></div>
-        <span>Save up to {Math.round((1 - activeTiers[activeTiers.length-1].price / activeTiers[0].price) * 100)}% on Bulk</span>
-        <div className="h-[1px] flex-1 bg-gray-100"></div>
+      {/* Footer */}
+      <div className="mt-4 flex items-center justify-center gap-3 text-[10px] font-bold text-gray-400">
+        <div className="h-px flex-1 bg-gray-200" />
+        <span>Save up to {savingPct}% on bulk orders</span>
+        <div className="h-px flex-1 bg-gray-200" />
       </div>
     </div>
   );

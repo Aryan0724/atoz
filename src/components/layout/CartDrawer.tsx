@@ -313,34 +313,31 @@ const CartDrawer = () => {
 
               {/* Footer */}
               {items.length > 0 && (
-                <div className="p-8 bg-white border-t border-gray-100/50 space-y-6 shadow-[0_-20px_40px_rgba(0,0,0,0.02)]">
-                  <div className="flex justify-between items-center bg-gray-50/50 p-6 rounded-[24px] border border-gray-100">
+                <div className="p-10 bg-white border-t border-gray-100/50 space-y-8 shadow-[0_-20px_60px_rgba(0,0,0,0.04)]">
+                  <div className="flex justify-between items-center bg-gray-50/80 p-8 rounded-[32px] border border-gray-100 shadow-inner">
                     <div className="flex flex-col">
-                      <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Grand Total</span>
-                      <span className="text-3xl font-black text-brand-dark tracking-tighter italic">₹{getTotalPrice()}</span>
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 leading-none">Grand Total Cost</span>
+                      <div className="flex items-baseline gap-1">
+                         <span className="text-xl font-black text-brand-dark italic mb-1 tracking-tighter">₹</span>
+                         <span className="text-4xl font-black text-brand-dark tracking-tighter italic leading-none">{getTotalPrice().toLocaleString()}</span>
+                      </div>
                     </div>
                     <div className="h-10 w-px bg-gray-200" />
                     <div className="text-right">
-                      <span className="text-xs font-black text-brand-pink uppercase tracking-widest block mb-1">Status</span>
-                      <span className="text-xs font-bold text-gray-400">Ready to Ship</span>
+                      <span className="text-[10px] font-black text-brand-pink uppercase tracking-widest block mb-1">Impact Status</span>
+                      <span className="text-[10px] font-black text-brand-dark uppercase tracking-widest bg-brand-cyan/20 px-3 py-1.5 rounded-full ring-4 ring-brand-cyan/5">Standard Pack</span>
                     </div>
                   </div>
                   
                   <div className="flex gap-4">
                     <button 
                       onClick={handleCheckoutClick}
-                      className="flex-1 bg-brand-pink text-white flex items-center justify-center py-6 rounded-3xl font-black text-xl hover:shadow-[0_20px_40px_rgba(235,51,126,0.3)] hover:scale-[1.02] transition-all active:scale-95 group"
+                      className="flex-1 bg-brand-dark text-white flex items-center justify-center py-6 rounded-[28px] font-black text-xl uppercase tracking-[0.2em] hover:bg-brand-pink shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] hover:shadow-brand-pink/20 transition-all active:scale-95 group italic"
                     >
-                      Checkout
-                      <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform duration-500" />
+                      Process Checkout
+                      <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform duration-500" />
                     </button>
                   </div>
-                  <button 
-                    onClick={() => setOpen(false)}
-                    className="w-full text-center text-sm font-black text-gray-400 uppercase tracking-[0.2em] hover:text-brand-dark transition-colors py-2"
-                  >
-                    Continue Shopping
-                  </button>
                 </div>
               )}
             </motion.div>

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   BarChart3, 
   Package, 
@@ -11,18 +11,30 @@ import {
   Users, 
   Settings, 
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Zap,
+  Layout,
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase/client';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
 
   const menuItems = [
     { name: 'Overview', href: '/admin', icon: <BarChart3 className="h-5 w-5" /> },
     { name: 'Products', href: '/admin/products', icon: <Package className="h-5 w-5" /> },
     { name: 'Orders', href: '/admin/orders', icon: <ShoppingBag className="h-5 w-5" /> },
     { name: 'Customers', href: '/admin/customers', icon: <Users className="h-5 w-5" /> },
+    { name: 'Integrations', href: '/admin/integrations', icon: <Zap className="h-5 w-5" /> },
+    { name: 'CMS', href: '/admin/cms', icon: <Layout className="h-5 w-5" /> },
     { name: 'Settings', href: '/admin/settings', icon: <Settings className="h-5 w-5" /> },
   ];
 
@@ -71,7 +83,7 @@ export default function AdminSidebar() {
         </nav>
       </div>
 
-      <div className="mt-auto p-8 pt-0">
+      <div className="mt-auto p-8 pt-0 space-y-3">
         <Link 
           href="/"
           className="flex items-center justify-between p-4 bg-brand-lightGray rounded-3xl group hover:bg-brand-dark transition-all duration-300"
@@ -82,6 +94,17 @@ export default function AdminSidebar() {
           </div>
           <ExternalLink className="h-4 w-4 text-gray-300 group-hover:text-brand-pink transition-colors" />
         </Link>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-between p-4 bg-red-50 rounded-3xl group hover:bg-red-500 transition-all duration-300"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-red-100 group-hover:bg-white/20 transition-colors">
+              <LogOut className="h-4 w-4 text-red-500 group-hover:text-white transition-colors" />
+            </div>
+            <span className="text-sm font-bold text-red-500 group-hover:text-white transition-colors">Logout</span>
+          </div>
+        </button>
       </div>
     </aside>
   );

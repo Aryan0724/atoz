@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const Footer = () => {
   return (
@@ -30,27 +30,27 @@ const Footer = () => {
             <p className="text-on-primary/60 leading-relaxed font-medium">
               Transforming your digital visions into premium physical impressions. From custom apparel to corporate gifting, we define the standard of high-fidelity printing.
             </p>
-            <div className="flex space-x-4">
-              {[Facebook, Instagram, Twitter].map((Icon, i) => (
-                <a 
-                  key={i} 
-                  href="#" 
-                  className="h-12 w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary hover:border-primary transition-all duration-500 hover:-translate-y-1 group"
-                >
-                  <Icon className="h-5 w-5 text-on-primary/50 group-hover:text-white transition-colors" />
-                </a>
-              ))}
-            </div>
+              <div className="flex space-x-6">
+                {[Facebook, Instagram, Twitter].map((Icon, i) => (
+                  <a 
+                    key={i} 
+                    href="#" 
+                    className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary hover:border-primary transition-all duration-500 hover:-translate-y-1 group"
+                  >
+                    <Icon className="h-6 w-6 text-on-primary/50 group-hover:text-white transition-colors" />
+                  </a>
+                ))}
+              </div>
           </div>
 
           {/* Navigation Links */}
           <div>
             <h4 className="text-white font-bold text-lg mb-8 tracking-tight">Curation</h4>
-            <ul className="space-y-4">
-              <li><Link href="/products" className="hover:text-primary transition-all duration-300 font-medium">Product Catalog</Link></li>
-              <li><Link href="/services" className="hover:text-primary transition-all duration-300 font-medium">Design Atelier</Link></li>
-              <li><Link href="/bulk" className="hover:text-primary transition-all duration-300 font-medium">Enterprise Orders</Link></li>
-              <li><Link href="/about" className="hover:text-primary transition-all duration-300 font-medium">Our Philosophy</Link></li>
+            <ul className="space-y-5">
+              <li><Link href="/products" className="text-base sm:text-sm hover:text-primary transition-all duration-300 font-medium">Product Catalog</Link></li>
+              <li><Link href="/services" className="text-base sm:text-sm hover:text-primary transition-all duration-300 font-medium">Design Atelier</Link></li>
+              <li><Link href="/bulk" className="text-base sm:text-sm hover:text-primary transition-all duration-300 font-medium">Enterprise Orders</Link></li>
+              <li><Link href="/about" className="text-base sm:text-sm hover:text-primary transition-all duration-300 font-medium">Our Philosophy</Link></li>
             </ul>
           </div>
 

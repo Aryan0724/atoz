@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase/client';
 import { ArrowLeft, Github, Chrome, Loader2, AlertCircle, Sparkles, ShieldCheck, Zap } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 export default function RegisterPage() {

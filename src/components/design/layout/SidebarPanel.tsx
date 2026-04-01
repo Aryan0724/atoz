@@ -3,11 +3,11 @@
 import React, { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { SidebarTab } from './SidebarRail';
-import { CanvasObjectProperties } from '../DesignerCanvas';
+import { CanvasObjectProperties } from '@/types/canvas';
 import { canvasTemplates, templateCategories } from '@/lib/data/canvasTemplates';
 import { iconLibrary, iconCategories } from '@/lib/data/icons';
 import { podGraphics, podGraphicCategories } from '@/lib/data/podGraphics';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { 
   Type, Loader2, Upload, Plus, Search, LayoutGrid, Layers, Lock, Unlock, Eye, EyeOff,
   X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes

@@ -8,14 +8,16 @@ import { useCart } from '@/lib/store/useCart';
 import { 
   Check, 
   ChevronRight, 
-  ShoppingCart, 
-  Sparkles, 
-  Truck, 
-  ShieldCheck, 
+  Minus,
+  Loader2,
+  Calendar,
+  Zap,
+  Info,
+  ShieldCheck,
   RotateCcw,
   Plus,
-  Minus,
-  Loader2
+  Truck,
+  ShoppingCart
 } from 'lucide-react';
 import ProductCard from '@/components/products/ProductCard';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
@@ -24,83 +26,47 @@ import PricingTierTable from '@/components/products/PricingTierTable';
 import { mockProducts } from '@/lib/data/mockProducts';
 import { supabase } from '@/lib/supabase/client';
 import { Product } from '@/lib/supabase/types';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-export default function ProductDetailClient() {
+export default function ProductDetailClient({ product: initialProduct }: { product: Product }) {
   const params = useParams();
   const slug = params.slug as string;
   const { addItem } = useCart();
 
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<Product>(initialProduct);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedQuality, setSelectedQuality] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [selectedQuality, setSelectedQuality] = useState(initialProduct.quality_levels?.[0] || 'Standard');
+  const [quantity, setQuantity] = useState(initialProduct.moq || 1);
   const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
-    const fetchProductData = async () => {
-      setLoading(true);
+    const fetchRelatedData = async () => {
+      // We already have the product from props
       
-      // Fetch current product
-      const { data: productData, error: productError } = await supabase
-        .from('products')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-
-      if (productError || !productData) {
-        // Fallback to mock data by slug
-        const mockProduct = mockProducts.find(p => p.slug === slug);
-        if (mockProduct) {
-          setProduct(mockProduct);
-          setSelectedQuality(mockProduct.quality_levels?.[0] || 'Standard');
-          setQuantity(mockProduct.moq || 1);
-          
-          const related = mockProducts
-            .filter(p => p.category === mockProduct.category && p.slug !== slug)
-            .slice(0, 4);
-          setRelatedProducts(related);
-        }
-        setLoading(false);
-        return;
-      }
-
-      // Enrich with mock images for realistic preview
-      const mockMatch = mockProducts.find(m => m.slug === slug || m.id === productData.id);
-      const enrichedProduct = {
-        ...productData,
-        images: mockMatch?.images || productData.images
-      };
-
-      setProduct(enrichedProduct);
-      setSelectedQuality(productData.quality_levels?.[0] || 'Standard');
-      setQuantity(productData.moq || 1);
-
       // Fetch related products from Supabase
       const { data: relatedData } = await supabase
         .from('products')
         .select('*')
-        .eq('category', productData.category)
-        .neq('id', productData.id)
+        .eq('category', initialProduct.category)
+        .neq('id', initialProduct.id)
         .limit(4);
 
       // If no related products in Supabase, try mock data
       if (!relatedData || relatedData.length === 0) {
         const related = mockProducts
-          .filter(p => p.category === productData.category && p.slug !== slug)
+          .filter(p => p.category === initialProduct.category && p.slug !== slug)
           .slice(0, 4);
         setRelatedProducts(related);
       } else {
         setRelatedProducts(relatedData);
       }
-      setLoading(false);
     };
 
-    fetchProductData();
-  }, [slug]);
+    fetchRelatedData();
+  }, [slug, initialProduct.category, initialProduct.id]);
 
   if (loading) {
     return (
@@ -162,7 +128,7 @@ export default function ProductDetailClient() {
             {/* Thumbnail Gallery */}
             {product.images && product.images.length > 1 && (
               <div className="mt-6 flex gap-4 overflow-x-auto pb-2 no-scrollbar">
-                {product.images.map((image, index) => (
+                {product.images.map((image: string, index: number) => (
                   <button 
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
@@ -235,7 +201,7 @@ export default function ProductDetailClient() {
                 )}
               </div>
               <div className="flex flex-wrap gap-3">
-                {product.quality_levels?.map((level) => (
+                {product.quality_levels?.map((level: string) => (
                   <button
                     key={level}
                     onClick={() => setSelectedQuality(level)}
@@ -256,11 +222,11 @@ export default function ProductDetailClient() {
               <label className="block text-sm font-bold text-brand-dark mb-4 uppercase tracking-wider">
                 Order Quantity <span className="text-brand-pink ml-2"> (Min. {product.moq} Units)</span>
               </label>
-              <div className="flex items-center gap-6">
-                <div className="inline-flex items-center border-2 border-gray-100 rounded-2xl p-1.5">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+                <div className="inline-flex items-center border-2 border-gray-100 rounded-2xl p-1.5 shadow-inner bg-gray-50/30">
                   <button 
                     onClick={() => setQuantity(prev => Math.max(product.moq || 1, prev - 1))}
-                    className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors"
+                    className="p-2.5 rounded-xl hover:bg-white hover:shadow-md transition-all active:scale-95"
                   >
                     <Minus className="h-5 w-5 text-brand-dark" />
                   </button>
@@ -268,19 +234,27 @@ export default function ProductDetailClient() {
                     type="number" 
                     value={quantity}
                     onChange={(e) => setQuantity(Math.max(product.moq || 1, parseInt(e.target.value) || (product.moq || 1)))}
-                    className="w-20 text-center font-bold text-xl focus:outline-none bg-transparent"
+                    className="w-20 text-center font-black text-2xl focus:outline-none bg-transparent text-brand-dark"
                   />
                   <button 
                     onClick={() => setQuantity(prev => prev + 1)}
-                    className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors"
+                    className="p-2.5 rounded-xl hover:bg-white hover:shadow-md transition-all active:scale-95"
                   >
                     <Plus className="h-5 w-5 text-brand-dark" />
                   </button>
                 </div>
-                <div className="text-sm font-bold text-gray-400">
-                   Base Rate: <span className="text-brand-dark text-lg ml-1">
-                     ₹{Math.round((product.base_price || 0) * ([1, 1.2, 1.5, 2][Math.max(0, product.quality_levels?.indexOf(selectedQuality) ?? 0)] || 1))}
-                   </span>
+                <div className="flex flex-col">
+                  <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Unit Rate</div>
+                  <div className="text-xl font-black text-brand-dark">
+                    ₹{Math.round((product.base_price || 0) * ([1, 1.2, 1.5, 2][Math.max(0, product.quality_levels?.indexOf(selectedQuality) ?? 0)] || 1))}
+                  </div>
+                </div>
+                <div className="h-10 w-px bg-gray-100 hidden sm:block" />
+                <div className="flex flex-col">
+                  <div className="text-[10px] font-black text-brand-pink uppercase tracking-widest mb-1">Total Impact</div>
+                  <div className="text-2xl font-black text-brand-pink tracking-tight">
+                    ₹{(quantity * Math.round((product.base_price || 0) * ([1, 1.2, 1.5, 2][Math.max(0, product.quality_levels?.indexOf(selectedQuality) ?? 0)] || 1))).toLocaleString()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -293,33 +267,40 @@ export default function ProductDetailClient() {
               />
             </div>
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button 
-                onClick={handleAddToCart}
-                className="flex items-center justify-center gap-3 px-8 py-5 bg-brand-pink text-white font-bold text-lg rounded-full hover:shadow-2xl hover:shadow-pink-200 transform hover:-translate-y-1 transition-all"
-              >
-                <ShoppingCart className="h-6 w-6" />
-                Add to Cart
-              </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <Link 
                 href={`/customize/${product.slug}`}
-                className="flex items-center justify-center gap-3 px-8 py-5 bg-brand-dark text-white font-bold text-lg rounded-full hover:shadow-2xl hover:shadow-gray-200 transform hover:-translate-y-1 transition-all"
+                className="flex items-center justify-center gap-3 px-8 py-5 bg-brand-dark text-white font-black text-xs uppercase tracking-[0.25em] rounded-[24px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:bg-brand-pink transform hover:-translate-y-1 transition-all group relative overflow-hidden italic"
               >
-                <Sparkles className="h-6 w-6 text-brand-cyan" />
-                Start Designing
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Zap className="h-5 w-5 text-brand-cyan animate-pulse" />
+                Open Design Studio
               </Link>
+              <button 
+                onClick={handleAddToCart}
+                className="flex items-center justify-center gap-3 px-8 py-5 bg-white border border-brand-pink text-brand-pink font-black text-xs uppercase tracking-[0.25em] rounded-[24px] hover:bg-brand-pink hover:text-white transform hover:-translate-y-1 transition-all shadow-xl shadow-brand-pink/5 italic"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                Add to Cart
+              </button>
             </div>
 
             {/* Delivery Info */}
-            <div className="mt-12 bg-pink-50/50 p-6 rounded-3xl border border-pink-100">
-              <div className="flex items-start gap-4">
-                <div className="p-2 bg-brand-pink/10 rounded-xl">
-                  <Check className="h-5 w-5 text-brand-pink" />
+            <div className="mt-12 bg-gray-50 border border-gray-100 p-8 rounded-[32px] relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Truck className="w-16 h-16 text-brand-dark" />
+              </div>
+              <div className="relative z-10 flex items-start gap-5">
+                <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-100 text-brand-pink">
+                  <Calendar className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-brand-dark mb-1">Estimated Delivery: {product.delivery_days} Days</h4>
-                  <p className="text-sm text-gray-500">Includes printing time, quality check, and shipping across India.</p>
+                  <h4 className="font-black text-brand-dark text-lg mb-1 tracking-tight">
+                    Arrives by {new Date(Date.now() + (parseInt(product.delivery_days?.toString() || '7') || 7) * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })}
+                  </h4>
+                  <p className="text-sm font-bold text-gray-400 leading-relaxed uppercase tracking-widest text-[10px]">
+                    Includes production & express shipping nationwide
+                  </p>
                 </div>
               </div>
             </div>
@@ -336,7 +317,7 @@ export default function ProductDetailClient() {
                 Customization Fields
               </h3>
               <ul className="space-y-4">
-                {product.customization_fields?.map((field, idx) => (
+                {product.customization_fields?.map((field: string, idx: number) => (
                   <li key={idx} className="flex items-center gap-3 text-gray-600 font-medium">
                     <Check className="h-5 w-5 text-brand-pink" />
                     {field}
@@ -350,7 +331,7 @@ export default function ProductDetailClient() {
                 Packaging Options
               </h3>
               <ul className="space-y-4">
-                {product.packaging_options?.map((opt, idx) => (
+                {product.packaging_options?.map((opt: string, idx: number) => (
                   <li key={idx} className="flex items-center gap-3 text-gray-600 font-medium">
                     <div className="h-2 w-2 rounded-full bg-brand-cyan"></div>
                     {opt}

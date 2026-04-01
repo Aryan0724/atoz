@@ -1,0 +1,30 @@
+# A to Z Prints - Project Rules
+
+## Tech Stack & Architecture
+- **Framework:** Next.js 14+ (App Router). Use Server Components by default; use `'use client'` only when necessary for hooks/interactivity.
+- **Database/Auth:** Supabase. Always use the shared clients from `@/lib/supabase/client` or `@/lib/supabase/server`.
+- **Styling:** Tailwind CSS. Use clean, semantic class naming. Prefer CSS variables for theme colors.
+- **Canvas Engine:** Fabric.js. Ensure proper object cleanup on unmount to prevent memory leaks in the Customizer.
+- **State Management:** Zustand for global UI/Cart state.
+
+## Coding Standards
+- **TypeScript:** Strict typing is mandatory. Avoid `any`. Use interfaces for data models.
+- **Components:** Functional components with Lucide-React for icons.
+- **Feedback:** Use `sonner` for all toast notifications.
+- **Animations:** Use `framer-motion` for transitions and micro-interactions.
+- **API:** Use Server Actions for data mutations instead of manual API routes where possible.
+
+## Fabric.js Specifics (Customizer)
+- Always handle canvas scaling and high-DPI displays.
+- Center objects by default when added.
+- Implement "History" (Undo/Redo) logic using a debounced state snapshot.
+
+## UI/UX Principles
+- **Aesthetics:** Follow a "Premium & Modern" design—ample whitespace, smooth gradients, and subtle shadows.
+- **Responsive:** Mobile-first approach is non-negotiable.
+- **Loading:** Use Skeleton loaders for data-heavy sections (Catalog, Orders).
+
+## File Naming
+- Components: `PascalCase.tsx`
+- Hooks: `useCamelCase.ts`
+- Lib/Utils: `camelCase.ts`

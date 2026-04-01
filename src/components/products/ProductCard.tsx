@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '@/lib/supabase/types';
-import { ShoppingBag, Eye, Zap } from 'lucide-react';
+import { ShoppingBag, Eye, Zap, X } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -24,6 +24,7 @@ const categoryGradients: Record<string, string> = {
 const ProductCard = ({ product }: ProductCardProps) => {
   const [imgError, setImgError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const gradient = product.category ? (categoryGradients[product.category] || 'from-gray-400 to-gray-600') : 'from-gray-400 to-gray-600';
   
   return (
@@ -63,14 +64,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <AnimatePresence>
             {isHovered && (
               <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="absolute inset-x-0 bottom-0 p-6 z-20 pointer-events-none"
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="absolute inset-x-0 bottom-0 p-8 z-20 pointer-events-none"
               >
-                <div className="w-full bg-brand-dark/90 backdrop-blur-lg text-white py-4 rounded-2xl flex items-center justify-center gap-2 shadow-2xl shadow-brand-dark/40 border border-white/10">
-                  <Zap className="w-4 h-4 text-brand-lime" />
-                  <span className="text-sm font-black tracking-widest uppercase">Customize Now</span>
+                <div className="w-full bg-brand-dark/95 backdrop-blur-2xl text-white py-5 rounded-[24px] flex items-center justify-center gap-3 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border border-white/20">
+                  <Zap className="w-5 h-5 text-brand-cyan animate-pulse" />
+                  <span className="text-xs font-black tracking-[0.25em] uppercase italic">Custom Studio</span>
                 </div>
               </motion.div>
             )}
@@ -78,9 +79,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
           {/* Quick View Button - Subtle Top Right */}
           <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg hover:bg-brand-pink hover:text-white transition-all cursor-pointer">
+            <button 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsQuickViewOpen(true); }}
+              className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg hover:bg-brand-pink hover:text-white transition-all cursor-pointer border border-gray-100"
+            >
               <Eye className="w-5 h-5" />
-            </div>
+            </button>
           </div>
         </div>
 
@@ -111,6 +115,76 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
         </div>
       </Link>
+
+      {/* Quick View Modal Overlay */}
+      <AnimatePresence>
+        {isQuickViewOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsQuickViewOpen(false)}
+              className="fixed inset-0 bg-brand-dark/40 backdrop-blur-md z-[1001]"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-4xl bg-white rounded-[40px] shadow-2xl z-[1002] overflow-hidden flex flex-col md:flex-row"
+            >
+              <button 
+                onClick={() => setIsQuickViewOpen(false)}
+                className="absolute top-6 right-6 p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors z-20"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="w-full md:w-1/2 bg-gray-50 aspect-square relative p-12">
+                 <Image 
+                    src={product.images?.[0] || ''} 
+                    alt={product.name} 
+                    fill 
+                    className="object-contain p-8" 
+                 />
+              </div>
+
+              <div className="w-full md:w-1/2 p-10 flex flex-col">
+                <div className="text-[10px] font-black text-brand-pink uppercase tracking-widest mb-4">
+                  {product.category}
+                </div>
+                <h2 className="text-3xl font-black text-brand-dark mb-6 tracking-tight">
+                  {product.name}
+                </h2>
+                <div className="flex items-baseline gap-2 mb-8">
+                  <span className="text-sm font-bold text-gray-400">From</span>
+                  <span className="text-3xl font-black text-brand-dark tracking-tighter">₹{product.base_price}</span>
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">/ unit</span>
+                </div>
+                <p className="text-gray-500 font-medium leading-relaxed mb-10 line-clamp-4">
+                  {product.description}
+                </p>
+
+                <div className="mt-auto space-y-3">
+                  <Link 
+                    href={`/customize/${product.slug}`}
+                    className="flex items-center justify-center gap-3 w-full py-5 bg-brand-dark text-white font-black rounded-2xl hover:bg-brand-pink transition-all shadow-xl shadow-brand-dark/10 text-xs uppercase tracking-[0.2em] italic"
+                  >
+                    <Zap className="h-4 w-4 text-brand-cyan" />
+                    Custom Design Studio
+                  </Link>
+                  <Link 
+                    href={`/products/${product.slug}`}
+                    className="flex items-center justify-center gap-3 w-full py-5 bg-white border border-gray-100 text-brand-dark/40 font-black rounded-2xl hover:border-brand-pink hover:text-brand-pink transition-all text-[10px] uppercase tracking-[0.2em] italic"
+                  >
+                    Explore Full Details
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

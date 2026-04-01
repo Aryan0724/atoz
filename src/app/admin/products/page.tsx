@@ -20,7 +20,7 @@ import { Product } from '@/lib/supabase/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 export default function ProductManagerPage() {
@@ -36,15 +36,19 @@ export default function ProductManagerPage() {
 
   const fetchProducts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching products:', error);
-    } else {
+      if (error) throw error;
       setProducts(data || []);
+    } catch (err) {
+      console.error('Error fetching products, using mock data:', err);
+      // Fallback for Demo
+      const { mockProducts } = require('@/lib/data/mockProducts');
+      setProducts(mockProducts || []);
     }
     setLoading(false);
   };
