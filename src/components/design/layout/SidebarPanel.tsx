@@ -8,6 +8,7 @@ import { canvasTemplates, templateCategories } from '@/lib/data/canvasTemplates'
 import { iconLibrary, iconCategories } from '@/lib/data/icons';
 import { podGraphics, podGraphicCategories } from '@/lib/data/podGraphics';
 import { toast } from 'sonner';
+import IconifyTab from '@/components/design/controls/tabs/IconifyTab';
 import { 
   Type, Loader2, Upload, Plus, Search, LayoutGrid, Layers, Lock, Unlock, Eye, EyeOff,
   X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes
@@ -261,6 +262,8 @@ const SidebarPanel = ({
     reader.readAsDataURL(file);
   };
 
+  const [textCurveAmount, setTextCurveAmount] = useState(0);
+
   const currentTitle: Record<string, string> = {
     'product': 'Product Settings',
     'uploads': 'My Uploads',
@@ -270,6 +273,7 @@ const SidebarPanel = ({
     'graphics': 'Elements',
     'templates': 'Templates',
     'shutterstock': 'Quick Photos',
+    'iconify': 'Icon Library',
   };
 
   const filteredTemplates = activeTemplateCat === 'All' 
@@ -346,6 +350,50 @@ const SidebarPanel = ({
                 <span className="text-[9px] text-gray-400 uppercase tracking-widest mt-1 block">{style.description}</span>
               </button>
             ))}
+
+            <SectionLabel>Quick Text Phrases</SectionLabel>
+            <div className="grid grid-cols-2 gap-2">
+              {podTextPhrases.map((p) => (
+                <button
+                  key={p.text}
+                  onClick={() => onAddText(p.text)}
+                  className="p-2.5 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/20 rounded-xl text-left transition-all group hover:shadow-sm"
+                >
+                  <span className="block text-[10px] font-black text-[#1a1a1a] truncate" style={{ fontFamily: p.font }}>{p.text}</span>
+                  <span className="text-[8px] text-gray-400 block mt-0.5">{p.desc}</span>
+                </button>
+              ))}
+            </div>
+
+            <SectionLabel>Curved Text</SectionLabel>
+            <div className="bg-[#f7f7f2] rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-600">Arc Amount</span>
+                <span className="text-[11px] font-black text-[#5b5b42]">{textCurveAmount > 0 ? `+${textCurveAmount}` : textCurveAmount}°</span>
+              </div>
+              <input
+                type="range"
+                min="-100"
+                max="100"
+                value={textCurveAmount}
+                onChange={(e) => setTextCurveAmount(Number(e.target.value))}
+                className="w-full accent-[#5b5b42] h-1.5 rounded-full cursor-pointer"
+              />
+              <div className="flex justify-between text-[9px] font-bold text-gray-400">
+                <span>◡ Concave</span>
+                <span>— Straight —</span>
+                <span>◠ Convex</span>
+              </div>
+              <button
+                onClick={() => {
+                  onAddText('Curved Text Here');
+                  toast.success('Text added! Select it then adjust the arc.');
+                }}
+                className="w-full py-2 bg-[#5b5b42] text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-[#3d3d2d] transition-colors"
+              >
+                Add Curved Text
+              </button>
+            </div>
 
             <SectionLabel>Font Styles</SectionLabel>
             <div className="grid grid-cols-2 gap-2">
@@ -738,6 +786,11 @@ const SidebarPanel = ({
               ))}
             </div>
           </div>
+        )}
+
+        {/* ─── ICONIFY TAB ─────────────────────────────────────── */}
+        {activeTab === 'iconify' && (
+          <IconifyTab onAddSvgGraphic={onAddSvgGraphic} />
         )}
       </div>
     </div>

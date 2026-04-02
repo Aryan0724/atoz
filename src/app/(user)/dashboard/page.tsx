@@ -21,7 +21,8 @@ import {
   User,
   MapPin,
   Save,
-  Plus as PlusIcon
+  Plus as PlusIcon,
+  RotateCcw
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { getUserOrders } from '@/lib/supabase/orderActions';
@@ -286,11 +287,19 @@ export default function DashboardPage() {
                                    <span className="text-brand-pink text-sm mb-1 italic">₹</span>
                                    {(order.total_price || 0).toLocaleString()}
                                  </div>
-                                 <span className="text-[9px] font-black text-gray-300 uppercase tracking-[0.2em]">Deployment Total</span>
                               </div>
-                              <button className="p-4 bg-gray-50 rounded-2xl text-gray-400 group-hover:bg-brand-pink group-hover:text-white group-hover:shadow-lg transition-all">
-                                 <ExternalLink className="h-5 w-5" />
-                              </button>
+                              <div className="flex gap-2">
+                                <Link 
+                                  href={`/customize/${order.products?.slug}`}
+                                  className="px-6 py-4 bg-gray-50 rounded-2xl text-brand-dark group-hover:bg-brand-dark group-hover:text-white group-hover:shadow-lg transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2"
+                                >
+                                  <RotateCcw className="h-4 w-4" />
+                                  Reorder
+                                </Link>
+                                <button className="p-4 bg-gray-50 rounded-2xl text-gray-400 group-hover:bg-brand-pink group-hover:text-white group-hover:shadow-lg transition-all">
+                                   <ExternalLink className="h-5 w-5" />
+                                </button>
+                              </div>
                            </div>
                         </motion.div>
                       ))

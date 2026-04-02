@@ -10,8 +10,9 @@ import SidebarRail from '@/components/design/layout/SidebarRail';
 import SidebarPanel from '@/components/design/layout/SidebarPanel';
 import TopToolbar from '@/components/design/layout/TopToolbar';
 import ThreeDPreview from '@/components/design/ThreeDPreview';
+import { canvasTemplates } from '@/lib/data/canvasTemplates';
 import {
-  ArrowLeft, Check, Loader2, Plus, RotateCcw, LayoutGrid, ZoomOut, ZoomIn, Hand, Info, Palette, Type, Square, Upload, Sparkles, Download
+  ArrowLeft, Check, Loader2, Plus, RotateCcw, LayoutGrid, ZoomOut, ZoomIn, Hand, Info, Palette, Type, Square, Upload, Sparkles, Download, Shuffle
 } from 'lucide-react';
 import Link from 'next/link';
 import { Product } from '@/lib/supabase/types';
@@ -19,7 +20,7 @@ import { cn, dataURLToBlob } from '@/lib/utils';
 import { uploadFile } from '@/lib/supabase/storage';
 import { toast } from 'sonner';
 
-export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock';
+export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify';
 
 interface CustomizeClientProps {
   product: Product;
@@ -30,8 +31,8 @@ const mobileTools: { id: SidebarTab; icon: React.ReactNode; label: string }[] = 
   { id: 'templates', icon: <LayoutGrid className="h-5 w-5" />, label: 'Templates' },
   { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },
   { id: 'graphics', icon: <Square className="h-5 w-5" />, label: 'Elements' },
+  { id: 'iconify', icon: <Sparkles className="h-5 w-5" />, label: 'Icons' },
   { id: 'uploads', icon: <Upload className="h-5 w-5" />, label: 'Upload' },
-  { id: 'ai', icon: <Sparkles className="h-5 w-5" />, label: 'AI' },
 ];
 
 export default function CustomizeClient({ product }: CustomizeClientProps) {
@@ -185,6 +186,18 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
           <button className="p-2 text-gray-400 hover:text-brand-dark transition-colors"><Info className="h-5 w-5" /></button>
           <button onClick={() => canvasRef.current?.undo?.()} className="p-2 text-gray-400 hover:text-brand-dark transition-colors"><RotateCcw className="h-5 w-5 -scale-x-100" /></button>
           <button onClick={() => canvasRef.current?.redo?.()} className="p-2 text-gray-400 hover:text-brand-dark transition-colors"><RotateCcw className="h-5 w-5" /></button>
+          <div className="h-6 w-px bg-gray-100 mx-1" />
+          <button 
+            onClick={() => {
+              const random = canvasTemplates[Math.floor(Math.random() * canvasTemplates.length)];
+              canvasRef.current?.loadJson(random.json);
+              import('sonner').then(({ toast }) => toast.success(`✨ "${random.name}" applied!`));
+            }}
+            className="flex items-center gap-2 px-4 py-1.5 bg-brand-pink/10 hover:bg-brand-pink text-brand-pink hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all italic"
+          >
+            <Shuffle className="h-3.5 w-3.5" />
+            Surprise Me
+          </button>
           <div className="h-6 w-px bg-gray-100 mx-1" />
           <button 
             onClick={() => canvasRef.current?.downloadDesign()}
