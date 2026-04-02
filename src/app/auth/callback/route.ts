@@ -25,6 +25,7 @@ export async function GET(request: Request) {
           {
             id: session.user.id,
             full_name: session.user.user_metadata.full_name || session.user.user_metadata.name || 'New User',
+            email: session.user.email,
             role: 'customer'
           }
         ]);
