@@ -1,69 +1,25 @@
-# AtoZ Prints – Launch Readiness Checklist 🚀
+# AtoZ Prints - Launch Operations Checklist
 
-This document summarizes the final state of the platform and the steps required for a successful production deployment.
+Before pointing real DNS traffic to `https://atozprints.in`, run through this deployment flight checklist to ensure robust security and optimal performance.
 
-## 🟢 Technical Implementations Completed
+## 1. Database & Supabase Configuration
+- [ ] **Run Final Migrations:** Ensure the two latest SQL files (`20260402000000_reviews_schema.sql` and `20260402000001_pages_schema.sql`) are executed over your live Supabase SQL Editor.
+- [ ] **Verify RLS Policies:** Access your Supabase dashboard > Authentication > Policies and ensure policies for `products`, `orders`, `profiles`, and `product_reviews` are perfectly active.
+- [ ] **Enable Auth Providers:** Turn on Google Auth in Supabase settings and punch in your Client ID and Secret if you haven't natively stored them in the production branch yet.
+- [ ] **Storage Buckets:** Verify that the `designs` and `products` storage buckets are created and public rules are toggled correctly so users can download PDFs without auth locks!
 
-### 🔐 Authentication & Access
-- [x] **Supabase Auth Integration**: Full login/register flow with role-based routing.
-- [x] **Admin Guard**: Layout-level protection for `/admin` routes.
-- [x] **Logout Functionality**: Wired to `signOut()` in Admin Sidebar, Dashboard, and Navbar.
-- [x] **User Dashboard**: Fully functional profile and address management.
+## 2. Secrets & Environment Setup (Vercel)
+- [ ] Sync the `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- [ ] Populate `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` with **Live Mode** keys (not testing keys).
+- [ ] Inject `REMOVE_BG_API_KEY` with your subscription token. *Background removal will throw internal 500s otherwise.*
 
-### 👕 Product & Catalog
-- [x] **Live Database Sync**: Homepage and Catalog fetch directly from Supabase `products` table.
-- [x] **Mock Fallback**: Robust error handling ensuring the site never appears "empty."
-- [x] **SEO Optimization**: Metadata and Open Graph tags added to all major public routes.
+## 3. SEO & Aesthetics
+- [ ] **Favicon & OG Preview:** Add `og-image.png` and a custom `favicon.ico` / `site.webmanifest` inside the `public/` directory so iMessage links preview beautifully!
+- [ ] **Google Search Console**: Go attach your sitemap endpoints to Google Search console post-deployment so your CMS campaigns begin crawling immediately.
 
-### 🎨 Design Studio (Canvas)
-- [x] **Export PNG**: Direct design downloads for users.
-- [x] **Cloud Save**: Designs automatically uploaded to Supabase Storage (`designs/` bucket) on cart addition.
-- [x] **Background Removal**: Fully wired to a server-side API bridge (requires key).
+## 4. Final Smoke Test
+- [ ] Attempt to checkout 1 single mocked item using real banking logic or Razorpay test credentials.
+- [ ] Open the Designer Customizer on a smartphone browser and configure the elements with your thumbs.
+- [ ] Check `/admin` capabilities on Production deployment to see if Supabase properly filters your admin UID.
 
-### 💳 Checkout & Operations
-- [x] **Razorpay Bridge**: Integrated payment flow with order persistence.
-- [x] **Auto-fill**: Checkout forms pre-populated from saved user profiles.
-- [x] **Admin CMS**: Fully wired CRUD interface for managing site pages and campaigns.
-
----
-
-## 🟡 Required configuration (Environment Variables)
-
-Ensure these are set in your production environment (Vercel/Cloudflare):
-
-| Variable | Status | Purpose |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | ✅ Set | API Connection |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ Set | Client Operations |
-| `SUPABASE_SERVICE_ROLE_KEY` | ⚠️ Pending | Admin Mutations (Safe Server-side) |
-| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | ⚠️ Pending | Real Payments (currently mock) |
-| `REMOVE_BG_API_KEY` | ⚠️ Pending | Background Removal API |
-
----
-
-## 🧪 Final Manual QA Flight Plan
-
-### 1. The Customer Journey
-- [ ] **Registration**: Create a new account → Verify profile exists in Supabase.
-- [ ] **Design**: Customize a product → Download PNG → Add to Cart.
-- [ ] **Checkout**: Proceed to pay → Verify auto-fill works → Success redirect.
-- [ ] **History**: Check "My Orders" in the dashboard.
-
-### 2. The Admin Journey
-- [ ] **Login**: Access `/admin` as an admin user.
-- [ ] **CMS**: Create a new "Campaign" content → Verify it saves.
-- [ ] **Products**: Edit an existing product price → Check public listing.
-- [ ] **Orders**: View the order list → Confirm the new test order is tracked.
-
-### 3. Mobile Fluidity
-- [ ] **Navigation**: Test mobile menu and cart drawer.
-- [ ] **Designer**: Ensure tools are accessible on small screens.
-- [ ] **Checkout**: Verify the summary stickiness and form fields.
-
----
-
-> [!IMPORTANT]
-> **Storage Bucket Permission**: Ensure the `designs` bucket in Supabase Storage has "Public" read access or appropriate RLS policies to allow users to view their design previews.
-
-> [!TIP]
-> **SEO Check**: Use [SocialSharePreview.com](https://socialsharepreview.com) to verify how product links will look on WhatsApp/Slack/Twitter.
+#### Built with ❤️ by Antigravity using the Ralph Loop. You are ready for launch!

@@ -51,11 +51,20 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     siteName: siteConfig.name,
+    images: [
+      {
+        url: "https://atozprint.in/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "AtoZ Print - Premium Printing & Corporate Gifting",
+      }
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
+    images: ["https://atozprint.in/og-image.png"],
     creator: "@atozprints",
   },
   manifest: "/site.webmanifest",

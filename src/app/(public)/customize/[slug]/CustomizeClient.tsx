@@ -288,7 +288,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             </div>
           </div>
 
-          <div className="flex-1 flex items-center justify-center pt-20 md:pt-16 pb-32 md:pb-28 px-2 md:px-8 relative overflow-hidden">
+          <div className="flex-1 flex items-center justify-center pt-16 md:pt-16 pb-16 md:pb-28 px-4 md:px-8 relative overflow-hidden">
             {isOutOfBounds && (
               <div className="absolute top-24 left-1/2 -translate-x-1/2 z-40 bg-orange-500 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl animate-bounce">
                 Outside Print Area
@@ -352,7 +352,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
               </button>
             </div>
 
-            <div className="absolute bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40 overflow-x-auto max-w-[95vw] pb-2 no-scrollbar px-4">
+            <div className="absolute bottom-16 md:bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40 overflow-x-auto w-full md:w-auto px-4 justify-start md:justify-center no-scrollbar pb-2">
                {[
                  { id: 'front', label: 'Front side' },
                  { id: 'back', label: 'Back side' },
@@ -378,7 +378,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                ))}
             </div>
 
-            <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 z-40">
+            <div className="absolute bottom-2 right-4 md:bottom-8 md:right-8 z-40 scale-75 md:scale-100 origin-bottom-right">
                <div className="flex flex-col items-end gap-1.5 md:gap-2">
                  <div className="bg-white/95 backdrop-blur-2xl px-5 py-4 rounded-[32px] border border-white/40 shadow-2xl shadow-brand-dark/5 ring-1 ring-black/5 w-64">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
