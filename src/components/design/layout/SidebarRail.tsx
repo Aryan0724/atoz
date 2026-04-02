@@ -3,10 +3,10 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { 
-  Type, LayoutGrid, Square, Upload, Sparkles, FolderHeart, Image as ImageIcon, HelpCircle, Layout as LayoutIcon, Palette
+  Type, LayoutGrid, Square, Upload, Sparkles, FolderHeart, Image as ImageIcon, HelpCircle, Layout as LayoutIcon, Palette, Star
 } from 'lucide-react';
 
-export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify';
+export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify' | 'reviews';
 
 interface SidebarRailProps {
   activeTab: SidebarTab | null;
@@ -19,6 +19,7 @@ const navItems: { id: SidebarTab; icon: React.ReactNode; label: string }[] = [
   { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },
   { id: 'graphics', icon: <Square className="h-5 w-5" />, label: 'Elements' },
   { id: 'iconify', icon: <FolderHeart className="h-5 w-5" />, label: 'Icons' },
+  { id: 'reviews', icon: <Star className="h-5 w-5" />, label: 'Reviews' },
   { id: 'uploads', icon: <Upload className="h-5 w-5" />, label: 'Upload' },
   { id: 'ai', icon: <Sparkles className="h-5 w-5" />, label: 'AI' },
 ];

@@ -12,7 +12,7 @@ import TopToolbar from '@/components/design/layout/TopToolbar';
 import ThreeDPreview from '@/components/design/ThreeDPreview';
 import { canvasTemplates } from '@/lib/data/canvasTemplates';
 import {
-  ArrowLeft, Check, Loader2, Plus, RotateCcw, LayoutGrid, ZoomOut, ZoomIn, Hand, Info, Palette, Type, Square, Upload, Sparkles, Download, Shuffle
+  ArrowLeft, Check, Loader2, Plus, RotateCcw, LayoutGrid, ZoomOut, ZoomIn, Hand, Info, Palette, Type, Square, Upload, Sparkles, Download, Shuffle, Minus
 } from 'lucide-react';
 import Link from 'next/link';
 import { Product } from '@/lib/supabase/types';
@@ -20,7 +20,7 @@ import { cn, dataURLToBlob } from '@/lib/utils';
 import { uploadFile } from '@/lib/supabase/storage';
 import { toast } from 'sonner';
 
-export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify';
+export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify' | 'reviews';
 
 interface CustomizeClientProps {
   product: Product;
@@ -32,6 +32,7 @@ const mobileTools: { id: SidebarTab; icon: React.ReactNode; label: string }[] = 
   { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },
   { id: 'graphics', icon: <Square className="h-5 w-5" />, label: 'Elements' },
   { id: 'iconify', icon: <Sparkles className="h-5 w-5" />, label: 'Icons' },
+  { id: 'reviews', icon: <Check className="h-5 w-5" />, label: 'Reviews' },
   { id: 'uploads', icon: <Upload className="h-5 w-5" />, label: 'Upload' },
 ];
 
@@ -53,6 +54,9 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [viewData, setViewData] = useState<{ front: any, back: any, side: any, sleeve_l: any, sleeve_r: any, neck: any }>({ front: null, back: null, side: null, sleeve_l: null, sleeve_r: null, neck: null });
   const [totalPrice, setTotalPrice] = useState<number>(product.base_price || 0);
+  const [unitPrice, setUnitPrice] = useState<number>(product.base_price || 0);
+  const [quantity, setQuantity] = useState<number>(product.moq || 1);
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [selectedQuality, setSelectedQuality] = useState<string>('Standard');
   const [designPreviews, setDesignPreviews] = useState<{ front: string; back: string }>({ front: '', back: '' });
 
@@ -77,9 +81,18 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     
     if (hasFrontDesign) base += 50;
     if (hasBackDesign) base += 50;
+
+    // Bulk Pricing Logic
+    let discount = 0;
+    if (quantity >= 50) discount = 20;
+    else if (quantity >= 10) discount = 10;
     
-    setTotalPrice(base);
-  }, [layers, viewData, activeView, product, selectedQuality]);
+    setDiscountPercent(discount);
+    
+    const finalUnitPrice = Math.round(base * (1 - discount / 100));
+    setUnitPrice(finalUnitPrice);
+    setTotalPrice(finalUnitPrice * quantity);
+  }, [layers, viewData, activeView, product, selectedQuality, quantity]);
 
   const handleUpdateObjectById = (id: string, props: Partial<CanvasObjectProperties>) => {
     canvasRef.current?.updateObjectById(id, props);
@@ -156,10 +169,11 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
       addItem({
         id: `${product.id}-custom-${Date.now()}`,
         product: product,
-        quantity: product.moq || 1,
+        quantity: quantity,
         quality_level: selectedQuality,
         design_data: { color: selectedColor, canvasState: finalViewData },
-        design_preview_url: previewUrl
+        design_preview_url: previewUrl,
+        unitPrice: unitPrice
       });
       
       setIsFinishing(false);
@@ -252,6 +266,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             productCategory={product.category || "Apparel"}
             qualityLevels={product.quality_levels || ['Standard', 'Premium', 'Luxury']}
             basePrice={product.base_price || 0}
+            productId={product.id}
           />
         </div>
 
@@ -365,11 +380,37 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
 
             <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 z-40">
                <div className="flex flex-col items-end gap-1.5 md:gap-2">
-                 <div className="bg-white/95 backdrop-blur-2xl px-5 py-3 rounded-[24px] border border-white/40 flex flex-col items-end shadow-2xl shadow-brand-dark/5 ring-1 ring-black/5">
-                    <span className="text-[9px] font-black text-brand-pink/50 uppercase tracking-[0.25em] mb-0.5">{selectedQuality} Tier</span>
-                    <div className="flex items-baseline gap-1">
-                       <span className="text-sm font-black text-brand-dark italic mb-1">₹</span>
-                       <span className="text-3xl font-black text-brand-dark tracking-tighter italic leading-none">{totalPrice.toLocaleString()}</span>
+                 <div className="bg-white/95 backdrop-blur-2xl px-5 py-4 rounded-[32px] border border-white/40 shadow-2xl shadow-brand-dark/5 ring-1 ring-black/5 w-64">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
+                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Quantity</span>
+                       <div className="flex items-center gap-3 bg-[#f7f7f2] rounded-full p-1 border border-gray-100">
+                         <button 
+                           onClick={() => setQuantity(q => Math.max((product.moq || 1), q - 1))}
+                           className="w-6 h-6 rounded-full flex items-center justify-center bg-white text-gray-500 hover:text-brand-dark hover:shadow-sm transition-all"
+                         >
+                           <Minus className="w-3 h-3" />
+                         </button>
+                         <span className="text-xs font-black text-brand-dark min-w-[20px] text-center">{quantity}</span>
+                         <button 
+                           onClick={() => setQuantity(q => q + 1)}
+                           className="w-6 h-6 rounded-full flex items-center justify-center bg-white text-gray-500 hover:text-brand-dark hover:shadow-sm transition-all"
+                         >
+                           <Plus className="w-3 h-3" />
+                         </button>
+                       </div>
+                    </div>
+                    <div className="flex items-end justify-between">
+                       <div className="flex flex-col">
+                         <span className="text-[9px] font-black text-brand-pink/50 uppercase tracking-[0.25em] mb-0.5">{selectedQuality} • {discountPercent > 0 ? `${discountPercent}% OFF` : 'Base'}</span>
+                         <div className="flex items-baseline gap-1">
+                            <span className="text-sm font-black text-brand-dark italic mb-1">₹</span>
+                            <span className="text-3xl font-black text-brand-dark tracking-tighter italic leading-none">{totalPrice.toLocaleString()}</span>
+                         </div>
+                       </div>
+                       <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest text-right">
+                         <div>₹{unitPrice}</div>
+                         <div>per unit</div>
+                       </div>
                     </div>
                  </div>
                  <button 
@@ -407,6 +448,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                    productCategory={product.category || "Apparel"}
                    qualityLevels={product.quality_levels || ['Standard', 'Premium', 'Luxury']}
                    basePrice={product.base_price || 0}
+                   productId={product.id}
                  />
                </div>
             </div>

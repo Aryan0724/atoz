@@ -10,6 +10,7 @@ export interface CartItem {
   design_data: any;
   design_preview_url?: string;
   customization_details?: any;
+  unitPrice?: number;
 }
 
 interface CartState {
@@ -55,7 +56,7 @@ export const useCart = create<CartState>()(
       setOpen: (open) => set({ isOpen: open }),
       getTotalPrice: () => {
         return get().items.reduce(
-          (total, item) => total + (item.product.base_price || 0) * item.quantity,
+          (total, item) => total + (item.unitPrice ?? item.product.base_price ?? 0) * item.quantity,
           0
         );
       },

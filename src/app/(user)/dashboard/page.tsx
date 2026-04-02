@@ -32,15 +32,18 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import ReviewModal from '@/components/products/ReviewModal';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'orders' | 'profile' | 'addresses'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'profile' | 'addresses' | 'wishlist'>('orders');
+  const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [reviewOrder, setReviewOrder] = useState<any>(null);
   const [stats, setStats] = useState({
     active: 0,
     delivered: 0,
@@ -73,6 +76,10 @@ export default function DashboardPage() {
         
         if (profileData) {
           setProfile(profileData);
+          if (profileData.wishlist && profileData.wishlist.length > 0) {
+             const { data: wpx } = await supabase.from('products').select('*').in('id', profileData.wishlist);
+             if (wpx) setWishlistProducts(wpx);
+          }
         }
 
         const userOrders = await getUserOrders(user.id);
@@ -223,6 +230,16 @@ export default function DashboardPage() {
                       Addresses
                       {activeTab === 'addresses' && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-1 bg-brand-pink rounded-full" />}
                     </button>
+                    <button 
+                      onClick={() => setActiveTab('wishlist')}
+                      className={cn(
+                        "text-lg font-black uppercase tracking-tighter italic transition-all relative pb-2",
+                        activeTab === 'wishlist' ? "text-brand-dark" : "text-gray-300 hover:text-gray-400"
+                      )}
+                    >
+                      Wishlist <span className="ml-2 px-2 py-0.5 bg-brand-pink/10 text-brand-pink rounded-full text-[10px]">{wishlistProducts.length}</span>
+                      {activeTab === 'wishlist' && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-1 bg-brand-pink rounded-full" />}
+                    </button>
                  </div>
                  
                  {activeTab === 'orders' && (
@@ -279,6 +296,41 @@ export default function DashboardPage() {
                                  <span className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-brand-pink" /> {order.quality_level} Tier</span>
                                  <span className="flex items-center gap-2 text-brand-dark underline decoration-brand-cyan/30 underline-offset-4">{order.quantity} Units</span>
                               </div>
+
+                              {/* Order Tracking Timeline Stepper */}
+                              {order.status !== 'cancelled' && (
+                                <div className="mt-8 mb-4 flex items-center w-full md:max-w-md">
+                                  {['pending', 'processing', 'shipped', 'delivered'].map((step, i, arr) => {
+                                    const currentIdx = arr.indexOf(order.status || 'pending');
+                                    const isCompleted = i <= currentIdx;
+                                    const isStepCurrent = i === currentIdx;
+                                    return (
+                                      <React.Fragment key={step}>
+                                        <div className="flex flex-col items-center gap-2 relative z-10">
+                                          <div className={cn(
+                                            "w-7 h-7 rounded-full flex items-center justify-center transition-all bg-white shadow-sm ring-4 ring-white z-10",
+                                            isCompleted ? "bg-brand-pink/10 text-brand-pink" : "bg-gray-50 text-gray-300"
+                                          )}>
+                                            {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <div className="w-2 h-2 rounded-full bg-gray-200" />}
+                                          </div>
+                                          <span className={cn(
+                                            "absolute top-10 text-[8px] font-black uppercase tracking-[0.2em] whitespace-nowrap",
+                                            isStepCurrent ? "text-brand-pink" : "text-gray-300"
+                                          )}>
+                                            {step}
+                                          </span>
+                                        </div>
+                                        {i < arr.length - 1 && (
+                                          <div className={cn(
+                                            "flex-1 h-[2px] -mx-1 z-0 transition-all",
+                                            i < currentIdx ? "bg-brand-pink" : "bg-gray-100"
+                                          )} />
+                                        )}
+                                      </React.Fragment>
+                                    )
+                                  })}
+                                </div>
+                              )}
                            </div>
 
                            <div className="flex flex-col items-center md:items-end gap-6 w-full md:w-auto">
@@ -296,9 +348,19 @@ export default function DashboardPage() {
                                   <RotateCcw className="h-4 w-4" />
                                   Reorder
                                 </Link>
-                                <button className="p-4 bg-gray-50 rounded-2xl text-gray-400 group-hover:bg-brand-pink group-hover:text-white group-hover:shadow-lg transition-all">
-                                   <ExternalLink className="h-5 w-5" />
-                                </button>
+                                {order.status === 'delivered' ? (
+                                  <button 
+                                    onClick={() => setReviewOrder(order)}
+                                    className="px-6 py-4 bg-brand-cyan/10 text-brand-cyan rounded-2xl group-hover:bg-brand-cyan group-hover:text-white group-hover:shadow-lg transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2"
+                                  >
+                                     <Star className="h-4 w-4" />
+                                     Review
+                                  </button>
+                                ) : (
+                                  <button className="p-4 bg-gray-50 rounded-2xl text-gray-400 group-hover:bg-brand-pink group-hover:text-white group-hover:shadow-lg transition-all">
+                                     <ExternalLink className="h-5 w-5" />
+                                  </button>
+                                )}
                               </div>
                            </div>
                         </motion.div>
@@ -459,6 +521,51 @@ export default function DashboardPage() {
                     </div>
                   </motion.div>
                 )}
+
+                {activeTab === 'wishlist' && (
+                  <motion.div 
+                    key="wishlist"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  >
+                    {wishlistProducts.length > 0 ? (
+                      wishlistProducts.map((prod) => (
+                        <div key={prod.id} className="bg-white rounded-3xl border border-gray-100 overflow-hidden group hover:border-brand-pink/30 hover:shadow-xl transition-all">
+                           <div className="aspect-square bg-gray-50 relative p-4">
+                             <Image 
+                                src={prod.images?.[0] || ''} 
+                                alt={prod.name} 
+                                fill 
+                                className="object-contain p-4 group-hover:scale-110 transition-transform duration-500" 
+                             />
+                           </div>
+                           <div className="p-5">
+                             <div className="text-[9px] font-black text-brand-pink uppercase tracking-widest mb-1">{prod.category}</div>
+                             <h4 className="font-black text-brand-dark truncate mb-3">{prod.name}</h4>
+                             <div className="flex items-center justify-between">
+                               <div className="font-black text-lg text-brand-dark">₹{prod.base_price}</div>
+                               <Link href={`/customize/${prod.slug}`} className="px-4 py-2 bg-brand-dark text-white text-[10px] uppercase font-black tracking-widest rounded-xl hover:bg-brand-pink transition-colors">
+                                 Customize
+                               </Link>
+                             </div>
+                           </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-full bg-gray-50/50 rounded-[48px] p-24 text-center border-2 border-dashed border-gray-100 flex flex-col items-center gap-8">
+                         <div className="h-20 w-20 bg-white rounded-[32px] flex items-center justify-center shadow-lg">
+                           <Star className="h-8 w-8 text-gray-200 fill-gray-100" />
+                         </div>
+                         <h3 className="text-2xl font-black text-brand-dark uppercase italic">Your Wishlist is Empty</h3>
+                         <Link href="/products" className="px-10 py-5 bg-brand-dark text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-pink transition-all">
+                           Explore Catalog
+                         </Link>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
               </AnimatePresence>
            </div>
 
@@ -522,6 +629,12 @@ export default function DashboardPage() {
            </div>
         </div>
       </div>
+      <ReviewModal 
+        isOpen={!!reviewOrder} 
+        onClose={() => setReviewOrder(null)} 
+        product={reviewOrder?.products || { id: '', name: '' }} 
+        userId={userData?.id || ''} 
+      />
     </div>
   );
 }

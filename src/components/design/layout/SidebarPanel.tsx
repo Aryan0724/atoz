@@ -9,6 +9,7 @@ import { iconLibrary, iconCategories } from '@/lib/data/icons';
 import { podGraphics, podGraphicCategories } from '@/lib/data/podGraphics';
 import { toast } from 'sonner';
 import IconifyTab from '@/components/design/controls/tabs/IconifyTab';
+import ReviewsTab from '@/components/design/controls/tabs/ReviewsTab';
 import { 
   Type, Loader2, Upload, Plus, Search, LayoutGrid, Layers, Lock, Unlock, Eye, EyeOff,
   X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes
@@ -170,6 +171,7 @@ interface SidebarPanelProps {
   productCategory?: string;
   qualityLevels?: string[];
   basePrice?: number;
+  productId?: string;
 }
 
 const SidebarPanel = ({ 
@@ -189,7 +191,8 @@ const SidebarPanel = ({
   onQualityChange,
   productCategory = 'Apparel',
   qualityLevels = ['Standard', 'Premium', 'Luxury'],
-  basePrice = 0
+  basePrice = 0,
+  productId = ''
 }: SidebarPanelProps) => {
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -274,6 +277,7 @@ const SidebarPanel = ({
     'templates': 'Templates',
     'shutterstock': 'Quick Photos',
     'iconify': 'Icon Library',
+    'reviews': 'Customer Ratings',
   };
 
   const filteredTemplates = activeTemplateCat === 'All' 
@@ -791,6 +795,11 @@ const SidebarPanel = ({
         {/* ─── ICONIFY TAB ─────────────────────────────────────── */}
         {activeTab === 'iconify' && (
           <IconifyTab onAddSvgGraphic={onAddSvgGraphic} />
+        )}
+
+        {/* ─── REVIEWS TAB ─────────────────────────────────────── */}
+        {activeTab === 'reviews' && (
+          <ReviewsTab productId={productId} />
         )}
       </div>
     </div>

@@ -5,7 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '@/lib/supabase/types';
-import { ShoppingBag, Eye, Zap, X } from 'lucide-react';
+import { ShoppingBag, Eye, Zap, X, Heart } from 'lucide-react';
+import { useWishlist } from '@/lib/store/useWishlist';
+import { toast } from 'sonner';
 
 interface ProductCardProps {
   product: Product;
@@ -25,6 +27,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const [imgError, setImgError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const { isFavorite, toggleFavorite } = useWishlist();
+  const isFav = isFavorite(product.id);
   const gradient = product.category ? (categoryGradients[product.category] || 'from-gray-400 to-gray-600') : 'from-gray-400 to-gray-600';
   
   return (
@@ -78,7 +82,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </AnimatePresence>
 
           {/* Quick View Button - Subtle Top Right */}
-          <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+          <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex flex-col gap-2">
+            <button 
+              onClick={async (e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+                const added = await toggleFavorite(product.id);
+                if (added) toast.success(`${product.name} saved to wishlist!`);
+              }}
+              className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg hover:bg-brand-pink transition-all group/heart cursor-pointer border border-gray-100"
+            >
+              <Heart className={`w-5 h-5 ${isFav ? 'fill-brand-pink text-brand-pink' : 'text-gray-400 group-hover/heart:text-white'}`} />
+            </button>            
             <button 
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsQuickViewOpen(true); }}
               className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg hover:bg-brand-pink hover:text-white transition-all cursor-pointer border border-gray-100"
