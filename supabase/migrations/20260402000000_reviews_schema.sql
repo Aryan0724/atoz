@@ -17,7 +17,7 @@ ALTER TABLE public.product_reviews ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Reviews are viewable by everyone" ON public.product_reviews 
     FOR SELECT USING (true);
 
--- 2. Authenticated users can insert reviews
+-- 2. Authenticated users can insert reviewsdone
 CREATE POLICY "Authenticated users can create reviews" ON public.product_reviews 
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 

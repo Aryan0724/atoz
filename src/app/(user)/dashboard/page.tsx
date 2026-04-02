@@ -33,6 +33,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import ReviewModal from '@/components/products/ReviewModal';
+import AddressModal from '@/components/profile/AddressModal';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -44,6 +45,7 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [reviewOrder, setReviewOrder] = useState<any>(null);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [stats, setStats] = useState({
     active: 0,
     delivered: 0,
@@ -101,6 +103,53 @@ export default function DashboardPage() {
 
     fetchUserDataAndOrders();
   }, [router]);
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile || !userData) return;
+    
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: profile.full_name,
+          phone: profile.phone,
+          company_name: profile.company_name,
+          gst_number: profile.gst_number
+        })
+        .eq('id', userData.id);
+        
+      if (error) throw error;
+      toast.success('Profile updated successfully!');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAddAddress = async (newAddress: any) => {
+    if (!profile || !userData) return;
+    
+    const currentAddresses = profile.addresses || [];
+    const updatedAddresses = [...currentAddresses, newAddress];
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ addresses: updatedAddresses })
+        .eq('id', userData.id);
+        
+      if (error) throw error;
+      
+      setProfile({ ...profile, addresses: updatedAddresses });
+      toast.success('Address bound to profile!');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save address');
+      throw err;
+    }
+  };
 
   const topStats = [
     { label: "Active Deployments", value: stats.active.toString().padStart(2, '0'), icon: <Zap />, sub: "Order in Transit", color: "pink" },
@@ -482,7 +531,10 @@ export default function DashboardPage() {
                           <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">Manage your global shipping endpoints</p>
                         </div>
                       </div>
-                      <button className="px-6 py-3 bg-white border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-brand-cyan hover:text-brand-cyan transition-all flex items-center gap-2">
+                      <button 
+                        onClick={() => setIsAddressModalOpen(true)}
+                        className="px-6 py-3 bg-white border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-brand-cyan hover:text-brand-cyan transition-all flex items-center gap-2"
+                      >
                         <PlusIcon className="w-4 h-4" />
                         Add New
                       </button>
@@ -513,7 +565,10 @@ export default function DashboardPage() {
                               <MapPin className="h-8 w-8 text-gray-200" />
                            </div>
                            <h3 className="text-2xl font-black text-brand-dark uppercase italic">No Addresses Registered</h3>
-                           <button className="px-10 py-5 bg-brand-dark text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-cyan transition-all">
+                           <button 
+                             onClick={() => setIsAddressModalOpen(true)}
+                             className="px-10 py-5 bg-brand-dark text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-cyan transition-all"
+                           >
                              Deploy New Endpoint
                            </button>
                         </div>
@@ -634,6 +689,11 @@ export default function DashboardPage() {
         onClose={() => setReviewOrder(null)} 
         product={reviewOrder?.products || { id: '', name: '' }} 
         userId={userData?.id || ''} 
+      />
+      <AddressModal 
+        isOpen={isAddressModalOpen}
+        onClose={() => setIsAddressModalOpen(false)}
+        onSave={handleAddAddress}
       />
     </div>
   );
