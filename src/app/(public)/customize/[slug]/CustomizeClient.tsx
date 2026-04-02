@@ -38,7 +38,7 @@ const mobileTools: { id: SidebarTab; icon: React.ReactNode; label: string }[] = 
 
 export default function CustomizeClient({ product }: CustomizeClientProps) {
   const router = useRouter();
-  const openCart = useCart((state) => state.openCart);
+  const setOpen = useCart((state) => state.setOpen);
   
   const [selectedColor, setSelectedColor] = useState('#FFFFFF');
   const canvasRef = useRef<DesignerCanvasRef>(null);
@@ -181,7 +181,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
       setIsSuccess(true);
       setTimeout(() => {
         setIsSuccess(false);
-        openCart();
+        setOpen(true);
       }, 2000);
     } catch (err) {
       console.error("Failed to finish design:", err);
