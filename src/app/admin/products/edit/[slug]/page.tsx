@@ -45,6 +45,7 @@ export default function EditProductPage() {
           ...data,
           images: data.images || [],
           template_images: data.template_images || [],
+          wireframe_images: data.wireframe_images || [],
           supported_views: data.supported_views || ['front'],
           customization_fields: data.customization_fields || [],
           quality_levels: data.quality_levels || ['Standard', 'Premium', 'Luxury'],
@@ -62,7 +63,7 @@ export default function EditProductPage() {
     if (slug) fetchProduct();
   }, [slug, router]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isTemplate = false) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'gallery' | 'wireframe' = 'gallery') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -72,11 +73,12 @@ export default function EditProductPage() {
       const publicUrl = await uploadFile('products', fileName, file);
       
       setFormData((prev: any) => {
-        const newImages = [...prev.images, publicUrl];
-        const newTemplates = isTemplate ? [...prev.template_images, publicUrl] : prev.template_images;
-        return { ...prev, images: newImages, template_images: newTemplates };
+        if (type === 'wireframe') {
+          return { ...prev, wireframe_images: [...(prev.wireframe_images || []), publicUrl] };
+        }
+        return { ...prev, images: [...prev.images, publicUrl] };
       });
-      toast.success(isTemplate ? 'Template uploaded' : 'Image uploaded');
+      toast.success(type === 'wireframe' ? 'Wireframe uploaded' : 'Image uploaded');
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload image');
@@ -285,25 +287,9 @@ export default function EditProductPage() {
                         <button 
                           type="button"
                           onClick={() => {
-                            const newTemplates = isTemplate 
-                              ? formData.template_images.filter((t: string) => t !== url)
-                              : [...(formData.template_images || []), url];
-                            setFormData((f: any) => ({ ...f, template_images: newTemplates }));
-                          }}
-                          className={cn(
-                            "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest transition-all",
-                            isTemplate ? "bg-brand-cyan text-white" : "bg-white text-brand-dark"
-                          )}
-                        >
-                          {isTemplate ? 'Template ✓' : 'Set as Template'}
-                        </button>
-                        <button 
-                          type="button"
-                          onClick={() => {
                             setFormData((p: any) => ({ 
                               ...p, 
-                              images: p.images.filter((_: any, i: number) => i !== idx),
-                              template_images: (p.template_images || []).filter((t: string) => t !== url)
+                              images: (p.images || []).filter((_: any, i: number) => i !== idx)
                             }))
                           }}
                           className="px-3 py-1 bg-red-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest"
@@ -311,23 +297,61 @@ export default function EditProductPage() {
                           Remove
                         </button>
                       </div>
-                      {isTemplate && (
-                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-brand-cyan text-white text-[7px] font-black uppercase tracking-widest rounded-md">
-                          Canvas
-                        </div>
-                      )}
                     </div>
                   );
                 })}
-                {formData.images.length < 6 && (
+                {(formData.images || []).length < 6 && (
                   <label className="aspect-square rounded-2xl border-2 border-dashed border-gray-100 hover:border-brand-pink/30 transition-colors flex flex-col items-center justify-center cursor-pointer group">
-                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e)} disabled={uploading} />
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'gallery')} disabled={uploading} />
                     {uploading ? (
                       <Loader2 className="h-8 w-8 text-brand-pink animate-spin" />
                     ) : (
                       <>
                         <ImageIcon className="h-8 w-8 text-gray-200 group-hover:text-brand-pink transition-colors" />
                         <span className="text-[10px] font-black text-gray-300 uppercase mt-2">Add Photo</span>
+                      </>
+                    )}
+                  </label>
+                )}
+             </div>
+
+             <h2 className="text-xl font-bold mb-4 mt-8 w-full text-left">Canvas Wireframes</h2>
+             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6 w-full text-left italic">Technical outlines for the Designer Canvas</p>
+
+             <div className="w-full grid grid-cols-2 gap-4 mb-6">
+                {(formData.wireframe_images || []).map((url: string, idx: number) => {
+                  return (
+                    <div key={idx} className="aspect-square relative rounded-2xl overflow-hidden border border-gray-100 group bg-gray-50 p-2">
+                      <img src={url} alt="Wireframe" className="w-full h-full object-contain" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setFormData((p: any) => ({ 
+                              ...p, 
+                              wireframe_images: p.wireframe_images.filter((_: any, i: number) => i !== idx)
+                            }))
+                          }}
+                          className="px-3 py-1 bg-red-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <div className="absolute top-2 left-2 px-2 py-0.5 bg-brand-cyan text-white text-[7px] font-black uppercase tracking-widest rounded-md">
+                        {idx === 0 ? 'Front' : idx === 1 ? 'Back' : 'Side'}
+                      </div>
+                    </div>
+                  );
+                })}
+                {(formData.wireframe_images || []).length < 4 && (
+                  <label className="aspect-square rounded-2xl border-2 border-dashed border-gray-100 hover:border-brand-pink/30 transition-colors flex flex-col items-center justify-center cursor-pointer group">
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'wireframe')} disabled={uploading} />
+                    {uploading ? (
+                      <Loader2 className="h-8 w-8 text-brand-pink animate-spin" />
+                    ) : (
+                      <>
+                        <ImageIcon className="h-8 w-8 text-gray-200 group-hover:text-brand-pink transition-colors" />
+                        <span className="text-[10px] font-black text-gray-300 uppercase mt-2 italic">Add Wireframe</span>
                       </>
                     )}
                   </label>

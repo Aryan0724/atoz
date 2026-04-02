@@ -20,6 +20,7 @@ export interface Product {
   customization_fields?: string[];
   packaging_options?: string[];
   template_images?: string[];
+  wireframe_images?: string[];
   supported_views?: string[];
   features?: string[];
   specifications?: any;

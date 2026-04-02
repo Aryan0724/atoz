@@ -283,7 +283,10 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                 <DesignerCanvas 
                   ref={canvasRef}
                   productImage={(() => {
-                    const bgImages = (product as any).template_images?.length > 0 ? (product as any).template_images : product.images;
+                    const bgImages = (product as any).wireframe_images?.length > 0 
+                      ? (product as any).wireframe_images 
+                      : ((product as any).template_images?.length > 0 ? (product as any).template_images : product.images);
+                    
                     if (activeView === 'front') return bgImages?.[0] || '';
                     if (activeView === 'back') return bgImages?.[1] || bgImages?.[0] || '';
                     return bgImages?.[2] || bgImages?.[0] || '';
