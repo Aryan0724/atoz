@@ -83,7 +83,7 @@ BEGIN
     WHERE id = auth.uid() AND role = 'admin'
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 7. Setup Policies (Idempotent)
 DO $$ 
@@ -95,9 +95,8 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update their own profiles') THEN
         CREATE POLICY "Users can update their own profiles" ON profiles FOR UPDATE USING (auth.uid() = id);
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can view all profiles') THEN
-        CREATE POLICY "Admins can view all profiles" ON profiles FOR SELECT USING (public.is_admin());
-    END IF;
+    -- Note: 'Admins can view all profiles' removed as it's redundant with public view and causes recursion if not careful
+
 
     -- Products Policies
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Products are viewable by everyone') THEN

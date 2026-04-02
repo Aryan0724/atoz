@@ -41,5 +41,18 @@ VALUES
     '{"Standard", "Gold Embossed"}', 
     '{"Front Cover Logo", "Initialing"}',
     '{"https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=1000&auto=format"}'
+),
+(
+    'Custom Premium T-Shirt', 
+    'custom-premium-tshirt', 
+    '100% Organic cotton t-shirt with premium weight and breathable fabric. Perfect for high-quality custom designs.', 
+    'Apparel', 
+    599, 
+    1, 
+    '3-5 Days', 
+    '{"https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1000&auto=format"}', 
+    '{"Standard", "Premium", "Luxury"}', 
+    '{"Front Print", "Back Print", "Pocket Logo"}',
+    '{"https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1000&auto=format"}'
 )
 ON CONFLICT (slug) DO NOTHING;
