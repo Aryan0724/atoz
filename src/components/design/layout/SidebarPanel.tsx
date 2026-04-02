@@ -248,6 +248,8 @@ const SidebarPanel = ({
     }
   }, [availableTemplateCats, availableGraphicCats, activeTemplateCat, activeGraphicCat]);
 
+  const [textCurveAmount, setTextCurveAmount] = useState(0);
+
   if (!activeTab) return null;
 
   const handleLocalFileUpload = (file: File) => {
@@ -264,8 +266,6 @@ const SidebarPanel = ({
     };
     reader.readAsDataURL(file);
   };
-
-  const [textCurveAmount, setTextCurveAmount] = useState(0);
 
   const currentTitle: Record<string, string> = {
     'product': 'Product Settings',
