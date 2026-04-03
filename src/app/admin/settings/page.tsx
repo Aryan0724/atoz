@@ -14,12 +14,17 @@ export default async function AdminSettingsPage() {
   let initialConfig = {};
   
   try {
-    const { data } = await supabase.from('site_settings').select('config').eq('id', 'global').single();
+    const fetchPromise = supabase.from('site_settings').select('config').eq('id', 'global').single();
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2500));
+    
+    const { data } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+    
     if ((data as any)?.config) {
       initialConfig = (data as any).config;
     }
   } catch (err) {
-    // If the table doesn't exist yet, just pass empty config
+    console.error('Settings fetch timeout or error, using empty config');
+    // If it fails or times out, initialConfig remains {}
   }
 
   return (

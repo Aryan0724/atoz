@@ -77,15 +77,24 @@ export default function AdminOrdersPage() {
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status: newStatus })
-      .eq('id', orderId);
+    try {
+      const updatePromise = supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
 
-    if (error) {
-      toast.error('Failed to update status');
-    } else {
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Update Timeout')), 4000)
+      );
+
+      const { error } = await Promise.race([updatePromise, timeoutPromise]) as any;
+
+      if (error) throw error;
       setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+      toast.success(`Order ${orderId.slice(-4)} status updated.`);
+    } catch (err: any) {
+      console.error('Update failed:', err);
+      toast.error(err.message === 'Update Timeout' ? 'Update taking too long. Please refresh.' : 'Failed to update status');
     }
   };
 

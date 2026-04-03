@@ -35,11 +35,17 @@ export default function OrderDetailPage() {
   useEffect(() => {
     async function fetchOrder() {
       try {
-        const { data, error } = await supabase
+        const fetchPromise = supabase
           .from('orders')
           .select('*, profiles(*), products(*)')
           .eq('id', id)
           .single();
+
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 3500)
+        );
+
+        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
         if (error || !data) throw new Error('not found');
         setOrder(data);
