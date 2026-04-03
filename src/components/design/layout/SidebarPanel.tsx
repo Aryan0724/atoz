@@ -333,6 +333,8 @@ const SidebarPanel = ({
     }
   };
 
+  const [dynamicColors, setDynamicColors] = useState<string[]>([]);
+
   if (!activeTab) return null;
 
   const handleLocalFileUpload = (file: File) => {
@@ -368,7 +370,6 @@ const SidebarPanel = ({
     : canvasTemplates.filter(t => t.category === activeTemplateCat))
     .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  const [dynamicColors, setDynamicColors] = useState<string[]>([]);
   
   const handleSyncColors = () => {
     const colors = new Set<string>();
@@ -818,7 +819,7 @@ const SidebarPanel = ({
               <div className="group relative aspect-square rounded-[28px] overflow-hidden border-4 border-white shadow-2xl ring-1 ring-purple-100 animate-in zoom-in-95 duration-500">
                 <img src={generatedImage} alt="AI Preview" className="w-full h-full object-cover" />
                 <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col gap-2 translate-y-2 group-hover:translate-y-0 transition-transform opacity-0 group-hover:opacity-100">
-                   <p className="text-[10px] text-white/90 font-medium line-clamp-1 italic">"{aiPrompt}"</p>
+                   <p className="text-[10px] text-white/90 font-medium line-clamp-1 italic">&quot;{aiPrompt}&quot;</p>
                    <div className="flex gap-2">
                      <button 
                        onClick={() => onAddImage(generatedImage)}
@@ -868,7 +869,7 @@ const SidebarPanel = ({
                   onClick={() => setAiPrompt(idea)}
                   className="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl hover:border-purple-200 hover:shadow-sm transition-all group group-hover:scale-102"
                 >
-                  <span className="text-[10px] font-bold text-gray-500 group-hover:text-purple-700 transition-colors line-clamp-1">"{idea}"</span>
+                  <span className="text-[10px] font-bold text-gray-500 group-hover:text-purple-700 transition-colors line-clamp-1">&quot;{idea}&quot;</span>
                   <ArrowRight className="h-3 w-3 text-gray-300 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
                 </button>
               ))}
