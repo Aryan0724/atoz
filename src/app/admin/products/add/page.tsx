@@ -9,7 +9,6 @@ import {
   Plus, 
   Image as ImageIcon,
   Loader2,
-  Sparkles,
   Info,
   ExternalLink
 } from 'lucide-react';
@@ -302,191 +301,76 @@ export default function AddProductPage() {
         </div>
       </form>
 
-      {/* NEW WIREFRAME SECTION - CENTRAL & SPACIOUS */}
+      {/* SIMPLIFIED WIREFRAME SECTION - CENTRAL & SPACIOUS */}
       <section className="mt-16 bg-white p-8 sm:p-12 rounded-[50px] border border-gray-100 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-50 rounded-full blur-[100px] -z-10"></div>
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-purple-50 rounded-full blur-[100px] -z-10"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-pink/5 rounded-full blur-[100px] -z-10"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-brand-cyan/5 rounded-full blur-[100px] -z-10"></div>
 
         <div className="mb-12 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 rounded-full mb-4">
-             <Sparkles className="h-3 w-3 text-indigo-600" />
-             <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest leading-none">Studio Experience</span>
-          </div>
-          <h2 className="text-3xl font-black text-brand-dark mb-2 tracking-tighter">Canvas <span className="text-indigo-600">Wireframe</span> Center</h2>
-          <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Prepare your technical product outlines with AI or manual uploads</p>
+          <h2 className="text-3xl font-black text-brand-dark mb-2 tracking-tighter">Canvas <span className="text-brand-pink">Wireframe</span> Center</h2>
+          <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Upload technical product outlines (Transparent PNGs) generated from your preferred AI tools</p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
-          {/* Wireframe Preview Grid */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-               <h3 className="text-sm font-black text-brand-dark uppercase tracking-wider">Preview Inventory</h3>
-               <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{formData.wireframe_images.length}/4 Slots Filled</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {formData.wireframe_images.map((url, idx) => (
-                  <div key={idx} className="aspect-square relative rounded-[32px] overflow-hidden border border-gray-100 group bg-gray-50/50 p-4 transition-all hover:shadow-2xl hover:shadow-indigo-100 hover:border-indigo-100">
-                    <img src={url} alt="Wireframe" className="w-full h-full object-contain" />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                       <button 
-                         type="button"
-                         onClick={() => {
-                           setFormData(p => ({ 
-                             ...p, 
-                             wireframe_images: p.wireframe_images.filter((_, i) => i !== idx)
-                           }))
-                         }}
-                         className="px-5 py-2 bg-red-500 text-white rounded-full text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-transform"
-                       >
-                         Remove Outline
-                       </button>
-                    </div>
-                    <div className="absolute top-4 left-4 px-3 py-1 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                      {idx === 0 ? 'Front' : idx === 1 ? 'Back' : 'Side View'}
-                    </div>
-                  </div>
-                ))}
-                {formData.wireframe_images.length < 4 && (
-                  <label className="aspect-square rounded-[32px] border-2 border-dashed border-gray-100 hover:border-indigo-300 hover:bg-indigo-50/50 transition-all flex flex-col items-center justify-center cursor-pointer group">
-                    <input 
-                      type="file" 
-                      className="hidden" 
-                      accept="image/*" 
-                      onClick={(e) => (e.target as any).value = null}
-                      onChange={(e) => handleImageUpload(e, 'wireframe')} 
-                      disabled={uploading} 
-                    />
-                    {uploading ? (
-                      <div className="flex flex-col items-center gap-3">
-                        <Loader2 className="h-8 w-8 text-indigo-400 animate-spin" />
-                        <span className="text-[10px] font-black text-indigo-400 uppercase animate-pulse">Processing...</span>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="h-14 w-14 rounded-2xl bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
-                           <ImageIcon className="h-6 w-6 text-gray-200 group-hover:text-indigo-400 transition-colors" />
-                        </div>
-                        <span className="text-[10px] font-black text-gray-300 uppercase mt-4 tracking-widest group-hover:text-indigo-900 transition-colors">Upload Manual Outline</span>
-                      </>
-                    )}
-                  </label>
-                )}
-            </div>
+        <div className="space-y-8">
+          <div className="flex items-center justify-between">
+             <h3 className="text-sm font-black text-brand-dark uppercase tracking-wider">Manual Inventory</h3>
+             <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{formData.wireframe_images.length}/4 Slots Filled</span>
           </div>
 
-          {/* AI WIREFRAME STUDIO - NEW DESIGN */}
-          <div className="p-8 sm:p-10 bg-gradient-to-br from-indigo-600 to-indigo-900 rounded-[40px] text-white shadow-2xl relative">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl mt-10 mr-10"></div>
-             
-             <div className="flex items-center gap-4 mb-10">
-               <div className="p-4 bg-white/10 rounded-[24px] backdrop-blur-md">
-                 <Sparkles className="h-6 w-6 text-indigo-200" />
-               </div>
-               <div>
-                  <h3 className="text-xl font-black uppercase tracking-wider mb-1">AI Studio</h3>
-                  <p className="text-[10px] text-indigo-200 font-bold uppercase tracking-widest opacity-80 italic">Instant technical outlines from text</p>
-               </div>
-             </div>
-
-             <div className="space-y-6">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-indigo-200 uppercase tracking-widest">Outline Description</label>
-                  <textarea 
-                    className="w-full bg-white/10 border border-white/10 rounded-3xl py-5 px-6 text-sm font-bold focus:ring-2 focus:ring-white/20 outline-none transition-all placeholder:text-white/30 text-white min-h-[140px]"
-                    placeholder="Describe your wireframe: e.g., 'Plain hoodie, front view, flat mockup, transparent background'..."
-                    id="ai-mockup-prompt"
-                  />
-                </div>
-                
-                <div className="flex gap-2 pb-4 overflow-x-auto no-scrollbar">
-                   {['Front View', 'Back View', 'Side View', 'Ghost Mockup', 'Isolated'].map(v => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {formData.wireframe_images.map((url, idx) => (
+                <div key={idx} className="aspect-square relative rounded-[32px] overflow-hidden border border-gray-100 group bg-gray-50/50 p-6 transition-all hover:shadow-2xl hover:border-brand-pink/20">
+                  <img src={url} alt="Wireframe" className="w-full h-full object-contain" />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                      <button 
-                       key={v}
                        type="button"
                        onClick={() => {
-                         const el = document.getElementById('ai-mockup-prompt') as HTMLTextAreaElement;
-                         el.value = (el.value ? el.value + ', ' : '') + v;
+                         setFormData(p => ({ 
+                           ...p, 
+                           wireframe_images: p.wireframe_images.filter((_, i) => i !== idx)
+                         }))
                        }}
-                       className="px-4 py-2 bg-white/10 text-white rounded-full text-[9px] font-black border border-white/10 hover:bg-white hover:text-indigo-900 transition-all whitespace-nowrap"
+                       className="px-5 py-2 bg-red-500 text-white rounded-full text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-transform"
                      >
-                       + {v}
+                       Delete Asset
                      </button>
-                   ))}
+                  </div>
+                  <div className="absolute top-4 left-4 px-3 py-1 bg-brand-dark text-white text-[8px] font-black uppercase tracking-widest rounded-full">
+                    {idx === 0 ? 'Front' : idx === 1 ? 'Back' : 'Side View'}
+                  </div>
                 </div>
-
-                <button 
-                  type="button"
-                  onClick={async () => {
-                    const prompt = (document.getElementById('ai-mockup-prompt') as HTMLTextAreaElement).value;
-                    if (!prompt) {
-                      toast.error("Please describe the mockup first!");
-                      return;
-                    }
-                    
-                    setUploading(true);
-                    try {
-                      const seed = Math.floor(Math.random() * 1000000);
-                      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', centered product on white background, studio lighting, high resolution, 8k')}?width=1024&height=1024&nologo=true&seed=${seed}`;
-                      
-                      toast.info("Step 1/2: Generating mockup...");
-                      
-                      const img = new Image();
-                      img.src = url;
-                      await Promise.race([
-                        new Promise((resolve) => { img.onload = resolve; }),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error('Generation Timeout')), 60000))
-                      ]);
-
-                      toast.info("Step 2/2: Processing background...");
-                      
-                      const removeBgWithTimeout = async () => {
-                        const requestPromise = fetch('/api/remove-bg', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ imageUrl: url })
-                        });
-                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Removal Timeout')), 20000));
-                        return Promise.race([requestPromise, timeoutPromise]) as Promise<Response>;
-                      };
-
-                      try {
-                        const response = await removeBgWithTimeout();
-                        const result = await response.json();
-                        if (result.imageUrl) {
-                          setFormData(p => ({ ...p, wireframe_images: [...p.wireframe_images, result.imageUrl] }));
-                          toast.success("AI Outline Added!");
-                        } else {
-                          throw new Error('Processing failed');
-                        }
-                      } catch (pErr) {
-                        console.warn("[Admin] Processing failed, using original:", pErr);
-                        setFormData(p => ({ ...p, wireframe_images: [...p.wireframe_images, url] }));
-                        toast.warning("Added mockup (Skipped background removal).");
-                      }
-                    } catch (err: any) {
-                      console.error("[Admin] AI Generation failed:", err);
-                      if (err.message === 'Generation Timeout') {
-                         toast.error("The image generator is taking too long. Try a simpler prompt!");
-                      } else {
-                         toast.error("Generation failed. Check your connection or retry.");
-                      }
-                    } finally {
-                      setUploading(false);
-                    }
-                  }}
-                  disabled={uploading}
-                  className="w-full py-5 bg-white text-indigo-900 text-[11px] font-black uppercase tracking-widest rounded-[24px] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl disabled:opacity-50"
-                >
-                  {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-                  Launch Studio Engine
-                </button>
-             </div>
+              ))}
+              {formData.wireframe_images.length < 4 && (
+                <label className="aspect-square rounded-[32px] border-2 border-dashed border-gray-100 hover:border-brand-pink/30 hover:bg-brand-pink/[0.02] transition-all flex flex-col items-center justify-center cursor-pointer group">
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*" 
+                    onClick={(e) => (e.target as any).value = null}
+                    onChange={(e) => handleImageUpload(e, 'wireframe')} 
+                    disabled={uploading} 
+                  />
+                  {uploading ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="h-8 w-8 text-brand-pink animate-spin" />
+                      <span className="text-[10px] font-black text-brand-pink uppercase animate-pulse">Uploading...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="h-14 w-14 rounded-2xl bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
+                         <ImageIcon className="h-6 w-6 text-gray-200 group-hover:text-brand-pink transition-colors" />
+                      </div>
+                      <span className="text-[10px] font-black text-gray-300 uppercase mt-4 tracking-widest group-hover:text-brand-dark transition-colors text-center px-4">Upload Clean Wireframe</span>
+                    </>
+                  )}
+                </label>
+              )}
           </div>
         </div>
       </section>
 
       <div className="mt-20 border-t border-gray-100 pt-16 text-center">
-         <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.3em] mb-10">Confirming Final Portfolio details</p>
+         <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.3em] mb-10">Review your portfolio details before publishing</p>
          <button 
            onClick={() => handleSubmit()}
            disabled={loading || uploading}
