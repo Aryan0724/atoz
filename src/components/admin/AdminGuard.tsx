@@ -23,7 +23,14 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
           return;
         }
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const fetchUserWithTimeout = async () => {
+          const authPromise = supabase.auth.getUser();
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Auth Timeout')), 3000));
+          return Promise.race([authPromise, timeoutPromise]) as Promise<any>;
+        };
+
+        const userResult = await fetchUserWithTimeout().catch(err => ({ error: err, data: { user: null } }));
+        const { data: { user }, error: authError } = userResult;
 
         if (authError || !user) {
           console.warn('[AdminGuard] No active session found. Redirecting to login.');
@@ -31,13 +38,16 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
           return;
         }
 
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+        const fetchProfileWithTimeout = async () => {
+           const profilePromise = supabase.from('profiles').select('role').eq('id', user.id).single();
+           const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Profile Timeout')), 3000));
+           return Promise.race([profilePromise, timeoutPromise]) as Promise<any>;
+        };
 
-        if (profile?.role !== 'admin') {
+        const profileResult = await fetchProfileWithTimeout().catch(err => ({ error: err, data: null }));
+        const profile = profileResult.data;
+
+        if (!profile || profile.role !== 'admin') {
           console.error(`[AdminGuard] Access denied. User role: ${profile?.role || 'none'}`);
           router.push('/dashboard');
           return;
