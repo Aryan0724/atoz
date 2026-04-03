@@ -279,9 +279,19 @@ export default function AddProductPage() {
                 })}
                 {formData.images.length < 6 && (
                   <label className="aspect-square rounded-2xl border-2 border-dashed border-gray-100 hover:border-brand-pink/30 transition-colors flex flex-col items-center justify-center cursor-pointer group">
-                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'gallery')} disabled={uploading} />
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*" 
+                      onClick={(e) => (e.target as any).value = null}
+                      onChange={(e) => handleImageUpload(e, 'gallery')} 
+                      disabled={uploading} 
+                    />
                     {uploading ? (
-                      <Loader2 className="h-8 w-8 text-brand-pink animate-spin" />
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="h-8 w-8 text-brand-pink animate-spin" />
+                        <span className="text-[8px] font-black text-brand-pink uppercase animate-pulse">Uploading...</span>
+                      </div>
                     ) : (
                       <>
                         <ImageIcon className="h-8 w-8 text-gray-200 group-hover:text-brand-pink transition-colors" />
@@ -322,9 +332,19 @@ export default function AddProductPage() {
                 })}
                 {formData.wireframe_images.length < 4 && (
                   <label className="aspect-square rounded-2xl border-2 border-dashed border-gray-100 hover:border-brand-pink/30 transition-colors flex flex-col items-center justify-center cursor-pointer group">
-                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'wireframe')} disabled={uploading} />
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*" 
+                      onClick={(e) => (e.target as any).value = null}
+                      onChange={(e) => handleImageUpload(e, 'wireframe')} 
+                      disabled={uploading} 
+                    />
                     {uploading ? (
-                      <Loader2 className="h-8 w-8 text-brand-pink animate-spin" />
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="h-8 w-8 text-brand-pink animate-spin" />
+                        <span className="text-[8px] font-black text-brand-pink uppercase animate-pulse">Uploading...</span>
+                      </div>
                     ) : (
                       <>
                         <ImageIcon className="h-8 w-8 text-gray-200 group-hover:text-brand-pink transition-colors" />
@@ -385,31 +405,46 @@ export default function AddProductPage() {
                         const seed = Math.floor(Math.random() * 1000000);
                         const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', centered product on white background, studio lighting, high resolution, 8k')}?width=1024&height=1024&nologo=true&seed=${seed}`;
                         
-                        // "Warming" the image
+                        toast.info("Step 1/2: Generating mockup...");
+                        
+                        // "Warming" the image with a timeout
                         const img = new Image();
                         img.src = url;
-                        await new Promise((resolve) => { img.onload = resolve; });
+                        await Promise.race([
+                          new Promise((resolve) => { img.onload = resolve; }),
+                          new Promise((_, reject) => setTimeout(() => reject(new Error('Generation Timeout')), 30000))
+                        ]);
 
-                        // Background Removal Trigger
-                        toast.info("Mockup generated! Removing background...");
-                        const response = await fetch('/api/remove-bg', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ imageUrl: url })
-                        });
+                        // Background Removal Trigger with Timeout
+                        toast.info("Step 2/2: Processing background...");
                         
-                        const result = await response.json();
-                        if (result.imageUrl) {
-                          setFormData(p => ({ ...p, wireframe_images: [...p.wireframe_images, result.imageUrl] }));
-                          toast.success("AI Wireframe Added!");
-                        } else {
-                          // Fallback to original if BG removal fails or is limited
+                        const removeBgWithTimeout = async () => {
+                          const requestPromise = fetch('/api/remove-bg', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ imageUrl: url })
+                          });
+                          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Removal Timeout')), 15000));
+                          return Promise.race([requestPromise, timeoutPromise]) as Promise<Response>;
+                        };
+
+                        try {
+                          const response = await removeBgWithTimeout();
+                          const result = await response.json();
+                          if (result.imageUrl) {
+                            setFormData(p => ({ ...p, wireframe_images: [...p.wireframe_images, result.imageUrl] }));
+                            toast.success("AI Wireframe Added!");
+                          } else {
+                            throw new Error('Processing failed');
+                          }
+                        } catch (pErr) {
+                          console.warn("Processing failed or timed out, using original:", pErr);
                           setFormData(p => ({ ...p, wireframe_images: [...p.wireframe_images, url] }));
-                          toast.warning("Added without background removal.");
+                          toast.warning("Added mockup (Skipped background removal).");
                         }
                       } catch (err) {
                         console.error("AI Generation failed:", err);
-                        toast.error("Generation failed. Check your API limits.");
+                        toast.error("Generation failed. Check your API limits or connection.");
                       } finally {
                         setUploading(false);
                       }
