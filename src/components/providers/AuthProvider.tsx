@@ -85,7 +85,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   const signOut = async () => {
     try {
-      // 1. Collect all sensitive keys to remove to avoid mutation during loop
+      console.log('[Auth] Initiating sign out...');
+      
+      // 1. CLEAR LOCALLY FIRST (Immediate)
       if (typeof window !== 'undefined') {
         const keysToRemove: string[] = ['atoz_demo_admin'];
         for (let i = 0; i < localStorage.length; i++) {
@@ -94,17 +96,27 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             keysToRemove.push(key);
           }
         }
-        // 2. Clear flags immediately to stop any auto-redirects
         keysToRemove.forEach(k => localStorage.removeItem(k));
         sessionStorage.clear();
+        
+        // Optimistically set states to null to trigger UI updates immediately
+        setUser(null);
+        setProfile(null);
       }
 
-      // 3. Attempt official signOut
-      await supabase.auth.signOut();
+      // 2. Official signOut with 3s Timeout
+      const performSignOut = async () => {
+        const signoutPromise = supabase.auth.signOut();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Signout Timeout')), 3000));
+        return Promise.race([signoutPromise, timeoutPromise]);
+      };
+
+      await performSignOut().catch(err => console.warn('[Auth] Network signout warn:', err));
+
     } catch (err) {
       console.error('Sign out error:', err);
     } finally {
-      // 4. Force a hard reload to home page, clearing all React state
+      // 3. Force hard reload to home page, guaranteed to happen
       if (typeof window !== 'undefined') {
         window.location.replace('/');
       }
