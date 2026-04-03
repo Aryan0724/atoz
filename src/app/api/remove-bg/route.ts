@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,11 +33,28 @@ export async function POST(req: NextRequest) {
     }
 
     const blob = await response.blob();
-    return new NextResponse(blob, {
-        headers: {
-            'Content-Type': 'image/png'
-        }
-    });
+    
+    // UPLOAD TO SUPABASE
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const fileName = `generated/${crypto.randomUUID()}.png`;
+    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+      .from('products')
+      .upload(fileName, blob, { contentType: 'image/png' });
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      return NextResponse.json({ error: 'Failed to save processed image' }, { status: 500 });
+    }
+
+    const { data: { publicUrl } } = supabaseAdmin.storage
+      .from('products')
+      .getPublicUrl(fileName);
+
+    return NextResponse.json({ imageUrl: publicUrl });
 
   } catch (error: any) {
     console.error('Remove BG Error:', error);

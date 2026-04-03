@@ -35,15 +35,23 @@ export async function GET(request: Request) {
         }
       }
 
-      const forwardedHost = request.headers.get('x-forwarded-host') // if being forwarded from a reverse proxy
+      // Fetch profile to determine redirect
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single() as any;
+      
+      const targetPath = profileData?.role === 'admin' ? '/admin' : next;
+
+      const forwardedHost = request.headers.get('x-forwarded-host') 
       const isLocalEnv = process.env.NODE_ENV === 'development'
       if (isLocalEnv) {
-        // we can be certain that origin is the correct redirection URL
-        return NextResponse.redirect(`${origin}${next}`)
+        return NextResponse.redirect(`${origin}${targetPath}`)
       } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`)
+        return NextResponse.redirect(`https://${forwardedHost}${targetPath}`)
       } else {
-        return NextResponse.redirect(`${origin}${next}`)
+        return NextResponse.redirect(`${origin}${targetPath}`)
       }
     }
   }

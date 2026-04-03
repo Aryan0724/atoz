@@ -88,7 +88,7 @@ export default function RootLayout({
           <MobileBottomNav />
           <CartDrawer />
           <SupportWidget />
-          <Toaster position="bottom-right" />
+          <Toaster position="top-center" richColors />
         </AuthProvider>
       </body>
     </html>

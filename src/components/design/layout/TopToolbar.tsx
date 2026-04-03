@@ -20,6 +20,7 @@ interface TopToolbarProps {
   onLockToggle?: () => void;
   onSetTextShadow?: (options: { color: string; blur: number; offsetX: number; offsetY: number } | null) => void;
   onSetTextOutline?: (options: { color: string; width: number } | null) => void;
+  onAlign?: (position: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void;
 }
 
 const fonts = [
@@ -42,13 +43,14 @@ const TopToolbar = ({
   onDuplicate,
   onLockToggle,
   onSetTextShadow,
-  onSetTextOutline
+  onSetTextOutline,
+  onAlign
 }: TopToolbarProps) => {
   const [isProcessing, setIsProcessing] = React.useState(false);
 
   if (!activeObject) return (
-     <div className="h-14 border-b border-gray-100 bg-white flex items-center px-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-300">
-        Select an element to edit
+     <div className="h-14 border-b border-white/20 bg-white/40 backdrop-blur-xl flex items-center px-6 text-[9px] font-black uppercase tracking-[0.25em] text-gray-400 italic">
+        Select an object to customize
      </div>
   );
 
@@ -56,14 +58,38 @@ const TopToolbar = ({
   const isImage = activeObject.type === 'image';
 
   return (
-    <div className="min-h-14 h-auto md:h-14 border-b border-gray-100 bg-white flex flex-wrap md:flex-nowrap items-center px-4 py-2 md:py-0 gap-2 z-20 shadow-sm animate-in slide-in-from-top duration-300 overflow-x-auto no-scrollbar">
+    <div className="min-h-14 h-auto md:h-14 border-b border-white/20 bg-white/70 backdrop-blur-2xl flex flex-wrap md:flex-nowrap items-center px-4 py-2 md:py-0 gap-2 z-20 shadow-xl shadow-black/[0.02] ring-1 ring-black/5 animate-in slide-in-from-top duration-500 overflow-x-auto no-scrollbar justify-center md:justify-start">
       
-      {/* OBJECT TYPE LABEL */}
-      <div className="px-3 py-1.5 bg-gray-50 rounded-lg text-[10px] font-black uppercase tracking-widest text-brand-dark mr-2 border border-gray-100">
-        {activeObject.type.replace('i-', '')}
-      </div>
-
       <div className="h-8 w-px bg-gray-100 mx-2" />
+
+      {/* ALIGNMENT TOOLS */}
+      <div className="relative group">
+        <button className="h-9 px-3 hover:bg-gray-50 rounded-lg flex items-center gap-2 border border-transparent hover:border-gray-100 transition-all text-gray-500">
+          <Layers className="h-4 w-4" />
+          <span className="text-[10px] font-black uppercase tracking-widest">Align</span>
+          <ChevronDown className="h-3 w-3 opacity-50" />
+        </button>
+        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2 grid grid-cols-3 gap-1">
+          {[
+            { pos: 'left', icon: <AlignLeft className="h-4 w-4" />, label: 'Left' },
+            { pos: 'center', icon: <AlignCenter className="h-4 w-4" />, label: 'H-Center' },
+            { pos: 'right', icon: <AlignRight className="h-4 w-4" />, label: 'Right' },
+            { pos: 'top', icon: <AlignLeft className="h-4 w-4 rotate-90" />, label: 'Top' },
+            { pos: 'middle', icon: <AlignCenter className="h-4 w-4 rotate-90" />, label: 'V-Center' },
+            { pos: 'bottom', icon: <AlignRight className="h-4 w-4 rotate-90" />, label: 'Bottom' },
+          ].map(item => (
+            <button 
+              key={item.pos}
+              //@ts-ignore
+              onClick={() => onAlign?.(item.pos)}
+              className="flex flex-col items-center justify-center p-2 hover:bg-pink-50 hover:text-brand-pink rounded-lg transition-colors"
+              title={item.label}
+            >
+              {item.icon}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="h-8 w-px bg-gray-100 mx-2" />
 
@@ -133,11 +159,41 @@ const TopToolbar = ({
 
            <div className="h-8 w-px bg-gray-100 mx-1" />
 
+          <div className="relative group">
+            <button className="h-9 px-3 hover:bg-gray-50 rounded-lg flex items-center gap-2 border border-transparent hover:border-gray-100 transition-all text-gray-500 hover:text-brand-pink">
+              <Sparkles className="h-4 w-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Magic Styles</span>
+              <ChevronDown className="h-3 w-3 opacity-50" />
+            </button>
+            <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2 flex flex-col gap-1">
+              {[
+                { name: 'Neon Glow', shadow: { color: 'rgba(233, 30, 99, 0.8)', blur: 20, offsetX: 0, offsetY: 0 }, outline: { color: '#E91E63', width: 1 } },
+                { name: 'College Out', shadow: null, outline: { color: '#000000', width: 3 } },
+                { name: 'Retro Drop', shadow: { color: 'rgba(0,0,0,0.3)', blur: 0, offsetX: 6, offsetY: 6 }, outline: { color: '#ffffff', width: 1.5 } },
+                { name: 'Clear All', shadow: null, outline: null }
+              ].map(style => (
+                <button
+                  key={style.name}
+                  onClick={() => {
+                    onSetTextShadow?.(style.shadow);
+                    //@ts-ignore
+                    onSetTextOutline?.(style.outline);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-pink-50 hover:text-brand-pink transition-colors"
+                >
+                  {style.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="h-8 w-px bg-gray-100 mx-1" />
+
           {/* EFFECTS HUB */}
           <div className="relative group">
             <button className="h-9 px-3 hover:bg-gray-50 rounded-lg flex items-center gap-2 border border-transparent hover:border-gray-100 transition-all text-gray-500 hover:text-brand-pink">
               <Sparkles className="h-4 w-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Effects</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">Manual Effects</span>
               <ChevronDown className="h-3 w-3 opacity-50" />
             </button>
             <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-4">

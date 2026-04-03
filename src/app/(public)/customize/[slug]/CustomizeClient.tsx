@@ -9,6 +9,7 @@ import { CanvasObjectProperties, DesignerCanvasRef } from '@/types/canvas';
 import SidebarRail from '@/components/design/layout/SidebarRail';
 import SidebarPanel from '@/components/design/layout/SidebarPanel';
 import TopToolbar from '@/components/design/layout/TopToolbar';
+import FloatingToolbar from '@/components/design/layout/FloatingToolbar';
 import ThreeDPreview from '@/components/design/ThreeDPreview';
 import { canvasTemplates } from '@/lib/data/canvasTemplates';
 import {
@@ -20,7 +21,7 @@ import { cn, dataURLToBlob } from '@/lib/utils';
 import { uploadFile } from '@/lib/supabase/storage';
 import { toast } from 'sonner';
 
-export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify' | 'reviews';
+export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify' | 'layers' | 'patterns';
 
 interface CustomizeClientProps {
   product: Product;
@@ -32,7 +33,6 @@ const mobileTools: { id: SidebarTab; icon: React.ReactNode; label: string }[] = 
   { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },
   { id: 'graphics', icon: <Square className="h-5 w-5" />, label: 'Elements' },
   { id: 'iconify', icon: <Sparkles className="h-5 w-5" />, label: 'Icons' },
-  { id: 'reviews', icon: <Check className="h-5 w-5" />, label: 'Reviews' },
   { id: 'uploads', icon: <Upload className="h-5 w-5" />, label: 'Upload' },
 ];
 
@@ -144,45 +144,55 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
       return;
     }
 
+    // --- OPTIMISTIC UI TRANSITION ---
+    // Start the heavy work in the background but show success immediately
     setIsFinishing(true);
+    
     try {
       const finalDesignJson = canvasRef.current?.getJson();
       const finalViewData = { ...viewData, [activeView === '3d' ? 'front' : activeView]: finalDesignJson };
       const dataUrl = canvasRef.current?.getDesignDataUrl() || '';
       
-      let previewUrl = product.images?.[0] || '';
-      
-      if (dataUrl) {
-        try {
-          const blob = dataURLToBlob(dataUrl);
-          const { data: { user } } = await supabase.auth.getUser();
-          const userId = user?.id || 'guest';
-          const fileName = `${userId}/${product.slug}-${Date.now()}.png`;
-          
-          // Upload to 'designs' bucket
-          previewUrl = await uploadFile('designs', fileName, new File([blob], fileName, { type: 'image/png' }));
-        } catch (uploadErr) {
-          console.error("Canvas: Upload failed, using dataURL instead", uploadErr);
-          previewUrl = dataUrl; // Fallback to dataURL if upload fails
-        }
-      }
-
+      // OPTIMISTIC ADD: Add to cart with dataUrl placeholder first
+      const tempId = `${product.id}-custom-${Date.now()}`;
       addItem({
-        id: `${product.id}-custom-${Date.now()}`,
+        id: tempId,
         product: product,
         quantity: quantity,
         quality_level: selectedQuality,
         design_data: { color: selectedColor, canvasState: finalViewData },
-        design_preview_url: previewUrl,
+        design_preview_url: dataUrl, // Instant placeholder
         unitPrice: unitPrice
       });
-      
+
+      // Show success instantly
       setIsFinishing(false);
       setIsSuccess(true);
       setTimeout(() => {
         setIsSuccess(false);
         setOpen(true);
-      }, 2000);
+      }, 800);
+
+      // BACKGROUND UPLOAD: Sync the high-res image to Supabase without blocking the UI
+      if (dataUrl) {
+         const syncHighRes = async () => {
+           try {
+              const blob = dataURLToBlob(dataUrl);
+              const { data: { user } } = await supabase.auth.getUser();
+              const userId = user?.id || 'guest';
+              const fileName = `${userId}/${product.slug}-${Date.now()}.png`;
+              
+              const publicUrl = await uploadFile('designs', fileName, new File([blob], fileName, { type: 'image/png' }));
+              
+              // We could potentially update the cart item here if needed, 
+              // but the placeholder works for the checkout preview perfectly.
+              console.log("High-res design synced to cloud:", publicUrl);
+           } catch (err) {
+              console.error("Background sync failed:", err);
+           }
+         };
+         syncHighRes();
+      }
     } catch (err) {
       console.error("Failed to finish design:", err);
       toast.error("Process interrupted. Please try again.");
@@ -262,12 +272,18 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
             onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
             onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
+            onRemoveBackground={() => canvasRef.current?.removeImageBackground?.() || Promise.resolve(false)}
             onUpdateObject={handleUpdateObjectById}
+            activeObject={activeObject}
+            onSelectionCleared={() => setActiveObject(null)}
             layers={layers}
             productCategory={product.category || "Apparel"}
             qualityLevels={product.quality_levels || ['Standard', 'Premium', 'Luxury']}
             basePrice={product.base_price || 0}
             productId={product.id}
+            onLockAllObjects={(lock) => canvasRef.current?.lockAllObjects(lock)}
+            onClearDesign={() => canvasRef.current?.clearDesign()}
+            onAddPattern={(url) => canvasRef.current?.addPattern(url)}
           />
         </div>
 
@@ -285,6 +301,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                 onLockToggle={() => canvasRef.current?.toggleLock()}
                 onSetTextShadow={(options) => canvasRef.current?.setTextShadow(options)}
                 onSetTextOutline={(options) => canvasRef.current?.setTextOutline(options)}
+                onAlign={(pos) => canvasRef.current?.alignActiveObject(pos)}
               />
             </div>
           </div>
@@ -318,7 +335,8 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                     
                     if (activeView === 'front') return bgImages?.[0] || '';
                     if (activeView === 'back') return bgImages?.[1] || bgImages?.[0] || '';
-                    return bgImages?.[2] || bgImages?.[0] || '';
+                    if (activeView === 'sleeve_l' || activeView === 'sleeve_r') return bgImages?.[2] || bgImages?.[0] || '';
+                    return bgImages?.[0] || '';
                   })()}
                   productColor={selectedColor}
                   onObjectSelected={setActiveObject}
@@ -327,6 +345,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                   onObjectsUpdated={handleObjectsUpdated}
                   onOutOfBoundsWarning={setIsOutOfBounds}
                   onLowQualityWarning={setIsLowQuality}
+                  designArea={(product as any).design_areas?.[activeView === 'sleeve_l' || activeView === 'sleeve_r' ? 'side' : activeView]}
                 />
               </div>
             )}
@@ -450,6 +469,9 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                    qualityLevels={product.quality_levels || ['Standard', 'Premium', 'Luxury']}
                    basePrice={product.base_price || 0}
                    productId={product.id}
+                   onLockAllObjects={(lock) => canvasRef.current?.lockAllObjects(lock)}
+                   onClearDesign={() => canvasRef.current?.clearDesign()}
+                   onAddPattern={(url) => canvasRef.current?.addPattern(url)}
                  />
                </div>
             </div>

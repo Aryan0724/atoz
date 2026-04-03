@@ -295,7 +295,7 @@ export default function AddProductPage() {
              <h2 className="text-xl font-bold mb-4 mt-8 w-full text-left">Canvas Wireframes</h2>
              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6 w-full text-left italic">Technical outlines for the Designer Canvas</p>
 
-             <div className="w-full grid grid-cols-2 gap-4 mb-6">
+              <div className="w-full grid grid-cols-2 gap-4 mb-6">
                 {formData.wireframe_images.map((url, idx) => {
                   return (
                     <div key={idx} className="aspect-square relative rounded-2xl overflow-hidden border border-gray-100 group bg-gray-50 p-2">
@@ -333,6 +333,94 @@ export default function AddProductPage() {
                     )}
                   </label>
                 )}
+             </div>
+
+             {/* AI WIREFRAME STUDIO */}
+             <div className="w-full mt-10 p-8 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 rounded-[40px] border border-indigo-100/50 text-left">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-white rounded-2xl shadow-sm">
+                    <Sparkles className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-indigo-950 uppercase tracking-widest">AI Wireframe Studio</h3>
+                    <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-tighter italic">Generate mockups for FREE</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <textarea 
+                    className="w-full bg-white/80 border border-indigo-100 rounded-2xl py-4 px-5 text-xs font-bold focus:ring-2 focus:ring-indigo-400 outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                    placeholder="Describe the product (e.g. 'Plain white oversized t-shirt, front view mockup, high-end photography')..."
+                    rows={3}
+                    id="ai-mockup-prompt"
+                  />
+                  
+                  <div className="flex gap-2 pb-2 overflow-x-auto no-scrollbar">
+                     {['Front View', 'Back View', 'Side View', 'Ghost Mockup', 'Isolated'].map(v => (
+                       <button 
+                         key={v}
+                         type="button"
+                         onClick={() => {
+                           const el = document.getElementById('ai-mockup-prompt') as HTMLTextAreaElement;
+                           el.value = (el.value ? el.value + ', ' : '') + v;
+                         }}
+                         className="px-4 py-2 bg-white text-indigo-600 rounded-full text-[9px] font-black border border-indigo-100 hover:bg-indigo-50 transition-colors whitespace-nowrap"
+                       >
+                         + {v}
+                       </button>
+                     ))}
+                  </div>
+
+                  <button 
+                    type="button"
+                    onClick={async () => {
+                      const prompt = (document.getElementById('ai-mockup-prompt') as HTMLTextAreaElement).value;
+                      if (!prompt) {
+                        toast.error("Please describe the mockup first!");
+                        return;
+                      }
+                      
+                      setUploading(true);
+                      try {
+                        const seed = Math.floor(Math.random() * 1000000);
+                        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', centered product on white background, studio lighting, high resolution, 8k')}?width=1024&height=1024&nologo=true&seed=${seed}`;
+                        
+                        // "Warming" the image
+                        const img = new Image();
+                        img.src = url;
+                        await new Promise((resolve) => { img.onload = resolve; });
+
+                        // Background Removal Trigger
+                        toast.info("Mockup generated! Removing background...");
+                        const response = await fetch('/api/remove-bg', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ imageUrl: url })
+                        });
+                        
+                        const result = await response.json();
+                        if (result.imageUrl) {
+                          setFormData(p => ({ ...p, wireframe_images: [...p.wireframe_images, result.imageUrl] }));
+                          toast.success("AI Wireframe Added!");
+                        } else {
+                          // Fallback to original if BG removal fails or is limited
+                          setFormData(p => ({ ...p, wireframe_images: [...p.wireframe_images, url] }));
+                          toast.warning("Added without background removal.");
+                        }
+                      } catch (err) {
+                        console.error("AI Generation failed:", err);
+                        toast.error("Generation failed. Check your API limits.");
+                      } finally {
+                        setUploading(false);
+                      }
+                    }}
+                    disabled={uploading}
+                    className="w-full py-4 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-indigo-100 disabled:opacity-50"
+                  >
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                    Generate & Process
+                  </button>
+                </div>
              </div>
 
              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 px-4">Maximum 4 dynamic product images</p>

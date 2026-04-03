@@ -216,10 +216,10 @@ export default function AdminDashboard() {
              <h2 className="text-2xl font-black mb-10 border-b border-white/5 pb-6">Quick <span className="text-brand-pink">Actions</span></h2>
              <div className="grid grid-cols-2 gap-4">
                 {[
-                  { label: 'Add Product', icon: <Plus className="h-5 w-5" />, color: 'pink', action: () => router.push('/admin/products') },
-                  { label: 'Upload Asset', icon: <Package className="h-5 w-5" />, color: 'cyan', action: () => {} },
-                  { label: 'Order Report', icon: <Activity className="h-5 w-5" />, color: 'white', action: () => router.push('/admin/orders/analyze') },
-                  { label: 'User Support', icon: <Users className="h-5 w-5" />, color: 'pink', action: () => {} },
+                  { label: 'Add Product', icon: <Plus className="h-5 w-5" />, color: 'pink', action: () => router.push('/admin/products/add') },
+                  { label: 'Manage Assets', icon: <Package className="h-5 w-5" />, color: 'cyan', action: () => router.push('/admin/products') },
+                  { label: 'Order Report', icon: <Activity className="h-5 w-5" />, color: 'white', action: () => router.push('/admin/orders') },
+                  { label: 'User Support', icon: <Users className="h-5 w-5" />, color: 'pink', action: () => router.push('/admin/customers') },
                 ].map((action) => (
                   <button 
                     key={action.label}

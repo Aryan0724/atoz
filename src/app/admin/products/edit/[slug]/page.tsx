@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import { cn } from '@/lib/utils';
 import { mockProducts } from '@/lib/data/mockProducts';
+import DesignAreaSelector from '@/components/admin/DesignAreaSelector';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function EditProductPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState<any>(null);
+  const [editingArea, setEditingArea] = useState<{ url: string, index: number } | null>(null);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -323,7 +325,14 @@ export default function EditProductPage() {
                   return (
                     <div key={idx} className="aspect-square relative rounded-2xl overflow-hidden border border-gray-100 group bg-gray-50 p-2">
                       <img src={url} alt="Wireframe" className="w-full h-full object-contain" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 px-4 text-center">
+                        <button 
+                          type="button"
+                          onClick={() => setEditingArea({ url, index: idx })}
+                          className="w-full py-1.5 bg-brand-pink text-white rounded-full text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-transform"
+                        >
+                          Define Area
+                        </button>
                         <button 
                           type="button"
                           onClick={() => {
@@ -332,7 +341,7 @@ export default function EditProductPage() {
                               wireframe_images: p.wireframe_images.filter((_: any, i: number) => i !== idx)
                             }))
                           }}
-                          className="px-3 py-1 bg-red-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest"
+                          className="w-full py-1.5 bg-red-400 text-white rounded-full text-[8px] font-black uppercase tracking-widest hover:bg-red-500"
                         >
                           Remove
                         </button>
@@ -371,6 +380,27 @@ export default function EditProductPage() {
           </div>
         </div>
       </form>
+
+      {editingArea && (
+        <DesignAreaSelector 
+          imageUrl={editingArea.url}
+          label={editingArea.index === 0 ? 'Front View' : editingArea.index === 1 ? 'Back View' : 'Side View'}
+          initialArea={formData.design_areas?.[editingArea.index === 0 ? 'front' : editingArea.index === 1 ? 'back' : 'side']}
+          onCancel={() => setEditingArea(null)}
+          onSave={(area) => {
+            const key = editingArea.index === 0 ? 'front' : editingArea.index === 1 ? 'back' : 'side';
+            setFormData({
+              ...formData,
+              design_areas: {
+                ...(formData.design_areas || {}),
+                [key]: area
+              }
+            });
+            setEditingArea(null);
+            toast.success(`Design area set for ${key} view`);
+          }}
+        />
+      )}
     </div>
   );
 }

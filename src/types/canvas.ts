@@ -42,6 +42,7 @@ export interface DesignerCanvasProps {
   onHistoryChange?: () => void;
   onOutOfBoundsWarning?: (isOut: boolean) => void; 
   onLowQualityWarning?: (isLowQuality: boolean) => void;
+  designArea?: { x: number; y: number; w: number; h: number };
 }
 
 export interface DesignerCanvasRef {
@@ -71,6 +72,10 @@ export interface DesignerCanvasRef {
   redo: () => void;
   setPanning: (enabled: boolean) => void;
   getDesignDataUrl: () => string;
+  alignActiveObject: (position: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void;
+  lockAllObjects: (lock: boolean) => void;
+  clearDesign: () => void;
+  addPattern: (url: string) => void;
 }
 
 export const getObjectProperties = (obj: any): CanvasObjectProperties => {

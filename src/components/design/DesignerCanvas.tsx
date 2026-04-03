@@ -20,14 +20,15 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   onObjectsUpdated,
   onHistoryChange,
   onOutOfBoundsWarning,
-  onLowQualityWarning
+  onLowQualityWarning,
+  designArea
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
 
   const { saveHistory, undo, redo } = useCanvasHistory(canvas);
-  const { zoomLevel, handleZoom, resetZoom, setZoomLevel } = useCanvasGestures(canvas, containerRef);
+  const { zoomLevel, handleZoom, resetZoom } = useCanvasGestures(canvas, containerRef);
   const { addText, addImage, addShape, addIcon, addSvgGraphic } = useCanvasActions(canvas, onObjectsUpdated, onHistoryChange);
 
   const productColorRef = useRef(productColor);
@@ -77,7 +78,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       onObjectsUpdated?.();
     });
 
-    // Always-on-top Safe Zone (Prints at the end of rendering)
+    // Always-on-top overlays (Safe Zone & Smart Guides)
     fabricCanvas.on('after:render', function() {
       const ctx = fabricCanvas.getContext();
       ctx.save();
@@ -85,14 +86,47 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       if (vpt) {
         ctx.transform(vpt[0], vpt[1], vpt[2], vpt[3], vpt[4], vpt[5]);
       }
+
+      // Safe Zone
       ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
       ctx.lineWidth = 1;
       ctx.setLineDash([5, 5]);
-      ctx.strokeRect(150, 120, 200, 320);
+      
+      const { x = 150, y = 120, w = 200, h = 320 } = designArea || {};
+      ctx.strokeRect(x, y, w, h);
+
+      // Center Guides (Existing)
+      if ((fabricCanvas as any).showVGuide) {
+        ctx.beginPath();
+        ctx.moveTo(250, 0); ctx.lineTo(250, 625);
+        ctx.stroke();
+      }
+      if ((fabricCanvas as any).showHGuide) {
+        ctx.beginPath();
+        ctx.moveTo(0, 312.5); ctx.lineTo(500, 312.5);
+        ctx.stroke();
+      }
+
+      // Inter-object Dynamic Guides
+      ctx.strokeStyle = '#6200EE'; // Purple for inter-object snapping
+      ctx.setLineDash([2, 4]);
+
+      ((fabricCanvas as any).vGuides || []).forEach((x: number) => {
+        ctx.beginPath();
+        ctx.moveTo(x, 0); ctx.lineTo(x, 625);
+        ctx.stroke();
+      });
+
+      ((fabricCanvas as any).hGuides || []).forEach((y: number) => {
+        ctx.beginPath();
+        ctx.moveTo(0, y); ctx.lineTo(500, y);
+        ctx.stroke();
+      });
+
       ctx.restore();
     });
 
-    // PANNING
+    // PANNING & GUIDES
     fabricCanvas.on('mouse:down', function(opt) {
       const evt = opt.e;
       if ((fabricCanvas as any).isPanning) {
@@ -102,6 +136,65 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         (fabricCanvas as any).lastPosY = evt.clientY;
       }
     });
+
+    fabricCanvas.on('object:moving', (e: any) => {
+      const obj = e.target;
+      const centerX = 250;
+      const centerY = 312.5;
+      const snapRange = 6;
+      let guided = false;
+
+      (fabricCanvas as any).vGuides = [];
+      (fabricCanvas as any).hGuides = [];
+
+      // 1. Center Snapping
+      if (Math.abs(obj.left - centerX) < snapRange) {
+        obj.set({ left: centerX });
+        (fabricCanvas as any).showVGuide = true;
+        guided = true;
+      } else {
+        (fabricCanvas as any).showVGuide = false;
+      }
+
+      if (Math.abs(obj.top - centerY) < snapRange) {
+        obj.set({ top: centerY });
+        (fabricCanvas as any).showHGuide = true;
+        guided = true;
+      } else {
+        (fabricCanvas as any).showHGuide = false;
+      }
+
+      // 2. Inter-object Snapping
+      const others = fabricCanvas.getObjects().filter(o => o !== obj && (o as any).id !== 'product_base_image' && !(o as any).id?.includes('safe_zone'));
+      
+      others.forEach(other => {
+        const otherLeft = (other as any).left;
+        const otherTop = (other as any).top;
+        if (otherLeft === undefined || otherTop === undefined) return;
+
+        // X-links
+        if (Math.abs(obj.left! - otherLeft) < snapRange) {
+          obj.set({ left: otherLeft });
+          (fabricCanvas as any).vGuides.push(otherLeft);
+          guided = true;
+        }
+        if (Math.abs(obj.left! + (obj.width! * (obj.scaleX || 1)) - (otherLeft + (other.width! * (other.scaleX || 1)))) < snapRange) {
+           obj.set({ left: otherLeft + (other.width! * (other.scaleX || 1)) - (obj.width! * (obj.scaleX || 1)) });
+           (fabricCanvas as any).vGuides.push(otherLeft + (other.width! * (other.scaleX || 1)));
+           guided = true;
+        }
+
+        // Y-links
+        if (Math.abs(obj.top! - otherTop) < snapRange) {
+          obj.set({ top: otherTop });
+          (fabricCanvas as any).hGuides.push(otherTop);
+          guided = true;
+        }
+      });
+      
+      if (guided) fabricCanvas.renderAll();
+    });
+
     fabricCanvas.on('mouse:move', function(opt) {
       if ((fabricCanvas as any).isDragging) {
         const e = opt.e;
@@ -113,10 +206,14 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         (fabricCanvas as any).lastPosY = e.clientY;
       }
     });
+
     fabricCanvas.on('mouse:up', function() {
       fabricCanvas.setViewportTransform(fabricCanvas.viewportTransform!);
       (fabricCanvas as any).isDragging = false;
       fabricCanvas.selection = true;
+      (fabricCanvas as any).showVGuide = false;
+      (fabricCanvas as any).showHGuide = false;
+      fabricCanvas.renderAll();
     });
 
     setCanvas(fabricCanvas);
@@ -297,7 +394,6 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         if (properties.text !== undefined) textObj.set('text', properties.text);
         
         if (properties.fontFamily !== undefined) {
-          // Dynamic font loading
           const loaded = await loadGoogleFont(properties.fontFamily);
           if (loaded) {
             textObj.set('fontFamily', properties.fontFamily);
@@ -531,7 +627,6 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         });
       } catch (err: any) {
         console.error("Background removal failed:", err);
-        alert(err.message || "Failed to remove background. Ensure the API key is configured.");
         return false;
       }
     },
@@ -553,8 +648,72 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       bgObjects.forEach(obj => obj.set('visible', true));
       canvas.renderAll();
       return dataUrl;
+    },
+    alignActiveObject: (pos: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => {
+      if (!canvas) return;
+      const obj = canvas.getActiveObject();
+      if (!obj) return;
+      const bounds = { w: 500, h: 625 };
+      if (pos === 'left') obj.set({ left: obj.getScaledWidth() / 2 });
+      else if (pos === 'center') obj.set({ left: bounds.w / 2 });
+      else if (pos === 'right') obj.set({ left: bounds.w - obj.getScaledWidth() / 2 });
+      else if (pos === 'top') obj.set({ top: obj.getScaledHeight() / 2 });
+      else if (pos === 'middle') obj.set({ top: bounds.h / 2 });
+      else if (pos === 'bottom') obj.set({ top: bounds.h - obj.getScaledHeight() / 2 });
+      obj.setCoords();
+      canvas.renderAll();
+      onObjectModified?.(getObjectProperties(obj));
+    },
+    lockAllObjects: (lock: boolean) => {
+      if (!canvas) return;
+      canvas.getObjects().forEach(obj => {
+        if (['product_base_image', 'product_color_fill', 'safe_zone_indicator'].includes((obj as any).id)) return;
+        obj.set({
+          lockMovementX: lock, lockMovementY: lock, lockRotation: lock, lockScalingX: lock, lockScalingY: lock,
+          hasControls: !lock, selectable: !lock
+        });
+      });
+      canvas.renderAll();
+      onObjectsUpdated?.();
+    },
+    clearDesign: () => {
+       if (!canvas) return;
+       canvas.getObjects().forEach(obj => {
+         if (!['product_base_image', 'product_color_fill', 'safe_zone_indicator'].includes((obj as any).id)) {
+           canvas.remove(obj);
+         }
+       });
+       canvas.discardActiveObject();
+       canvas.renderAll();
+       onObjectsUpdated?.();
+       onSelectionCleared?.();
+    },
+    addPattern: (url: string) => {
+      if (!canvas) return;
+      fabric.Image.fromURL(url, (img) => {
+         if (!img) return;
+         const pattern = new fabric.Pattern({
+           source: (img as any)._element,
+           repeat: 'repeat'
+         });
+         const rect = new fabric.Rect({
+           width: 250,
+           height: 250,
+           left: 250,
+           top: 312.5,
+           originX: 'center',
+           originY: 'center',
+           fill: pattern,
+           //@ts-ignore
+           id: `pattern_${Date.now()}`
+         });
+         canvas.add(rect);
+         canvas.setActiveObject(rect);
+         canvas.renderAll();
+         onObjectsUpdated?.();
+      }, { crossOrigin: 'anonymous' });
     }
-  }), [canvas, addText, addImage, addShape, addIcon, addSvgGraphic, undo, redo, resetZoom, handleZoom, onObjectsUpdated, onHistoryChange, onObjectModified]);
+  }), [canvas, addText, addImage, addShape, addIcon, addSvgGraphic, undo, redo, resetZoom, handleZoom, onObjectsUpdated, onHistoryChange, onObjectModified, onSelectionCleared, designArea]);
 
   return (
     <div ref={containerRef} className="relative w-full max-w-[500px] aspect-[4/5] bg-gray-50 rounded-[30px] overflow-hidden border border-gray-100 shadow-2xl flex items-center justify-center group isolate ring-1 ring-black/5" style={{ touchAction: 'none' }}>

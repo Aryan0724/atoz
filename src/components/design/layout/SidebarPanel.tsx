@@ -9,11 +9,10 @@ import { iconLibrary, iconCategories } from '@/lib/data/icons';
 import { podGraphics, podGraphicCategories } from '@/lib/data/podGraphics';
 import { toast } from 'sonner';
 import IconifyTab from '@/components/design/controls/tabs/IconifyTab';
-import ReviewsTab from '@/components/design/controls/tabs/ReviewsTab';
 import { 
-  Type, Loader2, Upload, Plus, Search, LayoutGrid, Layers, Lock, Unlock, Eye, EyeOff,
-  X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes
+  Type, Loader2, Upload, Plus, Search, LayoutGrid, X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes, Wand2, History, RefreshCcw, Download, Trash2, ArrowRight, Layers, Lock, Unlock, Eye, EyeOff
 } from 'lucide-react';
+import { aiStylePills, aiSubjectIdeas } from '@/lib/data/AiPrompts';
 
 // ─────────────────────────────────────────────────────────
 // Color palette data
@@ -172,6 +171,12 @@ interface SidebarPanelProps {
   qualityLevels?: string[];
   basePrice?: number;
   productId?: string;
+  activeObject?: CanvasObjectProperties | null;
+  onRemoveBackground?: () => Promise<boolean>;
+  onSelectionCleared?: () => void;
+  onLockAllObjects?: (lock: boolean) => void;
+  onClearDesign?: () => void;
+  onAddPattern?: (url: string) => void;
 }
 
 const SidebarPanel = ({ 
@@ -186,6 +191,12 @@ const SidebarPanel = ({
   onAddSvgGraphic,
   onLoadTemplate,
   onUpdateObject,
+  activeObject,
+  onRemoveBackground,
+  onSelectionCleared,
+  onLockAllObjects,
+  onClearDesign,
+  onAddPattern,
   layers,
   selectedQuality,
   onQualityChange,
@@ -239,6 +250,65 @@ const SidebarPanel = ({
   const [customColor, setCustomColor] = useState('#E91E63');
   const [activePalette, setActivePalette] = useState(colorPalettes[0].name);
 
+  // AI Generator State
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [aiHistory, setAiHistory] = useState<{ url: string, prompt: string }[]>([]);
+
+  const handleAiGenerate = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error("Please enter a prompt first!");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const style = aiStylePills.find(s => s.id === selectedStyle);
+      const fullPrompt = style ? `${aiPrompt}, ${style.suffix}` : aiPrompt;
+      const seed = Math.floor(Math.random() * 1000000);
+      
+      // Dynamic Aspect Ratio based on Product Category
+      let width = 1024;
+      let height = 1024;
+      const cat = productCategory?.toLowerCase() || '';
+      
+      if (cat.includes('tshirt') || cat.includes('t-shirt') || cat.includes('hoodie')) {
+        width = 768;   // Portrait for chest prints
+        height = 1024;
+      } else if (cat.includes('mug') || cat.includes('bottle') || cat.includes('drinkware')) {
+        width = 1024;  // Wide for wrap-arounds
+        height = 512;
+      } else if (cat.includes('diary') || cat.includes('notebook') || cat.includes('stationery')) {
+        width = 768;   // Natural portrait for covers
+        height = 1024;
+      } else if (cat.includes('phone') || cat.includes('case')) {
+        width = 512;   // Slim portrait for phones
+        height = 1024;
+      }
+
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${width}&height=${height}&nologo=true&seed=${seed}`;
+      
+      // We "pre-warm" the image to ensure it's generated before showing
+      const img = new Image();
+      img.src = imageUrl;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      setGeneratedImage(imageUrl);
+      setAiHistory(prev => [{ url: imageUrl, prompt: aiPrompt }, ...prev].slice(0, 10));
+      toast.success("AI Image Generated!");
+    } catch (err) {
+      console.error("AI Generation failed:", err);
+      toast.error("Generation failed. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   React.useEffect(() => {
     if (!availableTemplateCats.includes(activeTemplateCat)) {
       setActiveTemplateCat(availableTemplateCats.includes('All') ? 'All' : availableTemplateCats[0]);
@@ -249,6 +319,19 @@ const SidebarPanel = ({
   }, [availableTemplateCats, availableGraphicCats, activeTemplateCat, activeGraphicCat]);
 
   const [textCurveAmount, setTextCurveAmount] = useState(0);
+
+  React.useEffect(() => {
+    if (activeObject?.type?.includes('text')) {
+      setTextCurveAmount(activeObject._curve || 0);
+    }
+  }, [activeObject]);
+
+  const handleCurveChange = (amount: number) => {
+    setTextCurveAmount(amount);
+    if (activeObject?.id && activeObject?.type?.includes('text')) {
+      onUpdateObject?.(activeObject.id, { _curve: amount });
+    }
+  };
 
   if (!activeTab) return null;
 
@@ -277,21 +360,38 @@ const SidebarPanel = ({
     'templates': 'Templates',
     'shutterstock': 'Quick Photos',
     'iconify': 'Icon Library',
-    'reviews': 'Customer Ratings',
+    'layers': 'Design Layers',
   };
 
-  const filteredTemplates = activeTemplateCat === 'All' 
+  const filteredTemplates = (activeTemplateCat === 'All' 
     ? canvasTemplates.filter(t => availableTemplateCats.includes(t.category)) 
-    : canvasTemplates.filter(t => t.category === activeTemplateCat);
+    : canvasTemplates.filter(t => t.category === activeTemplateCat))
+    .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const [dynamicColors, setDynamicColors] = useState<string[]>([]);
+  
+  const handleSyncColors = () => {
+    const colors = new Set<string>();
+    layers.forEach(l => {
+      if (l.fill && typeof l.fill === 'string') colors.add(l.fill);
+    });
+    if (colors.size > 0) {
+      setDynamicColors(Array.from(colors));
+      setActivePalette('Dynamic');
+      toast.success('Palette synced from design!');
+    } else {
+      toast.error('No colored elements found to sync.');
+    }
+  };
 
   const currentIconCat = iconCategories.find(c => c.name === activeIconCat);
 
   return (
-    <div className="w-full md:w-[340px] shrink-0 bg-white border-r border-gray-100 flex flex-col z-30 shadow-xl relative">
+    <div className="w-full md:w-[340px] shrink-0 bg-white/80 backdrop-blur-2xl border-r border-white/20 flex flex-col z-30 shadow-[4px_0_24px_rgba(0,0,0,0.04)] relative isolate ring-1 ring-black/5">
       {/* Header */}
-      <div className="h-14 flex items-center justify-between px-5 border-b border-gray-100 flex-shrink-0 bg-white">
-        <h3 className="text-base font-black text-[#1a1a1a] tracking-tight">{currentTitle[activeTab] || activeTab}</h3>
-        <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-full transition-colors">
+      <div className="h-14 flex items-center justify-between px-5 border-b border-gray-100/50 flex-shrink-0 bg-white/40">
+        <h3 className="text-sm font-black text-[#1a1a1a] uppercase tracking-[0.15em]">{currentTitle[activeTab] || activeTab}</h3>
+        <button onClick={onClose} className="p-1.5 hover:bg-white/60 rounded-full transition-colors border border-transparent hover:border-gray-100 shadow-sm">
           <X className="h-4 w-4 text-gray-400" />
         </button>
       </div>
@@ -301,7 +401,18 @@ const SidebarPanel = ({
         {/* ─── TEMPLATES TAB ──────────────────────────────────── */}
         {activeTab === 'templates' && (
           <div className="p-4 space-y-4">
-            {/* Category filter */}
+            {/* Search and Category filter */}
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search templates..."
+                className="w-full bg-[#f3f3f3] border-none rounded-xl py-2 pl-8 pr-4 text-[10px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-[#5b5b42] transition-all outline-none"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {availableTemplateCats.map(cat => (
                 <PillTab key={cat} active={activeTemplateCat === cat} onClick={() => setActiveTemplateCat(cat)}>
@@ -380,7 +491,7 @@ const SidebarPanel = ({
                 min="-100"
                 max="100"
                 value={textCurveAmount}
-                onChange={(e) => setTextCurveAmount(Number(e.target.value))}
+                onChange={(e) => handleCurveChange(Number(e.target.value))}
                 className="w-full accent-[#5b5b42] h-1.5 rounded-full cursor-pointer"
               />
               <div className="flex justify-between text-[9px] font-bold text-gray-400">
@@ -511,17 +622,29 @@ const SidebarPanel = ({
                 })}
             </div>
 
-            {/* Color Palette */}
-            <SectionLabel>Color Palettes</SectionLabel>
+            <div className="flex items-center justify-between mb-2">
+              <SectionLabel>Color Palettes</SectionLabel>
+              <button 
+                onClick={handleSyncColors}
+                className="text-[9px] font-black text-brand-pink hover:underline uppercase tracking-tighter flex items-center gap-1"
+              >
+                <RefreshCcw className="h-2.5 w-2.5" /> Sync from Design
+              </button>
+            </div>
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1.5 mb-2">
+              {dynamicColors.length > 0 && (
+                <PillTab active={activePalette === 'Dynamic'} onClick={() => setActivePalette('Dynamic')}>
+                  ✨ Dynamic
+                </PillTab>
+              )}
               {colorPalettes.map(p => (
                 <PillTab key={p.name} active={activePalette === p.name} onClick={() => setActivePalette(p.name)}>
                   {p.name}
                 </PillTab>
               ))}
             </div>
-            <div className="flex gap-2 flex-wrap">
-              {(colorPalettes.find(p => p.name === activePalette)?.colors || []).map(color => (
+            <div className="flex gap-2 flex-wrap mb-6">
+              {(activePalette === 'Dynamic' ? dynamicColors : (colorPalettes.find(p => p.name === activePalette)?.colors || [])).map(color => (
                 <button
                   key={color}
                   onClick={() => onProductColorChange(color)}
@@ -639,40 +762,150 @@ const SidebarPanel = ({
         {/* ─── AI TAB ─────────────────────────────────────────── */}
         {activeTab === 'ai' && (
           <div className="p-4 space-y-4">
-            <div className="p-5 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 rounded-2xl">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-5 w-5 text-purple-500" />
-                <span className="text-sm font-black text-purple-800">AI Image Generator</span>
+            <div className="p-5 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border border-purple-100 rounded-[28px] shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-32 h-32 bg-purple-200/20 blur-3xl rounded-full" />
+              
+              <div className="flex items-center gap-2 mb-3 relative z-10">
+                <div className="p-2 bg-white rounded-xl shadow-sm">
+                  <Sparkles className="h-4 w-4 text-purple-600" />
+                </div>
+                <span className="text-xs font-black text-purple-900 uppercase tracking-widest italic">AI Studio</span>
               </div>
-              <p className="text-xs text-purple-600 mb-4">Describe what you want to create and our AI will generate it for you.</p>
-              <textarea
-                className="w-full bg-white border border-purple-200 rounded-xl py-3 px-4 text-sm resize-none h-24 focus:ring-1 focus:ring-purple-400 outline-none"
-                placeholder="A vintage logo with mountains and a sun..."
-              />
-              <button className="w-full mt-3 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-black text-[11px] rounded-xl uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2">
-                <Sparkles className="h-4 w-4" /> Generate (Coming Soon)
-              </button>
+
+              <div className="relative z-10">
+                <textarea
+                  className="w-full bg-white/80 backdrop-blur-sm border border-purple-100 rounded-2xl py-3.5 px-4 text-sm resize-none h-28 focus:ring-2 focus:ring-purple-400 outline-none transition-all placeholder:text-gray-400 shadow-inner"
+                  placeholder="Describe your vision (e.g., 'A vintage cosmic jellyfish in neon colors')..."
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                />
+                
+                <div className="mt-4 space-y-3">
+                  <p className="text-[9px] font-black text-purple-400 uppercase tracking-widest ml-1">Select a Style</p>
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                    {aiStylePills.map(style => (
+                      <button
+                        key={style.id}
+                        onClick={() => setSelectedStyle(selectedStyle === style.id ? null : style.id)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-full text-[9px] font-black whitespace-nowrap transition-all border",
+                          selectedStyle === style.id 
+                            ? "bg-purple-600 text-white border-purple-600 shadow-md scale-105" 
+                            : "bg-white text-purple-600 border-purple-100 hover:border-purple-300"
+                        )}
+                      >
+                        {style.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handleAiGenerate}
+                  disabled={isGenerating}
+                  className="w-full mt-5 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-[11px] rounded-2xl uppercase tracking-[0.2em] shadow-lg shadow-purple-200 hover:shadow-purple-300 transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 disabled:opacity-50 italic"
+                >
+                  {isGenerating ? (
+                    <><RefreshCcw className="h-4 w-4 animate-spin" /> Weaving Magic...</>
+                  ) : (
+                    <><Wand2 className="h-4 w-4" /> Generate Masterpiece</>
+                  )}
+                </button>
+              </div>
             </div>
 
-            <SectionLabel>AI-Powered Features</SectionLabel>
-            {[
-              { label: 'Background Remover', desc: 'Remove bg from any image', emoji: '✂️', available: true },
-              { label: 'Style Transfer', desc: 'Apply artistic styles', emoji: '🎨', available: false },
-              { label: 'Upscale Image', desc: 'Enhance image resolution', emoji: '🔍', available: false },
-              { label: 'Text to Logo', desc: 'Generate logo from text', emoji: '⚡', available: false },
-            ].map(feat => (
-              <div key={feat.label} className="flex items-center gap-3 p-3 bg-[#f7f7f2] rounded-xl">
-                <span className="text-2xl">{feat.emoji}</span>
-                <div className="flex-1">
-                  <p className="text-xs font-black text-[#1a1a1a]">{feat.label}</p>
-                  <p className="text-[10px] text-gray-400">{feat.desc}</p>
+            {generatedImage && (
+              <div className="group relative aspect-square rounded-[28px] overflow-hidden border-4 border-white shadow-2xl ring-1 ring-purple-100 animate-in zoom-in-95 duration-500">
+                <img src={generatedImage} alt="AI Preview" className="w-full h-full object-cover" />
+                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col gap-2 translate-y-2 group-hover:translate-y-0 transition-transform opacity-0 group-hover:opacity-100">
+                   <p className="text-[10px] text-white/90 font-medium line-clamp-1 italic">"{aiPrompt}"</p>
+                   <div className="flex gap-2">
+                     <button 
+                       onClick={() => onAddImage(generatedImage)}
+                       className="flex-1 py-2.5 bg-white text-black text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
+                     >
+                       <Plus className="h-3.5 w-3.5" /> Add to Canvas
+                     </button>
+                     <button 
+                       onClick={() => window.open(generatedImage, '_blank')}
+                       className="p-2.5 bg-white/20 backdrop-blur-md text-white rounded-xl hover:bg-white/30 transition-colors"
+                     >
+                       <Download className="h-3.5 w-3.5" />
+                     </button>
+                   </div>
                 </div>
-                {feat.available ? (
-                  <span className="text-[9px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-full uppercase">Ready</span>
-                ) : (
-                  <span className="text-[9px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full uppercase">Soon</span>
-                )}
               </div>
+            )}
+
+            {aiHistory.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <SectionLabel>Recent Creations</SectionLabel>
+                  <button onClick={() => setAiHistory([])} className="text-[9px] font-black text-gray-300 hover:text-red-400 uppercase tracking-widest transition-colors mb-2">Clear</button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {aiHistory.map((item, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => onAddImage(item.url)}
+                      className="group relative aspect-square rounded-2xl overflow-hidden border-2 border-transparent hover:border-purple-400 transition-all shadow-sm"
+                    >
+                      <img src={item.url} alt="History" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-purple-900/20 transition-all flex items-center justify-center">
+                        <Plus className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <SectionLabel>Inspiration</SectionLabel>
+            <div className="flex flex-col gap-2">
+              {aiSubjectIdeas.slice(0, 3).map((idea, i) => (
+                <button
+                  key={i}
+                  onClick={() => setAiPrompt(idea)}
+                  className="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl hover:border-purple-200 hover:shadow-sm transition-all group group-hover:scale-102"
+                >
+                  <span className="text-[10px] font-bold text-gray-500 group-hover:text-purple-700 transition-colors line-clamp-1">"{idea}"</span>
+                  <ArrowRight className="h-3 w-3 text-gray-300 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+                </button>
+              ))}
+            </div>
+
+            <SectionLabel>AI Toolbox</SectionLabel>
+            {[
+              { 
+                label: 'Background Remover', 
+                desc: 'Auto-detect and extract the subject', 
+                emoji: '✂️', 
+                available: !!onRemoveBackground, 
+                action: activeObject?.type === 'image' ? 'Try on Canvas' : 'Select an Image',
+                onClick: onRemoveBackground
+              },
+              { label: 'Style Transfer', desc: 'Apply artistic styles to your photos', emoji: '🎨', available: false, action: 'Coming Soon' },
+            ].map(feat => (
+              <button 
+                key={feat.label} 
+                onClick={feat.onClick}
+                disabled={!feat.available || (feat.label === 'Background Remover' && activeObject?.type !== 'image')}
+                className="w-full flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow group text-left disabled:opacity-50"
+              >
+                <div className="h-10 w-10 bg-gray-50 rounded-xl flex items-center justify-center text-xl group-hover:bg-purple-50 transition-colors">
+                  {feat.emoji}
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-black text-gray-900 uppercase tracking-widest">{feat.label}</p>
+                  <p className="text-[9px] text-gray-400 font-medium leading-relaxed mt-0.5">{feat.desc}</p>
+                </div>
+                <div className={cn(
+                  "text-[8px] font-black px-2 py-1 rounded-lg uppercase tracking-tighter",
+                  feat.available && (feat.label !== 'Background Remover' || activeObject?.type === 'image') ? "text-green-600 bg-green-50" : "text-gray-400 bg-gray-50"
+                )}>
+                  {feat.action}
+                </div>
+              </button>
             ))}
           </div>
         )}
@@ -797,9 +1030,163 @@ const SidebarPanel = ({
           <IconifyTab onAddSvgGraphic={onAddSvgGraphic} />
         )}
 
-        {/* ─── REVIEWS TAB ─────────────────────────────────────── */}
-        {activeTab === 'reviews' && (
-          <ReviewsTab productId={productId} />
+
+        {/* ─── LAYERS TAB ──────────────────────────────────────── */}
+        {activeTab === 'layers' && (
+          <div className="p-4 space-y-3">
+             <div className="flex items-center justify-between mb-2">
+                <SectionLabel>Scene Hierarchy</SectionLabel>
+                <div className="flex items-center gap-2">
+                   <button onClick={() => onLockAllObjects?.(true)} className="text-[8px] font-black uppercase text-gray-400 hover:text-brand-pink transition-colors">Lock All</button>
+                   <div className="h-2 w-px bg-gray-200" />
+                   <button onClick={() => onClearDesign?.()} className="text-[8px] font-black uppercase text-gray-400 hover:text-red-500 transition-colors">Clear</button>
+                </div>
+             </div>
+
+            {layers.length === 0 ? (
+              <div className="py-20 text-center bg-white/30 rounded-3xl border border-dashed border-gray-200/50">
+                <Layers className="h-10 w-10 text-gray-200 mx-auto mb-3" />
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No active layers</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {layers.map((layer) => (
+                  <div 
+                    key={layer.id}
+                    className={cn(
+                      "group p-3 bg-white/40 hover:bg-white/80 border border-gray-100/50 rounded-2xl flex items-center gap-3 transition-all cursor-pointer shadow-sm hover:shadow-md hover:border-brand-pink/20 hover:-translate-y-0.5",
+                      activeObject?.id === layer.id && "ring-2 ring-brand-pink ring-offset-2 bg-white shadow-lg border-brand-pink/30 translate-y-0"
+                    )}
+                    onClick={() => {
+                        // Select logic
+                        onUpdateObject?.(layer.id, {}); 
+                    }}
+                  >
+                    <div className="w-10 h-10 bg-gray-50/50 rounded-xl flex items-center justify-center overflow-hidden shrink-0 border border-gray-100 group-hover:border-brand-pink/20 transition-colors">
+                      <div className="text-gray-300 group-hover:text-brand-pink transition-colors capitalize text-[8px] font-black">
+                         {layer.type === 'i-text' ? <Type className="h-4 w-4" /> : (layer.type === 'image' ? <ImageIcon className="h-4 w-4" /> : <Shapes className="h-4 w-4" />)}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-black text-brand-dark uppercase truncate tracking-tight">{layer.name}</p>
+                      <p className="text-[8px] text-brand-pink/60 font-black uppercase tracking-widest">{layer.type.replace('i-', '')}</p>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onUpdateObject?.(layer.id, { locked: !layer.locked }); }}
+                        className={cn("p-1.5 rounded-lg transition-all", layer.locked ? "text-brand-pink bg-pink-50 opacity-100" : "text-gray-400 hover:bg-gray-100")}
+                      >
+                        {layer.locked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <p className="text-[9px] text-gray-400 font-bold uppercase text-center mt-6 tracking-tighter italic">Scene graph renders in real-time</p>
+          </div>
+        )}
+
+        {/* ─── FILTERS TAB ─────────────────────────────────────── */}
+        {activeTab === 'library' && (
+          <div className="p-4 space-y-4">
+             <SectionLabel>Elite FX Presets</SectionLabel>
+             <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: 'none', name: 'Original', preview: '🖼️', props: { _isGrayscale: false, _brightness: 0, _contrast: 0 } },
+                  { id: 'noir', name: 'Noir', preview: '🌑', props: { _isGrayscale: true, _brightness: 0, _contrast: 0 } },
+                  { id: 'vivid', name: 'Vivid', preview: '🌈', props: { _isGrayscale: false, _brightness: 10, _contrast: 30 } },
+                  { id: 'warm', name: 'Warm', preview: '🌅', props: { _isGrayscale: false, _brightness: 5, _contrast: 10 } },
+                  { id: 'cold', name: 'Cold', preview: '❄️', props: { _isGrayscale: false, _brightness: 0, _contrast: 15 } },
+                  { id: 'bright', name: 'Bright', preview: '✨', props: { _isGrayscale: false, _brightness: 30, _contrast: 0 } },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => {
+                      if (activeObject?.id && activeObject.type === 'image') {
+                        onUpdateObject?.(activeObject.id, f.props);
+                        toast.success(`${f.name} filter applied!`);
+                      } else {
+                        toast.error('Select an image to apply filters.');
+                      }
+                    }}
+                    className="group bg-white/40 hover:bg-white border border-gray-100 rounded-2xl p-4 flex flex-col items-center gap-2 transition-all hover:shadow-xl hover:border-brand-pink/20"
+                  >
+                    <span className="text-3xl group-hover:scale-110 transition-transform">{f.preview}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-brand-dark">{f.name}</span>
+                  </button>
+                ))}
+             </div>
+             
+             <div className="mt-8 p-4 bg-brand-pink/5 rounded-3xl border border-brand-pink/10">
+                <p className="text-[9px] text-brand-pink font-black uppercase tracking-[0.2em] mb-2 text-center">Pro Enhancement Tips</p>
+                <ul className="text-[8px] text-gray-500 font-bold space-y-1.5 uppercase tracking-tighter list-disc px-4 italic">
+                  <li>Use Noir for high-contrast B&W prints</li>
+                  <li>Vivid works best for colorful photos</li>
+                  <li>Bright helps clean up dark uploads</li>
+                </ul>
+             </div>
+          </div>
+        )}
+
+        {/* ─── PATTERNS TAB ─────────────────────────────────────── */}
+        {activeTab === 'patterns' && (
+          <div className="p-4 space-y-4">
+             <div className="relative mb-3">
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+               <input
+                 type="text"
+                 placeholder="Search infinite patterns (e.g. 'Floral', 'Batik')..."
+                 className="w-full bg-[#f3f3f3] border-none rounded-xl py-2.5 pl-9 pr-4 text-[11px] font-bold focus:ring-1 focus:ring-[#5b5b42] outline-none transition-all"
+                 onKeyDown={(e) => {
+                   if (e.key === 'Enter') {
+                     const query = (e.target as HTMLInputElement).value;
+                     // For free, we use Pollinations.ai with a "seamless pattern" suffix for high-res unique assets
+                     const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(query + ' seamless high-resolution repeatable textile pattern design')}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*100000)}`;
+                     onAddPattern?.(url);
+                     toast.success("AI Pattern Generated & Applied!");
+                   }
+                 }}
+               />
+               <p className="text-[8px] text-gray-400 font-bold uppercase mt-2 ml-1 tracking-tighter italic">Press Enter to Generate AI Pattern for FREE</p>
+             </div>
+
+             <SectionLabel>Curated High-Res Patterns</SectionLabel>
+             <div className="grid grid-cols-2 gap-3 overflow-y-auto max-h-[400px] no-scrollbar">
+                {[
+                  { id: 'floral_vibe', name: 'Vintage Floral', preview: 'https://images.unsplash.com/photo-1579541814924-49fef17c5be5?w=400&q=80' },
+                  { id: 'abstract_geo', name: 'Abstract Geo', preview: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&q=80' },
+                  { id: 'indi_block', name: 'Indian Block Print', preview: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400&q=80' },
+                  { id: 'minimal_lines', name: 'Minimal Lines', preview: 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=400&q=80' },
+                  { id: 'luxury_marble', name: 'Luxury Marble', preview: 'https://images.unsplash.com/photo-1618221639243-7f311f42702b?w=400&q=80' },
+                  { id: 'retro_waves', name: 'Retro Waves', preview: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&q=80' },
+                  { id: 'cyber_tech', name: 'Cyber Tech', preview: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=80' },
+                  { id: 'boho_chic', name: 'Boho Chic', preview: 'https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?w=400&q=80' },
+                ].map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      onAddPattern?.(p.preview);
+                      toast.success(`Applied ${p.name} pattern!`);
+                    }}
+                    className="group bg-white/40 hover:bg-white border border-gray-100 rounded-2xl p-4 flex flex-col items-center gap-2 transition-all hover:shadow-xl hover:border-brand-pink/20"
+                  >
+                    <div className="w-full aspect-square rounded-xl overflow-hidden shadow-inner border border-black/5">
+                       <img src={p.preview} alt={p.name} className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-brand-dark">{p.name}</span>
+                  </button>
+                ))}
+             </div>
+             
+             <div className="mt-8 p-4 bg-brand-pink/5 rounded-3xl border border-brand-pink/10">
+                <p className="text-[9px] text-brand-pink font-black uppercase tracking-[0.2em] mb-2 text-center">Design Tip</p>
+                <p className="text-[8px] text-gray-500 font-bold text-center uppercase tracking-tighter italic px-4">
+                  Patterns are applied as tileable background fills. You can scale and rotate them directly on the canvas!
+                </p>
+             </div>
+          </div>
         )}
       </div>
     </div>

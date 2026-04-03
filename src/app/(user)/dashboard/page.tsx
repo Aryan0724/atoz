@@ -24,6 +24,7 @@ import {
   Plus as PlusIcon,
   RotateCcw
 } from 'lucide-react';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { supabase } from '@/lib/supabase/client';
 import { getUserOrders } from '@/lib/supabase/orderActions';
 import { cn } from '@/lib/utils';
@@ -53,9 +54,9 @@ export default function DashboardPage() {
     points: 1250
   });
 
+  const { signOut } = useAuth();
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
+    await signOut();
     toast.success('Signed out successfully');
   };
 
@@ -77,11 +78,21 @@ export default function DashboardPage() {
           .single();
         
         if (profileData) {
+          // FAIL-SAFE: If user is an admin, they should not be here.
+          if (profileData.role === 'admin' || localStorage.getItem('atoz_demo_admin') === 'true') {
+             router.push('/admin');
+             return;
+          }
+          
           setProfile(profileData);
           if (profileData.wishlist && profileData.wishlist.length > 0) {
              const { data: wpx } = await supabase.from('products').select('*').in('id', profileData.wishlist);
              if (wpx) setWishlistProducts(wpx);
           }
+        } else if (localStorage.getItem('atoz_demo_admin') === 'true') {
+           // Demo bypass check even if no profile found
+           router.push('/admin');
+           return;
         }
 
         const userOrders = await getUserOrders(user.id);

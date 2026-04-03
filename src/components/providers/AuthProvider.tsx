@@ -84,8 +84,31 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/';
+    try {
+      // 1. Collect all sensitive keys to remove to avoid mutation during loop
+      if (typeof window !== 'undefined') {
+        const keysToRemove: string[] = ['atoz_demo_admin'];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.includes('supabase') || key.includes('sb-') || key.includes('atoz'))) {
+            keysToRemove.push(key);
+          }
+        }
+        // 2. Clear flags immediately to stop any auto-redirects
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        sessionStorage.clear();
+      }
+
+      // 3. Attempt official signOut
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Sign out error:', err);
+    } finally {
+      // 4. Force a hard reload to home page, clearing all React state
+      if (typeof window !== 'undefined') {
+        window.location.replace('/');
+      }
+    }
   };
 
   return (

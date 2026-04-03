@@ -16,6 +16,9 @@ export const podGraphicCategories = [
   'Vintage',
   'Decorative',
   'Animals',
+  'Stickers',
+  'Abstract',
+  'Indian Heritage'
 ];
 
 export const podGraphics: PodGraphic[] = [

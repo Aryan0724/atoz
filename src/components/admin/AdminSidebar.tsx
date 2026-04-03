@@ -18,14 +18,19 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const { signOut } = useAuth();
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
+    // Proactively clear the demo flag if it exists
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('atoz_demo_admin');
+    }
+    await signOut();
   };
 
   const menuItems = [

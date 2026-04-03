@@ -1,0 +1,3 @@
+7bd576f fix(auth): resolve admin-to-dashboard redirect bug and refine logout flow
+07a529c feat: multi-view customization and designer refinements
+0e29820 feat: implement Headless CMS for Pricing, Hero, and TopBanner via Admin Dashboard

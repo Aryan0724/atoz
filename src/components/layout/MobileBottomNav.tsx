@@ -6,26 +6,16 @@ import { usePathname } from 'next/navigation';
 import { Home, ShoppingBag, ShoppingCart, User as UserIcon } from 'lucide-react';
 import { useCart } from '@/lib/store/useCart';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const { setOpen, getItemCount } = useCart();
   const [mounted, setMounted] = useState(false);
-  const [hasSession, setHasSession] = useState(false);
+  const { user, profile } = useAuth();
 
   useEffect(() => {
     setMounted(true);
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setHasSession(!!data.session);
-    };
-    checkSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setHasSession(!!session);
-    });
-    return () => subscription.unsubscribe();
   }, []);
 
   if (pathname.startsWith('/customize')) {
@@ -81,18 +71,18 @@ export default function MobileBottomNav() {
 
         {/* Profile/Login */}
         <Link 
-          href={hasSession ? "/dashboard" : "/login"}
+          href={user ? (profile?.role === 'admin' ? '/admin' : '/dashboard') : "/login"}
           className={cn(
             "flex flex-col items-center justify-center w-full h-full space-y-1 min-w-[64px] min-h-[44px] relative transition-all duration-300",
-            pathname.includes('/dashboard') || pathname.includes('/login') ? "text-brand-pink scale-105" : "text-gray-400 hover:text-brand-dark"
+            pathname.includes('/dashboard') || pathname.includes('/admin') || pathname.includes('/login') ? "text-brand-pink scale-105" : "text-gray-400 hover:text-brand-dark"
           )}
         >
-          {(pathname.includes('/dashboard') || pathname.includes('/login')) && (
+          {(pathname.includes('/dashboard') || pathname.includes('/admin') || pathname.includes('/login')) && (
             <span className="absolute -top-1 w-1 h-1 rounded-full bg-brand-pink animate-in zoom-in" />
           )}
-          <UserIcon className="h-6 w-6 mb-1" strokeWidth={pathname.includes('/dashboard') ? 2.5 : 2} />
+          <UserIcon className="h-6 w-6 mb-1" strokeWidth={(pathname.includes('/dashboard') || pathname.includes('/admin')) ? 2.5 : 2} />
           <span className="text-[11px] font-bold tracking-wider">
-            {hasSession ? "Profile" : "Login"}
+            {user ? "Profile" : "Login"}
           </span>
         </Link>
       </nav>

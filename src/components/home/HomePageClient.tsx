@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 import ProductCard from '@/components/products/ProductCard';
 
 // --- Hero Section ---
-const Hero = () => {
+const Hero = ({ heroConfig }: { heroConfig: { title: string, subtitle: string, image: string } }) => {
   return (
     <section className="relative pt-12 pb-20 lg:pt-16 lg:pb-24 overflow-hidden bg-gradient-to-br from-surface via-surface to-surface-variant/20">
       <div className="max-w-7xl mx-auto px-8 grid lg:grid-cols-2 gap-12 items-center">
@@ -36,11 +36,10 @@ const Hero = () => {
             <Star className="w-3.5 h-3.5 fill-current" />
             The Premium Choice for Brands
           </div>
-          <h1 className="font-headline text-6xl md:text-7xl lg:text-8xl font-black text-on-surface leading-[0.9] tracking-tighter mb-8 italic">
-            Your <span className="text-primary italic">Design</span>.<br/>Our Impression.
+          <h1 className="font-headline text-6xl md:text-7xl lg:text-8xl font-black text-on-surface leading-[0.9] tracking-tighter mb-8 italic" dangerouslySetInnerHTML={{ __html: heroConfig.title.replace(/\n/g, '<br/>') }}>
           </h1>
           <p className="text-sm md:text-base text-on-surface-variant max-w-lg mb-12 leading-relaxed font-black uppercase tracking-widest italic opacity-60">
-            Elevate your brand identity with high-fidelity custom merchandise. From boutique startups to Fortune 500s, we deliver retail-ready excellence.
+            {heroConfig.subtitle}
           </p>
           <div className="flex flex-wrap gap-4">
             <Link 
@@ -87,7 +86,7 @@ const Hero = () => {
               <Image 
                 alt="High-fidelity product mockup" 
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1000&auto=format&fit=crop"
+                src={heroConfig.image}
                 fill
               />
               <div className="absolute top-8 right-8 glass-panel px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 z-10 transition-all hover:scale-105 bg-white/80 backdrop-blur-md">
@@ -428,10 +427,10 @@ const CTA = () => {
   );
 };
 
-export default function HomePageClient({ products }: { products: any[] }) {
+export default function HomePageClient({ products, heroConfig }: { products: any[], heroConfig: { title: string, subtitle: string, image: string } }) {
   return (
     <div className="min-h-screen bg-white">
-      <Hero />
+      <Hero heroConfig={heroConfig} />
       <TrustBar />
       <Stats />
       <Testimonials />

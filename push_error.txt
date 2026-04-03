@@ -1,0 +1,35 @@
+remote: error: GH013: Repository rule violations found for refs/heads/ralph-loop-3cael.        
+remote: 
+remote: - GITHUB PUSH PROTECTION        
+remote:   —————————————————————————————————————————        
+remote:     Resolve the following violations before pushing again        
+remote: 
+remote:     - Push cannot contain secrets        
+remote: 
+remote:             
+remote:      (?) Learn how to resolve a blocked push        
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push        
+remote:             
+remote:             
+remote:       —— Google OAuth Client ID ————————————————————————————        
+remote:        locations:        
+remote:          - commit: 0e29820013c3b105b6737f26c97fe2e6eece972d        
+remote:            path: a to z pass google auth.json:1        
+remote:             
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.        
+remote:        https://github.com/Aryan0724/atoz/security/secret-scanning/unblock-secret/3BoFJvbKweMYPftfpHyiGkEtIZR        
+remote:             
+remote:             
+remote:       —— Google OAuth Client Secret ————————————————————————        
+remote:        locations:        
+remote:          - commit: 0e29820013c3b105b6737f26c97fe2e6eece972d        
+remote:            path: a to z pass google auth.json:1        
+remote:             
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.        
+remote:        https://github.com/Aryan0724/atoz/security/secret-scanning/unblock-secret/3BoFJtZe323OUixwUZLS9eU6GZk        
+remote:             
+remote: 
+remote: 
+To https://github.com/Aryan0724/atoz.git
+ ! [remote rejected] ralph-loop-3cael -> ralph-loop-3cael (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/Aryan0724/atoz.git'

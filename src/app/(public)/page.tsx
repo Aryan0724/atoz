@@ -32,8 +32,25 @@ async function getTopProducts() {
   return products;
 }
 
-export default async function HomePage() {
-  const products = await getTopProducts();
+const defaultHero = {
+  title: "Your Design.\nOur Impression.",
+  subtitle: "Elevate your brand identity with high-fidelity custom merchandise. From boutique startups to Fortune 500s, we deliver retail-ready excellence.",
+  image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1000&auto=format&fit=crop"
+};
 
-  return <HomePageClient products={products} />;
+export default async function HomePage() {
+  const supabase = createClient();
+  const products = await getTopProducts();
+  
+  let heroConfig = defaultHero;
+  try {
+    const { data } = await supabase.from('site_settings').select('config').eq('id', 'global').single();
+    if ((data as any)?.config?.hero) {
+      heroConfig = (data as any).config.hero;
+    }
+  } catch (err) {
+    console.warn("Hero CMS error (fallback applied):", err);
+  }
+
+  return <HomePageClient products={products} heroConfig={heroConfig} />;
 }

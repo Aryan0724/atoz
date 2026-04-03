@@ -1,0 +1,19 @@
+commit 0e29820013c3b105b6737f26c97fe2e6eece972d
+Author: Aryan0724 <aryantiwari0724@gmail.com>
+Date:   Fri Apr 3 00:36:29 2026 +0530
+
+    feat: implement Headless CMS for Pricing, Hero, and TopBanner via Admin Dashboard
+
+ .env.local                                         |   2 +
+ a to z pass google auth.json                       |   1 +
+ progress.txt                                       |   2 +
+ src/app/(public)/page.tsx                          |  19 +-
+ src/app/(public)/pricing/PricingClient.tsx         | 361 +++++++++++++++++++
+ src/app/(public)/pricing/page.tsx                  | 382 ++-------------------
+ src/app/admin/settings/SettingsClient.tsx          | 176 ++++++++++
+ src/app/admin/settings/page.tsx                    | 115 ++-----
+ src/components/home/HomePageClient.tsx             |  13 +-
+ src/components/layout/TopBanner.tsx                |  24 +-
+ .../migrations/20260403000000_site_settings.sql    |  84 +++++
+ tsconfig.tsbuildinfo                               |   2 +-
+ 12 files changed, 718 insertions(+), 463 deletions(-)

@@ -16,7 +16,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { setOpen, getItemCount } = useCart();
   const [mounted, setMounted] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
 
   const navLinks = [
     { name: 'Products', href: '/products' },
@@ -43,6 +43,10 @@ const Navbar = () => {
   };
 
   const handleSignOut = async () => {
+    // Proactively clear the demo flag if it exists
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('atoz_demo_admin');
+    }
     await signOut();
     setIsMenuOpen(false);
   };
@@ -131,7 +135,10 @@ const Navbar = () => {
             
             {mounted && user ? (
               <div className="flex items-center gap-6 border-l border-outline-variant/20 pl-6">
-                <Link href="/dashboard" className="flex items-center gap-2 group">
+                <Link 
+                  href={profile?.role === 'admin' ? '/admin' : '/dashboard'} 
+                  className="flex items-center gap-2 group"
+                >
                    <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500 hover:rotate-6">
                       <UserIcon className="h-4 w-4" />
                    </div>
@@ -200,12 +207,12 @@ const Navbar = () => {
               {mounted && user ? (
                 <>
                   <Link 
-                    href="/dashboard" 
+                    href={profile?.role === 'admin' ? '/admin' : '/dashboard'} 
                     onClick={() => setIsMenuOpen(false)}
                     className="flex items-center gap-3 px-4 py-4 bg-surface rounded-xl text-on-surface font-bold"
                   >
                     <UserIcon className="h-5 w-5 text-primary" />
-                    My Dashboard
+                    {profile?.role === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
                   </Link>
                   <button 
                     onClick={handleSignOut}

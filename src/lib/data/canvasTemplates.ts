@@ -290,7 +290,253 @@ export const canvasTemplates = [
         }
       ]
     }
+  },
+  // --- NEW TEMPLATES START ---
+  {
+    id: 'indian-mandala',
+    name: 'Royal Mandala',
+    category: 'Handicraft',
+    preview: '🕉️',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 200, originX: 'center', originY: 'center',
+          text: 'NAMASTE', fontSize: 64, fontWeight: 'black', fontFamily: 'Oswald',
+          fill: '#B8860B', charSpacing: 400, id: 'ind-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 280, originX: 'center', originY: 'center',
+          text: 'S P I R I T U A L • J O U R N E Y', fontSize: 14, fontWeight: 'bold', fontFamily: 'Montserrat',
+          fill: '#D4AF37', charSpacing: 600, id: 'ind-2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'cyber-glitch',
+    name: 'System Glitch',
+    category: 'Streetwear',
+    preview: '👾',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 245, top: 245, originX: 'center', originY: 'center',
+          text: 'GLITCH', fontSize: 120, fontWeight: 'black', fontFamily: 'Bebas Neue',
+          fill: '#FF00FF', opacity: 0.5, id: 'gl-1'
+        },
+        {
+          type: 'i-text', left: 255, top: 255, originX: 'center', originY: 'center',
+          text: 'GLITCH', fontSize: 120, fontWeight: 'black', fontFamily: 'Bebas Neue',
+          fill: '#00FFFF', opacity: 0.5, id: 'gl-2'
+        },
+        {
+          type: 'i-text', left: 250, top: 250, originX: 'center', originY: 'center',
+          text: 'GLITCH', fontSize: 120, fontWeight: 'black', fontFamily: 'Bebas Neue',
+          fill: '#FFFFFF', id: 'gl-3'
+        }
+      ]
+    }
+  },
+  {
+    id: 'retro-california',
+    name: 'Malibu 84',
+    category: 'Vintage',
+    preview: '🏖️',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 180, originX: 'center', originY: 'center',
+          text: 'MALIBU', fontSize: 110, fontWeight: 'bold', fontFamily: 'Pacifico',
+          fill: '#FF6F00', id: 'ret-1', shadow: { color: 'rgba(0,0,0,0.2)', offsetX: 4, offsetY: 4 }
+        },
+        {
+          type: 'i-text', left: 250, top: 280, originX: 'center', originY: 'center',
+          text: 'CALIFORNIA', fontSize: 42, fontWeight: 'black', fontFamily: 'Oswald',
+          fill: '#FFD54F', charSpacing: 400, id: 'ret-2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'minimal-luxury-gold',
+    name: 'Golden Ratio',
+    category: 'Minimal',
+    preview: '⚜️',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'rect', left: 250, top: 250, width: 300, height: 300, fill: 'transparent', stroke: '#D4AF37', strokeWidth: 1, id: 'lux-r'
+        },
+        {
+          type: 'i-text', left: 250, top: 250, originX: 'center', originY: 'center',
+          text: 'LUX', fontSize: 80, fontWeight: 'black', fontFamily: 'Playfair Display',
+          fill: '#D4AF37', charSpacing: 200, id: 'lux-1'
+        }
+      ]
+    }
+  },
+  {
+    id: 'street-bold-tag',
+    name: 'Urban Tag',
+    category: 'Streetwear',
+    preview: '🏷️',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 250, originX: 'center', originY: 'center',
+          text: 'URBAN', fontSize: 140, fontWeight: 'black', fontFamily: 'Righteous',
+          fill: '#1A1A1A', stroke: '#FFFFFF', strokeWidth: 4, id: 'urt-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 350, originX: 'center', originY: 'center',
+          text: 'COLLECTIVE', fontSize: 24, fontWeight: 'black', fontFamily: 'Inter',
+          fill: '#E91E63', charSpacing: 800, id: 'urt-2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'nature-abstract-1',
+    name: 'Mountain Peak',
+    category: 'Art',
+    preview: '🏔️',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 250, originX: 'center', originY: 'center',
+          text: 'VALLEY', fontSize: 90, fontWeight: 'black', fontFamily: 'Oswald',
+          fill: '#37474F', id: 'nat-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 320, originX: 'center', originY: 'center',
+          text: 'THE GREAT OUTDOORS', fontSize: 14, fontWeight: 'bold', fontFamily: 'Montserrat',
+          fill: '#78909C', charSpacing: 400, id: 'nat-2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'ind-heritage-gold',
+    name: 'Royal Crest',
+    category: 'Indian Heritage',
+    preview: '🔱',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 230, originX: 'center', originY: 'center',
+          text: 'ARJUN', fontSize: 80, fontWeight: 'black', fontFamily: 'Playfair Display',
+          fill: '#D4AF37', id: 'ind-h1'
+        },
+        {
+          type: 'i-text', left: 250, top: 300, originX: 'center', originY: 'center',
+          text: 'LEGACY OF INDIA', fontSize: 12, fontWeight: 'black', fontFamily: 'Inter',
+          fill: '#B8860B', charSpacing: 600, id: 'ind-h2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'sports-team-01',
+    name: 'Team Captain',
+    category: 'Sports',
+    preview: '🏆',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 180, originX: 'center', originY: 'center',
+          text: 'ATHLETIC', fontSize: 64, fontWeight: 'black', fontFamily: 'Bebas Neue',
+          fill: '#1A237E', charSpacing: 200, id: 'sp-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 280, originX: 'center', originY: 'center',
+          text: '01', fontSize: 180, fontWeight: 'black', fontFamily: 'Oswald',
+          fill: '#C62828', id: 'sp-2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'y2k-future',
+    name: 'Y2K Dreams',
+    category: 'Graphic',
+    preview: '🌀',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 250, originX: 'center', originY: 'center',
+          text: 'FUTURE', fontSize: 100, fontWeight: 'black', fontFamily: 'Righteous',
+          fill: '#00E5FF', stroke: '#6200EA', strokeWidth: 2, id: 'y2k-1'
+        }
+      ]
+    }
+  },
+  {
+    id: 'coffee-lover-1',
+    name: 'Morning Brew',
+    category: 'Drinkware',
+    preview: '☕',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 230, originX: 'center', originY: 'center',
+          text: 'BUT FIRST,', fontSize: 24, fontWeight: 'black', fontFamily: 'Inter',
+          fill: '#6F4E37', charSpacing: 200, id: 'cof-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 280, originX: 'center', originY: 'center',
+          text: 'COFFEE', fontSize: 72, fontWeight: 'black', fontFamily: 'Oswald',
+          fill: '#3C2A21', id: 'cof-2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'gaming-zone',
+    name: 'Gamer Tag',
+    category: 'Lifestyle',
+    preview: '🎮',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 230, originX: 'center', originY: 'center',
+          text: 'PLAYER ONE', fontSize: 48, fontWeight: 'black', fontFamily: 'Righteous',
+          fill: '#FFEE58', stroke: '#1A1A1A', strokeWidth: 2, id: 'gam-1'
+        },
+        {
+          type: 'i-text', left: 250, top: 290, originX: 'center', originY: 'center',
+          text: 'READY UP', fontSize: 16, fontWeight: 'black', fontFamily: 'Inter',
+          fill: '#F44336', charSpacing: 400, id: 'gam-2'
+        }
+      ]
+    }
+  },
+  {
+    id: 'wedding-classic',
+    name: 'Classic Initials',
+    category: 'Stationery',
+    preview: '💒',
+    json: {
+      version: '5.3.0',
+      objects: [
+        {
+          type: 'i-text', left: 250, top: 250, originX: 'center', originY: 'center',
+          text: 'A & S', fontSize: 90, fontWeight: 'bold', fontFamily: 'Dancing Script',
+          fill: '#D81B60', id: 'wed-1'
+        }
+      ]
+    }
   }
 ];
 
-export const templateCategories = ['All', 'Apparel', 'Drinkware', 'Stationery', 'Lifestyle', 'Corporate', 'Vintage', 'Minimal', 'Art'];
+export const templateCategories = ['All', 'Apparel', 'Drinkware', 'Stationery', 'Lifestyle', 'Corporate', 'Vintage', 'Minimal', 'Art', 'Sports', 'Streetwear', 'Indian Heritage', 'Handicraft'];
