@@ -60,10 +60,10 @@ const Navbar = () => {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 flex items-center gap-3">
             <div className="relative h-10 w-10">
-              <Image 
-                src="https://lh3.googleusercontent.com/aida/ADBb0uieUJFbF7eBfo3s9pG1y2TlX8vEgBOlDc2r6osyyhQrpBhPJBb2OrYNpTpNBlnZYUNuwT9vKX9oH1Ju5DNO8RVLbkQKEM7pP1hX4igIK40j4AOLet64Ox8MQ3sPlzwva8m9YHQm8QZdAoN1M9Emnxt_4w7tNfYSjaZmJUmtDOwV9zJqNiIkPppyantJzHBApTVu9gR6sUF1UYCMnTIU2DpWGGZcntcWxx6vdpWvXIHBjlB0izvN6V_n579yAkT-QrLXPowqLSITtw" 
-                alt="AtoZ Print" 
-                fill 
+              <Image
+                src="/logo.png"
+                alt="AtoZ Print"
+                fill
                 className="object-contain"
                 priority
               />
@@ -74,13 +74,13 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-10">
             {navLinks.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href} 
+              <Link
+                key={link.href}
+                href={link.href}
                 className={cn(
                   "text-sm font-bold tracking-tight transition-all relative group py-1",
-                  pathname === link.href 
-                    ? "text-primary border-b-2 border-primary" 
+                  pathname === link.href
+                    ? "text-primary border-b-2 border-primary"
                     : "text-on-surface/70 hover:text-primary"
                 )}
               >
@@ -92,14 +92,14 @@ const Navbar = () => {
           {/* Icons and CTA */}
           <div className="hidden lg:flex items-center space-x-6">
             <div className="relative flex items-center">
-              <form 
+              <form
                 onSubmit={handleSearch}
                 className={cn(
                   "flex items-center transition-all duration-300 overflow-hidden bg-surface-variant/20 rounded-full",
                   isSearchOpen ? "w-64 px-4 py-1.5 border border-primary/20" : "w-0 p-0"
                 )}
               >
-                <input 
+                <input
                   type="text"
                   placeholder="Search products..."
                   value={searchQuery}
@@ -108,7 +108,7 @@ const Navbar = () => {
                   autoFocus={isSearchOpen}
                 />
               </form>
-              <button 
+              <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 aria-label={isSearchOpen ? "Close search bar" : "Open search bar"}
                 className={cn(
@@ -119,8 +119,8 @@ const Navbar = () => {
                 {isSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
               </button>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => setOpen(true)}
               aria-label="Open cart"
               className="p-2 text-on-surface hover:text-primary transition-colors relative"
@@ -132,19 +132,19 @@ const Navbar = () => {
                 </span>
               )}
             </button>
-            
+
             {mounted && user ? (
               <div className="flex items-center gap-6 border-l border-outline-variant/20 pl-6">
-                <Link 
-                  href={profile?.role === 'admin' ? '/admin' : '/dashboard'} 
+                <Link
+                  href={profile?.role === 'admin' ? '/admin' : '/dashboard'}
                   className="flex items-center gap-2 group"
                 >
-                   <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500 hover:rotate-6">
-                      <UserIcon className="h-4 w-4" />
-                   </div>
-                   <span className="text-sm font-black text-on-surface group-hover:text-primary transition-colors tracking-tight italic">Dashboard</span>
+                  <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500 hover:rotate-6">
+                    <UserIcon className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-black text-on-surface group-hover:text-primary transition-colors tracking-tight italic">Dashboard</span>
                 </Link>
-                <button 
+                <button
                   onClick={handleSignOut}
                   className="p-2 text-on-surface/40 hover:text-red-500 transition-colors"
                   title="Sign Out"
@@ -162,7 +162,7 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center space-x-4">
-            <button 
+            <button
               onClick={() => setOpen(true)}
               aria-label="Open mobile cart"
               className="p-2 text-on-surface hover:text-primary transition-colors relative"
@@ -174,7 +174,7 @@ const Navbar = () => {
                 </span>
               )}
             </button>
-            <button 
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               className="p-2 rounded-md text-on-surface hover:text-primary focus:outline-none"
@@ -190,9 +190,9 @@ const Navbar = () => {
         <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-outline-variant/10 shadow-xl animate-in slide-in-from-top-2 duration-300 ease-out z-40">
           <div className="px-4 pt-4 pb-8 space-y-2 max-h-[calc(100vh-80px)] overflow-y-auto">
             {navLinks.map((link) => (
-              <Link 
+              <Link
                 key={link.href}
-                href={link.href} 
+                href={link.href}
                 onClick={() => setIsMenuOpen(false)}
                 className={cn(
                   "block px-4 py-3 text-lg font-medium rounded-xl transition-all",
@@ -202,19 +202,19 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
-            
+
             <div className="pt-6 px-4 space-y-3">
               {mounted && user ? (
                 <>
-                  <Link 
-                    href={profile?.role === 'admin' ? '/admin' : '/dashboard'} 
+                  <Link
+                    href={profile?.role === 'admin' ? '/admin' : '/dashboard'}
                     onClick={() => setIsMenuOpen(false)}
                     className="flex items-center gap-3 px-4 py-4 bg-surface rounded-xl text-on-surface font-bold"
                   >
                     <UserIcon className="h-5 w-5 text-primary" />
                     {profile?.role === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
                   </Link>
-                  <button 
+                  <button
                     onClick={handleSignOut}
                     className="w-full flex items-center gap-3 px-4 py-4 text-red-500 font-bold hover:bg-red-50 rounded-xl transition-colors"
                   >
@@ -223,13 +223,13 @@ const Navbar = () => {
                   </button>
                 </>
               ) : (
-                  <Link 
-                    href="/login" 
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block w-full ink-gradient text-white text-center px-6 py-4 rounded-xl text-lg font-bold hover:shadow-lg transition-all"
-                  >
-                    Sign In
-                  </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block w-full ink-gradient text-white text-center px-6 py-4 rounded-xl text-lg font-bold hover:shadow-lg transition-all"
+                >
+                  Sign In
+                </Link>
               )}
             </div>
           </div>
