@@ -44,14 +44,15 @@ export async function GET(request: Request) {
       
       const targetPath = profileData?.role === 'admin' ? '/admin' : next;
 
-      const forwardedHost = request.headers.get('x-forwarded-host') 
-      const isLocalEnv = process.env.NODE_ENV === 'development'
-      if (isLocalEnv) {
+      // Robust host detection for redirection
+      const isLocal = request.url.includes('localhost') || request.url.includes('127.0.0.1');
+      
+      if (isLocal) {
         return NextResponse.redirect(`${origin}${targetPath}`)
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${targetPath}`)
       } else {
-        return NextResponse.redirect(`${origin}${targetPath}`)
+        // Force HTTPS for production redirects
+        const productionHost = request.headers.get('x-forwarded-host') || new URL(request.url).host;
+        return NextResponse.redirect(`https://${productionHost}${targetPath}`)
       }
     }
   }
