@@ -253,7 +253,7 @@ export default function AddProductPage() {
              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-pink/10 rounded-full blur-3xl"></div>
           </section>
 
-          <div className="bg-white p-10 rounded-[40px] border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center">
+          <div className="bg-white p-6 sm:p-10 rounded-[40px] border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center">
              <div className="w-full grid grid-cols-2 gap-4 mb-6">
                 {formData.images.map((url, idx) => {
                   const isTemplate = formData.template_images.includes(url);
@@ -336,14 +336,14 @@ export default function AddProductPage() {
              </div>
 
              {/* AI WIREFRAME STUDIO */}
-             <div className="w-full mt-10 p-8 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 rounded-[40px] border border-indigo-100/50 text-left">
-                <div className="flex items-center gap-3 mb-6">
+             <div className="w-full mt-10 p-5 sm:p-8 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 rounded-[40px] border border-indigo-100/50 text-left">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
                   <div className="p-3 bg-white rounded-2xl shadow-sm">
                     <Sparkles className="h-5 w-5 text-indigo-600" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-indigo-950 uppercase tracking-widest">AI Wireframe Studio</h3>
-                    <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-tighter italic">Generate mockups for FREE</p>
+                    <h3 className="text-sm font-black text-indigo-950 uppercase tracking-wider leading-tight">AI Wireframe Studio</h3>
+                    <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-tight italic">Generate mockups for FREE</p>
                   </div>
                 </div>
 
@@ -364,7 +364,7 @@ export default function AddProductPage() {
                            const el = document.getElementById('ai-mockup-prompt') as HTMLTextAreaElement;
                            el.value = (el.value ? el.value + ', ' : '') + v;
                          }}
-                         className="px-4 py-2 bg-white text-indigo-600 rounded-full text-[9px] font-black border border-indigo-100 hover:bg-indigo-50 transition-colors whitespace-nowrap"
+                         className="px-3 py-2 bg-white text-indigo-600 rounded-full text-[9px] font-black border border-indigo-100 hover:bg-indigo-50 transition-colors whitespace-nowrap"
                        >
                          + {v}
                        </button>
@@ -415,7 +415,7 @@ export default function AddProductPage() {
                       }
                     }}
                     disabled={uploading}
-                    className="w-full py-4 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-indigo-100 disabled:opacity-50"
+                    className="w-full py-4 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-wider rounded-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-indigo-100 disabled:opacity-50"
                   >
                     {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                     Generate & Process
@@ -423,7 +423,7 @@ export default function AddProductPage() {
                 </div>
              </div>
 
-             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 px-4">Maximum 4 dynamic product images</p>
+             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider my-6 px-4">Maximum 4 dynamic product images</p>
              
              <button 
                type="submit"
