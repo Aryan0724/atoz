@@ -72,10 +72,13 @@ export default function RegisterPage() {
         return url;
       };
 
+      const redirectTo = `${getURL()}auth/callback`;
+      console.log('[DEBUG] OAuth Redirect URL:', redirectTo);
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${getURL()}auth/callback`,
+          redirectTo,
         },
       });
       if (error) throw error;

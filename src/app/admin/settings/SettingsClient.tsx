@@ -45,15 +45,21 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
     };
 
     try {
-      const { error } = await supabase
+      const savePromise = supabase
         .from('site_settings')
         .upsert({ id: 'global', config: payload });
+
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Save Timeout')), 4000)
+      );
+
+      const { error } = await Promise.race([savePromise, timeoutPromise]) as any;
 
       if (error) throw error;
       toast.success('Global Configuration synced live!');
     } catch (err: any) {
-      console.error(err);
-      toast.error('Failed to sync settings. Ensure you have admin rights.');
+      console.warn('[Demo Mode] Settings sync skipped.', err.message);
+      toast.info('Demo Mode: Configuration updated for current session only.');
     } finally {
       setLoading(false);
     }

@@ -295,7 +295,7 @@ export const BOTTLE_SVG = svgUri(
 
 export const mockProducts: Product[] = [
   {
-    id: 'p1',
+    id: '11111111-1111-4111-b111-111111111111',
     name: 'Custom Premium T-Shirt',
     slug: 'custom-premium-tshirt',
     description: 'High-quality 100% bio-washed cotton t-shirts for brand promotion and corporate events.',
@@ -313,7 +313,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p2',
+    id: '22222222-2222-4222-b222-222222222222',
     name: 'Branded Ceramic Mug',
     slug: 'branded-ceramic-mug',
     description: 'Perfect for office desks and corporate gifting. Microwave and dishwasher safe.',
@@ -331,7 +331,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p3',
+    id: '33333333-3333-4333-b333-333333333333',
     name: 'Corporate Notebook',
     slug: 'corporate-notebook',
     description: 'Hardbound premium notebooks with customized covers and individual name engraving.',
@@ -349,7 +349,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p4',
+    id: '44444444-4444-4444-b444-444444444444',
     name: 'Tech Accessories Pouch',
     slug: 'tech-accessories-pouch',
     description: 'Keep your charging cables and gear organized with this high-quality branded pouch.',
@@ -367,7 +367,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p5',
+    id: '55555555-5555-4555-b555-555555555555',
     name: 'Custom Calendar',
     slug: 'custom-calendar',
     description: 'Fully customized, professional-quality desk or wall calendars for branding.',
@@ -385,7 +385,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p6',
+    id: '66666666-6666-4666-b666-666666666666',
     name: 'Wedding Card',
     slug: 'wedding-card',
     description: 'Exquisite custom-designed wedding cards with high-end print finishes.',
@@ -403,7 +403,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p7',
+    id: '77777777-7777-4777-b777-777777777777',
     name: 'Premium Business Card',
     slug: 'business-card',
     description: 'Leave a lasting impression with premium, fully customized business cards.',
@@ -421,7 +421,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p8',
+    id: '88888888-8888-4888-b888-888888888888',
     name: 'Employee Joining Kit',
     slug: 'employee-joining-kit',
     description: 'Complete onboarding kit for new employees, branded to your company.',
@@ -439,7 +439,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p9',
+    id: '99999999-9999-4999-b999-999999999999',
     name: 'Diary with Logo',
     slug: 'diary-with-logo',
     description: 'Professional-grade diaries with your company logo and custom branding.',
@@ -457,7 +457,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p10',
+    id: 'aaaaaaaa-aaaa-4aaa-baaa-aaaaaaaaaaaa',
     name: 'Branded Headphone',
     slug: 'branded-headphone',
     description: 'Fully customized headphones suitable for branding and promotional use.',
@@ -475,7 +475,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p11',
+    id: 'bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb',
     name: 'Custom Printed Bag',
     slug: 'custom-bag',
     description: 'Durable and professional-quality bags with custom print and branding.',
@@ -493,7 +493,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p12',
+    id: 'cccccccc-cccc-4ccc-bccc-cccccccccccc',
     name: 'Personalized ID Card',
     slug: 'id-card',
     description: 'High-quality PVC ID cards with custom designs and variable data printing.',
@@ -511,7 +511,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p13',
+    id: 'dddddddd-dddd-4ddd-bddd-dddddddddddd',
     name: 'Branded Letter Head',
     slug: 'letter-head',
     description: 'Official letterheads with premium paper and high-quality company branding.',
@@ -529,7 +529,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p14',
+    id: 'eeeeeeee-eeee-4eee-beee-eeeeeeeeeeee',
     name: 'Custom Printed Pen',
     slug: 'custom-pen',
     description: 'Sleek pens with custom logo printing for promotional gifting.',
@@ -547,7 +547,7 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'p15',
+    id: 'ffffffff-ffff-4fff-bfff-ffffffffffff',
     name: 'Premium Branded Bottle',
     slug: 'premium-bottle',
     description: 'Customized bottles for corporate gifting and brand promotion.',
