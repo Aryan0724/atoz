@@ -40,16 +40,19 @@ export default function AdminCustomersPage() {
     setLoading(true);
     
     try {
-      // Fetch profiles
-      const { data: profiles, error } = await supabase
+      const fetchPromise = supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
+      
+      const { data: profiles, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
       if (error) throw error;
 
       // Fetch order stats for each customer (Simulated for now, optimization would use a view)
-      const customersWithStats = await Promise.all((profiles || []).map(async (profile) => {
+      const customersWithStats = await Promise.all((profiles || []).map(async (profile: any) => {
         const { data: orders } = await supabase
           .from('orders')
           .select('total_price')

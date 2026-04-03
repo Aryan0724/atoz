@@ -22,6 +22,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
+import { mockProducts } from '@/lib/data/mockProducts';
 
 export default function ProductManagerPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -37,17 +38,20 @@ export default function ProductManagerPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const fetchPromise = supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
+
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
       if (error) throw error;
       setProducts(data || []);
     } catch (err) {
       console.error('Error fetching products, using mock data:', err);
       // Fallback for Demo
-      const { mockProducts } = require('@/lib/data/mockProducts');
       setProducts(mockProducts || []);
     }
     setLoading(false);

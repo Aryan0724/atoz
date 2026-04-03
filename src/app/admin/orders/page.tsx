@@ -49,20 +49,16 @@ export default function AdminOrdersPage() {
   const fetchOrders = async () => {
     setLoading(true);
     
-    // Add a safety timeout to ensure the UI doesn't hang forever
-    const timeout = setTimeout(() => {
-      if (loading) {
-        console.warn('Orders fetch timed out, showing current state');
-        setLoading(false);
-      }
-    }, 8000);
-
     try {
-      const { data, error } = await supabase
+      const fetchPromise = supabase
         .from('orders')
         .select('*, profiles(full_name, email)')
         .order('created_at', { ascending: false })
-        .limit(50); // Performance: Only fetch latest 50 orders initially
+        .limit(50);
+
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
       if (error) throw error;
       setOrders(data || []);
@@ -76,7 +72,6 @@ export default function AdminOrdersPage() {
         { id: 'ORD-1004', created_at: new Date(Date.now() - 259200000).toISOString(), total_price: 5900, status: 'delivered', user_id: '4', profiles: { full_name: 'Sneha Kapur', email: 'sneha@example.com' }, shipping_address: {} }
       ] as any);
     } finally {
-      clearTimeout(timeout);
       setLoading(false);
     }
   };
