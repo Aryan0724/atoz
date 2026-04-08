@@ -104,21 +104,8 @@ const CartDrawer = () => {
   if (!mounted) return null;
 
   const handleCheckoutClick = () => {
-    // Check if any items are missing design data
-    // Design data is missing if design_data is empty or placeholder (design_data is an object with color and canvasState)
-    const itemsMissingDesign = items.filter(item => {
-      // If it's a customization design_data will have canvasState
-      // If added from product page, design_data is {}
-      const hasDesign = item.design_data && Object.keys(item.design_data).length > 0;
-      return !hasDesign;
-    });
-
-    if (itemsMissingDesign.length > 0) {
-      setShowDesignModal(true);
-    } else {
-      setOpen(false);
-      router.push('/checkout');
-    }
+    setOpen(false);
+    router.push('/checkout');
   };
 
   const handleDesignChoice = (choice: 'design' | 'import' | 'plain') => {
@@ -126,7 +113,6 @@ const CartDrawer = () => {
     setOpen(false);
 
     if (choice === 'design') {
-      // Navigate to the customizer for the first item in cart
       const firstItem = items[0];
       if (firstItem) {
         router.push(`/customize/${firstItem.product.slug}`);
@@ -134,7 +120,6 @@ const CartDrawer = () => {
         router.push('/products');
       }
     } else if (choice === 'import') {
-      // Navigate to customizer with upload tab open
       const firstItem = items[0];
       if (firstItem) {
         router.push(`/customize/${firstItem.product.slug}?tab=uploads`);
@@ -142,7 +127,6 @@ const CartDrawer = () => {
         router.push('/products');
       }
     } else {
-      // Plain order – go straight to checkout
       router.push('/checkout');
     }
   };
@@ -161,7 +145,6 @@ const CartDrawer = () => {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -170,7 +153,6 @@ const CartDrawer = () => {
               onClick={() => setOpen(false)}
             />
 
-            {/* Drawer */}
             <motion.div 
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
@@ -178,7 +160,6 @@ const CartDrawer = () => {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="fixed top-0 right-0 h-full w-full max-w-lg bg-white/90 backdrop-blur-2xl z-[101] shadow-[-20px_0_80px_rgba(0,0,0,0.1)] flex flex-col border-l border-white/20"
             >
-              {/* Header */}
               <div className="flex items-center justify-between px-8 py-10 border-b border-gray-100/50">
                 <div className="flex items-center gap-4">
                   <div className="h-14 w-14 bg-brand-pink/10 rounded-[22px] flex items-center justify-center text-brand-pink shadow-inner">
@@ -201,7 +182,6 @@ const CartDrawer = () => {
                 </button>
               </div>
 
-              {/* Cart Items */}
               <div className="flex-1 overflow-y-auto px-8 py-8 custom-scrollbar">
                 {items.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center">
@@ -332,10 +312,10 @@ const CartDrawer = () => {
                   <div className="flex gap-4">
                     <button 
                       onClick={handleCheckoutClick}
-                      className="flex-1 bg-brand-dark text-white flex items-center justify-center py-6 rounded-[28px] font-black text-xl uppercase tracking-[0.2em] hover:bg-brand-pink shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] hover:shadow-brand-pink/20 transition-all active:scale-95 group italic"
+                      className="flex-1 bg-brand-dark text-white flex items-center justify-center py-6 rounded-[28px] font-black text-xl uppercase tracking-[0.2em] hover:bg-brand-pink shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] hover:shadow-brand-pink/20 transition-all active:scale-95 group"
                     >
                       Process Checkout
-                      <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform duration-500" />
+                      <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform duration-500 shrink-0" />
                     </button>
                   </div>
                 </div>

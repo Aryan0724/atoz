@@ -22,23 +22,26 @@ const config: Config = {
         },
         brand: {
           olive: '#5b5b42',
-          dark: '#2d2d2d',
-          bg: '#f7f7f2',
-          border: '#e5e7eb',
+          dark: '#1a1a1a', // More stable charcoal
+          bg: '#fcfcfc', // Cleaner off-white
+          border: '#f1f1f1', // Subtle separator
           lime: '#a3ff66',
-          pink: '#E91E63',
+          pink: '#D53F8C', // Refined Muted Rose
         }
       },
       boxShadow: {
-        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        'float': '0 8px 30px rgba(0, 0, 0, 0.12)',
-        'premium': '0 20px 40px rgba(16, 27, 48, 0.04), 0 1px 3px rgba(0, 0, 0, 0.05)',
-        'premium-hover': '0 30px 60px rgba(16, 27, 48, 0.08)',
+        'soft': '0 1px 12px 0 rgba(0, 0, 0, 0.03)',
+        'premium': '0 10px 30px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.04)',
+        'premium-hover': '0 15px 40px rgba(0, 0, 0, 0.05)',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
         headline: ['Manrope', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
+      },
+      borderRadius: {
+        '1.5xl': '12px',
+        '2.5xl': '20px',
       },
       keyframes: {
         marquee: {

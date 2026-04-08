@@ -3,12 +3,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, User as UserIcon, ShoppingCart, Menu, X, LogOut } from 'lucide-react';
+import { Search, User as UserIcon, ShoppingBag, Menu, X, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/lib/store/useCart';
 import { usePathname, useRouter } from 'next/navigation';
-import { User } from '@supabase/supabase-js';
 import { useAuth } from '@/components/providers/AuthProvider';
+import Button from '@/components/common/Button';
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -43,7 +43,6 @@ const Navbar = () => {
   };
 
   const handleSignOut = async () => {
-    // Proactively clear the demo flag if it exists
     if (typeof window !== 'undefined') {
       localStorage.removeItem('atoz_demo_admin');
     }
@@ -54,12 +53,12 @@ const Navbar = () => {
   const cartCount = mounted ? getItemCount() : 0;
 
   return (
-    <nav className="sticky top-0 w-full z-50 glass-panel border-b border-outline-variant/10 transition-all duration-500">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="sticky top-0 w-full z-100 bg-white border-b border-gray-100 transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 flex items-center gap-3">
-            <div className="relative h-10 w-10">
+            <div className="relative h-9 w-9">
               <Image
                 src="/logo.png"
                 alt="AtoZ Print"
@@ -68,7 +67,7 @@ const Navbar = () => {
                 priority
               />
             </div>
-            <span className="text-xl font-black tracking-tighter font-headline text-on-surface hidden sm:block">AtoZ Print</span>
+            <span className="text-lg font-bold tracking-tighter text-brand-dark hidden sm:block">AtoZ Print</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -78,10 +77,10 @@ const Navbar = () => {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "text-sm font-bold tracking-tight transition-all relative group py-1",
+                  "text-[13px] font-bold uppercase tracking-widest transition-all relative py-1",
                   pathname === link.href
-                    ? "text-primary border-b-2 border-primary"
-                    : "text-on-surface/70 hover:text-primary"
+                    ? "text-brand-pink"
+                    : "text-gray-400 hover:text-brand-dark"
                 )}
               >
                 {link.name}
@@ -95,69 +94,74 @@ const Navbar = () => {
               <form
                 onSubmit={handleSearch}
                 className={cn(
-                  "flex items-center transition-all duration-300 overflow-hidden bg-surface-variant/20 rounded-full",
-                  isSearchOpen ? "w-64 px-4 py-1.5 border border-primary/20" : "w-0 p-0"
+                  "flex items-center transition-all duration-300 overflow-hidden bg-gray-50 rounded-lg",
+                  isSearchOpen ? "w-64 px-4 py-2 border border-brand-pink/10" : "w-0 p-0"
                 )}
               >
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent text-sm w-full focus:outline-none font-medium"
+                  className="bg-transparent text-sm w-full focus:outline-none font-bold italic text-brand-dark placeholder:text-gray-300"
                   autoFocus={isSearchOpen}
                 />
               </form>
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                aria-label={isSearchOpen ? "Close search bar" : "Open search bar"}
                 className={cn(
-                  "p-2 transition-colors",
-                  isSearchOpen ? "text-primary" : "text-on-surface hover:text-primary"
+                  "p-2.5 transition-colors",
+                  isSearchOpen ? "text-brand-pink" : "text-gray-400 hover:text-brand-dark"
                 )}
               >
-                {isSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+                {isSearchOpen ? <X className="h-4 w-4" /> : <Search className="h-4 w-4" />}
               </button>
             </div>
 
             <button
               onClick={() => setOpen(true)}
-              aria-label="Open cart"
-              className="p-2 text-on-surface hover:text-primary transition-colors relative"
+              className="p-2.5 text-gray-400 hover:text-brand-dark transition-colors relative"
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingBag className="h-4 w-4" />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 h-4 w-4 bg-primary text-white text-[10px] flex items-center justify-center rounded-full animate-in zoom-in duration-300">
+                <span className="absolute top-1 right-1 h-4 w-4 bg-brand-pink text-white text-[9px] font-black flex items-center justify-center rounded-lg shadow-sm">
                   {cartCount}
                 </span>
               )}
             </button>
 
             {mounted && user ? (
-              <div className="flex items-center gap-6 border-l border-outline-variant/20 pl-6">
+              <div className="flex items-center gap-8 border-l border-gray-100 pl-8 h-10">
                 <Link
                   href={profile?.role === 'admin' ? '/admin' : '/dashboard'}
-                  className="flex items-center gap-2 group"
+                  className="flex items-center gap-3 group px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-all duration-300"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500 hover:rotate-6">
-                    <UserIcon className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-black text-on-surface group-hover:text-primary transition-colors tracking-tight italic">Dashboard</span>
+                   <div className="w-8 h-8 rounded-lg bg-brand-dark text-white flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-md shadow-brand-dark/10">
+                      <UserIcon className="h-4 w-4" />
+                   </div>
+                   <div className="flex flex-col text-left">
+                      <span className="text-[11px] font-black uppercase tracking-widest text-brand-dark leading-tight">Dashboard</span>
+                      <span className="text-[8px] font-bold text-gray-300 uppercase tracking-tighter leading-none">{profile?.role || 'User'}</span>
+                   </div>
                 </Link>
+                
+                <div className="h-6 w-px bg-gray-100 opacity-50" />
+
                 <button
                   onClick={handleSignOut}
-                  className="p-2 text-on-surface/40 hover:text-red-500 transition-colors"
+                  className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                   title="Sign Out"
                 >
                   <LogOut className="h-5 w-5" />
                 </button>
               </div>
             ) : (
-              <Link href="/login" className="bg-brand-dark text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.25em] shadow-2xl hover:bg-brand-pink hover:shadow-brand-pink/20 transition-all duration-300 hover:-translate-y-0.5 italic">
-                Sign In
+              <Link href="/login">
+                <Button variant="primary" size="sm" className="px-6">
+                  Sign In
+                </Button>
               </Link>
             )}
-
           </div>
 
           {/* Mobile Menu Button */}
@@ -165,11 +169,11 @@ const Navbar = () => {
             <button
               onClick={() => setOpen(true)}
               aria-label="Open mobile cart"
-              className="p-2 text-on-surface hover:text-primary transition-colors relative"
+              className="p-2 text-on-surface hover:text-brand-pink transition-colors relative"
             >
-              <ShoppingCart className="h-6 w-6" />
+              <ShoppingBag className="h-6 w-6" />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 h-4 w-4 bg-primary text-white text-[10px] flex items-center justify-center rounded-full">
+                <span className="absolute top-0 right-0 h-4 w-4 bg-brand-pink text-white text-[10px] flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}
@@ -177,7 +181,7 @@ const Navbar = () => {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-              className="p-2 rounded-md text-on-surface hover:text-primary focus:outline-none"
+              className="p-2 rounded-md text-on-surface hover:text-brand-pink focus:outline-none"
             >
               {isMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
             </button>
@@ -196,7 +200,7 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
                 className={cn(
                   "block px-4 py-3 text-lg font-medium rounded-xl transition-all",
-                  pathname === link.href ? "text-primary bg-primary/5 font-bold" : "text-on-surface hover:bg-surface"
+                  pathname === link.href ? "text-brand-pink bg-brand-pink/5 font-bold" : "text-on-surface hover:bg-surface"
                 )}
               >
                 {link.name}
@@ -209,14 +213,14 @@ const Navbar = () => {
                   <Link
                     href={profile?.role === 'admin' ? '/admin' : '/dashboard'}
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-4 bg-surface rounded-xl text-on-surface font-bold"
+                    className="flex items-center gap-3 px-4 py-4 bg-surface rounded-xl text-on-surface font-semibold"
                   >
-                    <UserIcon className="h-5 w-5 text-primary" />
+                    <UserIcon className="h-5 w-5 text-brand-pink" />
                     {profile?.role === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="w-full flex items-center gap-3 px-4 py-4 text-red-500 font-bold hover:bg-red-50 rounded-xl transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-4 text-red-500 font-semibold hover:bg-red-50 rounded-xl transition-colors"
                   >
                     <LogOut className="h-5 w-5" />
                     Sign Out
@@ -226,9 +230,11 @@ const Navbar = () => {
                 <Link
                   href="/login"
                   onClick={() => setIsMenuOpen(false)}
-                  className="block w-full ink-gradient text-white text-center px-6 py-4 rounded-xl text-lg font-bold hover:shadow-lg transition-all"
+                  className="block w-full"
                 >
-                  Sign In
+                  <Button variant="primary" className="w-full py-4 text-lg">
+                    Sign In
+                  </Button>
                 </Link>
               )}
             </div>

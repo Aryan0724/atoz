@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import HomePageClient from '@/components/home/HomePageClient';
 import { mockProducts } from '@/lib/data/mockProducts';
+import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'A to Z Prints | Premium Custom Printing & Corporate Gifting',
@@ -13,11 +15,16 @@ export const metadata: Metadata = {
   }
 };
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 600; // Faster revalidation (10 mins) for CMS responsiveness
+
+async function getSiteConfig() {
+  const supabase = createClient();
+  const { data } = await supabase.from('site_settings').select('config').eq('id', 'global').single();
+  return (data as any)?.config || {};
+}
 
 async function getTopProducts() {
   const supabase = createClient();
-  
   const { data: products, error } = await supabase
     .from('products')
     .select('*')
@@ -25,32 +32,21 @@ async function getTopProducts() {
     .limit(8);
 
   if (error || !products || products.length === 0) {
-    console.error('Error fetching homepage products:', error);
     return mockProducts.slice(0, 8);
   }
-
   return products;
 }
 
-const defaultHero = {
-  title: "Your Design.\nOur Impression.",
-  subtitle: "Elevate your brand identity with high-fidelity custom merchandise. From boutique startups to Fortune 500s, we deliver retail-ready excellence.",
-  image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1000&auto=format&fit=crop"
-};
-
 export default async function HomePage() {
-  const supabase = createClient();
-  const products = await getTopProducts();
-  
-  let heroConfig = defaultHero;
-  try {
-    const { data } = await supabase.from('site_settings').select('config').eq('id', 'global').single();
-    if ((data as any)?.config?.hero) {
-      heroConfig = (data as any).config.hero;
-    }
-  } catch (err) {
-    console.warn("Hero CMS error (fallback applied):", err);
-  }
+  // Parallel fetch for speed
+  const [config, products] = await Promise.all([
+    getSiteConfig(),
+    getTopProducts()
+  ]);
 
-  return <HomePageClient products={products} heroConfig={heroConfig} />;
+  return (
+    <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="w-12 h-12 animate-spin text-brand-pink" /></div>}>
+      <HomePageClient products={products} config={config} />
+    </Suspense>
+  );
 }

@@ -289,10 +289,10 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       const existingFill = canvas.getObjects().find(obj => (obj as any).id === 'product_color_fill');
       if (existingFill) canvas.remove(existingFill);
 
-      if (!isSvgMock && productColor && productColor.toUpperCase() !== '#FFFFFF') {
+      if (productColor) {
          const fillRect = new fabric.Rect({
            left: 250, top: 312.5, originX: 'center', originY: 'center',
-           width: img.getScaledWidth() * 0.98, height: img.getScaledHeight() * 0.98,
+           width: img.getScaledWidth(), height: img.getScaledHeight(),
            fill: productColor, selectable: false, evented: false,
            //@ts-ignore
            id: 'product_color_fill'
@@ -575,60 +575,6 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       active.set({ lockMovementX: isLocked, lockMovementY: isLocked, lockScalingX: isLocked, lockScalingY: isLocked, lockRotation: isLocked, hasControls: !isLocked });
       canvas.renderAll();
       onObjectModified?.(getObjectProperties(active));
-    },
-    removeImageBackground: async () => {
-      if (!canvas) return false;
-      const active = canvas.getActiveObject();
-      if (!active || active.type !== 'image') return false;
-      
-      const imageUrl = (active as fabric.Image).getSrc();
-      if (!imageUrl) return false;
-
-      try {
-        const response = await fetch('/api/remove-bg', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageUrl }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to remove background');
-        }
-
-        const blob = await response.blob();
-        const reader = new FileReader();
-
-        return new Promise<boolean>((resolve) => {
-          reader.onload = (e) => {
-            if (e.target?.result) {
-               fabric.Image.fromURL(e.target.result as string, (newImg) => {
-                  newImg.set({ 
-                    left: active.left, 
-                    top: active.top, 
-                    scaleX: active.scaleX, 
-                    scaleY: active.scaleY, 
-                    angle: active.angle, 
-                    originX: active.originX, 
-                    originY: active.originY, 
-                    //@ts-ignore
-                    id: (active as any).id 
-                  });
-                  canvas.remove(active); 
-                  canvas.add(newImg); 
-                  canvas.setActiveObject(newImg); 
-                  canvas.renderAll(); 
-                  onObjectsUpdated?.(); 
-                  resolve(true);
-               });
-            } else resolve(false);
-          };
-          reader.readAsDataURL(blob);
-        });
-      } catch (err: any) {
-        console.error("Background removal failed:", err);
-        return false;
-      }
     },
     undo,
     redo,

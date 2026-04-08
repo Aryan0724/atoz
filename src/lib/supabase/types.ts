@@ -26,7 +26,27 @@ export interface Product {
   specifications?: any;
   stock_quantity?: number;
   is_active?: boolean;
+  quality_prices?: Record<string, number>;
+  bulk_pricing?: { min: number; discount: number }[];
   created_at?: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+}
+
+export interface CheckoutAttempt {
+  id: string;
+  user_id?: string;
+  product_id?: string;
+  quantity?: number;
+  quality_level?: string;
+  total_price?: number;
+  status: 'pending' | 'successful';
+  created_at: string;
 }
 
 export interface Order {

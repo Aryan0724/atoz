@@ -10,8 +10,9 @@ import { podGraphics, podGraphicCategories } from '@/lib/data/podGraphics';
 import { toast } from 'sonner';
 import IconifyTab from '@/components/design/controls/tabs/IconifyTab';
 import { 
-  Type, Loader2, Upload, Plus, Search, LayoutGrid, X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes, Wand2, History, RefreshCcw, Download, Trash2, ArrowRight, Layers, Lock, Unlock, Eye, EyeOff
+  Type, Loader2, Upload, Plus, Search, LayoutGrid, X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes, Wand2, History, RefreshCcw, Download, Trash2, ArrowRight, Layers, Lock, Unlock, Eye, EyeOff, Minus
 } from 'lucide-react';
+import StockTab from '@/components/design/controls/tabs/StockTab';
 import { aiStylePills, aiSubjectIdeas } from '@/lib/data/AiPrompts';
 
 // ─────────────────────────────────────────────────────────
@@ -73,7 +74,6 @@ const textStyles = [
   { label: 'Add a label', text: 'LABEL TEXT', fontSize: 18, fontWeight: 'bold', fontFamily: "'Bebas Neue', sans-serif", description: 'All caps label' },
 ];
 
-// Graphic phrases commonly used on merchandise
 const podTextPhrases = [
   { text: 'EST. 2024', font: "'Bebas Neue', sans-serif", desc: 'Established badge' },
   { text: 'ORIGINAL', font: "'Oswald', sans-serif", desc: 'Brand stamp' },
@@ -89,7 +89,6 @@ const podTextPhrases = [
   { text: 'TEAM SPIRIT', font: "'Righteous', cursive", desc: 'Group wear' },
 ];
 
-// Design accent shapes — commonly used in print design
 const shapeDefinitions = [
   { type: 'rect' as const, label: 'Rectangle', preview: <div className="w-10 h-7 border-2 border-current" /> },
   { type: 'circle' as const, label: 'Circle', preview: <div className="w-8 h-8 border-2 border-current rounded-full" /> },
@@ -100,42 +99,7 @@ const shapeDefinitions = [
 ];
 
 const photoCategories = ['Streetwear', 'Textures', 'Vintage', 'Gradients', 'Typography'];
-const unsplashPhotos: Record<string, { url: string; thumb: string }[]> = {
-  'Streetwear': [
-    { url: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1523398002811-999aa8d9512e?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1523398002811-999aa8d9512e?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1617114919297-3c8ddb01f599?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1617114919297-3c8ddb01f599?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&q=60' },
-  ],
-  'Textures': [
-    { url: 'https://images.unsplash.com/photo-1600161474147-38e24baef762?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1600161474147-38e24baef762?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1463130456064-9b16ac427ba6?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1463130456064-9b16ac427ba6?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1604871000636-074fa5117945?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1604871000636-074fa5117945?w=200&q=60' },
-  ],
-  'Vintage': [
-    { url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1505909182942-e2f09aee3e89?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1505909182942-e2f09aee3e89?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1478059299873-f04771b0db7a?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1478059299873-f04771b0db7a?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1478147427282-58a87a120781?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1478147427282-58a87a120781?w=200&q=60' },
-  ],
-  'Gradients': [
-    { url: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&q=60' },
-  ],
-  'Typography': [
-    { url: 'https://images.unsplash.com/photo-1516315720917-231cb9ac11f1?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1516315720917-231cb9ac11f1?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1555617260-2640243be129?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1555617260-2640243be129?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1563298723-dcfebaa392e3?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1563298723-dcfebaa392e3?w=200&q=60' },
-    { url: 'https://images.unsplash.com/photo-1490578474895-699bc4e34711?w=800&q=80', thumb: 'https://images.unsplash.com/photo-1490578474895-699bc4e34711?w=200&q=60' },
-  ],
-};
 
-// ─────────────────────────────────────────────────────────
-// Sub-components
-// ─────────────────────────────────────────────────────────
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <p className="text-[10px] font-black uppercase tracking-[0.12em] text-gray-400 mb-3 mt-6 first:mt-0">{children}</p>
 );
@@ -172,11 +136,11 @@ interface SidebarPanelProps {
   basePrice?: number;
   productId?: string;
   activeObject?: CanvasObjectProperties | null;
-  onRemoveBackground?: () => Promise<boolean>;
   onSelectionCleared?: () => void;
   onLockAllObjects?: (lock: boolean) => void;
   onClearDesign?: () => void;
   onAddPattern?: (url: string) => void;
+  qualityPrices?: Record<string, number>;
 }
 
 const SidebarPanel = ({ 
@@ -192,7 +156,6 @@ const SidebarPanel = ({
   onLoadTemplate,
   onUpdateObject,
   activeObject,
-  onRemoveBackground,
   onSelectionCleared,
   onLockAllObjects,
   onClearDesign,
@@ -203,13 +166,13 @@ const SidebarPanel = ({
   productCategory = 'Apparel',
   qualityLevels = ['Standard', 'Premium', 'Luxury'],
   basePrice = 0,
-  productId = ''
+  productId = '',
+  qualityPrices = {}
 }: SidebarPanelProps) => {
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
-  // Configure defaults based on product category
   const catLower = productCategory.toLowerCase();
   const isBottle = catLower.includes('bottle') || catLower.includes('mug') || catLower.includes('drinkware');
   const isPrint = catLower.includes('print') || catLower.includes('canvas');
@@ -218,7 +181,6 @@ const SidebarPanel = ({
   const isLifestyle = catLower.includes('lifestyle');
   const isCorporate = catLower.includes('corporate');
 
-  // Filter available categories based on product type
   const availableTemplateCats = React.useMemo(() => {
     return templateCategories.filter(cat => {
       if (cat === 'All') return true;
@@ -269,28 +231,26 @@ const SidebarPanel = ({
       const fullPrompt = style ? `${aiPrompt}, ${style.suffix}` : aiPrompt;
       const seed = Math.floor(Math.random() * 1000000);
       
-      // Dynamic Aspect Ratio based on Product Category
       let width = 1024;
       let height = 1024;
       const cat = productCategory?.toLowerCase() || '';
       
       if (cat.includes('tshirt') || cat.includes('t-shirt') || cat.includes('hoodie')) {
-        width = 768;   // Portrait for chest prints
+        width = 768;
         height = 1024;
       } else if (cat.includes('mug') || cat.includes('bottle') || cat.includes('drinkware')) {
-        width = 1024;  // Wide for wrap-arounds
+        width = 1024;
         height = 512;
       } else if (cat.includes('diary') || cat.includes('notebook') || cat.includes('stationery')) {
-        width = 768;   // Natural portrait for covers
+        width = 768;
         height = 1024;
       } else if (cat.includes('phone') || cat.includes('case')) {
-        width = 512;   // Slim portrait for phones
+        width = 512;
         height = 1024;
       }
 
       const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${width}&height=${height}&nologo=true&seed=${seed}`;
       
-      // We "pre-warm" the image to ensure it's generated before showing
       const img = new Image();
       img.src = imageUrl;
       await new Promise((resolve, reject) => {
@@ -357,12 +317,14 @@ const SidebarPanel = ({
     'uploads': 'My Uploads',
     'ai': 'AI Generator',
     'text': 'Text',
-    'library': 'Photos',
+    'library': 'Filters',
     'graphics': 'Elements',
     'templates': 'Templates',
     'shutterstock': 'Quick Photos',
     'iconify': 'Icon Library',
     'layers': 'Design Layers',
+    'unsplash': 'Stock Photos',
+    'pexels': 'Stock Photos',
   };
 
   const filteredTemplates = (activeTemplateCat === 'All' 
@@ -370,7 +332,6 @@ const SidebarPanel = ({
     : canvasTemplates.filter(t => t.category === activeTemplateCat))
     .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  
   const handleSyncColors = () => {
     const colors = new Set<string>();
     layers.forEach(l => {
@@ -402,7 +363,6 @@ const SidebarPanel = ({
         {/* ─── TEMPLATES TAB ──────────────────────────────────── */}
         {activeTab === 'templates' && (
           <div className="p-4 space-y-4">
-            {/* Search and Category filter */}
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
               <input
@@ -529,10 +489,14 @@ const SidebarPanel = ({
           </div>
         )}
 
+        {/* ─── STOCK TAB (UNSPLASH/PEXELS) ──────────────────── */}
+        {(activeTab === 'unsplash' || activeTab === 'pexels') && (
+          <StockTab onAddImage={onAddImage} onClose={onClose} />
+        )}
+
         {/* ─── GRAPHICS / ELEMENTS TAB ────────────────────────── */}
         {activeTab === 'graphics' && (
           <div className="p-4 space-y-1">
-            {/* Search */}
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               <input
@@ -544,7 +508,6 @@ const SidebarPanel = ({
               />
             </div>
 
-            {/* Shapes section */}
             <SectionLabel>Shapes</SectionLabel>
             <div className="grid grid-cols-3 gap-2 mb-2">
               {shapeDefinitions.map((s) => (
@@ -559,7 +522,6 @@ const SidebarPanel = ({
               ))}
             </div>
 
-            {/* Premium Vector Graphics for POD */}
             <SectionLabel>Vector Graphics</SectionLabel>
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1.5 mb-2">
               {availableGraphicCats.map(cat => (
@@ -588,8 +550,6 @@ const SidebarPanel = ({
                 ))}
             </div>
 
-
-            {/* Vector Icons */}
             <SectionLabel>Icons</SectionLabel>
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1.5 mb-2">
               {iconCategories.map(cat => (
@@ -713,53 +673,6 @@ const SidebarPanel = ({
           </div>
         )}
 
-        {/* ─── LIBRARY / PHOTOS TAB ───────────────────────────── */}
-        {activeTab === 'library' && (
-          <div className="p-4 space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search photos..."
-                className="w-full bg-[#f3f3f3] border-none rounded-xl py-2.5 pl-9 pr-4 text-sm focus:ring-1 focus:ring-[#5b5b42] outline-none"
-              />
-            </div>
-            
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-              {photoCategories.map(cat => (
-                <PillTab key={cat} active={activePhotoCat === cat} onClick={() => setActivePhotoCat(cat)}>
-                  {cat}
-                </PillTab>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              {(unsplashPhotos[activePhotoCat] || []).map((photo, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    onAddImage(photo.url);
-                    toast.success('Photo added to canvas!');
-                  }}
-                  className="aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-[#5b5b42] transition-all group relative"
-                >
-                  <img
-                    src={photo.thumb}
-                    alt={`${activePhotoCat} ${i + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-1.5">
-                      <Plus className="h-4 w-4 text-[#5b5b42]" />
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* ─── AI TAB ─────────────────────────────────────────── */}
         {activeTab === 'ai' && (
           <div className="p-4 space-y-4">
@@ -877,20 +790,10 @@ const SidebarPanel = ({
 
             <SectionLabel>AI Toolbox</SectionLabel>
             {[
-              { 
-                label: 'Background Remover', 
-                desc: 'Auto-detect and extract the subject', 
-                emoji: '✂️', 
-                available: !!onRemoveBackground, 
-                action: activeObject?.type === 'image' ? 'Try on Canvas' : 'Select an Image',
-                onClick: onRemoveBackground
-              },
               { label: 'Style Transfer', desc: 'Apply artistic styles to your photos', emoji: '🎨', available: false, action: 'Coming Soon' },
             ].map(feat => (
               <button 
                 key={feat.label} 
-                onClick={feat.onClick}
-                disabled={!feat.available || (feat.label === 'Background Remover' && activeObject?.type !== 'image')}
                 className="w-full flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow group text-left disabled:opacity-50"
               >
                 <div className="h-10 w-10 bg-gray-50 rounded-xl flex items-center justify-center text-xl group-hover:bg-purple-50 transition-colors">
@@ -917,11 +820,8 @@ const SidebarPanel = ({
             <div className="space-y-4">
               <SectionLabel>Product Quality</SectionLabel>
               <div className="grid grid-cols-1 gap-2">
-                {qualityLevels.map((q, index) => {
-                  const multipliers = [1, 1.2, 1.5, 2];
-                  const multiplier = multipliers[Math.max(0, index)] || 1;
-                  const price = Math.round(basePrice * multiplier);
-                  const bonus = price - basePrice;
+                {qualityLevels.map((q) => {
+                  const bonus = qualityPrices[q] || 0;
                   const bonusStr = bonus > 0 ? `+ ₹${bonus}` : '+ ₹0';
 
                   const descriptions: Record<string, string> = {
@@ -1000,29 +900,8 @@ const SidebarPanel = ({
                 className="w-full bg-[#f3f3f3] border-none rounded-xl py-2.5 pl-9 pr-4 text-sm focus:ring-1 focus:ring-[#5b5b42] outline-none"
               />
             </div>
-            <p className="text-[10px] text-gray-400 font-bold text-center py-2">Premium Photo Library — Integration Coming Soon</p>
-            
-            {/* Show some curated samples from multiple categories */}
-            <SectionLabel>Curated Picks</SectionLabel>
-            <div className="grid grid-cols-2 gap-2">
-              {Object.values(unsplashPhotos).flat().slice(0, 8).map((photo, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    onAddImage(photo.url);
-                    toast.success('Photo added to canvas!');
-                  }}
-                  className="aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-[#5b5b42] transition-all group relative"
-                >
-                  <img src={photo.thumb} alt={`photo-${i}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-1.5">
-                      <Plus className="h-4 w-4 text-[#5b5b42]" />
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <p className="text-[10px] text-gray-400 font-bold text-center py-2 text-brand-pink underline italic">Premium Search Engine Powered by AI</p>
+            <StockTab onAddImage={onAddImage} onClose={onClose} />
           </div>
         )}
 
@@ -1030,7 +909,6 @@ const SidebarPanel = ({
         {activeTab === 'iconify' && (
           <IconifyTab onAddSvgGraphic={onAddSvgGraphic} />
         )}
-
 
         {/* ─── LAYERS TAB ──────────────────────────────────────── */}
         {activeTab === 'layers' && (
@@ -1059,7 +937,6 @@ const SidebarPanel = ({
                       activeObject?.id === layer.id && "ring-2 ring-brand-pink ring-offset-2 bg-white shadow-lg border-brand-pink/30 translate-y-0"
                     )}
                     onClick={() => {
-                        // Select logic
                         onUpdateObject?.(layer.id, {}); 
                     }}
                   >
@@ -1143,7 +1020,6 @@ const SidebarPanel = ({
                  onKeyDown={(e) => {
                    if (e.key === 'Enter') {
                      const query = (e.target as HTMLInputElement).value;
-                     // For free, we use Pollinations.ai with a "seamless pattern" suffix for high-res unique assets
                      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(query + ' seamless high-resolution repeatable textile pattern design')}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*100000)}`;
                      onAddPattern?.(url);
                      toast.success("AI Pattern Generated & Applied!");
@@ -1179,13 +1055,6 @@ const SidebarPanel = ({
                     <span className="text-[10px] font-black uppercase tracking-widest text-brand-dark">{p.name}</span>
                   </button>
                 ))}
-             </div>
-             
-             <div className="mt-8 p-4 bg-brand-pink/5 rounded-3xl border border-brand-pink/10">
-                <p className="text-[9px] text-brand-pink font-black uppercase tracking-[0.2em] mb-2 text-center">Design Tip</p>
-                <p className="text-[8px] text-gray-500 font-bold text-center uppercase tracking-tighter italic px-4">
-                  Patterns are applied as tileable background fills. You can scale and rotate them directly on the canvas!
-                </p>
              </div>
           </div>
         )}

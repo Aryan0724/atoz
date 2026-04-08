@@ -18,28 +18,28 @@ const SectionHeading = ({
 }: SectionHeadingProps) => {
   return (
     <div className={cn(
-      "mb-16",
+      "mb-20",
       align === 'center' ? "text-center" : "text-left",
       className
     )}>
       {badge && (
-        <span className="inline-block px-4 py-1.5 rounded-full bg-pink-50 text-brand-pink text-xs font-bold uppercase tracking-wider mb-4">
+        <span className="inline-block px-3 py-1 rounded-lg bg-brand-pink/5 text-brand-pink text-[10px] font-black uppercase tracking-widest mb-4">
           {badge}
         </span>
       )}
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-brand-dark mb-6">
+      <h2 className="text-3xl md:text-5xl font-bold text-brand-dark mb-6 tracking-tight">
         {title}
       </h2>
       {subtitle && (
         <p className={cn(
-          "text-lg text-gray-500 max-w-2xl",
+          "text-lg text-gray-500 font-medium max-w-2xl",
           align === 'center' ? "mx-auto" : "mr-auto"
         )}>
           {subtitle}
         </p>
       )}
       <div className={cn(
-        "h-1.5 w-20 bg-brand-pink mt-8 rounded-full",
+        "h-[3px] w-12 bg-brand-pink mt-10 rounded-full opacity-60",
         align === 'center' ? "mx-auto" : "mr-auto"
       )}></div>
     </div>

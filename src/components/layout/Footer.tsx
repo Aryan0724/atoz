@@ -8,16 +8,13 @@ import { toast } from 'sonner';
 
 const Footer = () => {
   return (
-    <footer className="bg-secondary text-on-primary/70 pt-24 pb-12 overflow-hidden relative">
-      {/* Background Decorative Element */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -mr-48 -mt-48"></div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
+    <footer className="bg-brand-dark text-white/70 pt-24 pb-16 overflow-hidden relative">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
           {/* Brand Info */}
-          <div className="space-y-8">
+          <div className="space-y-10">
             <Link href="/" className="flex items-center gap-3">
-              <div className="relative h-12 w-12 bg-white rounded-xl p-2 shadow-lg">
+              <div className="relative h-10 w-10">
                 <Image
                   src="/logo.png"
                   alt="AtoZ Print"
@@ -25,19 +22,19 @@ const Footer = () => {
                   className="object-contain"
                 />
               </div>
-              <span className="text-2xl font-black tracking-tighter text-white font-headline">AtoZ Print</span>
+              <span className="text-xl font-bold tracking-tighter text-white">AtoZ Print</span>
             </Link>
-            <p className="text-on-primary/60 leading-relaxed font-medium">
-              Transforming your digital visions into premium physical impressions. From custom apparel to corporate gifting, we define the standard of high-fidelity printing.
+            <p className="text-sm text-white/50 leading-relaxed font-medium max-w-sm">
+              Premium physical impressions for the modern brand. From apparel to packaging, we define the standard of high-fidelity manufacturing.
             </p>
-            <div className="flex space-x-6">
+            <div className="flex space-x-4">
               {[Facebook, Instagram, Twitter].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
-                  className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary hover:border-primary transition-all duration-500 hover:-translate-y-1 group"
+                  className="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-brand-pink hover:border-brand-pink transition-all group"
                 >
-                  <Icon className="h-6 w-6 text-on-primary/50 group-hover:text-white transition-colors" />
+                  <Icon className="h-5 w-5 text-white/40 group-hover:text-white transition-colors" />
                 </a>
               ))}
             </div>
@@ -45,30 +42,30 @@ const Footer = () => {
 
           {/* Navigation Links */}
           <div>
-            <h4 className="text-white font-bold text-lg mb-8 tracking-tight">Curation</h4>
+            <h4 className="text-white font-bold text-sm mb-10 uppercase tracking-widest italic opacity-50">Products</h4>
             <ul className="space-y-5">
-              <li><Link href="/products" className="text-base sm:text-sm hover:text-primary transition-all duration-300 font-medium">Product Catalog</Link></li>
-              <li><Link href="/services" className="text-base sm:text-sm hover:text-primary transition-all duration-300 font-medium">Design Atelier</Link></li>
-              <li><Link href="/bulk" className="text-base sm:text-sm hover:text-primary transition-all duration-300 font-medium">Enterprise Orders</Link></li>
-              <li><Link href="/about" className="text-base sm:text-sm hover:text-primary transition-all duration-300 font-medium">Our Philosophy</Link></li>
+              <li><Link href="/products" className="text-sm hover:text-brand-pink transition-all font-bold italic">Full Catalog</Link></li>
+              <li><Link href="/services" className="text-sm hover:text-brand-pink transition-all font-bold italic">Design Studio</Link></li>
+              <li><Link href="/bulk" className="text-sm hover:text-brand-pink transition-all font-bold italic">Bulk Inquiries</Link></li>
+              <li><Link href="/about" className="text-sm hover:text-brand-pink transition-all font-bold italic">Our Story</Link></li>
             </ul>
           </div>
 
           {/* Support Links */}
           <div>
-            <h4 className="text-white font-bold text-lg mb-8 tracking-tight">Concierge</h4>
+            <h4 className="text-white font-bold text-sm mb-10 uppercase tracking-widest italic opacity-50">Support</h4>
             <ul className="space-y-4">
-              <li><Link href="/contact" className="hover:text-primary transition-all duration-300 font-medium">Client Support</Link></li>
-              <li><Link href="/shipping" className="hover:text-primary transition-all duration-300 font-medium">Logistics Details</Link></li>
-              <li><Link href="/returns" className="hover:text-primary transition-all duration-300 font-medium">Satisfaction Policy</Link></li>
-              <li><Link href="/faq" className="hover:text-primary transition-all duration-300 font-medium">Common Queries</Link></li>
+              <li><Link href="/contact" className="text-sm hover:text-brand-pink transition-all font-bold italic">Contact Board</Link></li>
+              <li><Link href="/shipping" className="text-sm hover:text-brand-pink transition-all font-bold italic">Logistics Policy</Link></li>
+              <li><Link href="/terms" className="text-sm hover:text-brand-pink transition-all font-bold italic">Legal Framework</Link></li>
+              <li><Link href="/faq" className="text-sm hover:text-brand-pink transition-all font-bold italic">Common Queries</Link></li>
             </ul>
           </div>
 
           {/* Newsletter */}
           <div className="space-y-8">
-            <h4 className="text-white font-bold text-lg tracking-tight">Stay Impactful</h4>
-            <p className="text-on-primary/60 font-medium">Get curated design inspiration and exclusive offers.</p>
+            <h4 className="text-white font-bold text-sm uppercase tracking-widest italic opacity-50">Stay Informed</h4>
+            <p className="text-sm text-white/50 font-medium">Curated design updates and seasonal drops.</p>
             <form
               onSubmit={(e) => { e.preventDefault(); toast.success('Welcome to the Atelier!'); }}
               className="relative group lg:max-w-xs"
@@ -76,12 +73,12 @@ const Footer = () => {
               <input
                 type="email"
                 placeholder="Email Address"
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-primary/50 transition-all font-bold placeholder:text-on-primary/30"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-sm focus:outline-none focus:border-brand-pink/50 transition-all font-bold placeholder:text-white/20 italic"
                 required
               />
               <button
                 type="submit"
-                className="absolute right-2 top-2 h-10 w-10 bg-primary text-white rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20"
+                className="absolute right-2 top-2 h-10 w-10 bg-brand-pink text-white rounded-lg flex items-center justify-center hover:scale-105 transition-all shadow-lg shadow-brand-pink/20"
               >
                 <Mail className="h-4 w-4" />
               </button>
@@ -91,12 +88,12 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-          <p className="text-sm font-bold text-on-primary/40 tracking-tight">
-            © {new Date().getFullYear()} ATOZ PRINT. ENGINEERED FOR IMPRESSIONS.
+          <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic">
+            © {new Date().getFullYear()} ATOZ PRINT. ALL RIGHTS RESERVED.
           </p>
-          <div className="flex space-x-12 text-xs font-bold uppercase tracking-widest text-on-primary/40">
-            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Privacy</Link>
-            <Link href="/terms" className="hover:text-primary transition-colors">Legal Framework</Link>
+          <div className="flex space-x-10 text-[9px] font-black uppercase tracking-[0.2em] text-white/20">
+            <Link href="/privacy" className="hover:text-brand-pink transition-colors italic">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-brand-pink transition-colors italic">Terms of Service</Link>
           </div>
         </div>
       </div>

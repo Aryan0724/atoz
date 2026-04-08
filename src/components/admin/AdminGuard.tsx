@@ -38,8 +38,9 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
         if (authError || !user) {
           console.warn('[AdminGuard] No active session. Redirecting to login.');
-          setLoading(false);
-          router.push('/login');
+          if (typeof window !== 'undefined') {
+            window.location.replace('/login');
+          }
           return;
         }
 
@@ -58,8 +59,9 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
         if (!profile || profile.role !== 'admin') {
           console.error(`[AdminGuard] Access denied. Role: ${profile?.role || 'none'}`);
-          setLoading(false);
-          router.push('/');
+          if (typeof window !== 'undefined') {
+            window.location.replace('/');
+          }
           return;
         }
 
@@ -105,6 +107,10 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
     );
   }
 
-  if (!authorized) return null;
+  if (!authorized) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Loader2 className="h-8 w-8 text-brand-pink animate-spin" />
+    </div>
+  );
   return <>{children}</>;
 }

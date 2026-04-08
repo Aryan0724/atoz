@@ -67,7 +67,6 @@ export interface DesignerCanvasRef {
   resetZoom: () => void;
   duplicateActiveObject: () => void;
   toggleLock: () => void;
-  removeImageBackground: () => Promise<boolean>;
   undo: () => void;
   redo: () => void;
   setPanning: (enabled: boolean) => void;

@@ -32,14 +32,15 @@ export const useCart = create<CartState>()(
       items: [],
       isOpen: false,
       addItem: (item) => set((state) => {
-        const existingItem = state.items.find((i) => i.id === item.id);
-        if (existingItem) {
-          return {
-            items: state.items.map((i) =>
-              i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
-            ),
-            isOpen: true,
+        const existingItemIndex = state.items.findIndex((i) => i.id === item.id);
+        if (existingItemIndex > -1) {
+          const newItems = [...state.items];
+          newItems[existingItemIndex] = {
+            ...newItems[existingItemIndex],
+            ...item,
+            quantity: newItems[existingItemIndex].quantity + item.quantity
           };
+          return { items: newItems, isOpen: true };
         }
         return { items: [...state.items, item], isOpen: true };
       }),

@@ -79,69 +79,7 @@ export default function ProductsContent({ initialProducts }: { initialProducts: 
   }, [products, selectedCategory, searchQuery, sortBy]);
 
   return (
-    <div className="bg-white min-h-screen pb-20 overflow-x-hidden">
-      {/* Hero Section - Cinematic */}
-      <div className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
-        {/* Background Mesh/Glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl">
-           <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-pink-100/50 rounded-full blur-[120px] animate-pulse" />
-           <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-50/50 rounded-full blur-[100px]" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
-            <motion.div 
-               initial={{ opacity: 0, x: -30 }}
-               animate={{ opacity: 1, x: 0 }}
-               transition={{ duration: 0.8 }}
-               className="max-w-2xl"
-            >
-               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-pink/5 border border-brand-pink/10 text-brand-pink text-[10px] font-black uppercase tracking-[0.2em] mb-8">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Professional Printing Solutions
-               </div>
-               <h1 className="text-5xl lg:text-8xl font-black text-brand-dark tracking-tighter mb-8 leading-[0.85]">
-                  Your <span className="text-brand-pink underline decoration-brand-cyan/20 decoration-8 underline-offset-[12px]">Vision,</span> <br/>
-                  Perfectly Printed.
-               </h1>
-               <p className="text-lg text-gray-400 font-bold leading-relaxed max-w-xl">
-                  High-end customizable gear engineered for excellence. Designed to make your brand stand out with consistent quality and fast turnaround.
-               </p>
-               
-               <div className="mt-12 flex items-center gap-8">
-                  <div className="flex flex-col">
-                     <span className="text-3xl font-black text-brand-dark tracking-tighter">{products.length}+</span>
-                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Products</span>
-                  </div>
-                  <div className="h-10 w-px bg-gray-100" />
-                  <div className="flex flex-col">
-                     <span className="text-3xl font-black text-brand-pink tracking-tighter">48h</span>
-                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Quick Dispatch</span>
-                  </div>
-               </div>
-            </motion.div>
-
-            <motion.div 
-               initial={{ opacity: 0, scale: 0.8 }}
-               animate={{ opacity: 1, scale: 1 }}
-               transition={{ duration: 1, delay: 0.2 }}
-               className="relative w-full lg:w-1/2 flex justify-center mt-12 lg:mt-0"
-            >
-               <div className="relative w-full max-w-sm sm:max-w-md aspect-square">
-                  <div className="absolute inset-0 bg-gradient-to-br from-brand-pink/20 to-brand-cyan/20 rounded-full blur-3xl animate-pulse-slow opacity-50" />
-                  <Image 
-                    src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=2000&auto=format&fit=crop" 
-                    alt="Premium Gear Showcase"
-                    fill
-                    className="object-contain relative z-10 drop-shadow-2xl hover:scale-105 transition-transform duration-700 cursor-zoom-in"
-                    priority
-                  />
-               </div>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
+    <div className="bg-white min-h-screen pb-20 overflow-x-hidden pt-32">
       <div className="max-w-7xl mx-auto px-6">
         <Breadcrumbs items={[{ label: 'Catalog' }]} />
 

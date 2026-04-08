@@ -6,7 +6,7 @@ import {
   Type, LayoutGrid, Square, Upload, Sparkles, FolderHeart, Image as ImageIcon, HelpCircle, Layout as LayoutIcon, Palette, Star, Layers, Grid
 } from 'lucide-react';
 
-export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify' | 'layers' | 'patterns';
+export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify' | 'layers' | 'patterns' | 'unsplash' | 'pexels';
 
 interface SidebarRailProps {
   activeTab: SidebarTab | null;
@@ -22,6 +22,7 @@ const navItems: { id: SidebarTab; icon: React.ReactNode; label: string }[] = [
   { id: 'layers', icon: <Layers className="h-5 w-5" />, label: 'Layers' },
   { id: 'library', icon: <Sparkles className="h-5 w-5" />, label: 'Filters' },
   { id: 'iconify', icon: <FolderHeart className="h-5 w-5" />, label: 'Icons' },
+  { id: 'unsplash', icon: <ImageIcon className="h-5 w-5" />, label: 'Stock' },
   { id: 'uploads', icon: <Upload className="h-5 w-5" />, label: 'Upload' },
   { id: 'ai', icon: <Sparkles className="h-5 w-5 opacity-40" />, label: 'AI' },
 ];

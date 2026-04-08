@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getCategoryIcon } from '@/lib/data/icons';
 
 export default function PricingClient({ initialCategories }: { initialCategories: any[] }) {
   const [activeTab, setActiveTab] = useState(initialCategories[0]?.id || '');
@@ -20,17 +21,20 @@ export default function PricingClient({ initialCategories }: { initialCategories
 
   const calculateEstimate = () => {
     const product = selectedCatObj.items?.find((i: any) => i.name === estProduct);
-    if (!product || !product.tiers || product.tiers.length === 0) return 0;
+    if (!product || !product.tiers || !product.tiers.length) return 0;
     
     let unitPrice = product.tiers[0];
-    if (product.tiers.length >= 4) {
-      if (estQty >= 100) unitPrice = product.tiers[3];
-      else if (estQty >= 50) unitPrice = product.tiers[2];
-      else if (estQty >= 20) unitPrice = product.tiers[1];
-    } else if (product.tiers.length === 3) {
-      if (estQty >= 20) unitPrice = product.tiers[2];
-      else if (estQty >= 10) unitPrice = product.tiers[1];
-    }
+    const headers = activeCategory?.headers || [];
+    
+    headers.forEach((h: string, idx: number) => {
+      const match = h.match(/\d+/);
+      if (match) {
+        const minVal = parseInt(match[0]);
+        if (estQty >= minVal) {
+          unitPrice = product.tiers[idx] ?? unitPrice;
+        }
+      }
+    });
     
     return unitPrice * estQty;
   };
@@ -72,28 +76,34 @@ export default function PricingClient({ initialCategories }: { initialCategories
           className="mt-16 flex flex-col md:flex-row items-center justify-between gap-6 bg-white border border-gray-100 p-3 rounded-[32px] shadow-soft overflow-hidden"
         >
           <div className="flex overflow-x-auto no-scrollbar w-full md:w-auto p-1 gap-2.5">
-            {initialCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveTab(cat.id)}
-                className={cn(
-                  "flex items-center gap-3 px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] rounded-[24px] whitespace-nowrap transition-all duration-700 relative isolate group",
-                  activeTab === cat.id 
-                    ? "text-white" 
-                    : "text-gray-400 hover:text-brand-dark"
-                )}
-              >
-                {activeTab === cat.id && (
-                  <motion.div 
-                    layoutId="activeTabPricing"
-                    className="absolute inset-0 bg-brand-dark rounded-[24px] shadow-2xl shadow-brand-dark/20 -z-10"
-                    transition={{ type: "spring", bounce: 0.25, duration: 0.6 }}
-                  />
-                )}
-                <span className="text-xl group-hover:scale-125 transition-transform duration-500">{cat.icon}</span>
-                {cat.name}
-              </button>
-            ))}
+            {initialCategories.map((cat) => {
+              const Icon = getCategoryIcon(cat.icon || cat.id);
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveTab(cat.id)}
+                  className={cn(
+                    "flex items-center gap-3 px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] rounded-[16px] whitespace-nowrap transition-all duration-700 relative isolate group",
+                    activeTab === cat.id 
+                      ? "text-white" 
+                      : "text-gray-400 hover:text-brand-dark"
+                  )}
+                >
+                  {activeTab === cat.id && (
+                    <motion.div 
+                      layoutId="activeTabPricing"
+                      className="absolute inset-0 bg-brand-dark rounded-[16px] shadow-2xl shadow-brand-dark/10 -z-10"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <Icon className={cn(
+                    "w-4 h-4 transition-transform duration-500",
+                    activeTab === cat.id ? "text-brand-pink" : "group-hover:scale-125"
+                  )} />
+                  {cat.name}
+                </button>
+              );
+            })}
           </div>
           <div className="relative w-full md:w-80 group px-2 pb-2 md:p-0 mr-4">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 h-4 w-4 group-focus-within:text-brand-pink transition-colors" />

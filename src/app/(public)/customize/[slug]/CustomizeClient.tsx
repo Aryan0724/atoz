@@ -21,7 +21,7 @@ import { cn, dataURLToBlob } from '@/lib/utils';
 import { uploadFile } from '@/lib/supabase/storage';
 import { toast } from 'sonner';
 
-export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify' | 'layers' | 'patterns';
+export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify' | 'layers' | 'patterns' | 'unsplash' | 'pexels';
 
 interface CustomizeClientProps {
   product: Product;
@@ -272,7 +272,6 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
             onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
             onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
-            onRemoveBackground={() => canvasRef.current?.removeImageBackground?.() || Promise.resolve(false)}
             onUpdateObject={handleUpdateObjectById}
             activeObject={activeObject}
             onSelectionCleared={() => setActiveObject(null)}
@@ -296,7 +295,6 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                 onDeleteActiveObject={() => canvasRef.current?.deleteActiveObject()}
                 onBringForward={() => canvasRef.current?.bringForward()}
                 onSendBackward={() => canvasRef.current?.sendBackward()}
-                onRemoveBackground={() => canvasRef.current?.removeImageBackground?.() || Promise.resolve(false)}
                 onDuplicate={() => canvasRef.current?.duplicateActiveObject()}
                 onLockToggle={() => canvasRef.current?.toggleLock()}
                 onSetTextShadow={(options) => canvasRef.current?.setTextShadow(options)}
@@ -400,7 +398,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
 
             <div className="absolute bottom-2 right-4 md:bottom-8 md:right-8 z-40 scale-75 md:scale-100 origin-bottom-right">
                <div className="flex flex-col items-end gap-1.5 md:gap-2">
-                 <div className="bg-white/95 backdrop-blur-2xl px-5 py-4 rounded-[32px] border border-white/40 shadow-2xl shadow-brand-dark/5 ring-1 ring-black/5 w-64">
+                 <div className="bg-white/95 backdrop-blur-2xl px-6 py-5 rounded-[32px] border border-white/40 shadow-2xl shadow-brand-dark/5 ring-1 ring-black/5 w-80">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Quantity</span>
                        <div className="flex items-center gap-3 bg-[#f7f7f2] rounded-full p-1 border border-gray-100">
@@ -438,7 +436,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                    disabled={isFinishing}
                    className="px-10 py-5 bg-brand-dark text-white text-[11px] font-black uppercase tracking-[0.25em] rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:shadow-brand-pink/20 hover:bg-brand-pink transition-all transform hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 italic group"
                  >
-                   {isFinishing ? "Processing..." : "Deploy to Cart"}
+                   {isFinishing ? "Processing..." : "Add to Project"}
                  </button>
                </div>
             </div>

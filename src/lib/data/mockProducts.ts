@@ -565,3 +565,28 @@ export const mockProducts: Product[] = [
     created_at: new Date().toISOString()
   }
 ];
+
+export const mockPricingCategories = [
+  {
+    id: 'apparel',
+    name: 'Apparel',
+    icon: 'shirt',
+    headers: ['1-10', '11-50', '51-100', '100+'],
+    unit: 'Units',
+    items: [
+      { name: 'Premium T-Shirt', unit: 'Units', tiers: [299, 279, 249, 199] },
+      { name: 'Classic Hoodie', unit: 'Units', tiers: [899, 849, 799, 699] },
+    ]
+  },
+  {
+    id: 'drinkware',
+    name: 'Drinkware',
+    icon: 'coffee',
+    headers: ['1-10', '11-50', '51-100', '100+'],
+    unit: 'Units',
+    items: [
+      { name: 'Ceramic Mug', unit: 'Units', tiers: [149, 139, 129, 99] },
+      { name: 'Steel Bottle', unit: 'Units', tiers: [599, 549, 499, 449] },
+    ]
+  }
+];

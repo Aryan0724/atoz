@@ -106,97 +106,104 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="p-12 max-w-7xl mx-auto">
+    <div className="p-10 max-w-7xl mx-auto">
       <header className="mb-12 flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-black text-brand-dark tracking-tighter mb-2">Business <span className="text-brand-pink">Intelligence</span></h1>
-          <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Real-time performance measurements</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-1">Control <span className="text-brand-pink italic">Center</span></h1>
+          <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Aggregate Performance Metrics</p>
         </div>
-        <div className="flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm text-sm font-bold text-gray-500">
-           <Activity className="h-4 w-4 text-green-500" />
-           Live Analytics
+        <div className="flex items-center gap-3 px-5 py-2.5 bg-white border border-gray-100 rounded-xl shadow-sm text-[11px] font-black uppercase tracking-widest text-gray-400">
+           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+           Real-time Update
         </div>
       </header>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-        {statCards.map((stat) => (
-          <div key={stat.label} className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-2xl hover:shadow-gray-100 transition-all duration-500">
-             <div className={cn(
-               "w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110",
-               stat.color === 'pink' ? "bg-pink-50 text-brand-pink" : 
-               stat.color === 'cyan' ? "bg-cyan-50 text-brand-cyan" : "bg-gray-100 text-brand-dark"
-             )}>
-                {stat.icon}
-             </div>
-             <h3 className="text-4xl font-black text-brand-dark mb-1 tracking-tighter">{stat.value}</h3>
-             <div className="flex items-center justify-between">
-               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{stat.label}</span>
-               <span className="flex items-center text-[10px] font-black text-brand-pink bg-pink-50 px-2 py-0.5 rounded-full">
-                 {stat.trend}
-               </span>
-             </div>
-             {/* Decorative Background */}
-             <div className={cn(
-               "absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl opacity-10 -translate-y-1/2 translate-x-1/2 transition-opacity group-hover:opacity-20",
-               stat.color === 'pink' ? "bg-brand-pink" : 
-               stat.color === 'cyan' ? "bg-brand-cyan" : "bg-brand-dark"
-             )}></div>
-          </div>
-        ))}
+        {loading ? (
+          [...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white p-8 rounded-2xl shadow-soft border border-gray-100 animate-pulse">
+               <div className="w-12 h-12 bg-gray-50 rounded-xl mb-6" />
+               <div className="h-8 bg-gray-50 rounded-lg w-3/4 mb-4" />
+               <div className="flex justify-between">
+                 <div className="h-3 bg-gray-50 rounded w-1/3" />
+                 <div className="h-3 bg-gray-50 rounded w-1/4" />
+               </div>
+            </div>
+          ))
+        ) : (
+          statCards.map((stat) => (
+            <div key={stat.label} className="bg-white p-8 rounded-2xl shadow-soft border border-gray-100 relative group overflow-hidden">
+               <div className={cn(
+                 "w-12 h-12 rounded-xl flex items-center justify-center mb-6 transition-all group-hover:scale-105",
+                 stat.color === 'pink' ? "bg-brand-pink/5 text-brand-pink" : 
+                 stat.color === 'cyan' ? "bg-cyan-50 text-brand-cyan" : "bg-gray-50 text-brand-dark"
+               )}>
+                  {stat.icon}
+               </div>
+               <h3 className="text-3xl font-bold text-brand-dark mb-1 tracking-tight">{stat.value}</h3>
+               <div className="flex items-center justify-between">
+                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{stat.label}</span>
+                 <span className="text-[9px] font-black text-brand-pink bg-brand-pink/5 px-2 py-0.5 rounded-lg italic">
+                   {stat.trend}
+                 </span>
+               </div>
+            </div>
+          ))
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Order Status Measurement */}
-        <div className="bg-white p-10 rounded-[48px] shadow-sm border border-gray-100">
-           <h2 className="text-xl font-bold text-brand-dark mb-8">Order Distribution</h2>
+        <div className="bg-white p-8 rounded-3xl shadow-soft border border-gray-100">
+           <h2 className="text-sm font-bold text-brand-dark mb-8 uppercase tracking-widest opacity-40">Order Volume Map</h2>
            <div className="space-y-6">
               {Object.entries(stats.statusDistribution).length > 0 ? Object.entries(stats.statusDistribution).map(([status, count]) => (
                 <div key={status} className="space-y-2">
-                   <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-gray-400">
+                   <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gray-400">
                       <span>{status}</span>
                       <span className="text-brand-dark font-black">{count}</span>
                    </div>
-                   <div className="w-full h-2 bg-gray-50 rounded-full overflow-hidden">
+                   <div className="w-full h-1.5 bg-gray-50 rounded-full overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: `${(count / stats.totalOrders) * 100}%` }}
-                        className={cn("h-full", statusColors[status.toLowerCase()] || "bg-gray-300")}
+                        className={cn("h-full opacity-80", statusColors[status.toLowerCase()] || "bg-gray-300")}
                       />
                    </div>
                 </div>
               )) : (
-                <div className="text-center py-12 text-gray-400 font-medium italic">No orders to measure yet.</div>
+                <div className="text-center py-12 text-gray-400 font-medium italic">No data yet.</div>
               )}
            </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-white p-10 rounded-[48px] shadow-sm border border-gray-100">
+        <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-soft border border-gray-100">
            <div className="flex items-center justify-between mb-10 border-b border-gray-50 pb-6">
-              <h2 className="text-xl font-bold text-brand-dark">Latest Orders</h2>
-              <button onClick={() => router.push('/admin/orders')} className="text-xs font-bold uppercase tracking-widest text-brand-pink hover:underline">View All</button>
+              <h2 className="text-sm font-bold text-brand-dark uppercase tracking-widest opacity-40">Recent Activity Log</h2>
+              <button onClick={() => router.push('/admin/orders')} className="text-[10px] font-black uppercase tracking-widest text-brand-pink hover:underline italic">Operational Archive</button>
            </div>
            
-           <div className="space-y-6">
+           <div className="space-y-4">
               {stats.recentOrders.length > 0 ? stats.recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 rounded-3xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                <div key={order.id} className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-colors group">
                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center text-brand-pink font-bold">
+                      <div className="w-10 h-10 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 font-bold text-xs">
                          {order.products?.name?.charAt(0) || 'O'}
                       </div>
                       <div>
-                         <h4 className="font-bold text-brand-dark text-sm">{order.products?.name}</h4>
-                         <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                            <Clock className="h-3 w-3" />
+                         <h4 className="font-bold text-brand-dark text-[13px]">{order.products?.name}</h4>
+                         <div className="flex items-center gap-2 text-[9px] text-gray-300 font-bold uppercase tracking-tighter">
+                            <Clock className="h-2.5 w-2.5" />
                             {new Date(order.created_at).toLocaleDateString()}
                          </div>
                       </div>
                    </div>
                    <div className="text-right">
-                      <span className="block font-black text-brand-dark text-sm">₹{(order.total_price || 0).toLocaleString()}</span>
+                      <span className="block font-bold text-brand-dark text-sm">₹{(order.total_price || 0).toLocaleString()}</span>
                       <span className={cn(
-                        "text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-full",
+                        "text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-lg",
                         order.status === 'delivered' ? "bg-green-50 text-green-600" :
                         order.status === 'cancelled' ? "bg-red-50 text-red-600" : "bg-cyan-50 text-brand-cyan"
                       )}>
@@ -205,42 +212,39 @@ export default function AdminDashboard() {
                    </div>
                 </div>
               )) : (
-                <div className="text-center py-20 text-gray-400 italic font-medium">Your recent orders will appear here.</div>
+                <div className="text-center py-20 text-gray-300 italic font-medium">Activity log is empty.</div>
               )}
            </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-brand-dark p-12 rounded-[48px] text-white shadow-2xl shadow-gray-200 relative overflow-hidden">
+        <div className="bg-brand-dark p-10 rounded-3xl text-white shadow-soft relative overflow-hidden">
            <div className="relative z-10">
-             <h2 className="text-2xl font-black mb-10 border-b border-white/5 pb-6">Quick <span className="text-brand-pink">Actions</span></h2>
-             <div className="grid grid-cols-2 gap-4">
+             <h2 className="text-sm font-bold mb-10 border-b border-white/5 pb-6 uppercase tracking-widest opacity-40">System Actions</h2>
+             <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'Add Product', icon: <Plus className="h-5 w-5" />, color: 'pink', action: () => router.push('/admin/products/add') },
-                  { label: 'Manage Assets', icon: <Package className="h-5 w-5" />, color: 'cyan', action: () => router.push('/admin/products') },
-                  { label: 'Order Report', icon: <Activity className="h-5 w-5" />, color: 'white', action: () => router.push('/admin/orders') },
-                  { label: 'User Support', icon: <Users className="h-5 w-5" />, color: 'pink', action: () => router.push('/admin/customers') },
+                  { label: 'Asset Intake', icon: <Plus className="h-4 w-4" />, color: 'pink', action: () => router.push('/admin/products/add') },
+                  { label: 'Catalog Sync', icon: <Package className="h-4 w-4" />, color: 'cyan', action: () => router.push('/admin/products') },
+                  { label: 'Order Stream', icon: <Activity className="h-4 w-4" />, color: 'white', action: () => router.push('/admin/orders') },
+                  { label: 'User Hub', icon: <Users className="h-4 w-4" />, color: 'pink', action: () => router.push('/admin/customers') },
                 ].map((action) => (
                   <button 
                     key={action.label}
                     onClick={action.action}
-                    className="flex flex-col items-center justify-center p-8 rounded-[32px] bg-white/5 hover:bg-white/10 border border-white/5 transition-all text-center group"
+                    className="flex flex-col items-center justify-center p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all text-center group"
                   >
                     <div className={cn(
-                      "mb-4 p-4 rounded-2xl group-hover:scale-110 transition-transform",
+                      "mb-3 p-3 rounded-xl transition-all group-hover:scale-105",
                       action.color === 'pink' ? "text-brand-pink bg-brand-pink/10" :
                       action.color === 'cyan' ? "text-brand-cyan bg-brand-cyan/10" : "text-white bg-white/10"
                     )}>
                       {action.icon}
                     </div>
-                    <span className="text-sm font-bold tracking-tight">{action.label}</span>
+                    <span className="text-[11px] font-bold tracking-tight opacity-70 group-hover:opacity-100">{action.label}</span>
                   </button>
                 ))}
              </div>
            </div>
-           
-           {/* Abstract Decoration */}
-           <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-pink/10 rounded-full blur-[100px] translate-y-1/2 translate-x-1/2"></div>
         </div>
       </div>
     </div>

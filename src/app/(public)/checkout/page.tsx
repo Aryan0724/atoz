@@ -49,12 +49,45 @@ export default function CheckoutPage() {
 
   const { user } = useAuth();
 
+  const [attemptIds, setAttemptIds] = useState<string[]>([]);
+
   useEffect(() => {
     setMounted(true);
     if (user) {
       loadUserProfile();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  // Track checkout attempts for abandoned cart analytics
+  useEffect(() => {
+    const recordAttempts = async () => {
+      if (items.length > 0 && mounted) {
+        // We only want to record once per mount/items change
+        const attempts = items.map(item => ({
+          user_id: user?.id || null,
+          product_id: item.product.id,
+          quantity: item.quantity,
+          quality_level: item.quality_level,
+          total_price: (item.product.base_price || 0) * item.quantity,
+          status: 'pending'
+        }));
+
+        const { data, error } = await supabase
+          .from('checkout_attempts')
+          .insert(attempts)
+          .select('id');
+
+        if (data) {
+          setAttemptIds(data.map(d => d.id));
+        }
+      }
+    };
+    
+    if (mounted && items.length > 0 && attemptIds.length === 0) {
+      recordAttempts();
+    }
+  }, [mounted, items, user, attemptIds]);
 
   const loadUserProfile = async () => {
     try {
@@ -158,6 +191,14 @@ export default function CheckoutPage() {
         order_id: orderData.mock ? undefined : orderData.id,
         handler: async function (response: any) {
           try {
+            // Update attempt status to successful
+            if (attemptIds.length > 0) {
+              await supabase
+                .from('checkout_attempts')
+                .update({ status: 'successful' })
+                .in('id', attemptIds);
+            }
+
             for (const item of items) {
               await createOrder({
                 product_id: item.product.id,

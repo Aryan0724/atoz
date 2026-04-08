@@ -15,7 +15,6 @@ interface TopToolbarProps {
   onDeleteActiveObject: () => void;
   onBringForward: () => void;
   onSendBackward: () => void;
-  onRemoveBackground: () => Promise<boolean>;
   onDuplicate?: () => void;
   onLockToggle?: () => void;
   onSetTextShadow?: (options: { color: string; blur: number; offsetX: number; offsetY: number } | null) => void;
@@ -39,7 +38,6 @@ const TopToolbar = ({
   onDeleteActiveObject,
   onBringForward,
   onSendBackward,
-  onRemoveBackground,
   onDuplicate,
   onLockToggle,
   onSetTextShadow,
@@ -310,20 +308,7 @@ const TopToolbar = ({
       )}
 
       {/* IMAGE SPECIFIC TOOLS */}
-      {isImage && (
-        <button
-          onClick={async () => {
-            setIsProcessing(true);
-            await onRemoveBackground();
-            setIsProcessing(false);
-          }}
-          disabled={isProcessing}
-          className="h-9 px-4 bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-brand-cyan hover:text-white transition-all flex items-center gap-2"
-        >
-          {isProcessing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-          BG REMOVAL
-        </button>
-      )}
+
 
       <div className="h-8 w-px bg-gray-100 mx-2" />
 

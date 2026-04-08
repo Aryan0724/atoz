@@ -1,65 +1,71 @@
 import { createClient } from '@/lib/supabase/server';
 import PricingClient from './PricingClient';
+import { mockPricingCategories } from '@/lib/data/mockProducts';
+import { Metadata } from 'next';
+import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 
-const defaultCategories = [
-  {
-    id: 'diaries',
-    name: "Diaries",
-    icon: "📖",
-    items: [
-      { name: "Premium Leather Diary", tiers: [550, 525, 490, 450], unit: "Units" },
-      { name: "Hard Cover Diary", tiers: [600, 580, 550, 520], unit: "Units" },
-      { name: "A5 Soft Cover Wiro Diary", tiers: [250, 220, 190, 160], unit: "Units" },
-      { name: "A5 Hard Cover Wiro Diary", tiers: [400, 380, 350, 320], unit: "Units" },
-    ],
-    headers: ["10+", "20+", "50+", "100+"]
-  },
-  {
-    id: 'bill-books',
-    name: "Bill Books",
-    icon: "📝",
-    items: [
-      { name: "A5 Bill Book", tiers: [450, 420, 400], "unit": "Sets" },
-      { name: "A5 Receipt Book", tiers: [450, 420, 400], "unit": "Sets" },
-      { name: "A5 Voucher Book", tiers: [450, 420, 400], "unit": "Sets" },
-      { name: "A4 GST Bill Book", tiers: [900, 840, 800], "unit": "Sets" },
-    ],
-    headers: ["5", "10", "20"]
-  },
-  {
-    id: 'stationary',
-    name: "Stationary",
-    icon: "✉️",
-    items: [
-      { name: "Letterheads (A4)", tiers: [600, 1000, 1800, 3500, 6000], "unit": "Units" },
-    ],
-    headers: ["50", "100", "200", "500", "1000"]
-  },
-  {
-    id: 'apparel',
-    name: "Apparel",
-    icon: "👕",
-    items: [
-      { name: "Premium Cotton T-Shirt", tiers: [650, 620, 600], "unit": "Units" },
-    ],
-    headers: ["1-10", "11-20", "21-50"]
-  }
-];
+export const metadata: Metadata = {
+  title: 'Pricing | A to Z Prints',
+  description: 'Transparent volume-based pricing for custom printing and corporate gifting. Get instant quotes for your bulk orders.',
+};
 
-export const revalidate = 60; // Revalidate every minute
+export const revalidate = 600;
+
+async function getPricingData() {
+  const supabase = createClient();
+  
+  // Parallel fetch config and products to build pricing
+  const [configRes, productsRes] = await Promise.all([
+    supabase.from('site_settings').select('config').eq('id', 'global').single(),
+    supabase.from('products').select('*, categories(*)').order('created_at', { ascending: false })
+  ]);
+
+  const config = (configRes.data as any)?.config || {};
+  const products = productsRes.data || [];
+
+  // Group products by category to match the UI expectations
+  const categoriesMap: Record<string, any> = {};
+  
+  products.forEach((p: any) => {
+    const catName = p.categories?.name || 'Uncategorized';
+    const catId = catName.toLowerCase().replace(/\s+/g, '-');
+    if (!categoriesMap[catName]) {
+      categoriesMap[catName] = {
+        id: catId,
+        name: catName,
+        icon: catId, // Using ID as icon key
+        headers: config.pricing?.tiers?.map((t: any) => `${t.min}+`) || ['1+', '20+', '50+', '100+'],
+        items: []
+      };
+    }
+
+    // Default tiers if none exist
+    const defaultTiers = [p.base_price, Math.round(p.base_price * 0.95), Math.round(p.base_price * 0.9), Math.round(p.base_price * 0.8)];
+    
+    // Calculate dynamic tiers based on global config discounts
+    const dynamicTiers = config.pricing?.tiers?.map((tier: any) => {
+      const discounted = p.base_price * (1 - (tier.discount / 100));
+      return Math.round(discounted);
+    }) || defaultTiers;
+
+    categoriesMap[catName].items.push({
+      name: p.name,
+      unit: 'Units',
+      tiers: dynamicTiers
+    });
+  });
+
+  const categories = Object.values(categoriesMap);
+  return categories.length > 0 ? categories : mockPricingCategories;
+}
 
 export default async function PricingPage() {
-  const supabase = createClient();
-  let categories = defaultCategories;
+  const categories = await getPricingData();
 
-  try {
-    const { data } = await supabase.from('site_settings').select('config').eq('id', 'global').single();
-    if ((data as any)?.config?.pricing?.categories) {
-      categories = (data as any).config.pricing.categories;
-    }
-  } catch (err) {
-    console.warn("Pricing CMS error (fallback applied):", err);
-  }
-
-  return <PricingClient initialCategories={categories} />;
+  return (
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="w-12 h-12 animate-spin text-brand-pink" /></div>}>
+      <PricingClient initialCategories={categories} />
+    </Suspense>
+  );
 }

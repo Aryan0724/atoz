@@ -63,6 +63,7 @@ const DesignControls = ({
     } else if (activeTab === 'edit') {
       setActiveTab('add');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeObject]);
 
   const tabs: { id: TabType; icon: React.ReactNode; label: string }[] = [

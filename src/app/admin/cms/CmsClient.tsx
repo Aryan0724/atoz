@@ -1,0 +1,290 @@
+"use client";
+
+import React, { useState } from 'react';
+import { 
+  Save, 
+  Loader2, 
+  Plus, 
+  Trash2,
+  Building2,
+  Gift,
+  Users,
+  Zap,
+  Globe,
+  Star,
+  Shield,
+  Palette,
+  X,
+  CreditCard,
+  Target
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase/client';
+import { uploadFile } from '@/lib/supabase/storage';
+import { cn } from '@/lib/utils';
+
+const ICONS: Record<string, React.ReactNode> = {
+  Building2: <Building2 className="w-5 h-5" />,
+  Gift: <Gift className="w-5 h-5" />,
+  Users: <Users className="w-5 h-5" />,
+  Zap: <Zap className="w-5 h-5" />,
+  Globe: <Globe className="w-5 h-5" />,
+  Star: <Star className="w-5 h-5" />,
+  Shield: <Shield className="w-5 h-5" />,
+  Palette: <Palette className="w-5 h-5" />,
+  CreditCard: <CreditCard className="w-5 h-5" />,
+  Target: <Target className="w-5 h-5" />
+};
+
+export default function ContentManagerClient({ 
+  initialCmsConfig, 
+  initialGlobalConfig 
+}: { 
+  initialCmsConfig: any;
+  initialGlobalConfig: any;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'home' | 'services' | 'settings'>('home');
+
+  // --- HOME PAGE (Global) STATE --- //
+  const [heroTitle, setHeroTitle] = useState(initialGlobalConfig?.hero?.title || '');
+  const [heroSubtitle, setHeroSubtitle] = useState(initialGlobalConfig?.hero?.subtitle || '');
+  const [heroImage, setHeroImage] = useState(initialGlobalConfig?.hero?.image || '');
+  const [bannerText, setBannerText] = useState(initialGlobalConfig?.topBanner?.text || '');
+  const [bannerActive, setBannerActive] = useState(initialGlobalConfig?.topBanner?.isActive !== false);
+  const [features, setFeatures] = useState<any[]>(initialGlobalConfig?.features || []);
+
+  // --- SERVICES PAGE (CMS) STATE --- //
+  const [serviceHeroTitle, setServiceHeroTitle] = useState(initialCmsConfig?.services?.heroTitle || '');
+  const [serviceHeroSubtitle, setServiceHeroSubtitle] = useState(initialCmsConfig?.services?.heroSubtitle || '');
+  const [servicesList, setServicesList] = useState<any[]>(initialCmsConfig?.services?.servicesList || []);
+  const [ctaHeading, setCtaHeading] = useState(initialCmsConfig?.services?.ctaHeading || '');
+  const [ctaDesc, setCtaDesc] = useState(initialCmsConfig?.services?.ctaDesc || '');
+
+  // --- SYSTEM INTEGRATIONS (Global) STATE --- //
+  const [pexelsApiKey, setPexelsApiKey] = useState(initialGlobalConfig?.integrations?.pexelsApiKey || '');
+
+  const handleSave = async () => {
+    setLoading(true);
+
+    const cmsPayload = {
+      services: {
+        heroTitle: serviceHeroTitle,
+        heroSubtitle: serviceHeroSubtitle,
+        servicesList,
+        ctaHeading,
+        ctaDesc
+      }
+    };
+
+    const globalPayload = {
+      hero: { title: heroTitle, subtitle: heroSubtitle, image: heroImage },
+      topBanner: { text: bannerText, isActive: bannerActive },
+      features,
+      integrations: { pexelsApiKey },
+      stats: initialGlobalConfig?.stats || [],
+      testimonials: initialGlobalConfig?.testimonials || [],
+      trustLogos: initialGlobalConfig?.trustLogos || [],
+      pricing: initialGlobalConfig?.pricing || {}
+    };
+
+    try {
+      // Execute multi-document update
+      const { error: cmsErr } = await supabase.from('site_settings').upsert({ id: 'cms_pages', config: cmsPayload });
+      if (cmsErr) throw cmsErr;
+
+      const { error: globalErr } = await supabase.from('site_settings').upsert({ id: 'global', config: globalPayload });
+      if (globalErr) throw globalErr;
+
+      toast.success('Site Content Published Successfully!');
+    } catch (err: any) {
+      toast.error('Failed to sync content: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    try {
+      const url = await uploadFile('public', `settings/${Date.now()}-${file.name}`, file);
+      if (url) {
+        setter(url);
+        toast.success('Asset uploaded successfully!');
+      }
+    } catch (err: any) {
+      toast.error('Upload failed: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- LIST HELPERS --- //
+  const addFeature = () => setFeatures([...features, { title: 'New Feature', desc: 'Detail', icon: 'Zap', color: 'pink' }]);
+  const removeFeature = (idx: number) => setFeatures(features.filter((_, i) => i !== idx));
+  const updateFeature = (idx: number, key: string, val: any) => { const n = [...features]; n[idx][key] = val; setFeatures(n); };
+
+  const addServiceItem = () => setServicesList([...servicesList, { title: "New Service", desc: "Detail", icon: "Star", features: [] }]);
+  const removeServiceItem = (idx: number) => setServicesList(servicesList.filter((_, i) => i !== idx));
+  const updateServiceItem = (idx: number, key: string, val: any) => { const n = [...servicesList]; n[idx][key] = val; setServicesList(n); };
+
+  return (
+    <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[800px]">
+      <div className="flex flex-wrap border-b border-gray-100 bg-gray-50/50 p-3 gap-2">
+        {(['home', 'services', 'settings'] as const).map(tab => (
+          <button 
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              "flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all",
+              activeTab === tab ? "bg-brand-dark text-white shadow-xl" : "text-gray-400 hover:bg-gray-100 hover:text-brand-dark"
+            )}
+          >
+            {tab === 'home' && 'Storefront / Home'}
+            {tab === 'services' && 'Services / B2B Page'}
+            {tab === 'settings' && 'Global Integrations'}
+          </button>
+        ))}
+      </div>
+
+      <div className="p-8 md:p-12 flex-1 overflow-auto bg-white/50">
+        
+        {/* --- HOME PAGE TAB --- */}
+        {activeTab === 'home' && (
+          <div className="space-y-12 animate-in fade-in duration-500 max-w-4xl mx-auto">
+             <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+                <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight mb-6 flex items-center gap-3">
+                  <Globe className="text-brand-cyan" /> Storefront Hero Section
+                </h3>
+                <div className="space-y-5">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Main Headline</label>
+                    <input type="text" value={heroTitle} onChange={e => setHeroTitle(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-white border border-transparent focus:border-brand-pink/20 outline-none font-black text-brand-dark shadow-sm" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Subheading</label>
+                    <textarea rows={2} value={heroSubtitle} onChange={e => setHeroSubtitle(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-white border border-transparent focus:border-brand-pink/20 outline-none font-bold text-gray-600 shadow-sm" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Hero Image Render</label>
+                    <div className="flex items-center gap-4">
+                       {heroImage && <img src={heroImage} alt="hero" className="w-16 h-16 rounded-xl object-cover" />}
+                       <input type="file" onChange={(e) => handleFileUpload(e, setHeroImage)} className="text-sm font-bold text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-brand-pink hover:file:bg-pink-100" />
+                    </div>
+                  </div>
+                </div>
+             </section>
+
+             <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+                 <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight flex items-center gap-3">
+                    <Zap className="text-brand-pink" /> Core Features Graph
+                  </h3>
+                  <button onClick={addFeature} className="px-5 py-2.5 bg-brand-dark text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-pink transition-all">Add Feature</button>
+                 </div>
+                 <div className="space-y-4">
+                    {features.map((feat, i) => (
+                      <div key={i} className="flex gap-4 p-4 rounded-2xl bg-white border border-gray-100 items-start group">
+                         <div className="flex-1 space-y-3">
+                            <input type="text" value={feat.title} onChange={e => updateFeature(i, 'title', e.target.value)} className="w-full text-sm font-black text-brand-dark uppercase tracking-widest focus:outline-none" placeholder="Feature Title" />
+                            <input type="text" value={feat.desc} onChange={e => updateFeature(i, 'desc', e.target.value)} className="w-full text-xs font-bold text-gray-500 focus:outline-none" placeholder="Description" />
+                         </div>
+                         <select value={feat.icon} onChange={e => updateFeature(i, 'icon', e.target.value)} className="text-xs font-bold text-gray-500 focus:outline-none bg-gray-50 rounded-lg p-2">
+                            {Object.keys(ICONS).map(icon => <option key={icon} value={icon}>{icon}</option>)}
+                         </select>
+                         <button onClick={() => removeFeature(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    ))}
+                 </div>
+             </section>
+          </div>
+        )}
+
+        {/* --- SERVICES PAGE TAB --- */}
+        {activeTab === 'services' && (
+          <div className="space-y-12 animate-in fade-in duration-500 max-w-4xl mx-auto">
+             <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+                <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight mb-6">Services Header</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Heading</label>
+                    <input type="text" value={serviceHeroTitle} onChange={e => setServiceHeroTitle(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent focus:border-brand-pink/20 outline-none font-black text-brand-dark shadow-sm" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Description</label>
+                    <textarea rows={2} value={serviceHeroSubtitle} onChange={e => setServiceHeroSubtitle(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent focus:border-brand-pink/20 outline-none font-bold text-gray-600 shadow-sm" />
+                  </div>
+                </div>
+             </section>
+
+             <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight">Structured Offerings</h3>
+                  <button onClick={addServiceItem} className="px-5 py-2.5 bg-brand-pink text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:shadow-lg transition-all">Add Offering</button>
+                </div>
+                
+                <div className="space-y-6">
+                  {servicesList.map((service, i) => (
+                    <div key={i} className="bg-white p-6 rounded-[24px] border border-gray-100 relative group text-sm">
+                       <button onClick={() => removeServiceItem(i)} className="absolute top-4 right-4 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button>
+                       <div className="grid grid-cols-2 gap-4">
+                         <div className="space-y-3">
+                            <input type="text" value={service.title} onChange={e => updateServiceItem(i, 'title', e.target.value)} className="w-full font-black text-brand-dark capitalize focus:outline-brand-pink" placeholder="Service Name" />
+                            <textarea rows={3} value={service.desc} onChange={e => updateServiceItem(i, 'desc', e.target.value)} className="w-full text-xs font-medium text-gray-500 resize-none focus:outline-brand-pink" placeholder="Details" />
+                         </div>
+                         <select value={service.icon} onChange={e => updateServiceItem(i, 'icon', e.target.value)} className="self-start text-xs font-bold text-gray-500 focus:outline-none bg-gray-50 rounded-lg p-2 max-w-[150px]">
+                            {Object.keys(ICONS).map(icon => <option key={icon} value={icon}>{icon}</option>)}
+                         </select>
+                       </div>
+                    </div>
+                  ))}
+                </div>
+             </section>
+          </div>
+        )}
+
+        {/* --- SYSTEM INTEGRATIONS TAB --- */}
+        {activeTab === 'settings' && (
+          <div className="space-y-12 animate-in fade-in duration-500 max-w-4xl mx-auto">
+             <section className="bg-brand-dark p-10 rounded-[32px] text-white shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-5"><Target className="w-40 h-40" /></div>
+                <h3 className="text-xl font-black italic uppercase tracking-tight mb-6">Backend API Links</h3>
+                <div className="space-y-6 relative z-10">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-brand-pink block mb-2">Pexels Stock Image API Key</label>
+                    <input 
+                      type="password" 
+                      value={pexelsApiKey}
+                      onChange={e => setPexelsApiKey(e.target.value)}
+                      className="w-full px-6 py-4 rounded-2xl bg-white/5 border border-white/10 focus:border-brand-cyan/40 outline-none font-bold text-white font-mono tracking-widest"
+                      placeholder="563492ad6f91700001000001..."
+                    />
+                    <p className="text-xs text-white/40 mt-2 font-medium">Leave blank to use default system stock library.</p>
+                  </div>
+                </div>
+             </section>
+          </div>
+        )}
+      </div>
+
+      {/* COMMIT BAR */}
+      <div className="p-8 border-t border-gray-100 bg-white flex justify-between items-center sticky bottom-0 z-20">
+         <div className="flex flex-col">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic leading-none mb-1">Unified Architect</span>
+            <span className="text-[8px] font-bold text-brand-pink uppercase tracking-tighter">Commit applies changes instantly network-wide.</span>
+         </div>
+         <button 
+           onClick={handleSave}
+           disabled={loading}
+           className="px-16 py-5 bg-brand-dark text-white rounded-[20px] font-black text-[11px] tracking-[0.3em] uppercase hover:shadow-2xl hover:bg-brand-cyan active:scale-95 flex items-center gap-4 transition-all"
+         >
+           {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-4 w-4" />}
+           Compile & Publish Database
+         </button>
+      </div>
+    </div>
+  );
+}

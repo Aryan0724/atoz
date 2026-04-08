@@ -3,12 +3,14 @@ import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import CartDrawer from "@/components/layout/CartDrawer";
 import TopBanner from "@/components/layout/TopBanner";
-import SupportWidget from "@/components/layout/SupportWidget";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { Toaster } from 'sonner';
 import AuthProvider from "@/components/providers/AuthProvider";
+import dynamic from 'next/dynamic';
+
+const CartDrawer = dynamic(() => import("@/components/layout/CartDrawer"), { ssr: false });
+const SupportWidget = dynamic(() => import("@/components/layout/SupportWidget"), { ssr: false });
 
 const inter = Inter({ 
   subsets: ["latin"],

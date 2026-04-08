@@ -14,7 +14,9 @@ import {
   ChevronRight,
   Zap,
   Layout,
-  LogOut
+  LogOut,
+  Clock,
+  FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
@@ -36,11 +38,12 @@ export default function AdminSidebar() {
   const menuItems = [
     { name: 'Overview', href: '/admin', icon: <BarChart3 className="h-5 w-5" /> },
     { name: 'Products', href: '/admin/products', icon: <Package className="h-5 w-5" /> },
+    { name: 'Categories', href: '/admin/categories', icon: <Layout className="h-5 w-5" /> },
     { name: 'Orders', href: '/admin/orders', icon: <ShoppingBag className="h-5 w-5" /> },
+    { name: 'Inquiries', href: '/admin/inquiries', icon: <Zap className="h-5 w-5" /> },
     { name: 'Customers', href: '/admin/customers', icon: <Users className="h-5 w-5" /> },
-    { name: 'Integrations', href: '/admin/integrations', icon: <Zap className="h-5 w-5" /> },
-    { name: 'CMS', href: '/admin/cms', icon: <Layout className="h-5 w-5" /> },
-    { name: 'Settings', href: '/admin/settings', icon: <Settings className="h-5 w-5" /> },
+    { name: 'Abandoned', href: '/admin/analytics/abandoned', icon: <Clock className="h-5 w-5" /> },
+    { name: 'Core Site Content', href: '/admin/cms', icon: <FileText className="h-5 w-5" /> },
   ];
 
   return (
@@ -55,10 +58,10 @@ export default function AdminSidebar() {
               className="object-contain mix-blend-multiply" 
             />
           </div>
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Console</span>
+          <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-1">Console</span>
         </div>
 
-        <nav className="space-y-2">
+        <nav className="space-y-1.5">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -66,22 +69,22 @@ export default function AdminSidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center justify-between group p-3.5 rounded-2xl transition-all duration-200",
+                  "flex items-center justify-between group p-3 rounded-xl transition-all duration-200 w-full",
                   isActive 
-                    ? "bg-brand-pink text-white shadow-xl shadow-pink-100" 
-                    : "text-gray-500 hover:bg-gray-50 hover:text-brand-dark"
+                    ? "bg-brand-dark text-white" 
+                    : "text-gray-400 hover:bg-gray-50 hover:text-brand-dark"
                 )}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full">
                   <div className={cn(
-                    "p-2 rounded-xl transition-colors",
-                    isActive ? "bg-white/20" : "bg-gray-100 text-gray-400 group-hover:bg-white group-hover:text-brand-pink"
+                    "p-2 rounded-lg transition-colors",
+                    isActive ? "bg-white/10" : "bg-gray-50 text-gray-400 group-hover:bg-white group-hover:text-brand-pink"
                   )}>
                     {item.icon}
                   </div>
-                  <span className="font-bold text-sm tracking-tight">{item.name}</span>
+                  <span className="font-bold text-[13px] tracking-tight">{item.name}</span>
                 </div>
-                {isActive && <ChevronRight className="h-4 w-4 text-white/50" />}
+                {isActive && <ChevronRight className="h-3.5 w-3.5 text-white/40" />}
               </Link>
             );
           })}
@@ -91,23 +94,23 @@ export default function AdminSidebar() {
       <div className="mt-auto p-8 pt-0 space-y-3">
         <Link 
           href="/"
-          className="flex items-center justify-between p-4 bg-brand-lightGray rounded-3xl group hover:bg-brand-dark transition-all duration-300"
+          className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl group hover:bg-brand-dark transition-all duration-300 border border-gray-100"
         >
           <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-400">Storefront</span>
-            <span className="text-sm font-bold text-brand-dark group-hover:text-white transition-colors">A to Z Prints</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-gray-300 group-hover:text-gray-500">Storefront</span>
+            <span className="text-xs font-bold text-brand-dark group-hover:text-white transition-colors">A to Z Prints</span>
           </div>
-          <ExternalLink className="h-4 w-4 text-gray-300 group-hover:text-brand-pink transition-colors" />
+          <ExternalLink className="h-3.5 w-3.5 text-gray-300 group-hover:text-brand-pink transition-colors" />
         </Link>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-between p-4 bg-red-50 rounded-3xl group hover:bg-red-500 transition-all duration-300"
+          className="w-full flex items-center justify-between p-4 bg-red-50/50 rounded-2xl group hover:bg-red-500 transition-all duration-300 border border-red-100"
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-red-100 group-hover:bg-white/20 transition-colors">
-              <LogOut className="h-4 w-4 text-red-500 group-hover:text-white transition-colors" />
+            <div className="p-2 rounded-lg bg-red-100 group-hover:bg-white/20 transition-colors">
+              <LogOut className="h-3.5 w-3.5 text-red-500 group-hover:text-white transition-colors" />
             </div>
-            <span className="text-sm font-bold text-red-500 group-hover:text-white transition-colors">Logout</span>
+            <span className="text-xs font-bold text-red-500 group-hover:text-white transition-colors">Logout</span>
           </div>
         </button>
       </div>
