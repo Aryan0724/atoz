@@ -322,7 +322,6 @@ const SidebarPanel = ({
     'templates': 'Templates',
     'shutterstock': 'Quick Photos',
     'iconify': 'Icon Library',
-    'layers': 'Design Layers',
     'unsplash': 'Stock Photos',
     'pexels': 'Stock Photos',
   };
@@ -489,9 +488,13 @@ const SidebarPanel = ({
           </div>
         )}
 
-        {/* ─── STOCK TAB (UNSPLASH/PEXELS) ──────────────────── */}
+        {/* ─── STOCK TAB (UNSPLASH/PEXELS) ─────────── */}
         {(activeTab === 'unsplash' || activeTab === 'pexels') && (
-          <StockTab onAddImage={onAddImage} onClose={onClose} />
+          <StockTab 
+            onAddImage={onAddImage} 
+            onClose={onClose} 
+            provider={activeTab === 'unsplash' ? 'unsplash' : 'pexels'}
+          />
         )}
 
         {/* ─── GRAPHICS / ELEMENTS TAB ────────────────────────── */}
