@@ -42,7 +42,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
       className="group bg-white rounded-2xl overflow-hidden border border-gray-100 transition-all duration-500 hover:border-brand-pink/20 hover:shadow-soft relative"
     >
 
-      <Link href={`/products/${product.slug}`} className="block">
+      <div
+        className="block cursor-pointer"
+        onClick={() => { window.location.href = `/products/${product.slug}`; }}
+        role="link"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && (window.location.href = `/products/${product.slug}`)}
+      >
         <div className="aspect-[4/5] bg-gray-50 relative overflow-hidden p-6">
           {product.images && product.images.length > 0 && !imgError ? (
             <Image
@@ -98,12 +104,22 @@ const ProductCard = ({ product }: ProductCardProps) => {
               </div>
             </div>
             
-            <div className="h-10 w-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-brand-dark group-hover:text-white group-hover:border-brand-dark transition-all duration-300">
-              <ShoppingBag className="h-4 w-4" />
+            <div className="flex items-center gap-2">
+              <Link 
+                href={`/customize/${product.slug}?autoOpen=uploads`}
+                className="h-10 px-4 rounded-lg bg-brand-pink/5 border border-brand-pink/10 flex items-center justify-center text-brand-pink hover:bg-brand-pink hover:text-white transition-all duration-300 font-black text-[9px] uppercase tracking-widest"
+                title="Import & Edit"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Direct Import
+              </Link>
+              <div className="h-10 w-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-brand-dark group-hover:text-white group-hover:border-brand-dark transition-all duration-300">
+                <ShoppingBag className="h-4 w-4" />
+              </div>
             </div>
           </div>
         </div>
-      </Link>
+      </div>
 
       {/* Quick View Modal Overlay */}
       <AnimatePresence>

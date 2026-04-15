@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase/client';
-import { ArrowLeft, Github, Chrome, Loader2, AlertCircle, Sparkles, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowLeft, Chrome, Loader2, AlertCircle, Sparkles, ShieldCheck, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -36,21 +36,6 @@ export default function RegisterPage() {
 
       if (authError) throw authError;
 
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: authData.user.id,
-              full_name: fullName,
-              role: 'customer'
-            }
-          ]);
-        
-        if (profileError && !profileError.message.includes('duplicate key')) {
-          console.error('Profile creation error:', profileError);
-        }
-      }
 
       toast.success('Account created! Please check your email for verification.');
       router.push('/login');
@@ -61,7 +46,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handleOAuthLogin = async (provider: 'google' | 'github') => {
+  const handleOAuthLogin = async (provider: 'google') => {
     try {
       const getURL = () => {
         let url = typeof window !== 'undefined' && window.location.origin
@@ -218,20 +203,13 @@ export default function RegisterPage() {
                <span className="relative px-6 bg-white text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Direct Connect</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-4">
               <button 
                 onClick={() => handleOAuthLogin('google')}
-                className="flex items-center justify-center gap-3 py-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition-all font-bold text-sm"
+                className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition-all font-bold text-sm shadow-sm"
               >
                 <Chrome className="h-5 w-5 text-red-500" />
-                Google
-              </button>
-              <button 
-                onClick={() => handleOAuthLogin('github')}
-                className="flex items-center justify-center gap-3 py-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition-all font-bold text-sm"
-              >
-                <Github className="h-5 w-5 text-gray-900" />
-                GitHub
+                Continue with Google
               </button>
             </div>
           </div>

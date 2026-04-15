@@ -13,34 +13,12 @@ export async function GET(request: Request) {
     const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error && session?.user) {
-      // Check if profile exists, otherwise create it
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (!profile) {
-        const { error: insertError } = await (supabase.from('profiles') as any).insert([
-          {
-            id: session.user.id,
-            full_name: session.user.user_metadata.full_name || session.user.user_metadata.name || 'New User',
-            email: session.user.email,
-            role: 'customer'
-          }
-        ]);
-        
-        if (insertError) {
-          console.error('Error creating profile in callback:', insertError);
-        }
-      }
-
       // Fetch profile to determine redirect
       const { data: profileData } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', session.user.id)
-        .single() as any;
+        .single();
       
       const targetPath = profileData?.role === 'admin' ? '/admin' : next;
 

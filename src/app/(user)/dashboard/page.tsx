@@ -22,7 +22,8 @@ import {
   MapPin,
   Save,
   Plus as PlusIcon,
-  RotateCcw
+  RotateCcw,
+  Mail
 } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { supabase } from '@/lib/supabase/client';
@@ -78,12 +79,7 @@ export default function DashboardPage() {
           .single();
         
         if (profileData) {
-          // FAIL-SAFE: If user is an admin, they should not be here.
-          if (profileData.role === 'admin' || localStorage.getItem('atoz_demo_admin') === 'true') {
-             router.push('/admin');
-             return;
-          }
-          
+          // Allow admins to access the buyer dashboard if they want to
           setProfile(profileData);
           if (profileData.wishlist && profileData.wishlist.length > 0) {
              const { data: wpx } = await supabase.from('products').select('*').in('id', profileData.wishlist);
@@ -227,32 +223,106 @@ export default function DashboardPage() {
         </div>
 
         {/* Intelligence Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-24">
           {topStats.map((stat, idx) => (
             <motion.div 
                key={idx}
                initial={{ opacity: 0, y: 30 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 0.6, delay: idx * 0.1 + 0.3 }}
-               className="group relative h-64 p-10 bg-white border border-gray-100 rounded-[48px] overflow-hidden shadow-xl shadow-gray-100 hover:shadow-2xl hover:border-brand-pink/20 transition-all cursor-default"
+               className="group relative h-56 p-8 bg-white border border-gray-100 rounded-[40px] overflow-hidden shadow-xl shadow-gray-100 hover:shadow-2xl hover:border-brand-pink/20 transition-all cursor-default"
             >
-               <div className="absolute top-0 right-0 w-32 h-32 bg-gray-50/50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-pink/10 transition-colors" />
+               <div className="absolute top-0 right-0 w-24 h-24 bg-gray-50/50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-pink/10 transition-colors" />
                
                <div className="relative z-10 flex flex-col h-full">
                   <div className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center mb-10 transition-all transform group-hover:rotate-12",
+                    "w-10 h-10 rounded-2xl flex items-center justify-center mb-6 transition-all transform group-hover:rotate-12",
                     stat.color === 'pink' ? "bg-brand-pink/10 text-brand-pink" : 
                     stat.color === 'cyan' ? "bg-brand-cyan/10 text-brand-cyan" : "bg-brand-dark/10 text-brand-dark"
                   )}>
-                    {React.cloneElement(stat.icon as React.ReactElement, { className: "h-6 w-6" })}
+                    {React.cloneElement(stat.icon as React.ReactElement, { className: "h-5 w-5" })}
                   </div>
                   <div className="mt-auto">
-                    <div className="text-6xl font-black tracking-tighter text-brand-dark mb-1 group-hover:scale-105 transition-transform origin-left">{stat.value}</div>
-                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 opacity-60 italic">{stat.label}</div>
+                    <div className="text-4xl font-black tracking-tighter text-brand-dark mb-0.5 group-hover:scale-105 transition-transform origin-left">{stat.value}</div>
+                    <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 opacity-60 italic leading-none">{stat.label}</div>
                   </div>
                </div>
             </motion.div>
           ))}
+
+          {/* Live Savings / Points Card */}
+          <motion.div 
+             initial={{ opacity: 0, scale: 0.95 }}
+             animate={{ opacity: 1, scale: 1 }}
+             transition={{ duration: 0.6, delay: 0.6 }}
+             className="relative h-56 p-8 bg-brand-dark rounded-[40px] overflow-hidden shadow-2xl shadow-brand-dark/20 group"
+          >
+             <div className="absolute inset-0 bg-gradient-to-br from-brand-pink/20 to-transparent opacity-50" />
+             <div className="relative z-10 flex flex-col h-full text-white">
+                <div className="flex items-center justify-between mb-4">
+                   <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-pink">Loyalty Tier</div>
+                   <Zap className="h-4 w-4 text-brand-pink animate-pulse" />
+                </div>
+                <div className="text-4xl font-black italic tracking-tighter mb-1">PRO <span className="text-sm font-bold opacity-40">Lv.2</span></div>
+                <div className="mt-auto flex items-end justify-between">
+                   <div>
+                      <div className="text-[9px] font-bold text-white/50 uppercase tracking-widest mb-1">Total Savings</div>
+                      <div className="text-2xl font-black">₹4,250</div>
+                   </div>
+                   <button className="h-10 w-10 bg-white/10 hover:bg-brand-pink rounded-xl flex items-center justify-center transition-all">
+                      <ChevronRight className="h-5 w-5" />
+                   </button>
+                </div>
+             </div>
+          </motion.div>
+        </div>
+
+        {/* Recent Assets Scroller */}
+        <div className="mb-24">
+           <div className="flex justify-between items-end mb-8">
+              <div>
+                 <h3 className="text-2xl font-black text-brand-dark italic tracking-tighter uppercase mb-1">Recent Concepts</h3>
+                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest opacity-60">Your latest lab iterations</p>
+              </div>
+              <Link href="/products" className="text-[9px] font-black uppercase tracking-widest text-brand-pink hover:underline">All Variations →</Link>
+           </div>
+           
+           <div className="flex gap-6 overflow-x-auto pb-8 no-scrollbar -mx-6 px-6">
+              {[
+                { name: 'Custom Premium Tshirt', cat: 'Apparel', img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop' },
+                { name: 'Ceramic Mug v2', cat: 'Drinkware', img: 'https://images.unsplash.com/photo-1577937927133-66ca06acae4b?q=80&w=400&auto=format&fit=crop' },
+                { name: 'Executive Notebook', cat: 'Stationery', img: 'https://images.unsplash.com/photo-1512314889357-e157c22f938d?q=80&w=400&auto=format&fit=crop' },
+                { name: 'Tech Accessory Bag', cat: 'Lifestyle', img: 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?q=80&w=400&auto=format&fit=crop' },
+              ].map((asset, i) => (
+                <div key={i} className="flex-shrink-0 w-64 group p-6 bg-[#fcfcf9] border border-gray-100 rounded-[32px] hover:bg-white hover:border-brand-pink/20 hover:shadow-2xl hover:shadow-gray-200/50 transition-all cursor-pointer">
+                   <div className="aspect-square relative rounded-2xl overflow-hidden mb-6 bg-white border border-gray-50 group-hover:scale-105 transition-transform duration-500">
+                      <Image src={asset.img} alt={asset.name} fill className="object-contain p-6" />
+                      <div className="absolute inset-0 bg-brand-pink/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                   </div>
+                   <div className="text-[8px] font-black text-brand-pink uppercase tracking-widest mb-1">{asset.cat}</div>
+                   <div className="font-black text-sm text-brand-dark tracking-tight leading-tight line-clamp-1">{asset.name}</div>
+                </div>
+              ))}
+           </div>
+        </div>
+
+        {/* Quick Access Rails */}
+        <div className="flex flex-wrap gap-4 mb-20">
+           {[
+             { label: 'Bulk Orders', icon: <Package className="h-4 w-4" />, href: '/products?moq_min=100' },
+             { label: 'Brand Assets', icon: <Save className="h-4 w-4" />, href: '#' },
+             { label: 'Track Order', icon: <Truck className="h-4 w-4" />, href: '/track-order' },
+             { label: 'Help Desk', icon: <Mail className="h-4 w-4" />, href: '/contact' },
+           ].map((action, i) => (
+             <Link 
+               key={i}
+               href={action.href}
+               className="flex items-center gap-3 px-6 py-4 bg-[#f8f8f2] hover:bg-white border border-gray-100 hover:border-brand-pink/20 hover:shadow-lg transition-all rounded-2xl group"
+             >
+                <div className="text-gray-400 group-hover:text-brand-pink transition-colors">{action.icon}</div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-brand-dark group-hover:translate-x-0.5 transition-transform">{action.label}</span>
+             </Link>
+           ))}
         </div>
 
         {/* Main Panel with Tabs */}
@@ -263,11 +333,11 @@ export default function DashboardPage() {
                     <button 
                       onClick={() => setActiveTab('orders')}
                       className={cn(
-                        "text-lg font-black uppercase tracking-tighter italic transition-all relative pb-2",
+                        "text-lg font-black uppercase tracking-tighter italic transition-all relative pb-2 whitespace-nowrap",
                         activeTab === 'orders' ? "text-brand-dark" : "text-gray-300 hover:text-gray-400"
                       )}
                     >
-                      Orders <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-[10px]">{orders.length}</span>
+                      Deployments <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-[10px]">{orders.length}</span>
                       {activeTab === 'orders' && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-1 bg-brand-pink rounded-full" />}
                     </button>
                     <button 

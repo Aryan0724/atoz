@@ -36,7 +36,7 @@ interface DesignControlsProps {
   layers: any[];
 }
 
-type TabType = 'templates' | 'add' | 'edit' | 'layers' | 'product';
+type TabType = 'add' | 'edit' | 'layers' | 'product';
 
 const DesignControls = ({
   productColor,
@@ -67,7 +67,6 @@ const DesignControls = ({
   }, [activeObject]);
 
   const tabs: { id: TabType; icon: React.ReactNode; label: string }[] = [
-    { id: 'templates', icon: <LayoutTemplate className="h-5 w-5 md:h-6 md:w-6" />, label: 'Templates' },
     { id: 'add', icon: <PlusSquare className="h-5 w-5 md:h-6 md:w-6" />, label: 'Add' },
     { id: 'edit', icon: <Settings2 className="h-5 w-5 md:h-6 md:w-6" />, label: 'Edit' },
     { id: 'layers', icon: <Layers className="h-5 w-5 md:h-6 md:w-6" />, label: 'Layers' },
@@ -103,9 +102,6 @@ const DesignControls = ({
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-6 pb-24">
-        {activeTab === 'templates' && (
-          <TemplatesTab onLoadTemplate={onLoadTemplate} onTabChange={setActiveTab} />
-        )}
 
         {activeTab === 'add' && (
           <AddTab onAddText={onAddText} onAddImage={onAddImage} onAddShape={onAddShape} onTabChange={setActiveTab} />

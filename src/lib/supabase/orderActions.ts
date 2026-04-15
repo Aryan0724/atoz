@@ -43,22 +43,34 @@ export async function createOrder(orderData: OrderInput) {
 }
 
 export async function getUserOrders(userId: string) {
-  const { data, error } = await supabase
+  // Manual Join Approach: Bypasses Supabase relationship configuration issues (PGRST200)
+  const { data: orders, error: orderError } = await supabase
     .from('orders')
-    .select(`
-      *,
-      products (
-        name,
-        images
-      )
-    `)
+    .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching user orders:', error);
-    throw error;
+  if (orderError) throw orderError;
+  if (!orders || orders.length === 0) return [];
+
+  // Fetch products for these orders
+  const productIds = Array.from(new Set(orders.map(o => o.product_id).filter(Boolean)));
+  if (productIds.length > 0) {
+    const { data: products } = await supabase
+      .from('products')
+      .select('id, name, images')
+      .in('id', productIds);
+
+    const productMap = (products || []).reduce((acc: any, p) => {
+      acc[p.id] = p;
+      return acc;
+    }, {});
+
+    return orders.map(o => ({
+      ...o,
+      product: productMap[o.product_id]
+    }));
   }
 
-  return data;
+  return orders;
 }

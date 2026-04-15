@@ -21,7 +21,7 @@ import { cn, dataURLToBlob } from '@/lib/utils';
 import { uploadFile } from '@/lib/supabase/storage';
 import { toast } from 'sonner';
 
-export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'templates' | 'shutterstock' | 'iconify' | 'layers' | 'patterns' | 'unsplash' | 'pexels';
+export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'shutterstock' | 'iconify' | 'layers' | 'patterns' | 'unsplash' | 'pexels';
 
 interface CustomizeClientProps {
   product: Product;
@@ -29,7 +29,6 @@ interface CustomizeClientProps {
 
 const mobileTools: { id: SidebarTab; icon: React.ReactNode; label: string }[] = [
   { id: 'product', icon: <Palette className="h-5 w-5" />, label: 'Product' },
-  { id: 'templates', icon: <LayoutGrid className="h-5 w-5" />, label: 'Templates' },
   { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },
   { id: 'graphics', icon: <Square className="h-5 w-5" />, label: 'Elements' },
   { id: 'iconify', icon: <Sparkles className="h-5 w-5" />, label: 'Icons' },
@@ -50,15 +49,16 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
   const [isFinishing, setIsFinishing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const [activeView, setActiveView] = useState<'front' | 'back' | 'side' | 'sleeve_l' | 'sleeve_r' | 'neck' | '3d'>('front');
+  const [activeView, setActiveView] = useState<'front' | 'back' | 'left' | 'right' | '3d'>('front');
   const [isPanning, setIsPanning] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [viewData, setViewData] = useState<{ front: any, back: any, side: any, sleeve_l: any, sleeve_r: any, neck: any }>({ front: null, back: null, side: null, sleeve_l: null, sleeve_r: null, neck: null });
+  const [viewData, setViewData] = useState<{ front: any, back: any, left: any, right: any }>({ front: null, back: null, left: null, right: null });
   const [totalPrice, setTotalPrice] = useState<number>(product.base_price || 0);
   const [unitPrice, setUnitPrice] = useState<number>(product.base_price || 0);
   const [quantity, setQuantity] = useState<number>(product.moq || 1);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [selectedQuality, setSelectedQuality] = useState<string>('Standard');
+  const [qualityPrices, setQualityPrices] = useState<Record<string, number>>({});
   const [designPreviews, setDesignPreviews] = useState<{ front: string; back: string }>({ front: '', back: '' });
 
   const [activeTab, setActiveTab] = useState<SidebarTab | null>('product');
@@ -75,6 +75,23 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     const multiplier = multipliers[Math.max(0, qualityIndex)] || 1;
     
     base = Math.round(base * multiplier);
+
+    // Calculate quality price bonuses for UI display
+    const qPrices: Record<string, number> = {};
+    const baseAmount = product.base_price || 0;
+    
+    qualityLevels.forEach((q, idx) => {
+       // Sync with catalog by checking product.quality_prices first
+       const dbBonus = (product as any).quality_prices?.[q];
+       if (dbBonus !== undefined) {
+         qPrices[q] = dbBonus;
+       } else {
+         const multipliers = [1, 1.2, 1.5, 2];
+         const m = multipliers[idx] || 1;
+         qPrices[q] = Math.round(baseAmount * m) - baseAmount;
+       }
+    });
+    setQualityPrices(qPrices);
 
     // Design adjustments
     const hasFrontDesign = activeView === 'front' ? layers.length > 0 : (viewData.front?.objects?.length > 0);
@@ -95,6 +112,15 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     setTotalPrice(finalUnitPrice * quantity);
   }, [layers, viewData, activeView, product, selectedQuality, quantity]);
 
+  // Deep link support for "Import & Edit"
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('autoOpen') === 'uploads') {
+      setActiveTab('uploads');
+      setMobilePanel('uploads');
+    }
+  }, []);
+
   const handleUpdateObjectById = (id: string, props: Partial<CanvasObjectProperties>) => {
     canvasRef.current?.updateObjectById(id, props);
     handleObjectsUpdated();
@@ -105,7 +131,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     setLayers([...freshLayers]);
   };
 
-  const handleViewChange = (newView: 'front' | 'back' | 'side' | 'sleeve_l' | 'sleeve_r' | 'neck' | '3d') => {
+  const handleViewChange = (newView: 'front' | 'back' | 'left' | 'right' | '3d') => {
     if (newView === activeView) return;
     
     if (activeView !== '3d') {
@@ -283,6 +309,9 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             onLockAllObjects={(lock) => canvasRef.current?.lockAllObjects(lock)}
             onClearDesign={() => canvasRef.current?.clearDesign()}
             onAddPattern={(url) => canvasRef.current?.addPattern(url)}
+            qualityPrices={qualityPrices}
+            qualityLevels={product.quality_levels || ['Standard', 'Premium', 'Luxury']}
+            basePrice={product.base_price || 0}
           />
         </div>
 
@@ -327,13 +356,15 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                 <DesignerCanvas 
                   ref={canvasRef}
                   productImage={(() => {
-                    const bgImages = (product as any).wireframe_images?.length > 0 
-                      ? (product as any).wireframe_images 
+                    const wireframes = (product as any).wireframe_images || [];
+                    const bgImages = wireframes.length > 0 
+                      ? wireframes 
                       : ((product as any).template_images?.length > 0 ? (product as any).template_images : product.images);
                     
                     if (activeView === 'front') return bgImages?.[0] || '';
                     if (activeView === 'back') return bgImages?.[1] || bgImages?.[0] || '';
-                    if (activeView === 'sleeve_l' || activeView === 'sleeve_r') return bgImages?.[2] || bgImages?.[0] || '';
+                    if (activeView === 'left') return bgImages?.[2] || bgImages?.[0] || '';
+                    if (activeView === 'right') return bgImages?.[3] || bgImages?.[0] || '';
                     return bgImages?.[0] || '';
                   })()}
                   productColor={selectedColor}
@@ -343,7 +374,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                   onObjectsUpdated={handleObjectsUpdated}
                   onOutOfBoundsWarning={setIsOutOfBounds}
                   onLowQualityWarning={setIsLowQuality}
-                  designArea={(product as any).design_areas?.[activeView === 'sleeve_l' || activeView === 'sleeve_r' ? 'side' : activeView]}
+                  designArea={(product as any).design_areas?.[activeView]}
                 />
               </div>
             )}
@@ -374,8 +405,8 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                {[
                  { id: 'front', label: 'Front side' },
                  { id: 'back', label: 'Back side' },
-                 { id: 'sleeve_l', label: 'Sleeve left' },
-                 { id: 'sleeve_r', label: 'Sleeve right' },
+                 { id: 'left', label: 'Left side' },
+                 { id: 'right', label: 'Right side' },
                ].filter(v => 
                  !product.supported_views || 
                  product.supported_views.includes(v.id) || 
@@ -408,7 +439,16 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                          >
                            <Minus className="w-3 h-3" />
                          </button>
-                         <span className="text-xs font-black text-brand-dark min-w-[20px] text-center">{quantity}</span>
+                          <input 
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value);
+                              setQuantity(isNaN(val) ? 0 : Math.max(0, val));
+                            }}
+                            onBlur={() => setQuantity(q => Math.max((product.moq || 1), q))}
+                            className="w-12 bg-transparent text-xs font-black text-brand-dark text-center outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
                          <button 
                            onClick={() => setQuantity(q => q + 1)}
                            className="w-6 h-6 rounded-full flex items-center justify-center bg-white text-gray-500 hover:text-brand-dark hover:shadow-sm transition-all"
@@ -470,6 +510,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                    onLockAllObjects={(lock) => canvasRef.current?.lockAllObjects(lock)}
                    onClearDesign={() => canvasRef.current?.clearDesign()}
                    onAddPattern={(url) => canvasRef.current?.addPattern(url)}
+                   qualityPrices={qualityPrices}
                  />
                </div>
             </div>

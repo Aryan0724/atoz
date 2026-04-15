@@ -319,7 +319,6 @@ const SidebarPanel = ({
     'text': 'Text',
     'library': 'Filters',
     'graphics': 'Elements',
-    'templates': 'Templates',
     'shutterstock': 'Quick Photos',
     'iconify': 'Icon Library',
     'unsplash': 'Stock Photos',
@@ -358,52 +357,6 @@ const SidebarPanel = ({
       </div>
 
       <div className="flex-1 overflow-y-auto">
-
-        {/* ─── TEMPLATES TAB ──────────────────────────────────── */}
-        {activeTab === 'templates' && (
-          <div className="p-4 space-y-4">
-            <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search templates..."
-                className="w-full bg-[#f3f3f3] border-none rounded-xl py-2 pl-8 pr-4 text-[10px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-[#5b5b42] transition-all outline-none"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-              {availableTemplateCats.map(cat => (
-                <PillTab key={cat} active={activeTemplateCat === cat} onClick={() => setActiveTemplateCat(cat)}>
-                  {cat}
-                </PillTab>
-              ))}
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              {filteredTemplates.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => {
-                    onLoadTemplate?.(t.json);
-                    toast.success(`"${t.name}" template applied!`);
-                  }}
-                  className="group bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/20 rounded-xl overflow-hidden transition-all hover:shadow-md"
-                >
-                  <div className="aspect-square flex flex-col items-center justify-center gap-2 p-3 group-hover:scale-105 transition-transform">
-                    <span className="text-4xl">{t.preview}</span>
-                    <div className="text-center">
-                      <p className="text-[10px] font-black text-[#1a1a1a] uppercase tracking-wide">{t.name}</p>
-                      <p className="text-[9px] text-gray-400 mt-0.5">{(t as any).category}</p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* ─── TEXT TAB ───────────────────────────────────────── */}
         {activeTab === 'text' && (
           <div className="p-4 space-y-2">
@@ -823,8 +776,14 @@ const SidebarPanel = ({
             <div className="space-y-4">
               <SectionLabel>Product Quality</SectionLabel>
               <div className="grid grid-cols-1 gap-2">
-                {qualityLevels.map((q) => {
-                  const bonus = qualityPrices[q] || 0;
+                {qualityLevels.map((q, idx) => {
+                  // Robust bonus calculation: use the prop if available, otherwise calculate using multipliers
+                  const multipliers = [1, 1.2, 1.5, 2];
+                  const m = multipliers[idx] || 1;
+                  const fallbackBonus = Math.round(basePrice * m) - basePrice;
+                  
+                  // Priority: qualityPrices map (synced with DB) > fallback calculation
+                  const bonus = qualityPrices[q] !== undefined ? qualityPrices[q] : fallbackBonus;
                   const bonusStr = bonus > 0 ? `+ ₹${bonus}` : '+ ₹0';
 
                   const descriptions: Record<string, string> = {

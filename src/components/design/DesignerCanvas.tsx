@@ -257,57 +257,124 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   useEffect(() => {
     if (!canvas || !productImage) return;
 
-    let modifiedUrl = productImage;
-    const isSvgMock = productImage.startsWith('data:image/svg+xml');
-    
-    if (isSvgMock && productColor && productColor.toUpperCase() !== '#FFFFFF') {
-       try {
-         const decoded = decodeURIComponent(productImage.substring(productImage.indexOf(',') + 1));
-         const recolored = decoded.replace(/fill="#fff"/g, `fill="${productColor}"`);
-         modifiedUrl = `data:image/svg+xml;utf8,${encodeURIComponent(recolored)}`;
-       } catch(e) {
-         console.warn("DesignerCanvas: Recolor SVG failed", e);
-       }
-    }
+    const isSvgDataUrl = productImage.startsWith('data:image/svg+xml');
+    const isSvgFile = productImage.toLowerCase().includes('.svg') && !productImage.startsWith('data:');
 
-    fabric.Image.fromURL(modifiedUrl, (img) => {
-      if (!img) return;
-      img.set({
-        selectable: false, evented: false, originX: 'center', originY: 'center',
-        left: 250, top: 312.5, crossOrigin: 'anonymous', 
-        //@ts-ignore
-        id: 'product_base_image'
+    const removeExisting = () => {
+      const toRemove = canvas.getObjects().filter(
+        obj => (obj as any).id === 'product_base_image' || (obj as any).id === 'product_color_fill'
+      );
+      toRemove.forEach(obj => canvas.remove(obj));
+    };
+
+    const CANVAS_W = 500;
+    const CANVAS_H = 625;
+    const padding = 40;
+
+    if (isSvgDataUrl || isSvgFile) {
+      // --- SVG path: parse and recolor fills recursively ---
+      fabric.loadSVGFromURL(productImage, (objects, options) => {
+        const svgGroup = fabric.util.groupSVGElements(objects, options);
+
+        const recolorPaths = (obj: any) => {
+          if (obj._objects) {
+            obj._objects.forEach(recolorPaths);
+          } else if (productColor && (obj.type === 'path' || obj.type === 'rect' || obj.type === 'circle')) {
+            const fill = obj.get('fill');
+            if (!fill) return;
+            const fillStr = fill.toString().toLowerCase().replace(/\s/g, '');
+            // Protect black outlines, target everything else (white/gray body areas)
+            const isBlack = fillStr === '#000' || fillStr === '#000000' || fillStr === 'black' || fillStr === 'rgb(0,0,0)';
+            if (!isBlack) {
+              try {
+                const color = new fabric.Color(fillStr);
+                if (color.getBrightness() > 100) {
+                  obj.set({ fill: productColor });
+                }
+              } catch {
+                obj.set({ fill: productColor });
+              }
+            }
+          }
+          obj.set({ selectable: false, evented: false });
+        };
+
+        if (svgGroup.forEachObject) {
+          svgGroup.forEachObject(recolorPaths);
+        } else {
+          recolorPaths(svgGroup);
+        }
+
+        const scale = Math.min((CANVAS_W - padding * 2) / svgGroup.width!, (CANVAS_H - padding * 2) / svgGroup.height!);
+        svgGroup.scale(scale);
+        svgGroup.set({
+          selectable: false, evented: false, originX: 'center', originY: 'center',
+          left: CANVAS_W / 2, top: CANVAS_H / 2,
+          //@ts-ignore
+          id: 'product_base_image'
+        });
+
+        removeExisting();
+        canvas.insertAt(svgGroup, 0, false);
+        canvas.renderAll();
       });
-      
-      const padding = 40;
-      const scale = Math.min((500 - padding * 2) / img.width!, (625 - padding * 2) / img.height!);
-      img.scale(scale);
-      img.set({ shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.05)', blur: 15, offsetX: 0, offsetY: 8 }) });
+    } else {
+      // --- PNG/JPG wireframe path: Two-layer multiply blend technique ---
+      // Layer 1: Solid color rectangle (the product body color)
+      // Layer 2: Wireframe PNG on top with 'multiply' blend mode
+      //   → Black lines stay black, white body areas show the color from Layer 1
+      fabric.Image.fromURL(productImage, (img) => {
+        if (!img) return;
 
-      const existingBase = canvas.getObjects().find(obj => (obj as any).id === 'product_base_image');
-      if (existingBase) canvas.remove(existingBase);
-      const existingFill = canvas.getObjects().find(obj => (obj as any).id === 'product_color_fill');
-      if (existingFill) canvas.remove(existingFill);
+        const scale = Math.min((CANVAS_W - padding * 2) / img.width!, (CANVAS_H - padding * 2) / img.height!);
+        const scaledW = img.width! * scale;
+        const scaledH = img.height! * scale;
+        const imgLeft = CANVAS_W / 2;
+        const imgTop = CANVAS_H / 2;
 
-      if (productColor) {
-         const fillRect = new fabric.Rect({
-           left: 250, top: 312.5, originX: 'center', originY: 'center',
-           width: img.getScaledWidth(), height: img.getScaledHeight(),
-           fill: productColor, selectable: false, evented: false,
-           //@ts-ignore
-           id: 'product_color_fill'
-         });
-         canvas.insertAt(fillRect, 0, false);
-         canvas.insertAt(img, 1, false);
-      } else {
-         canvas.insertAt(img, 0, false);
-      }
-      canvas.renderAll();
-    }, { crossOrigin: 'anonymous' });
+        // Layer 1: Color fill rectangle, same size and position as the wireframe
+        const colorRect = new fabric.Rect({
+          left: imgLeft,
+          top: imgTop,
+          width: scaledW,
+          height: scaledH,
+          originX: 'center',
+          originY: 'center',
+          fill: productColor || '#FFFFFF',
+          selectable: false,
+          evented: false,
+          //@ts-ignore
+          id: 'product_color_fill',
+        });
+
+        // Layer 2: Wireframe image with multiply blend mode
+        img.scale(scale);
+        img.set({
+          selectable: false,
+          evented: false,
+          originX: 'center',
+          originY: 'center',
+          left: imgLeft,
+          top: imgTop,
+          crossOrigin: 'anonymous',
+          //@ts-ignore
+          id: 'product_base_image',
+          globalCompositeOperation: 'multiply',
+        });
+
+        removeExisting();
+        // Insert color layer first (index 0), then wireframe on top (index 1)
+        canvas.insertAt(colorRect, 0, false);
+        canvas.insertAt(img, 1, false);
+        canvas.renderAll();
+      }, { crossOrigin: 'anonymous' });
+    }
   }, [canvas, productImage, productColor]);
 
   // Guidelines and Interaction Events
+
   useEffect(() => {
+
     if (!canvas) return;
     
     let vLine: fabric.Line | null = null;

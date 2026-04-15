@@ -57,7 +57,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    // Smart redirect for admins visiting /dashboard
+    // Admins can stay on the dashboard if they want to
+    /*
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -67,6 +68,7 @@ export async function middleware(request: NextRequest) {
     if (profile?.role === 'admin') {
       return NextResponse.redirect(new URL('/admin', request.url))
     }
+    */
   }
 
   return response

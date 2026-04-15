@@ -52,10 +52,7 @@ export default function CategoriesPage() {
     try {
       const { data, error } = await supabase
         .from('categories')
-        .select(`
-          *,
-          products:products (id)
-        `);
+        .select('*');
 
       if (error) {
         console.warn("Categories fetch error:", error);
@@ -63,7 +60,7 @@ export default function CategoriesPage() {
       } else {
         const categoriesWithCount = data.map((cat: any) => ({
           ...cat,
-          product_count: cat.products?.length || 0
+          product_count: 0
         }));
         setCategories(categoriesWithCount);
       }
