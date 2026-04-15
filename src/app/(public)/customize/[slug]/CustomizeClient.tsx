@@ -307,11 +307,8 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             basePrice={product.base_price || 0}
             productId={product.id}
             onLockAllObjects={(lock) => canvasRef.current?.lockAllObjects(lock)}
-            onClearDesign={() => canvasRef.current?.clearDesign()}
-            onAddPattern={(url) => canvasRef.current?.addPattern(url)}
             qualityPrices={qualityPrices}
-            qualityLevels={product.quality_levels || ['Standard', 'Premium', 'Luxury']}
-            basePrice={product.base_price || 0}
+            colorVariants={(product as any).color_variants || []}
           />
         </div>
 
@@ -356,17 +353,30 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                 <DesignerCanvas 
                   ref={canvasRef}
                   productImage={(() => {
-                    const wireframes = (product as any).wireframe_images || [];
-                    const bgImages = wireframes.length > 0 
-                      ? wireframes 
-                      : ((product as any).template_images?.length > 0 ? (product as any).template_images : product.images);
+                    const variants = (product as any).color_variants || [];
+                    const exactMatch = variants.find((v: any) => v.hex.toLowerCase() === selectedColor.toLowerCase());
                     
-                    if (activeView === 'front') return bgImages?.[0] || '';
-                    if (activeView === 'back') return bgImages?.[1] || bgImages?.[0] || '';
-                    if (activeView === 'left') return bgImages?.[2] || bgImages?.[0] || '';
-                    if (activeView === 'right') return bgImages?.[3] || bgImages?.[0] || '';
+                    let bgImages: string[] = [];
+                    // Ensure the wireframe array actually has strings inside it
+                    if (exactMatch?.wireframe_images && exactMatch.wireframe_images.some((img: string) => img)) {
+                      bgImages = exactMatch.wireframe_images;
+                    } else if (exactMatch?.image_url) {
+                      // Legacy schema fallback
+                      bgImages = [exactMatch.image_url, exactMatch.image_url, exactMatch.image_url, exactMatch.image_url];
+                    } else {
+                      const wireframes = (product as any).wireframe_images || [];
+                      bgImages = wireframes.some((img: string) => img)
+                        ? wireframes
+                        : ((product as any).template_images?.length > 0 ? (product as any).template_images : product.images || []);
+                    }
+                    
+                    if (activeView === 'front' && bgImages?.[0]) return bgImages[0];
+                    if (activeView === 'back' && (bgImages?.[1] || bgImages?.[0])) return bgImages[1] || bgImages[0];
+                    if (activeView === 'left' && (bgImages?.[2] || bgImages?.[0])) return bgImages[2] || bgImages[0];
+                    if (activeView === 'right' && (bgImages?.[3] || bgImages?.[0])) return bgImages[3] || bgImages[0];
                     return bgImages?.[0] || '';
                   })()}
+                  disableTinting={((product as any).color_variants?.length > 0 && (product as any).color_variants.some((v: any) => v.hex.toLowerCase() === selectedColor.toLowerCase()))}
                   productColor={selectedColor}
                   onObjectSelected={setActiveObject}
                   onSelectionCleared={() => setActiveObject(null)}
@@ -407,24 +417,39 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                  { id: 'back', label: 'Back side' },
                  { id: 'left', label: 'Left side' },
                  { id: 'right', label: 'Right side' },
-               ].filter(v => 
-                 !product.supported_views || 
-                 product.supported_views.includes(v.id) || 
-                 (v.id === 'front' && product.supported_views.length === 0)
-               ).map((v) => (
-                 <button
-                   key={v.id}
-                   onClick={() => handleViewChange(v.id as any)}
-                   className={cn(
-                     "px-5 py-2 rounded-full text-[11px] font-black tracking-tight leading-none transition-all flex-shrink-0",
-                     activeView === v.id 
-                       ? "bg-brand-olive text-white shadow-[0_4px_12px_rgba(91,91,66,0.2)]" 
-                       : "bg-white text-gray-500 hover:bg-gray-50 shadow-soft border border-gray-100"
-                   )}
-                 >
-                   {v.label}
-                 </button>
-               ))}
+               ].filter(v => {
+                  // Smart Filtering: Only show view if an image exists for it in the current color
+                  const variants = (product as any).color_variants || [];
+                  const exactMatch = variants.find((ev: any) => ev.hex.toLowerCase() === selectedColor.toLowerCase());
+                  
+                  let bgImages: string[] = [];
+                  if (exactMatch?.wireframe_images && exactMatch.wireframe_images.some((img: string) => img)) {
+                    bgImages = exactMatch.wireframe_images;
+                  } else if (exactMatch?.image_url) {
+                    bgImages = [exactMatch.image_url, exactMatch.image_url, exactMatch.image_url, exactMatch.image_url];
+                  } else {
+                    const wireframes = (product as any).wireframe_images || [];
+                    bgImages = wireframes.some((img: string) => img)
+                      ? wireframes
+                      : ((product as any).template_images?.length > 0 ? (product as any).template_images : product.images || []);
+                  }
+
+                  const viewIdx = v.id === 'front' ? 0 : v.id === 'back' ? 1 : v.id === 'left' ? 2 : 3;
+                  return !!bgImages[viewIdx];
+                }).map((v) => (
+                  <button
+                    key={v.id}
+                    onClick={() => handleViewChange(v.id as any)}
+                    className={cn(
+                      "px-5 py-2 rounded-full text-[11px] font-black tracking-tight leading-none transition-all flex-shrink-0",
+                      activeView === v.id 
+                        ? "bg-brand-olive text-white shadow-[0_4px_12px_rgba(91,91,66,0.2)]" 
+                        : "bg-white text-gray-500 hover:bg-gray-50 shadow-soft border border-gray-100"
+                    )}
+                  >
+                    {v.label}
+                  </button>
+                ))}
             </div>
 
             <div className="absolute bottom-2 right-4 md:bottom-8 md:right-8 z-40 scale-75 md:scale-100 origin-bottom-right">
@@ -511,6 +536,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                    onClearDesign={() => canvasRef.current?.clearDesign()}
                    onAddPattern={(url) => canvasRef.current?.addPattern(url)}
                    qualityPrices={qualityPrices}
+                   colorVariants={(product as any).color_variants || []}
                  />
                </div>
             </div>

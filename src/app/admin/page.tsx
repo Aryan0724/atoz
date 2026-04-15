@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase/client';
+import { withTimeout } from '@/lib/fetchUtils';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 
@@ -41,7 +42,7 @@ export default function AdminDashboard() {
           { data: allOrders, count: orderCount },
           { count: userCount },
           { data: recentOrders }
-        ] = await Promise.all([
+        ] = await withTimeout(Promise.all([
           supabase.from('products').select('*', { count: 'exact', head: true }),
           supabase.from('orders').select('total_price, status'),
           supabase.from('profiles').select('*', { count: 'exact', head: true }),
@@ -49,7 +50,7 @@ export default function AdminDashboard() {
             .select('*, products(name)')
             .order('created_at', { ascending: false })
             .limit(5)
-        ]);
+        ]), 5000);
 
         const revenue = allOrders?.reduce((acc, order) => acc + (order.total_price || 0), 0) || 0;
         

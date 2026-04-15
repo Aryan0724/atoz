@@ -138,9 +138,10 @@ interface SidebarPanelProps {
   activeObject?: CanvasObjectProperties | null;
   onSelectionCleared?: () => void;
   onLockAllObjects?: (lock: boolean) => void;
-  onClearDesign?: () => void;
   onAddPattern?: (url: string) => void;
+  onClearDesign?: () => void;
   qualityPrices?: Record<string, number>;
+  colorVariants?: { name: string, hex: string, image_url: string }[];
 }
 
 const SidebarPanel = ({ 
@@ -167,7 +168,8 @@ const SidebarPanel = ({
   qualityLevels = ['Standard', 'Premium', 'Luxury'],
   basePrice = 0,
   productId = '',
-  qualityPrices = {}
+  qualityPrices = {},
+  colorVariants = []
 }: SidebarPanelProps) => {
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -818,12 +820,15 @@ const SidebarPanel = ({
             <div className="space-y-4">
               <SectionLabel>Surface Color</SectionLabel>
               <div className="grid grid-cols-5 gap-3">
-                {[
+                {(colorVariants.length > 0 
+                  ? colorVariants.map(v => v.hex)
+                  : [
                   '#FFFFFF', '#000000', '#2D3436', '#636E72', '#B2BEC3',
                   '#D63031', '#E84393', '#6C5CE7', '#0984E3', '#00B894',
                   '#FDCB6E', '#E17055', '#55E6C1', '#25CCF7', '#5B5B42'
-                ].map((color) => (
+                ]).map((color) => (
                   <button
+                    type="button"
                     key={color}
                     onClick={() => onProductColorChange(color)}
                     className={cn(

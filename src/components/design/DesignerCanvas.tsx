@@ -7,6 +7,7 @@ import { useCanvasGestures } from '@/hooks/design/useCanvasGestures';
 import { useCanvasActions } from '@/hooks/design/useCanvasActions';
 import { loadGoogleFont } from '@/lib/fontUtils';
 import { DesignerCanvasProps, DesignerCanvasRef, getObjectProperties, CanvasObjectProperties } from '@/types/canvas';
+import { recolorWireframePng } from '@/lib/recolorWireframe';
 
 const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(({
   productImage,
@@ -21,7 +22,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   onHistoryChange,
   onOutOfBoundsWarning,
   onLowQualityWarning,
-  designArea
+  designArea,
+  disableTinting
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -267,108 +269,50 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       toRemove.forEach(obj => canvas.remove(obj));
     };
 
-    const CANVAS_W = 500;
-    const CANVAS_H = 625;
-    const padding = 40;
 
-    if (isSvgDataUrl || isSvgFile) {
-      // --- SVG path: parse and recolor fills recursively ---
-      fabric.loadSVGFromURL(productImage, (objects, options) => {
-        const svgGroup = fabric.util.groupSVGElements(objects, options);
 
-        const recolorPaths = (obj: any) => {
-          if (obj._objects) {
-            obj._objects.forEach(recolorPaths);
-          } else if (productColor && (obj.type === 'path' || obj.type === 'rect' || obj.type === 'circle')) {
-            const fill = obj.get('fill');
-            if (!fill) return;
-            const fillStr = fill.toString().toLowerCase().replace(/\s/g, '');
-            // Protect black outlines, target everything else (white/gray body areas)
-            const isBlack = fillStr === '#000' || fillStr === '#000000' || fillStr === 'black' || fillStr === 'rgb(0,0,0)';
-            if (!isBlack) {
-              try {
-                const color = new fabric.Color(fillStr);
-                if (color.getBrightness() > 100) {
-                  obj.set({ fill: productColor });
-                }
-              } catch {
-                obj.set({ fill: productColor });
-              }
-            }
-          }
-          obj.set({ selectable: false, evented: false });
-        };
+    // --- UNIFIED BULLETPROOF IMAGE LOADER ---
+    // Instead of parsing SVGs manually (which silently crashes Fabric leading to an empty wireframe area),
+    // we rasterize ALL images (Base64 SVGs, PNGs, etc.) directly using the browser's native Image tag.
+    fabric.Image.fromURL(productImage, (img) => {
+      if (!img) {
+        console.warn("Fabric failed to load image entirely:", productImage);
+        return;
+      }
 
-        if (svgGroup.forEachObject) {
-          svgGroup.forEachObject(recolorPaths);
-        } else {
-          recolorPaths(svgGroup);
-        }
-
-        const scale = Math.min((CANVAS_W - padding * 2) / svgGroup.width!, (CANVAS_H - padding * 2) / svgGroup.height!);
-        svgGroup.scale(scale);
-        svgGroup.set({
-          selectable: false, evented: false, originX: 'center', originY: 'center',
-          left: CANVAS_W / 2, top: CANVAS_H / 2,
-          //@ts-ignore
-          id: 'product_base_image'
-        });
-
-        removeExisting();
-        canvas.insertAt(svgGroup, 0, false);
-        canvas.renderAll();
+      // Safely calculate scale to ensure we never get NaN if dimensions are missing
+      const w = img.width || 500;
+      const h = img.height || 500;
+      const scale = Math.min(500 / w, 625 / h);
+      
+      img.scale(scale);
+      img.set({
+        selectable: false,
+        evented: false,
+        originX: 'center',
+        originY: 'center',
+        left: 250,
+        top: 312.5,
+        //@ts-ignore
+        id: 'product_base_image',
       });
-    } else {
-      // --- PNG/JPG wireframe path: Two-layer multiply blend technique ---
-      // Layer 1: Solid color rectangle (the product body color)
-      // Layer 2: Wireframe PNG on top with 'multiply' blend mode
-      //   → Black lines stay black, white body areas show the color from Layer 1
-      fabric.Image.fromURL(productImage, (img) => {
-        if (!img) return;
 
-        const scale = Math.min((CANVAS_W - padding * 2) / img.width!, (CANVAS_H - padding * 2) / img.height!);
-        const scaledW = img.width! * scale;
-        const scaledH = img.height! * scale;
-        const imgLeft = CANVAS_W / 2;
-        const imgTop = CANVAS_H / 2;
-
-        // Layer 1: Color fill rectangle, same size and position as the wireframe
-        const colorRect = new fabric.Rect({
-          left: imgLeft,
-          top: imgTop,
-          width: scaledW,
-          height: scaledH,
-          originX: 'center',
-          originY: 'center',
-          fill: productColor || '#FFFFFF',
-          selectable: false,
-          evented: false,
-          //@ts-ignore
-          id: 'product_color_fill',
+      // Recolor using Fabric's Native BlendColor filter (Multiply mode)
+      // This allows the product's dark outlines to remain black while beautifully tinting the white areas.
+      if (!disableTinting && productColor && productColor !== '#ffffff' && productColor !== '#fff') {
+        const filter = new fabric.Image.filters.BlendColor({
+          color: productColor,
+          mode: 'multiply',
+          alpha: 1
         });
+        img.filters = [filter];
+        img.applyFilters();
+      }
 
-        // Layer 2: Wireframe image with multiply blend mode
-        img.scale(scale);
-        img.set({
-          selectable: false,
-          evented: false,
-          originX: 'center',
-          originY: 'center',
-          left: imgLeft,
-          top: imgTop,
-          crossOrigin: 'anonymous',
-          //@ts-ignore
-          id: 'product_base_image',
-          globalCompositeOperation: 'multiply',
-        });
-
-        removeExisting();
-        // Insert color layer first (index 0), then wireframe on top (index 1)
-        canvas.insertAt(colorRect, 0, false);
-        canvas.insertAt(img, 1, false);
-        canvas.renderAll();
-      }, { crossOrigin: 'anonymous' });
-    }
+      removeExisting();
+      canvas.insertAt(img, 0, false);
+      canvas.renderAll();
+    }, { crossOrigin: 'anonymous' });
   }, [canvas, productImage, productColor]);
 
   // Guidelines and Interaction Events

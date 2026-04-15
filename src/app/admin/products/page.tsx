@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { Product } from '@/lib/supabase/types';
+import { withTimeout } from '@/lib/fetchUtils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -38,14 +39,13 @@ export default function ProductManagerPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const fetchPromise = supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
-      
-      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+      const { data, error } = await withTimeout(
+        supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false }),
+        5000
+      ) as any;
 
       if (error) throw error;
       setProducts(data || []);

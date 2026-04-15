@@ -43,6 +43,7 @@ export interface DesignerCanvasProps {
   onOutOfBoundsWarning?: (isOut: boolean) => void; 
   onLowQualityWarning?: (isLowQuality: boolean) => void;
   designArea?: { x: number; y: number; w: number; h: number };
+  disableTinting?: boolean;
 }
 
 export interface DesignerCanvasRef {

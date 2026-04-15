@@ -20,7 +20,8 @@ export async function GET(request: Request) {
         .eq('id', session.user.id)
         .single();
       
-      const targetPath = profileData?.role === 'admin' ? '/admin' : next;
+      const profile = profileData as { role: string } | null;
+      const targetPath = profile?.role === 'admin' ? '/admin' : next;
 
       // Robust host detection for redirection
       const isLocal = request.url.includes('localhost') || request.url.includes('127.0.0.1');

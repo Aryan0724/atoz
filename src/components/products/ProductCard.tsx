@@ -105,18 +105,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Link 
-                href={`/customize/${product.slug}?autoOpen=uploads`}
-                className="h-10 px-4 rounded-lg bg-brand-pink/5 border border-brand-pink/10 flex items-center justify-center text-brand-pink hover:bg-brand-pink hover:text-white transition-all duration-300 font-black text-[9px] uppercase tracking-widest"
-                title="Import & Edit"
+              <Link
+                href={`/customize/${product.slug}`}
+                className="h-10 px-4 rounded-lg bg-brand-dark text-white flex items-center justify-center font-black text-[9px] uppercase tracking-widest hover:bg-brand-pink transition-all duration-300"
                 onClick={(e) => e.stopPropagation()}
               >
-                Direct Import
+                Customize
               </Link>
               <div className="h-10 w-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-brand-dark group-hover:text-white group-hover:border-brand-dark transition-all duration-300">
                 <ShoppingBag className="h-4 w-4" />
               </div>
             </div>
+
           </div>
         </div>
       </div>

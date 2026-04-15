@@ -31,6 +31,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Category } from '@/lib/supabase/types';
+import DesignAreaSelector from '@/components/admin/DesignAreaSelector';
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -40,6 +41,8 @@ export default function AddProductPage() {
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
+  const [editingArea, setEditingArea] = useState<{ url: string, sideIndex: number, sideKey: string } | null>(null);
+  const viewKeys = ['front', 'back', 'left', 'right'];
   
   const [formData, setFormData] = useState({
     name: '',
@@ -51,14 +54,15 @@ export default function AddProductPage() {
     delivery_days: '7-10 Days',
     images: [] as string[],
     template_images: [] as string[],
-    wireframe_images: ['', '', '', ''], // [Front, Back, Left, Right]
+    color_variants: [] as { name: string, hex: string, wireframe_images: string[] }[],
     quality_levels: ['Standard', 'Premium'],
     quality_prices: {} as Record<string, number>,
     bulk_pricing: [] as { min: number; discount: number }[],
     customization_fields: ['Logo', 'Text Color'],
     packaging_options: ['Standard Box'],
     supported_views: ['front', 'back', 'left', 'right'],
-    specifications: {}
+    specifications: {},
+    design_areas: {} as Record<string, { x: number, y: number, w: number, h: number }>
   });
 
   useEffect(() => {
@@ -81,7 +85,7 @@ export default function AddProductPage() {
     fetchData();
   }, []);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'gallery' | 'wireframe' = 'gallery', index?: number) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'gallery' | 'color_variant' = 'gallery', colorIndex?: number, viewIndex?: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -90,13 +94,16 @@ export default function AddProductPage() {
       const fileName = `${Date.now()}-${file.name}`;
       const publicUrl = await uploadFile('products', fileName, file);
       
-      if (type === 'wireframe' && index !== undefined) {
+      if (type === 'color_variant' && colorIndex !== undefined && viewIndex !== undefined) {
         setFormData(prev => {
-          const newWires = [...prev.wireframe_images];
-          newWires[index] = publicUrl;
-          return { ...prev, wireframe_images: newWires };
+          const newVariants = [...prev.color_variants];
+          if (!newVariants[colorIndex].wireframe_images) {
+            newVariants[colorIndex].wireframe_images = ['', '', '', ''];
+          }
+          newVariants[colorIndex].wireframe_images[viewIndex] = publicUrl;
+          return { ...prev, color_variants: newVariants };
         });
-        toast.success('Wireframe uploaded');
+        toast.success('Color view image uploaded');
       } else {
         setFormData(prev => ({ ...prev, images: [...prev.images, publicUrl] }));
         toast.success('Gallery image uploaded');
@@ -123,12 +130,16 @@ export default function AddProductPage() {
     
     setLoading(true);
     try {
-      // Clean up wireframe_images to ensure it's a valid array for DB
+      // Create global fallback wireframes from first variant if available, for backwards compatibility
+      const fallbackWireframes = formData.color_variants.length > 0 
+        ? formData.color_variants[0].wireframe_images 
+        : ['', '', '', ''];
+
       const { data: newProduct, error: productError } = await supabase
         .from('products')
         .insert([{
           ...formData,
-          wireframe_images: formData.wireframe_images.filter(img => img !== '') // Keep only uploaded ones or just keep array
+          wireframe_images: fallbackWireframes // keep DB happy if strict check
         }])
         .select()
         .single();
@@ -399,94 +410,101 @@ export default function AddProductPage() {
                 </div>
               )}
 
-              {/* STEP 3: DESIGN STUDIO (WIREFRAMES) */}
+              {/* STEP 3: DESIGN STUDIO (COLOUR VARIANTS) */}
               {currentStep === 3 && (
                 <div className="space-y-8">
                   <section className="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl shadow-gray-100/50">
                     <div className="flex items-center justify-between mb-8">
                        <h2 className="text-xl font-black text-brand-dark flex items-center gap-3 italic uppercase tracking-tighter">
                           <div className="h-6 w-1 bg-brand-pink rounded-full"></div>
-                          Canvas Studio Deployment
+                          Color Product Variations (Wireframes)
                        </h2>
-                       <div className="px-4 py-2 bg-brand-pink/5 text-brand-pink text-[9px] font-black uppercase tracking-widest rounded-full border border-brand-pink/10 shadow-sm animate-pulse">SVG Required</div>
-                    </div>
-                    
-                    {/* SVG Guide Box */}
-                    <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl mb-8">
-                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">How to get an SVG wireframe</p>
-                      <ol className="text-[11px] text-blue-500 font-medium space-y-1 list-decimal list-inside">
-                        <li>Find or create a flat product outline in Figma, Illustrator, or similar</li>
-                        <li>Export as <strong>SVG</strong> (not PNG)</li>
-                        <li>Set the product body fill to <code className="bg-blue-100 px-1 rounded">#ffffff</code> (white)</li>
-                        <li>Keep outlines/shadows as dark colors</li>
-                        <li>Open the .svg file in a text editor, copy the full code, paste below</li>
-                      </ol>
+                       <button type="button" onClick={() => setFormData(prev => ({ ...prev, color_variants: [...prev.color_variants, { name: 'New Color', hex: '#000000', wireframe_images: ['', '', '', ''] }] }))} className="px-4 py-2 bg-[#6C5CE7]/10 text-[#6C5CE7] hover:bg-[#6C5CE7] hover:text-white transition-all text-[9px] font-black uppercase tracking-widest rounded-full border shadow-sm">+ Add Variant</button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                      {[
-                        { label: 'Front View', idx: 0 },
-                        { label: 'Back View', idx: 1 },
-                        { label: 'Left Side', idx: 2 },
-                        { label: 'Right Side', idx: 3 },
-                      ].map((view) => {
-                        const stored = formData.wireframe_images[view.idx] || '';
-                        let svgText = '';
-                        if (stored.startsWith('data:image/svg+xml')) {
-                          try { svgText = decodeURIComponent(stored.split(',').slice(1).join(',')); } catch { svgText = stored; }
-                        }
-                        return (
-                          <div key={view.idx} className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">{view.label} — SVG Code</label>
-                              {svgText && <span className="text-[8px] font-black text-green-500 uppercase tracking-widest">✓ Loaded</span>}
-                            </div>
-                            {svgText && (
-                              <div className="aspect-[3/4] rounded-2xl border border-gray-100 bg-gray-50 overflow-hidden flex items-center justify-center p-4">
-                                <div className="w-full h-full flex items-center justify-center" dangerouslySetInnerHTML={{ __html: svgText }} />
-                              </div>
-                            )}
-                            <div className="relative">
-                              <textarea
-                                rows={svgText ? 4 : 8}
-                                placeholder={`Paste SVG markup for ${view.label}...\n\n<svg viewBox="0 0 300 380" xmlns="http://www.w3.org/2000/svg">\n  <path fill="#ffffff" stroke="#333" d="..."/>\n</svg>`}
-                                value={svgText}
-                                onChange={(e) => {
-                                  const raw = e.target.value.trim();
-                                  const newW = [...formData.wireframe_images];
-                                  newW[view.idx] = raw ? `data:image/svg+xml,${encodeURIComponent(raw)}` : '';
-                                  setFormData({ ...formData, wireframe_images: newW });
-                                }}
-                                className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 focus:border-brand-pink/30 focus:bg-white outline-none transition-all font-mono text-[11px] text-gray-600 resize-y"
-                              />
-                              {svgText && (
-                                <button type="button" onClick={() => { const newW = [...formData.wireframe_images]; newW[view.idx] = ''; setFormData({ ...formData, wireframe_images: newW }); }} className="absolute top-3 right-3 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg text-[9px] font-black uppercase transition-colors">Clear</button>
-                              )}
-                            </div>
-                            <p className="text-[9px] text-gray-400 font-medium px-1">Body paths must use <code className="bg-gray-100 px-1 rounded">#ffffff</code> fill — color picker recolors these automatically.</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Studio Info Box */}
-                    <div className="p-8 bg-brand-dark rounded-[32px] text-white relative overflow-hidden">
-                       <div className="absolute top-0 right-0 p-8 opacity-10"><Zap className="w-24 h-24" /></div>
-                       <div className="relative z-10">
-                          <h3 className="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">Studio Asset Requirements</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                             <div className="space-y-2 text-[10px] font-bold text-gray-400 uppercase leading-relaxed">
-                                <p>• SVG format with <span className="text-brand-cyan">white (#ffffff) body fill</span> paths.</p>
-                                <p>• Black/dark strokes for outlines and details.</p>
-                                <p>• Export from Figma, Illustrator, or similar tools.</p>
-                             </div>
-                             <div className="bg-white/5 p-5 rounded-2xl border border-white/5">
-                                <span className="text-[8px] font-black text-brand-cyan uppercase tracking-widest block mb-2">Quick tip:</span>
-                                <code className="text-[10px] font-bold text-gray-300 italic block leading-tight">Open the exported .svg file in Notepad or VS Code, select all, copy, paste into the field above.</code>
-                             </div>
-                          </div>
+                    {formData.color_variants.length === 0 ? (
+                       <div className="p-10 border-2 border-dashed border-gray-100 rounded-3xl text-center mb-8">
+                         <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">No variations established. Add a variant to define product colors and views.</p>
                        </div>
-                    </div>
+                    ) : (
+                       <div className="space-y-4 mb-8">
+                         {formData.color_variants.map((variant, colorIdx) => (
+                           <div key={colorIdx} className="flex flex-col gap-6 p-6 rounded-3xl border border-gray-100 bg-gray-50/50 relative group">
+                              <button type="button" onClick={() => {
+                                const newV = [...formData.color_variants];
+                                newV.splice(colorIdx, 1);
+                                setFormData({...formData, color_variants: newV});
+                              }} className="absolute top-4 right-4 p-2 bg-white hover:bg-red-500 hover:text-white rounded-xl text-gray-400 transition-all shadow-sm"><Trash2 className="h-4 w-4" /></button>
+                              
+                              <div className="flex-1 space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 block mb-2">Color Name</label>
+                                    <input type="text" value={variant.name} onChange={(e) => {
+                                        const newV = [...formData.color_variants];
+                                        newV[colorIdx].name = e.target.value;
+                                        setFormData({...formData, color_variants: newV});
+                                      }}
+                                      className="w-full px-4 py-3 rounded-xl bg-white border border-gray-100 focus:border-brand-pink/20 transition-all font-bold text-sm outline-none"
+                                      placeholder="e.g. Midnight Black"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 block mb-2">Hex Code</label>
+                                    <div className="flex gap-2">
+                                      <input type="color" value={variant.hex} onChange={(e) => {
+                                        const newV = [...formData.color_variants];
+                                        newV[colorIdx].hex = e.target.value;
+                                        setFormData({...formData, color_variants: newV});
+                                      }} className="w-12 h-[46px] rounded-xl cursor-pointer border-0 bg-transparent" />
+                                      <input type="text" value={variant.hex.toUpperCase()} readOnly className="w-full px-4 py-3 rounded-xl bg-gray-100 border-transparent font-bold text-sm outline-none text-gray-500 uppercase" />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 block mb-3">Viewing Angles (Wireframes)</label>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                  {[
+                                    { label: 'Front View', idx: 0 },
+                                    { label: 'Back View', idx: 1 },
+                                    { label: 'Left Side', idx: 2 },
+                                    { label: 'Right Side', idx: 3 },
+                                  ].map((view) => (
+                                    <div key={view.idx} className="space-y-2">
+                                      <label className="text-[8px] font-black text-gray-300 uppercase tracking-[0.2em] block text-center">{view.label}</label>
+                                      <div className="aspect-[3/4] rounded-2xl overflow-hidden border-2 border-dashed border-gray-200 bg-white hover:border-brand-pink/30 hover:bg-gray-50 transition-all cursor-pointer relative group/view flex items-center justify-center">
+                                        {(variant.wireframe_images && variant.wireframe_images[view.idx]) ? (
+                                          <>
+                                            <img src={variant.wireframe_images[view.idx]} alt={view.label} className="w-full h-full object-contain p-2" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/view:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 px-4">
+                                               <button 
+                                                 type="button" 
+                                                 onClick={() => setEditingArea({ url: variant.wireframe_images[view.idx], sideIndex: view.idx, sideKey: viewKeys[view.idx] })}
+                                                 className="w-full py-2 bg-brand-pink text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg"
+                                               >
+                                                 Define Area
+                                               </button>
+                                               <button type="button" onClick={() => { const newV = [...formData.color_variants]; newV[colorIdx].wireframe_images[view.idx] = ''; setFormData({...formData, color_variants: newV}); }} className="w-full py-2 bg-white/10 hover:bg-white text-brand-dark rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Remove</button>
+                                            </div>
+                                          </>
+                                        ) : (
+                                          <label className="flex flex-col items-center justify-center gap-2 w-full h-full cursor-pointer">
+                                            <div className="w-8 h-8 bg-gray-50 rounded-xl flex items-center justify-center group-hover/view:bg-white transition-colors"><ImageIcon className="h-4 w-4 text-gray-300" /></div>
+                                            <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest text-center px-1">Upload</span>
+                                            <input type="file" className="hidden" accept="image/png,image/jpeg,image/webp" onChange={(e) => handleImageUpload(e, 'color_variant', colorIdx, view.idx)} />
+                                          </label>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                           </div>
+                         ))}
+                       </div>
+                    )}
                   </section>
                 </div>
               )}
@@ -524,17 +542,17 @@ export default function AddProductPage() {
                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Customization & Packaging</label>
                       </div>
                       <div className="flex flex-wrap gap-3">
-                         {['customization_fields', 'packaging_options'].map((key) => (
-                           <div key={key} className="flex flex-wrap gap-2">
-                             {formData[key as keyof typeof formData].map((field, i) => (
-                               <span key={i} className="px-4 py-2 bg-gray-50 text-brand-dark text-[10px] font-bold rounded-xl border border-gray-100 flex items-center gap-2 group hover:bg-white transiton-all">
-                                 {field}
-                                 <button onClick={() => removeField(key as any, i)} className="opacity-0 group-hover:opacity-100 text-red-500 transition-all"><X className="h-3 w-3" /></button>
-                               </span>
-                             ))}
-                             <button type="button" onClick={() => handleAddField(key as any)} className="px-4 py-2 bg-white text-brand-pink text-[10px] font-black rounded-xl border border-dashed border-brand-pink/20 hover:border-brand-pink/50 transition-all">+ Add {key.split('_')[0]}</button>
-                           </div>
-                         ))}
+                          {(['customization_fields', 'packaging_options'] as const).map((key) => (
+                            <div key={key} className="flex flex-wrap gap-2">
+                              {(formData[key] as string[]).map((field, i) => (
+                                <span key={i} className="px-4 py-2 bg-gray-50 text-brand-dark text-[10px] font-bold rounded-xl border border-gray-100 flex items-center gap-2 group hover:bg-white transiton-all">
+                                  {field}
+                                  <button onClick={() => removeField(key as any, i)} className="opacity-0 group-hover:opacity-100 text-red-500 transition-all"><X className="h-3 w-3" /></button>
+                                </span>
+                              ))}
+                              <button type="button" onClick={() => handleAddField(key as any)} className="px-4 py-2 bg-white text-brand-pink text-[10px] font-black rounded-xl border border-dashed border-brand-pink/20 hover:border-brand-pink/50 transition-all">+ Add {key.split('_')[0]}</button>
+                            </div>
+                          ))}
                       </div>
                     </div>
                   </section>
@@ -578,7 +596,7 @@ export default function AddProductPage() {
               <div className="space-y-4 relative z-10">
                  <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold text-gray-400 underline">Wireframes</span>
-                    <span className="text-[10px] font-black text-brand-cyan">{formData.wireframe_images.filter(img => img).length}/4</span>
+                    <span className="text-[10px] font-black text-brand-cyan">{formData.color_variants?.length || 0}</span>
                  </div>
                  <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold text-gray-400 underline">Gallery Images</span>
@@ -616,6 +634,25 @@ export default function AddProductPage() {
            </div>
         </div>
       </div>
+      {editingArea && (
+        <DesignAreaSelector
+          imageUrl={editingArea.url}
+          label={`${editingArea.sideKey.toUpperCase()} VIEW DESIGN AREA`}
+          initialArea={formData.design_areas?.[editingArea.sideKey]}
+          onCancel={() => setEditingArea(null)}
+          onSave={(area) => {
+            setFormData({
+              ...formData,
+              design_areas: {
+                ...(formData.design_areas || {}),
+                [editingArea.sideKey]: area
+              }
+            });
+            setEditingArea(null);
+            toast.success(`${editingArea.sideKey} design area updated`);
+          }}
+        />
+      )}
     </div>
   );
 }

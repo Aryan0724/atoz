@@ -21,6 +21,7 @@ export interface Product {
   packaging_options?: string[];
   template_images?: string[];
   wireframe_images?: string[];
+  color_variants?: { name: string; hex: string; wireframe_images: string[] }[];
   supported_views?: string[];
   features?: string[];
   specifications?: any;
@@ -28,6 +29,7 @@ export interface Product {
   is_active?: boolean;
   quality_prices?: Record<string, number>;
   bulk_pricing?: { min: number; discount: number }[];
+  design_areas?: Record<string, { x: number; y: number; w: number; h: number }>;
   created_at?: string;
 }
 
