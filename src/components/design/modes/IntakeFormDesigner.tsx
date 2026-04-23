@@ -46,8 +46,23 @@ const IntakeFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>((p
         } as any
     ],
     addPattern: () => {},
-    zoomLevel: 1
-  }));
+    zoomLevel: 1,
+    updateActiveObject: () => {},
+    updateObjectById: () => {},
+    setTextShadow: () => {},
+    setTextOutline: () => {},
+    sendToBack: () => {},
+    bringToFront: () => {},
+    bringForward: () => {},
+    sendBackward: () => {},
+    groupObjects: () => {},
+    ungroupObjects: () => {},
+    removeBackground: async () => true,
+    getJson: () => ({}),
+    loadJson: () => {},
+    getLayers: () => [],
+    getDesignDataUrl: async () => "",
+  } as any));
 
   // Default fields if none provided in config
   const fields = designConfig?.fields || [

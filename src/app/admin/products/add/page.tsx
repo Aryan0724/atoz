@@ -180,7 +180,7 @@ export default function AddProductPage() {
   const handleAddField = (key: 'customization_fields' | 'packaging_options' | 'quality_levels') => {
     const value = prompt(`Add new ${key.replace('_', ' ')}:`);
     if (value) {
-      const newFields = [...formData[key], value];
+      const newFields = [...(formData as any)[key], value];
       const updates: any = { [key]: newFields };
       if (key === 'quality_levels') {
         updates.quality_prices = { ...formData.quality_prices, [value]: 0 };
@@ -190,8 +190,8 @@ export default function AddProductPage() {
   };
 
   const removeField = (key: 'customization_fields' | 'packaging_options' | 'quality_levels', index: number) => {
-    const valueToRemove = formData[key][index];
-    const newFields = [...formData[key]];
+    const valueToRemove = (formData as any)[key][index];
+    const newFields = [...(formData as any)[key]];
     newFields.splice(index, 1);
     const updates: any = { [key]: newFields };
     if (key === 'quality_levels') {
@@ -395,7 +395,7 @@ export default function AddProductPage() {
                        <div>
                           <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-4 ml-1">Quality Level Sur-charges</label>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {formData.quality_levels.map((level) => (
+                            {(formData as any).quality_levels.map((level: string) => (
                               <div key={level} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
                                 <span className="text-[11px] font-bold text-brand-dark truncate pr-2">{level}</span>
                                 <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-gray-100 shadow-sm">

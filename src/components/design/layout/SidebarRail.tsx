@@ -14,7 +14,7 @@ interface SidebarRailProps {
   designMode?: string;
 }
 
-const navItems: { id: SidebarTab; icon: React.ReactNode; label: string }[] = [
+const navItems: { id: SidebarTab; icon: React.ReactNode; label: string; mode?: string }[] = [
   { id: 'product', icon: <Palette className="h-5 w-5" />, label: 'Product' },
   { id: 'data', icon: <Grid className="h-5 w-5" />, label: 'Data', mode: 'vdp' },
   { id: 'pages', icon: <LayoutIcon className="h-5 w-5" />, label: 'Pages', mode: 'multipage' },

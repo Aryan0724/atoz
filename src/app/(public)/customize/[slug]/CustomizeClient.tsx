@@ -6,7 +6,7 @@ import { useCart } from '@/lib/store/useCart';
 import { supabase } from '@/lib/supabase/client';
 import DesignerFactory from '@/components/design/DesignerFactory';
 import { CanvasObjectProperties, DesignerCanvasRef } from '@/types/canvas';
-import SidebarRail from '@/components/design/layout/SidebarRail';
+import SidebarRail, { SidebarTab } from '@/components/design/layout/SidebarRail';
 import SidebarPanel from '@/components/design/layout/SidebarPanel';
 import TopToolbar from '@/components/design/layout/TopToolbar';
 import FloatingToolbar from '@/components/design/layout/FloatingToolbar';
@@ -21,7 +21,7 @@ import { cn, dataURLToBlob } from '@/lib/utils';
 import { uploadFile } from '@/lib/supabase/storage';
 import { toast } from 'sonner';
 
-export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'shutterstock' | 'iconify' | 'layers' | 'patterns' | 'unsplash' | 'pexels';
+
 
 interface CustomizeClientProps {
   product: Product;

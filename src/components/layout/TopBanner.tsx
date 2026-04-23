@@ -12,7 +12,7 @@ export default async function TopBanner() {
   try {
     const [settingsRes, couponRes] = await Promise.all([
       supabase.from('site_settings').select('config').eq('id', 'global').single(),
-      supabase.from('coupons').select('code, discount_value, discount_type').eq('is_active', true).order('created_at', { ascending: false }).limit(1).single()
+      (supabase.from('coupons') as any).select('code, discount_value, discount_type').eq('is_active', true).order('created_at', { ascending: false }).limit(1).single()
     ]);
 
     if ((settingsRes.data as any)?.config?.topBanner) {
@@ -21,7 +21,7 @@ export default async function TopBanner() {
     }
 
     if (couponRes.data) {
-      activeCoupon = couponRes.data;
+      activeCoupon = couponRes.data as any;
     }
   } catch (err) {
     // Silent fail
