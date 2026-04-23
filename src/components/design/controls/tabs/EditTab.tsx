@@ -9,7 +9,6 @@ interface EditTabProps {
   onDeleteActiveObject: () => void;
   onBringForward: () => void;
   onSendBackward: () => void;
-  onRemoveBackground: () => Promise<boolean>;
 }
 
 import { designerFonts } from '@/lib/fontUtils';
@@ -20,9 +19,7 @@ const EditTab = ({
   onDeleteActiveObject, 
   onBringForward, 
   onSendBackward,
-  onRemoveBackground
 }: EditTabProps) => {
-  const [removingBg, setRemovingBg] = useState(false);
   const [activeFontCategory, setActiveFontCategory] = useState<string>('All');
 
   if (!activeObject) return null;
@@ -31,12 +28,6 @@ const EditTab = ({
   const filteredFonts = activeFontCategory === 'All' 
     ? designerFonts 
     : designerFonts.filter(f => f.category === activeFontCategory);
-
-  const handleRemoveBg = async () => {
-    setRemovingBg(true);
-    await onRemoveBackground();
-    setRemovingBg(false);
-  };
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-8">
@@ -149,34 +140,7 @@ const EditTab = ({
       {/* IMAGE CONTROLS */}
       {activeObject.type === 'image' && (
         <div className="space-y-8">
-           <section className="bg-gradient-to-br from-brand-dark to-[#5b5b42] p-6 rounded-3xl shadow-xl shadow-gray-200 border border-white/10 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                <Sparkles className="h-12 w-12 text-white" />
-              </div>
-              <h4 className="text-white font-black text-sm mb-2 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-brand-cyan" />
-                AI Magic Tools
-              </h4>
-              <p className="text-[10px] text-white/60 mb-6 font-medium leading-relaxed">Remove backgrounds instantly using our on-device edge AI models.</p>
-              
-              <button 
-                onClick={handleRemoveBg}
-                disabled={removingBg}
-                className="w-full bg-white text-brand-dark font-black py-3.5 rounded-2xl flex items-center justify-center gap-3 hover:bg-brand-cyan hover:text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
-              >
-                {removingBg ? (
-                   <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    <span>Processing...</span>
-                   </>
-                ) : (
-                  <>
-                    <Sparkles className="h-5 w-5 text-brand-pink group-hover:rotate-12 transition-transform" />
-                    <span>Remove Background</span>
-                  </>
-                )}
-              </button>
-           </section>
+
 
            <section>
               <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">Visual Filters</label>

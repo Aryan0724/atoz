@@ -32,7 +32,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           setUser(session.user);
-          await fetchProfile(session.user.id);
+          // Fetch profile in parallel, don't block initial user state
+          fetchProfile(session.user.id);
         }
       } catch (error) {
         console.error('Error checking auth session:', error);
@@ -49,11 +50,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setUser(currentUser);
       
       if (currentUser) {
-        await fetchProfile(currentUser.id);
+        fetchProfile(currentUser.id);
       } else {
         setProfile(null);
       }
       
+      // Ensure loading is false as soon as we have a session state
       setLoading(false);
     });
 
@@ -71,7 +73,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         .single();
       
       if (error) {
-        // If profile doesn't exist yet (e.g., first login), it might error
         if (error.code !== 'PGRST116') {
           console.error('Error fetching profile:', error);
         }
@@ -85,40 +86,39 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   const signOut = async () => {
     try {
-      console.log('[Auth] Initiating sign out...');
-      
-      // 1. CLEAR LOCALLY FIRST (Immediate)
+      // 1. CLEAR LOCALLY IMMEDIATELY (Optimistic UI)
+      setUser(null);
+      setProfile(null);
+      setLoading(true); // Show loading while signing out if needed
+
       if (typeof window !== 'undefined') {
-        const keysToRemove: string[] = ['atoz_demo_admin'];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && (key.includes('supabase') || key.includes('sb-') || key.includes('atoz'))) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach(k => localStorage.removeItem(k));
+        // Clear all relevant storage
+        localStorage.clear();
         sessionStorage.clear();
         
-        // Optimistically set states to null to trigger UI updates immediately
-        setUser(null);
-        setProfile(null);
+        // Clear cookies (best effort)
+        document.cookie.split(";").forEach((c) => {
+          document.cookie = c
+            .replace(/^ +/, "")
+            .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
       }
 
-      // 2. Official signOut with 3s Timeout
+      // 2. Perform Network SignOut with a very short timeout
       const performSignOut = async () => {
         const signoutPromise = supabase.auth.signOut();
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Signout Timeout')), 3000));
+        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ error: null }), 800));
         return Promise.race([signoutPromise, timeoutPromise]);
       };
 
-      await performSignOut().catch(err => console.warn('[Auth] Network signout warn:', err));
+      await performSignOut();
 
     } catch (err) {
       console.error('Sign out error:', err);
     } finally {
-      // 3. Force hard reload to home page, guaranteed to happen
+      // 3. Force hard reload to home page
       if (typeof window !== 'undefined') {
-        window.location.replace('/');
+        window.location.href = '/';
       }
     }
   };

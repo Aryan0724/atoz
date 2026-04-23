@@ -31,6 +31,14 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // Only run auth checks for protected routes to improve performance
+  const isProtected = request.nextUrl.pathname.startsWith('/admin') || 
+                      request.nextUrl.pathname.startsWith('/dashboard');
+
+  if (!isProtected) {
+    return response;
+  }
+
   const { data: { user } } = await supabase.auth.getUser()
 
   // Protect /admin routes
@@ -39,7 +47,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    // Role check
+    // Role check - only for admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')

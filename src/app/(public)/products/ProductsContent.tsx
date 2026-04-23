@@ -5,11 +5,12 @@ import Image from 'next/image';
 import SectionHeading from '@/components/common/SectionHeading';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import ProductCard from '@/components/products/ProductCard';
-import { Search, ChevronDown, Filter, X, Sparkles, LayoutGrid, Shirt, Coffee, PenTool, Star, Briefcase } from 'lucide-react';
+import { Search, ChevronDown, Filter, X, Sparkles, LayoutGrid, Shirt, Coffee, PenTool, Star, Briefcase, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '@/lib/supabase/types';
 import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import TrustBadges from '@/components/common/TrustBadges';
 
 const categories = ['All', 'Apparel', 'Drinkware', 'Stationery', 'Lifestyle', 'Corporate Gifting'];
 const sortOptions = [
@@ -83,7 +84,44 @@ export default function ProductsContent({ initialProducts }: { initialProducts: 
       <div className="max-w-7xl mx-auto px-6">
         <Breadcrumbs items={[{ label: 'Catalog' }]} />
 
-        <div className="mt-16 flex flex-col lg:flex-row gap-12">
+        {/* ─── ACTIVE DISCOUNTS BANNER ─── */}
+        <div className="mt-8 relative overflow-hidden bg-brand-dark rounded-[32px] p-8 md:p-10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 group">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-pink/20 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/3 group-hover:scale-110 transition-transform duration-700" />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-brand-cyan/20 blur-[80px] rounded-full translate-y-1/3 -translate-x-1/3 group-hover:scale-110 transition-transform duration-700" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left w-full">
+            <div className="w-16 h-16 bg-brand-pink text-brand-dark rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-brand-pink/20 rotate-3 group-hover:-rotate-3 transition-transform">
+              <Tag className="h-8 w-8" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 justify-center md:justify-start mb-2">
+                <span className="px-3 py-1 bg-white/10 text-brand-pink text-[10px] font-black uppercase tracking-widest rounded-full border border-brand-pink/20">Active Offer</span>
+                <span className="px-3 py-1 bg-white/10 text-brand-cyan text-[10px] font-black uppercase tracking-widest rounded-full border border-brand-cyan/20">Bulk Savings</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+                Unlock <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-cyan italic">Volume Discounts</span> automatically.
+              </h2>
+              <p className="text-gray-400 font-medium mt-3 max-w-xl text-sm md:text-base leading-relaxed">
+                Whether you're stocking up on premium apparel or printing a massive batch of corporate ID cards using our VDP engine, our smart cart applies massive discounts as your quantity increases.
+              </p>
+            </div>
+          </div>
+          
+          <div className="relative z-10 shrink-0 w-full md:w-auto">
+             <div className="p-6 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md grid grid-cols-2 gap-x-8 gap-y-4">
+                <div>
+                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Buy 50+</p>
+                   <p className="text-2xl font-black text-white italic">15% OFF</p>
+                </div>
+                <div>
+                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Buy 200+</p>
+                   <p className="text-2xl font-black text-brand-cyan italic">30% OFF</p>
+                </div>
+             </div>
+          </div>
+        </div>
+
+        <div className="mt-12 flex flex-col lg:flex-row gap-12">
           {/* Desktop Filter Sidebar */}
           <aside className="hidden lg:block w-64 shrink-0 sticky top-32 h-fit">
             <div className="flex items-center gap-3 mb-8">
@@ -355,6 +393,10 @@ export default function ProductsContent({ initialProducts }: { initialProducts: 
             </>
           )}
         </AnimatePresence>
+        {/* Trust Badges */}
+        <div className="mt-20 -mx-6">
+          <TrustBadges />
+        </div>
       </div>
     </div>
   );

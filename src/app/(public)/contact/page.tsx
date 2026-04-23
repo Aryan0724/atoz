@@ -37,14 +37,14 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto relative z-10 text-center">
            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-pink/5 border border-brand-pink/10 text-brand-pink text-[10px] font-black uppercase tracking-[0.2em] mb-8">
               <Sparkles className="w-3.5 h-3.5" />
-              Strategic Partnerships
+              Contact Us
            </div>
            <h1 className="text-5xl md:text-7xl font-black text-brand-dark tracking-tighter mb-8 leading-[0.95]">
-             Elevate Your <br/>
-             <span className="text-brand-pink underline decoration-brand-cyan/20 decoration-8 underline-offset-[12px]">Brand Identity.</span>
+             Talk to Our <br/>
+             <span className="text-brand-pink underline decoration-brand-cyan/20 decoration-8 underline-offset-[12px]">Experts.</span>
            </h1>
            <p className="text-gray-400 font-bold text-xl leading-relaxed max-w-2xl mx-auto">
-             Get expert advice on custom branding, bulk production, and global logistics. Our specialists are ready to assist you in making a lasting impression.
+             Get help with your custom printing and bulk orders. Our team is ready to assist you.
            </p>
         </div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-brand-pink/5 to-transparent -z-10"></div>
@@ -60,7 +60,7 @@ export default function ContactPage() {
                  </div>
               </div>
 
-              <h2 className="text-3xl font-black text-brand-dark mb-8 tracking-tight">Send an Inquiry</h2>
+              <h2 className="text-3xl font-black text-brand-dark mb-8 tracking-tight">Contact Us</h2>
               
               <form onSubmit={handleSubmit} className="space-y-6">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -87,10 +87,10 @@ export default function ContactPage() {
                  <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Subject</label>
                     <select className="w-full px-8 py-5 rounded-3xl bg-gray-50 border-transparent focus:bg-white focus:border-brand-pink/20 transition-all outline-none font-bold text-brand-dark appearance-none">
-                       <option>Bulk Order Inquiry</option>
-                       <option>Dropshipping Partnership</option>
-                       <option>Custom Packaging Request</option>
-                       <option>Other Business Enquiry</option>
+                       <option>Large Order</option>
+                       <option>Partnership</option>
+                       <option>Custom Packaging</option>
+                       <option>Other Question</option>
                     </select>
                  </div>
 
@@ -109,7 +109,7 @@ export default function ContactPage() {
                    className="w-full py-6 bg-brand-dark text-white rounded-full font-black text-xl hover:bg-brand-pink hover:shadow-2xl hover:shadow-pink-200 transition-all active:scale-95 flex items-center justify-center gap-4"
                  >
                    {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
-                   Launch Inquiry
+                   Send Message
                  </button>
               </form>
            </div>
@@ -117,7 +117,7 @@ export default function ContactPage() {
            {/* Contact Info */}
            <div className="space-y-12 py-8">
               <div>
-                 <h2 className="text-3xl font-black text-brand-dark mb-4 tracking-tight">Direct Connections</h2>
+                 <h2 className="text-3xl font-black text-brand-dark mb-4 tracking-tight">How to Reach Us</h2>
                  <p className="text-gray-400 font-medium max-w-sm">We&apos;re based in the heart of Delhi&apos;s printing district, ready to serve nationwide.</p>
               </div>
 
@@ -138,7 +138,7 @@ export default function ContactPage() {
                        <Phone className="h-8 w-8" />
                     </div>
                     <div>
-                       <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Call Expertise</p>
+                       <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Call Us</p>
                        <p className="text-xl font-black text-brand-dark tracking-tight">+91 999 000 1234</p>
                        <p className="text-sm text-gray-400 font-bold">Mon - Sat, 10 AM - 7 PM</p>
                     </div>
@@ -149,7 +149,7 @@ export default function ContactPage() {
                        <MapPin className="h-8 w-8" />
                     </div>
                     <div>
-                       <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Production HQ</p>
+                       <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Our Office</p>
                        <p className="text-xl font-black text-brand-dark tracking-tight">Okhla Industrial Area, Phase II</p>
                        <p className="text-sm text-gray-400 font-bold">New Delhi, India - 110020</p>
                     </div>
@@ -169,7 +169,7 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-brand-dark tracking-tight uppercase">Trusted by 500+ Corporate Partners</h3>
+                  <h3 className="text-lg font-black text-brand-dark tracking-tight uppercase">Trusted by 500+ Businesses</h3>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Excellence in production & delivery</p>
                 </div>
               </div>

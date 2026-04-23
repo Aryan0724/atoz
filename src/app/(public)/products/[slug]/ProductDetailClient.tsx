@@ -20,7 +20,9 @@ import {
   ShoppingCart,
   X,
   Upload,
-  PenTool
+  PenTool,
+  Star,
+  User
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '@/components/products/ProductCard';
@@ -33,6 +35,7 @@ import { Product } from '@/lib/supabase/types';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import Button from '@/components/common/Button';
+import { trackViewContent, trackAddToCart } from '@/lib/analytics/meta-pixel';
 
 export default function ProductDetailClient({ product: initialProduct }: { product: Product }) {
   const params = useParams();
@@ -105,7 +108,10 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
     };
 
     fetchRelatedData();
-  }, [slug, initialProduct.category, initialProduct.id]);
+    
+    // Meta Ads Tracking
+    trackViewContent(initialProduct);
+  }, [slug, initialProduct.category, initialProduct.id, initialProduct]);
 
   if (loading) {
     return (
@@ -121,13 +127,20 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
   }
 
   const handleAddToCart = () => {
-    addItem({
+    const item = {
       id: `${product.id}-${selectedQuality}`,
       product: product,
       quantity: quantity,
       quality_level: selectedQuality,
       design_data: {},
-    });
+      unitPrice: product.base_price + (product.quality_prices?.[selectedQuality] || 0)
+    };
+    
+    addItem(item);
+    
+    // Meta Ads Tracking
+    trackAddToCart(item);
+    
     toast.success(`${product.name} added to cart!`);
   };
 
@@ -191,15 +204,15 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
             <div className="mt-10 grid grid-cols-3 gap-6">
               <div className="flex flex-col items-center p-5 bg-gray-50 rounded-2xl border border-gray-100/50">
                 <Truck className="h-5 w-5 text-brand-dark mb-2.5 opacity-40" />
-                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Express Logistics</span>
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Fast Shipping</span>
               </div>
               <div className="flex flex-col items-center p-5 bg-gray-50 rounded-2xl border border-gray-100/50">
                 <ShieldCheck className="h-5 w-5 text-brand-dark mb-2.5 opacity-40" />
-                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Quality Audited</span>
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Quality Checked</span>
               </div>
               <div className="flex flex-col items-center p-5 bg-gray-50 rounded-2xl border border-gray-100/50">
                 <RotateCcw className="h-5 w-5 text-brand-dark mb-2.5 opacity-40" />
-                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Batch Returns</span>
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Easy Returns</span>
               </div>
             </div>
           </div>
@@ -270,7 +283,7 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
             {/* Quantity Selector */}
             <div className="mb-12">
               <label className="block text-[10px] font-black text-gray-400 mb-5 uppercase tracking-widest">
-                Unit Volume <span className="text-brand-pink italic ml-2"> (Min. {product.moq} Units)</span>
+                Quantity <span className="text-brand-pink italic ml-2"> (Min. {product.moq} Units)</span>
               </label>
               <div className="flex flex-col sm:flex-row sm:items-center gap-8">
                 <div className="inline-flex items-center border border-gray-100 rounded-xl p-1 bg-gray-50/50">
@@ -325,7 +338,7 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                 className="w-full flex items-center justify-center gap-3 py-6 rounded-xl"
                 leftIcon={<Zap className="h-4 w-4 text-brand-pink" />}
               >
-                Configure Project
+                Customize Now
               </Button>
               <Button 
                 onClick={handleAddToCart}
@@ -362,7 +375,7 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
 
         {/* Product Specs area */}
         <div className="mt-24">
-          <h2 className="text-3xl font-bold text-brand-dark mb-12 tracking-tight">Product Specifications</h2>
+          <h2 className="text-3xl font-bold text-brand-dark mb-12 tracking-tight">Product Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
@@ -392,6 +405,69 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                 ))}
               </ul>
             </div>
+          </div>
+        </div>
+
+        {/* Customer Intelligence (Reviews) */}
+        <div className="mt-32">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+            <div>
+              <div className="inline-flex items-center gap-2 py-1.5 px-4 bg-brand-pink/5 text-brand-pink font-black text-[9px] tracking-[0.3em] uppercase rounded-full mb-4 border border-brand-pink/10">
+                <Star className="w-3 h-3 fill-current" />
+                Verified Community Intelligence
+              </div>
+              <h2 className="text-4xl font-black text-brand-dark uppercase italic tracking-tighter leading-none">
+                Customer <span className="text-brand-pink">Insights</span>
+              </h2>
+            </div>
+            <div className="flex items-center gap-6">
+               <div className="text-right">
+                  <div className="flex items-center gap-1 mb-1">
+                     {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 text-brand-pink fill-current" />)}
+                  </div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">4.9 Aggregate Score</p>
+               </div>
+               <button className="bg-brand-dark text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95">
+                  Write a Report
+               </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              { name: "Rahul S.", rating: 5, text: "The archival ink quality is insane. Colors are deep and exact. Perfect for our agency merch.", role: "Creative Director" },
+              { name: "Ananya K.", rating: 5, text: "Fastest turnaround in India. We ordered 200 hoodies and they arrived in 3 days. Superb.", role: "Event Manager" },
+              { name: "Vikram M.", rating: 4, text: "The online designer is very intuitive. Quality is top-notch. Highly recommended for startups.", role: "Founder" }
+            ].map((review, idx) => (
+              <motion.div 
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-gray-50 rounded-[40px] p-10 border border-transparent hover:border-gray-100 hover:bg-white hover:shadow-2xl transition-all group"
+              >
+                 <div className="flex items-center gap-4 mb-8">
+                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-brand-dark shadow-sm group-hover:bg-brand-pink group-hover:text-white transition-all">
+                       <User className="w-6 h-6" />
+                    </div>
+                    <div>
+                       <h4 className="text-[11px] font-black text-brand-dark uppercase tracking-widest">{review.name}</h4>
+                       <p className="text-[9px] font-bold text-gray-300 uppercase tracking-tighter">{review.role}</p>
+                    </div>
+                 </div>
+                 <div className="flex items-center gap-1 mb-6">
+                    {[1,2,3,4,5].map(i => <Star key={i} className={cn("w-3 h-3 fill-current", i <= review.rating ? "text-brand-pink" : "text-gray-200")} />)}
+                 </div>
+                 <p className="text-sm text-gray-500 font-medium leading-relaxed italic uppercase tracking-wide">
+                    "{review.text}"
+                 </p>
+                 <div className="mt-8 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                    <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest">Verified Transaction</span>
+                 </div>
+              </motion.div>
+            ))}
           </div>
         </div>
 
@@ -445,8 +521,8 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                    <div className="w-16 h-16 bg-brand-pink/10 rounded-3xl flex items-center justify-center text-brand-pink mb-8">
                       <Zap className="w-8 h-8" />
                    </div>
-                   <h2 className="text-3xl font-bold text-brand-dark mb-4 tracking-tight">Setup Your Project</h2>
-                   <p className="text-gray-500 font-semibold uppercase text-[10px] tracking-widest mb-10 opacity-70">Choose how you want to initiate your customization process.</p>
+                   <h2 className="text-3xl font-bold text-brand-dark mb-4 tracking-tight">Start Designing</h2>
+                   <p className="text-gray-500 font-semibold uppercase text-[10px] tracking-widest mb-10 opacity-70">Choose how you want to start your design.</p>
                    
                    <div className="grid gap-4">
                       <button 
@@ -457,8 +533,8 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                             <Upload className="w-6 h-6" />
                          </div>
                          <div className="flex-1">
-                            <h4 className="font-bold text-lg mb-1">Import & Edit</h4>
-                            <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">Upload your existing design asset</p>
+                            <h4 className="font-bold text-lg mb-1">Upload My Design</h4>
+                            <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">Upload a file from your computer</p>
                          </div>
                          <ChevronRight className="w-5 h-5 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                       </button>
@@ -471,8 +547,8 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                             <PenTool className="w-6 h-6" />
                          </div>
                          <div className="flex-1">
-                            <h4 className="font-bold text-lg mb-1">Make from Scratch</h4>
-                            <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">Start a new blank design project</p>
+                            <h4 className="font-bold text-lg mb-1">Design Online</h4>
+                            <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">Use our online design tool</p>
                          </div>
                          <ChevronRight className="w-5 h-5 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                       </button>

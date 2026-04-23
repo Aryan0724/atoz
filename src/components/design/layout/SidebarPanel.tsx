@@ -10,9 +10,10 @@ import { podGraphics, podGraphicCategories } from '@/lib/data/podGraphics';
 import { toast } from 'sonner';
 import IconifyTab from '@/components/design/controls/tabs/IconifyTab';
 import { 
-  Type, Loader2, Upload, Plus, Search, LayoutGrid, X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes, Wand2, History, RefreshCcw, Download, Trash2, ArrowRight, Layers, Lock, Unlock, Eye, EyeOff, Minus
+  Type, Loader2, Upload, Plus, Search, LayoutGrid, X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes, Wand2, History, RefreshCcw, Download, Trash2, ArrowRight, Layers, Lock, Unlock, Eye, EyeOff, Minus, ShieldAlert
 } from 'lucide-react';
 import StockTab from '@/components/design/controls/tabs/StockTab';
+import VdpDataTab from '@/components/design/controls/tabs/VdpDataTab';
 import { aiStylePills, aiSubjectIdeas } from '@/lib/data/AiPrompts';
 
 // ─────────────────────────────────────────────────────────
@@ -142,6 +143,15 @@ interface SidebarPanelProps {
   onClearDesign?: () => void;
   qualityPrices?: Record<string, number>;
   colorVariants?: { name: string, hex: string, image_url: string }[];
+  designMode?: string;
+  vdpData?: { headers: string[], rows: any[] } | null;
+  vdpRowIndex?: number;
+  onVdpDataLoaded?: (headers: string[], rows: any[]) => void;
+  onVdpRowChange?: (index: number) => void;
+  onVdpClear?: () => void;
+  pageData?: any[];
+  currentPageIndex?: number;
+  onPageChange?: (index: number) => void;
 }
 
 const SidebarPanel = ({ 
@@ -169,7 +179,16 @@ const SidebarPanel = ({
   basePrice = 0,
   productId = '',
   qualityPrices = {},
-  colorVariants = []
+  colorVariants = [],
+  designMode = 'standard',
+  vdpData = null,
+  vdpRowIndex = 0,
+  onVdpDataLoaded,
+  onVdpRowChange,
+  onVdpClear,
+  pageData = [],
+  currentPageIndex = 0,
+  onPageChange
 }: SidebarPanelProps) => {
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -325,6 +344,8 @@ const SidebarPanel = ({
     'iconify': 'Icon Library',
     'unsplash': 'Stock Photos',
     'pexels': 'Stock Photos',
+    'data': 'Data Import (VDP)',
+    'pages': 'Pages (Multipage)',
   };
 
   const filteredTemplates = (activeTemplateCat === 'All' 
@@ -763,12 +784,73 @@ const SidebarPanel = ({
                 </div>
                 <div className={cn(
                   "text-[8px] font-black px-2 py-1 rounded-lg uppercase tracking-tighter",
-                  feat.available && (feat.label !== 'Background Remover' || activeObject?.type === 'image') ? "text-green-600 bg-green-50" : "text-gray-400 bg-gray-50"
+                  feat.available ? "text-green-600 bg-green-50" : "text-gray-400 bg-gray-50"
                 )}>
                   {feat.action}
                 </div>
               </button>
             ))}
+          </div>
+        )}
+
+        {/* ─── DATA TAB (VDP) ────────────────────────────────── */}
+        {activeTab === 'data' && (
+          <VdpDataTab 
+            currentData={vdpData}
+            currentRowIndex={vdpRowIndex}
+            onDataLoaded={onVdpDataLoaded || (() => {})}
+            onRowChange={onVdpRowChange || (() => {})}
+            onClear={onVdpClear || (() => {})}
+          />
+        )}
+
+        {/* ─── PAGES TAB (MULTIPAGE) ─────────────────────────── */}
+        {activeTab === 'pages' && (
+          <div className="p-5 space-y-6">
+            <div className="flex items-center justify-between mb-2">
+              <SectionLabel>Calendar Pages</SectionLabel>
+              <button className="text-[9px] font-black text-brand-pink uppercase tracking-widest flex items-center gap-1.5 bg-brand-pink/5 px-3 py-1.5 rounded-lg">
+                <Plus className="h-3 w-3" /> Add Page
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {pageData.map((page, index) => (
+                <button 
+                  key={index} 
+                  onClick={() => onPageChange?.(index)}
+                  className={cn(
+                    "aspect-[4/5] rounded-[24px] border-2 transition-all relative group overflow-hidden bg-gray-50 flex flex-col",
+                    currentPageIndex === index ? "border-brand-pink shadow-lg shadow-brand-pink/10" : "border-transparent hover:border-gray-200"
+                  )}
+                >
+                  <div className="absolute top-2 left-2 z-10 w-6 h-6 bg-white/90 backdrop-blur-md rounded-lg flex items-center justify-center text-[10px] font-black text-brand-dark shadow-sm">
+                    {index + 1}
+                  </div>
+                  {page && page.objects && page.objects.length > 0 ? (
+                    <div className="w-full h-full flex items-center justify-center bg-brand-dark/5">
+                      <Layers className="h-6 w-6 text-brand-dark/20" />
+                    </div>
+                  ) : (
+                    <div className="w-full h-full bg-white flex items-center justify-center text-[8px] font-bold text-gray-300 uppercase tracking-widest italic">
+                      Empty
+                    </div>
+                  )}
+                  {index === 0 && <div className="absolute bottom-2 left-0 right-0 text-center text-[8px] font-bold text-brand-pink uppercase tracking-widest">Cover</div>}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all" />
+                </button>
+              ))}
+            </div>
+
+            <div className="p-6 bg-brand-olive/5 rounded-[32px] border border-brand-olive/10 flex gap-4 items-center">
+               <div className="w-10 h-10 bg-brand-olive rounded-xl flex items-center justify-center shrink-0">
+                  <LayoutGrid className="h-5 w-5 text-white" />
+               </div>
+               <div>
+                  <p className="text-[10px] font-black text-brand-olive uppercase tracking-tight italic">Page Manager</p>
+                  <p className="text-[9px] font-medium text-gray-500 leading-tight">Manage layout for each month individually.</p>
+               </div>
+            </div>
           </div>
         )}
 

@@ -2,22 +2,39 @@
 
 import React, { useState } from 'react';
 import SectionHeading from '@/components/common/SectionHeading';
-import { Search, ArrowRight, ShieldCheck, Zap, Sparkles, TrendingUp, Info, Calculator } from 'lucide-react';
+import { Search, ArrowRight, ShieldCheck, Zap, Sparkles, TrendingUp, Info, Calculator, Tag, Copy, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCategoryIcon } from '@/lib/data/icons';
+import { toast } from 'sonner';
 
-export default function PricingClient({ initialCategories }: { initialCategories: any[] }) {
+export default function PricingClient({ 
+  initialCategories, 
+  initialCoupons = [] 
+}: { 
+  initialCategories: any[], 
+  initialCoupons?: any[] 
+}) {
   const [activeTab, setActiveTab] = useState(initialCategories[0]?.id || '');
   const [searchQuery, setSearchQuery] = useState('');
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   
   // Estimator State
   const [estCategory, setEstCategory] = useState(initialCategories[0]?.id || '');
   const selectedCatObj = initialCategories.find(c => c.id === estCategory) || initialCategories[0] || { items: [] };
   const [estProduct, setEstProduct] = useState(selectedCatObj.items?.[0]?.name || '');
   const [estQty, setEstQty] = useState<number>(50);
+
+  const handleCopy = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    toast.success(`Coupon ${code} copied!`);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const activeCategory = initialCategories.find(c => c.id === activeTab);
 
   const calculateEstimate = () => {
     const product = selectedCatObj.items?.find((i: any) => i.name === estProduct);
@@ -39,14 +56,12 @@ export default function PricingClient({ initialCategories }: { initialCategories
     return unitPrice * estQty;
   };
 
-  const activeCategory = initialCategories.find(c => c.id === activeTab);
-
   if (!initialCategories || initialCategories.length === 0) {
      return <div className="min-h-screen pt-32 pb-24 flex justify-center text-gray-500">No pricing data configured.</div>;
   }
 
   return (
-    <div className="bg-[#F9F9F7] min-h-screen pt-32 pb-24 relative overflow-hidden text-brand-dark selection:bg-brand-pink/10 selection:text-brand-pink">
+    <div className="bg-[#F9F9F7] min-h-screen pt-40 pb-24 relative overflow-hidden text-brand-dark selection:bg-brand-pink/10 selection:text-brand-pink">
       {/* Premium Background elements */}
       <div className="absolute top-0 inset-0 pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-brand-pink/5 blur-[150px]" />
@@ -67,6 +82,73 @@ export default function PricingClient({ initialCategories }: { initialCategories
             className="text-brand-dark"
           />
         </motion.div>
+
+        {/* New Prominent Discounts Section (TOP ATTRACTION) */}
+        {initialCoupons.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="mt-12 bg-brand-dark rounded-[48px] p-8 md:p-12 shadow-2xl relative overflow-hidden group border border-white/5"
+          >
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-pink/10 rounded-full blur-[150px] -mr-64 -mt-64" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-brand-cyan/5 rounded-full blur-[120px] -ml-48 -mb-48" />
+            
+            <div className="relative z-10">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+                <div>
+                  <div className="inline-flex items-center gap-2 py-1.5 px-4 bg-brand-pink/10 text-brand-pink font-black text-[10px] tracking-[0.3em] uppercase rounded-full mb-4 border border-brand-pink/20">
+                    <Sparkles className="w-3.5 h-3.5 fill-current" />
+                    High-Fidelity Offer Zone
+                  </div>
+                  <h2 className="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-[0.9] py-2">
+                    Active <span className="text-brand-pink">Incentives</span>
+                  </h2>
+                </div>
+                <div className="hidden md:block text-right">
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Total Active Intel</p>
+                  <p className="text-4xl font-black text-white">{initialCoupons.length}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {initialCoupons.map((coupon) => (
+                  <div 
+                    key={coupon.code}
+                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 hover:bg-white/10 transition-all group/coupon relative overflow-hidden"
+                  >
+                    <div className="flex justify-between items-start mb-6 relative z-10">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                           <div className="w-2 h-2 rounded-full bg-brand-pink animate-pulse" />
+                           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-pink">
+                            {coupon.discount_type === 'percentage' ? `${coupon.discount_value}% Discount` : `₹${coupon.discount_value} Savings`}
+                          </span>
+                        </div>
+                        <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter">{coupon.code}</h4>
+                      </div>
+                      <button 
+                        onClick={() => handleCopy(coupon.code)}
+                        className="h-12 w-12 md:h-14 md:w-14 shrink-0 bg-white/5 hover:bg-brand-pink rounded-2xl flex items-center justify-center text-white/40 hover:text-white transition-all shadow-2xl group-hover/coupon:scale-110 active:scale-95 ml-4"
+                      >
+                        {copiedCode === coupon.code ? <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6" /> : <Copy className="h-5 w-5 md:h-6 md:w-6" />}
+                      </button>
+                    </div>
+                    <p className="text-xs text-white/50 font-bold leading-relaxed uppercase tracking-wider mb-6 relative z-10">
+                      {coupon.description || `Apply this code at checkout to secure your ${coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `₹${coupon.discount_value}`} enterprise-tier deduction.`}
+                    </p>
+                    {coupon.min_order_value > 0 && (
+                      <div className="pt-6 border-t border-white/5 flex items-center justify-between relative z-10">
+                         <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Eligibility Threshold</span>
+                         <span className="text-[10px] font-black text-brand-pink uppercase tracking-widest">₹{coupon.min_order_value}+</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Dynamic Controls Bar */}
         <motion.div 
@@ -117,7 +199,7 @@ export default function PricingClient({ initialCategories }: { initialCategories
           </div>
         </motion.div>
 
-        {/* Main Grid: Tables vs Estimator */}
+        {/* Main Grid */}
         <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-10">
           
           {/* Main Pricing Experience */}
@@ -141,7 +223,6 @@ export default function PricingClient({ initialCategories }: { initialCategories
                       transition={{ delay: idx * 0.1 }}
                       className="group relative bg-white border border-gray-100 rounded-[40px] p-8 md:p-10 transition-all duration-500 hover:shadow-xl hover:shadow-gray-200/50 overflow-hidden"
                     >
-                      {/* Suble pink glow on hover */}
                       <div className="absolute top-0 right-0 w-32 h-32 bg-brand-pink/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                       
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
@@ -187,12 +268,12 @@ export default function PricingClient({ initialCategories }: { initialCategories
           </div>
 
           {/* Premium Estimator Sidebar */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 space-y-8">
             <motion.div 
                initial={{ opacity: 0, x: 30 }}
                animate={{ opacity: 1, x: 0 }}
                transition={{ duration: 0.8, delay: 0.3 }}
-               className="sticky top-32 bg-white rounded-[48px] p-10 shadow-2xl border border-gray-100 relative overflow-hidden group"
+               className="bg-white rounded-[48px] p-10 shadow-2xl border border-gray-100 relative overflow-hidden group"
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-brand-pink/5 rounded-full blur-3xl -mr-20 -mt-20" />
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-olive/5 rounded-full blur-[80px] -ml-20 -mb-20" />
@@ -256,11 +337,6 @@ export default function PricingClient({ initialCategories }: { initialCategories
                         onChange={(e) => setEstQty(Number(e.target.value))}
                         className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand-pink"
                       />
-                      <div className="flex justify-between mt-2 px-1">
-                          <span className="text-[9px] font-bold text-gray-300">10</span>
-                          <span className="text-[9px] font-bold text-gray-300">500</span>
-                          <span className="text-[9px] font-bold text-gray-300">1000+</span>
-                      </div>
                     </div>
                   </div>
                 </div>

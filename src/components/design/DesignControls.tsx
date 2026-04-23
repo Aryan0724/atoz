@@ -31,7 +31,6 @@ interface DesignControlsProps {
   canUndo: boolean;
   canRedo: boolean;
   onDownload: () => void;
-  onRemoveBackground: () => Promise<boolean>;
   onLoadTemplate?: (json: any) => void;
   layers: any[];
 }
@@ -50,7 +49,6 @@ const DesignControls = ({
   onDeleteActiveObject,
   onBringForward,
   onSendBackward,
-  onRemoveBackground,
   onLoadTemplate,
   layers
 }: DesignControlsProps) => {
@@ -114,7 +112,6 @@ const DesignControls = ({
             onDeleteActiveObject={onDeleteActiveObject}
             onBringForward={onBringForward}
             onSendBackward={onSendBackward}
-            onRemoveBackground={onRemoveBackground}
           />
         )}
 

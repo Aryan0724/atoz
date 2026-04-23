@@ -24,6 +24,7 @@ import { createOrder } from '@/lib/supabase/orderActions';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { trackInitiateCheckout, trackPurchase } from '@/lib/analytics/meta-pixel';
 
 type Step = 'shipping' | 'review' | 'payment';
 
@@ -44,8 +45,10 @@ export default function CheckoutPage() {
     pincode: '',
   });
   const [promoCode, setPromoCode] = useState('');
+  const [promoData, setPromoData] = useState<any>(null); // real coupon from DB
   const [isPromoValid, setIsPromoValid] = useState<boolean | null>(null);
   const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>('standard');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'Online' | 'COD'>('Online');
 
   const { user } = useAuth();
 
@@ -55,6 +58,11 @@ export default function CheckoutPage() {
     setMounted(true);
     if (user) {
       loadUserProfile();
+    }
+    
+    // Meta Ads Tracking - Initiate Checkout
+    if (items.length > 0) {
+      trackInitiateCheckout(getTotalPrice(), items.length);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -125,19 +133,53 @@ export default function CheckoutPage() {
   }
 
   const subtotal = getTotalPrice();
-  const promoDiscount = isPromoValid ? Math.round(subtotal * 0.1) : 0; // 10% discount for demo
+  // Calculate promo discount from real DB data or fallback
+  const promoDiscountPct = promoData?.discount_type === 'percentage' ? promoData.discount_value : 0;
+  const promoDiscountFixed = promoData?.discount_type === 'fixed' ? promoData.discount_value : 0;
+  const promoDiscount = isPromoValid
+    ? promoDiscountFixed > 0
+      ? Math.min(promoDiscountFixed, subtotal)
+      : Math.round(subtotal * (promoDiscountPct / 100))
+    : 0;
   const baseShipping = subtotal > 5000 ? 0 : 250;
   const shipping = shippingMethod === 'express' ? baseShipping + 500 : baseShipping;
   const tax = Math.round((subtotal - promoDiscount) * 0.18);
   const total = subtotal - promoDiscount + shipping + tax;
 
-  const handlePromoApply = () => {
-    if (promoCode.toUpperCase() === 'ATOZ10') {
+  const handlePromoApply = async () => {
+    if (!promoCode.trim()) return;
+    try {
+      const { data, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', promoCode.toUpperCase())
+        .eq('is_active', true)
+        .single();
+
+      if (error || !data) {
+        setIsPromoValid(false);
+        setPromoData(null);
+        toast.error('Invalid or expired promo code.');
+        return;
+      }
+      if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        setIsPromoValid(false);
+        setPromoData(null);
+        toast.error('This promo code has expired.');
+        return;
+      }
+      if (data.min_order_amount && subtotal < data.min_order_amount) {
+        setIsPromoValid(false);
+        setPromoData(null);
+        toast.error(`Min order of ₹${data.min_order_amount} required for this code.`);
+        return;
+      }
       setIsPromoValid(true);
-      toast.success("Promo Code Applied! 10% Discount.");
-    } else {
+      setPromoData(data);
+      toast.success(`${data.code} applied! ${data.description}`);
+    } catch {
       setIsPromoValid(false);
-      toast.error("Invalid Promo Code.");
+      toast.error('Could not validate promo code.');
     }
   };
 
@@ -191,7 +233,6 @@ export default function CheckoutPage() {
         order_id: orderData.mock ? undefined : orderData.id,
         handler: async function (response: any) {
           try {
-            // Update attempt status to successful
             if (attemptIds.length > 0) {
               await supabase
                 .from('checkout_attempts')
@@ -201,15 +242,22 @@ export default function CheckoutPage() {
 
             for (const item of items) {
               await createOrder({
+                user_id: user?.id || null,
                 product_id: item.product.id,
                 quantity: item.quantity,
                 quality_level: item.quality_level,
                 design_data: item.design_data,
                 design_preview_url: item.design_preview_url,
-                total_price: (item.product.base_price || 0) * item.quantity,
+                total_price: item.unitPrice ? item.unitPrice * item.quantity : (item.product.base_price || 0) * item.quantity,
                 shipping_address: formData as any,
+                payment_method: 'Online',
+                payment_status: 'paid',
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
               });
             }
+            
+            trackPurchase(response.razorpay_order_id || 'manual', total, items);
             clearCart();
             router.push('/checkout/success');
           } catch (err) {
@@ -242,10 +290,36 @@ export default function CheckoutPage() {
     }
   };
 
+  const handlePlaceCODOrder = async () => {
+    setIsProcessing(true);
+    try {
+      for (const item of items) {
+        await createOrder({
+          user_id: user?.id || null,
+          product_id: item.product.id,
+          quantity: item.quantity,
+          quality_level: item.quality_level,
+          design_data: item.design_data,
+          design_preview_url: item.design_preview_url,
+          total_price: item.unitPrice ? item.unitPrice * item.quantity : (item.product.base_price || 0) * item.quantity,
+          shipping_address: formData as any,
+          payment_method: 'COD',
+          payment_status: 'pending_cod',
+        });
+      }
+      clearCart();
+      router.push('/checkout/success');
+    } catch (err) {
+      toast.error('Failed to place COD order. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const steps = [
-    { id: 'shipping', label: 'Identity', icon: <MapPin className="h-5 w-5" /> },
-    { id: 'review', label: 'Curation', icon: <ShoppingBag className="h-5 w-5" /> },
-    { id: 'payment', label: 'Finalize', icon: <CreditCard className="h-5 w-5" /> },
+    { id: 'shipping', label: 'Shipping', icon: <MapPin className="h-5 w-5" /> },
+    { id: 'review', label: 'Review', icon: <ShoppingBag className="h-5 w-5" /> },
+    { id: 'payment', label: 'Payment', icon: <CreditCard className="h-5 w-5" /> },
   ];
 
   return (
@@ -262,7 +336,7 @@ export default function CheckoutPage() {
              Back to Store
           </Link>
           <div className="flex items-end gap-4">
-             <h1 className="text-6xl font-black text-brand-dark tracking-tighter leading-none uppercase">Checkout <span className="text-brand-pink underline-offset-8 decoration-8 decoration-brand-pink/10 underline">Portal</span></h1>
+             <h1 className="text-6xl font-black text-brand-dark tracking-tighter leading-none uppercase">Check<span className="text-brand-pink underline-offset-8 decoration-8 decoration-brand-pink/10 underline">out</span></h1>
              <div className="h-2 w-20 bg-brand-pink rounded-full mb-2"></div>
           </div>
         </div>
@@ -316,8 +390,8 @@ export default function CheckoutPage() {
                           <MapPin className="text-brand-pink w-6 h-6" />
                        </div>
                        <div>
-                          <h2 className="text-2xl font-black text-brand-dark uppercase tracking-tight">Shipping Identity</h2>
-                          <p className="text-gray-500 font-bold text-xs uppercase tracking-widest mt-1">Delivery coordinates for your order</p>
+                          <h2 className="text-2xl font-black text-brand-dark uppercase tracking-tight">Shipping Details</h2>
+                          <p className="text-gray-500 font-bold text-xs uppercase tracking-widest mt-1">Where should we send your order?</p>
                        </div>
                     </div>
 
@@ -388,7 +462,7 @@ export default function CheckoutPage() {
                     <div className="space-y-6 pt-10 border-t border-gray-100">
                       <div className="flex items-center gap-3">
                          <Truck className="w-5 h-5 text-brand-pink" />
-                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Logistics Tier</span>
+                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Shipping Method</span>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <button 
@@ -404,7 +478,7 @@ export default function CheckoutPage() {
                               </div>
                               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Standard</span>
                            </div>
-                           <div className="font-black text-brand-dark text-lg uppercase italic leading-tight">Sea-Bridge Logistics</div>
+                           <div className="font-black text-brand-dark text-lg uppercase italic leading-tight">Standard Shipping</div>
                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">7-10 Working Days</p>
                         </button>
                         <button 
@@ -421,7 +495,7 @@ export default function CheckoutPage() {
                               </div>
                               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Express</span>
                            </div>
-                           <div className="font-black text-brand-dark text-lg uppercase italic leading-tight">Air-Lift Deployment</div>
+                           <div className="font-black text-brand-dark text-lg uppercase italic leading-tight">Express Delivery</div>
                            <p className="text-[10px] text-brand-cyan font-black uppercase tracking-widest mt-2">3-5 Working Days (+₹500)</p>
                         </button>
                       </div>
@@ -451,8 +525,8 @@ export default function CheckoutPage() {
                           <ShoppingBag className="text-brand-cyan w-6 h-6" />
                        </div>
                        <div>
-                          <h2 className="text-2xl font-black text-brand-dark italic uppercase tracking-tight">Curation Review</h2>
-                          <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">Verify your selected items and quantities</p>
+                          <h2 className="text-2xl font-black text-brand-dark italic uppercase tracking-tight">Order Review</h2>
+                          <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">Check your items before payment</p>
                        </div>
                     </div>
                     
@@ -520,45 +594,64 @@ export default function CheckoutPage() {
                           <CreditCard className="text-brand-lime w-6 h-6" />
                        </div>
                        <div>
-                          <h2 className="text-2xl font-black text-brand-dark uppercase tracking-tight">Finalize Transaction</h2>
-                          <p className="text-gray-500 font-bold text-xs uppercase tracking-widest mt-1">Verified secure global payment gateway</p>
+                          <h2 className="text-2xl font-black text-brand-dark uppercase tracking-tight">Secure Payment</h2>
+                          <p className="text-gray-500 font-bold text-xs uppercase tracking-widest mt-1">Safe and secure payment gateway</p>
                        </div>
                     </div>
                     
-                    <div className="space-y-8">
-                       <div className="p-10 rounded-[40px] border-2 border-brand-pink bg-pink-50/20 relative overflow-hidden group">
-                          <div className="relative z-10 flex items-center justify-between">
-                             <div className="flex items-center gap-6">
-                                <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500">
-                                  <CreditCard className="h-8 w-8 text-brand-pink" />
-                                </div>
-                                <div className="space-y-1">
-                                   <h4 className="font-black text-brand-dark text-xl tracking-tight uppercase italic">Razorpay Platinum</h4>
-                                   <p className="text-gray-400 text-xs font-black uppercase tracking-widest">UPI • Card • Netbanking • Wallet</p>
-                                </div>
-                             </div>
-                             <div className="h-8 w-8 rounded-full border-4 border-brand-pink flex items-center justify-center">
-                                <motion.div 
-                                  initial={{ scale: 0 }}
-                                  animate={{ scale: 1 }}
-                                  className="h-3 w-3 bg-brand-pink rounded-full" 
-                                />
-                             </div>
-                          </div>
-                          
-                          <div className="mt-8 pt-8 border-t border-brand-pink/10 relative z-10 grid grid-cols-2 gap-4">
-                             <div className="flex items-center gap-2 text-[10px] font-black text-brand-pink uppercase tracking-widest opacity-70">
-                                <ShieldCheck className="w-4 h-4" />
-                                Payment Security (PCI-DSS)
-                             </div>
-                             <div className="flex items-center gap-2 text-[10px] font-black text-brand-pink uppercase tracking-widest opacity-70">
-                                <Sparkles className="w-4 h-4" />
-                                Verified Merchant
-                             </div>
-                          </div>
+                    <div className="space-y-4">
+                       {/* Razorpay Option */}
+                       <button
+                         onClick={() => setSelectedPaymentMethod('Online')}
+                         className={cn(
+                           "w-full p-8 rounded-[32px] border-2 transition-all text-left relative overflow-hidden group",
+                           selectedPaymentMethod === 'Online' ? "border-brand-pink bg-pink-50/20" : "border-gray-100 bg-gray-50/50 hover:border-gray-200"
+                         )}
+                       >
+                         <div className="relative z-10 flex items-center justify-between">
+                            <div className="flex items-center gap-5">
+                               <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg">
+                                 <CreditCard className="h-7 w-7 text-brand-pink" />
+                               </div>
+                               <div>
+                                  <h4 className="font-black text-brand-dark text-lg tracking-tight uppercase">Pay Online</h4>
+                                  <p className="text-gray-400 text-xs font-black uppercase tracking-widest">UPI · Card · Netbanking · Wallet</p>
+                               </div>
+                            </div>
+                            <div className={cn("w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
+                              selectedPaymentMethod === 'Online' ? "border-brand-pink bg-brand-pink" : "border-gray-300"
+                            )}>
+                              {selectedPaymentMethod === 'Online' && <Check className="w-3.5 h-3.5 text-white" />}
+                            </div>
+                         </div>
+                         <CreditCard className="absolute -right-8 -bottom-8 h-32 w-32 text-brand-pink opacity-[0.04]" />
+                       </button>
 
-                          <CreditCard className="absolute -right-12 -bottom-12 h-56 w-56 text-brand-pink opacity-[0.05] rotate-12" />
-                       </div>
+                       {/* Cash on Delivery Option */}
+                       <button
+                         onClick={() => setSelectedPaymentMethod('COD')}
+                         className={cn(
+                           "w-full p-8 rounded-[32px] border-2 transition-all text-left relative overflow-hidden group",
+                           selectedPaymentMethod === 'COD' ? "border-amber-400 bg-amber-50/20" : "border-gray-100 bg-gray-50/50 hover:border-gray-200"
+                         )}
+                       >
+                         <div className="relative z-10 flex items-center justify-between">
+                            <div className="flex items-center gap-5">
+                               <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg">
+                                 <Package className="h-7 w-7 text-amber-500" />
+                               </div>
+                               <div>
+                                  <h4 className="font-black text-brand-dark text-lg tracking-tight uppercase">Cash on Delivery</h4>
+                                  <p className="text-gray-400 text-xs font-black uppercase tracking-widest">Pay when you receive your order</p>
+                               </div>
+                            </div>
+                            <div className={cn("w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
+                              selectedPaymentMethod === 'COD' ? "border-amber-400 bg-amber-400" : "border-gray-300"
+                            )}>
+                              {selectedPaymentMethod === 'COD' && <Check className="w-3.5 h-3.5 text-white" />}
+                            </div>
+                         </div>
+                       </button>
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4">
@@ -569,19 +662,29 @@ export default function CheckoutPage() {
                          Review Items
                        </button>
                        <button 
-                         onClick={handlePlaceOrder}
+                         onClick={selectedPaymentMethod === 'COD' ? handlePlaceCODOrder : handlePlaceOrder}
                          disabled={isProcessing}
-                         className="flex-1 px-10 py-5 bg-brand-pink text-white font-black text-lg rounded-2xl hover:shadow-2xl shadow-brand-pink/10 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-4 disabled:opacity-50 italic group"
+                         className={cn(
+                           "flex-1 px-10 py-5 font-black text-lg rounded-2xl hover:shadow-2xl transform hover:-translate-y-1 transition-all flex items-center justify-center gap-4 disabled:opacity-50 italic group text-white",
+                           selectedPaymentMethod === 'COD'
+                             ? "bg-amber-500 shadow-amber-500/20 hover:bg-amber-400"
+                             : "bg-brand-pink shadow-brand-pink/10 hover:shadow-brand-pink/20"
+                         )}
                        >
                          {isProcessing ? (
                            <>
                              <div className="h-5 w-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
-                             Securing...
+                             Processing...
+                           </>
+                         ) : selectedPaymentMethod === 'COD' ? (
+                           <>
+                             <Package className="h-5 w-5" />
+                             Confirm COD Order (₹{total.toLocaleString()})
                            </>
                          ) : (
                            <>
                              <Check className="h-6 w-6 group-hover:scale-110 transition-transform" />
-                             Deploy Payment (₹{total.toLocaleString()})
+                             Pay Now (₹{total.toLocaleString()})
                            </>
                          )}
                        </button>
@@ -606,9 +709,9 @@ export default function CheckoutPage() {
                       <span>Subtotal</span>
                       <span className="text-white font-black tracking-tight">₹{subtotal.toLocaleString()}</span>
                    </div>
-                   {isPromoValid && (
+                 {isPromoValid && promoData && (
                      <div className="flex justify-between items-center text-brand-pink">
-                        <span>Discount (ATOZ10)</span>
+                        <span>Discount ({promoData.code})</span>
                         <span className="font-black tracking-tight">-₹{promoDiscount.toLocaleString()}</span>
                      </div>
                    )}
@@ -667,8 +770,8 @@ export default function CheckoutPage() {
                         <ShieldCheck className="h-6 w-6 text-brand-pink" />
                       </div>
                       <div>
-                         <p className="text-[10px] font-black uppercase tracking-widest leading-normal">Encryption Secure</p>
-                         <p className="text-[9px] text-white/30 font-bold tracking-tight mt-0.5">Secure SSL/TLS Protocol Enabled</p>
+                         <p className="text-[10px] font-black uppercase tracking-widest leading-normal">Safe & Secure</p>
+                         <p className="text-[9px] text-white/30 font-bold tracking-tight mt-0.5">Your payment is protected</p>
                       </div>
                    </div>
                    <div className="flex items-center gap-4 group/item">
@@ -676,7 +779,7 @@ export default function CheckoutPage() {
                         <Truck className="h-6 w-6 text-brand-cyan" />
                       </div>
                       <div>
-                         <p className="text-[10px] font-black uppercase tracking-widest leading-normal">Rapid Deployment</p>
+                         <p className="text-[10px] font-black uppercase tracking-widest leading-normal">Fast Delivery</p>
                          <p className="text-[9px] text-white/30 font-bold tracking-tight mt-0.5">Est Delivery: 3-5 Working Days</p>
                       </div>
                    </div>

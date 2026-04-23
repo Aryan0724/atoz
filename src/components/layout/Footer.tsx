@@ -25,7 +25,7 @@ const Footer = () => {
               <span className="text-xl font-bold tracking-tighter text-white">AtoZ Print</span>
             </Link>
             <p className="text-sm text-white/50 leading-relaxed font-medium max-w-sm">
-              Premium physical impressions for the modern brand. From apparel to packaging, we define the standard of high-fidelity manufacturing.
+              High-quality printing for your business. From clothes to packaging, we provide the best printing services for you.
             </p>
             <div className="flex space-x-4">
               {[Facebook, Instagram, Twitter].map((Icon, i) => (
@@ -44,10 +44,11 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-bold text-sm mb-10 uppercase tracking-widest italic opacity-50">Products</h4>
             <ul className="space-y-5">
-              <li><Link href="/products" className="text-sm hover:text-brand-pink transition-all font-bold italic">Full Catalog</Link></li>
-              <li><Link href="/services" className="text-sm hover:text-brand-pink transition-all font-bold italic">Design Studio</Link></li>
-              <li><Link href="/bulk" className="text-sm hover:text-brand-pink transition-all font-bold italic">Bulk Inquiries</Link></li>
-              <li><Link href="/about" className="text-sm hover:text-brand-pink transition-all font-bold italic">Our Story</Link></li>
+              <li><Link href="/products" className="text-sm hover:text-brand-pink transition-all font-bold italic">All Products</Link></li>
+              <li><Link href="/category" className="text-sm hover:text-brand-pink transition-all font-bold italic">Categories</Link></li>
+              <li><Link href="/corporate" className="text-sm hover:text-brand-pink transition-all font-bold italic text-brand-pink">Corporate / Bulk</Link></li>
+              <li><Link href="/blogs" className="text-sm hover:text-brand-pink transition-all font-bold italic">Intelligence / Blog</Link></li>
+              <li><Link href="/about" className="text-sm hover:text-brand-pink transition-all font-bold italic">About Us</Link></li>
             </ul>
           </div>
 
@@ -55,19 +56,19 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-bold text-sm mb-10 uppercase tracking-widest italic opacity-50">Support</h4>
             <ul className="space-y-4">
-              <li><Link href="/contact" className="text-sm hover:text-brand-pink transition-all font-bold italic">Contact Board</Link></li>
-              <li><Link href="/shipping" className="text-sm hover:text-brand-pink transition-all font-bold italic">Logistics Policy</Link></li>
-              <li><Link href="/terms" className="text-sm hover:text-brand-pink transition-all font-bold italic">Legal Framework</Link></li>
-              <li><Link href="/faq" className="text-sm hover:text-brand-pink transition-all font-bold italic">Common Queries</Link></li>
+              <li><Link href="/track" className="text-sm hover:text-brand-pink transition-all font-bold italic text-brand-cyan">Track Order</Link></li>
+              <li><Link href="/contact" className="text-sm hover:text-brand-pink transition-all font-bold italic">Contact Us</Link></li>
+              <li><Link href="/shipping" className="text-sm hover:text-brand-pink transition-all font-bold italic">Shipping Policy</Link></li>
+              <li><Link href="/terms" className="text-sm hover:text-brand-pink transition-all font-bold italic">Terms & Privacy</Link></li>
             </ul>
           </div>
 
           {/* Newsletter */}
           <div className="space-y-8">
-            <h4 className="text-white font-bold text-sm uppercase tracking-widest italic opacity-50">Stay Informed</h4>
-            <p className="text-sm text-white/50 font-medium">Curated design updates and seasonal drops.</p>
+            <h4 className="text-white font-bold text-sm uppercase tracking-widest italic opacity-50">Email List</h4>
+            <p className="text-sm text-white/50 font-medium">Get updates on new products and deals.</p>
             <form
-              onSubmit={(e) => { e.preventDefault(); toast.success('Welcome to the Atelier!'); }}
+              onSubmit={(e) => { e.preventDefault(); toast.success('Thanks for joining!'); }}
               className="relative group lg:max-w-xs"
             >
               <input

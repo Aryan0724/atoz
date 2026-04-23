@@ -44,6 +44,10 @@ export interface DesignerCanvasProps {
   onLowQualityWarning?: (isLowQuality: boolean) => void;
   designArea?: { x: number; y: number; w: number; h: number };
   disableTinting?: boolean;
+  designMode?: 'standard' | 'vdp' | 'multipage' | 'intake_form';
+  designConfig?: any;
+  vdpData?: { headers: string[], rows: any[] } | null;
+  vdpRowIndex?: number;
 }
 
 export interface DesignerCanvasRef {
@@ -76,6 +80,7 @@ export interface DesignerCanvasRef {
   lockAllObjects: (lock: boolean) => void;
   clearDesign: () => void;
   addPattern: (url: string) => void;
+  previewVdpData?: (index: number) => void;
 }
 
 export const getObjectProperties = (obj: any): CanvasObjectProperties => {

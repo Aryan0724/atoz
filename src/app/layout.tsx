@@ -8,6 +8,8 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { Toaster } from 'sonner';
 import AuthProvider from "@/components/providers/AuthProvider";
 import dynamic from 'next/dynamic';
+import MetaPixel from "@/components/analytics/MetaPixel";
+import { Suspense } from 'react';
 
 const CartDrawer = dynamic(() => import("@/components/layout/CartDrawer"), { ssr: false });
 const SupportWidget = dynamic(() => import("@/components/layout/SupportWidget"), { ssr: false });
@@ -80,6 +82,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${manrope.variable} font-body antialiased`}>
+        <Suspense fallback={null}>
+          <MetaPixel />
+        </Suspense>
         <AuthProvider>
           <TopBanner />
           <Navbar />

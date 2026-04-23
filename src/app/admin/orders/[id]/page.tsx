@@ -5,21 +5,10 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { 
-  ArrowLeft, 
-  Package, 
-  User, 
-  MapPin, 
-  Calendar, 
-  CreditCard, 
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Truck,
-  Box,
-  ChevronRight,
-  ExternalLink,
-  Printer,
-  Download
+  ArrowLeft, Package, User, MapPin, Calendar, CreditCard, Clock,
+  CheckCircle2, AlertCircle, Truck, Box, ChevronRight, ExternalLink,
+  Printer, Download, DollarSign, ShieldAlert, ShieldCheck, Banknote,
+  MessageSquare, ChevronDown, ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -31,6 +20,45 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<any>(null);
   const [updating, setUpdating] = useState(false);
+  const [adminNotes, setAdminNotes] = useState('');
+  const [trackingInfo, setTrackingInfo] = useState({
+    tracking_number: '',
+    courier_name: '',
+    estimated_delivery: '',
+    tracking_url: ''
+  });
+
+  useEffect(() => {
+    if (order) {
+      setTrackingInfo({
+        tracking_number: order.tracking_number || '',
+        courier_name: order.courier_name || '',
+        estimated_delivery: order.estimated_delivery ? new Date(order.estimated_delivery).toISOString().split('T')[0] : '',
+        tracking_url: order.tracking_url || ''
+      });
+      setAdminNotes(order.admin_notes || '');
+    }
+  }, [order]);
+
+  const updateTrackingInfo = async () => {
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update(trackingInfo)
+        .eq('id', id);
+
+      if (error) throw error;
+      toast.success('Tracking information updated');
+      setOrder({ ...order, ...trackingInfo });
+    } catch (error: any) {
+      console.warn('[Demo Mode] Tracking update skipped.', error.message);
+      toast.info('Demo Mode: Tracking updated locally');
+      setOrder({ ...order, ...trackingInfo });
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchOrder() {
@@ -88,33 +116,21 @@ export default function OrderDetailPage() {
     if (id) fetchOrder();
   }, [id]);
 
-  const updateStatus = async (newStatus: string) => {
+  const updateOrderField = async (fields: Record<string, any>) => {
     setUpdating(true);
-    // Optimistic UI
-    const originalStatus = order?.status;
-    setOrder({ ...order, status: newStatus });
-
+    setOrder({ ...order, ...fields });
     try {
-      const updatePromise = supabase
-        .from('orders')
-        .update({ status: newStatus })
-        .eq('id', id);
-      
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Update Timeout')), 3000)
-      );
-
-      const { error } = await Promise.race([updatePromise, timeoutPromise]) as any;
-
+      const { error } = await supabase.from('orders').update(fields).eq('id', id);
       if (error) throw error;
-      toast.success('Status updated successfully');
-    } catch (error: any) {
-      console.warn('[Demo Mode] Using local state only.', error.message);
-      toast.info('Demo Mode: Status updated locally');
+      toast.success('Order updated!');
+    } catch (err: any) {
+      toast.info('Demo Mode: Updated locally');
     } finally {
       setUpdating(false);
     }
   };
+
+  const updateStatus = (newStatus: string) => updateOrderField({ status: newStatus });
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -132,11 +148,29 @@ export default function OrderDetailPage() {
 
   const statusColors: any = {
     pending: 'bg-yellow-50 text-yellow-600 border-yellow-100',
-    processing: 'bg-blue-50 text-blue-600 border-blue-100',
-    shipped: 'bg-purple-50 text-purple-600 border-purple-100',
+    confirmed: 'bg-sky-50 text-sky-600 border-sky-100',
+    in_production: 'bg-blue-50 text-blue-600 border-blue-100',
+    dispatched: 'bg-violet-50 text-violet-600 border-violet-100',
+    out_for_delivery: 'bg-orange-50 text-orange-600 border-orange-100',
     delivered: 'bg-green-50 text-green-600 border-green-100',
     cancelled: 'bg-red-50 text-red-600 border-red-100'
   };
+
+  const isCOD = order.payment_method === 'COD';
+
+  // Derive the next logical action for this order
+  const lifecycleActions: Record<string, { label: string; next: string; color: string }[]> = {
+    pending: isCOD
+      ? [{ label: 'Confirm Order', next: 'confirmed', color: 'bg-sky-500' }]
+      : [{ label: 'Start Production', next: 'in_production', color: 'bg-blue-500' }],
+    confirmed: [{ label: 'Start Production', next: 'in_production', color: 'bg-blue-500' }],
+    in_production: [{ label: 'Mark Dispatched', next: 'dispatched', color: 'bg-violet-500' }],
+    dispatched: [{ label: 'Out for Delivery', next: 'out_for_delivery', color: 'bg-orange-500' }],
+    out_for_delivery: [{ label: 'Mark Delivered', next: 'delivered', color: 'bg-green-500' }],
+    delivered: [],
+    cancelled: [],
+  };
+  const nextActions = lifecycleActions[order.status] || [];
 
   return (
     <div className="max-w-6xl mx-auto space-y-10">
@@ -160,26 +194,20 @@ export default function OrderDetailPage() {
            </div>
         </div>
 
-        <div className="flex items-center gap-4">
-           <button className="flex items-center gap-2 px-6 py-3 border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:bg-gray-50 transition-colors">
-              <Printer className="h-4 w-4" />
-              Invoice
+        <div className="flex items-center gap-3 flex-wrap">
+           <button className="flex items-center gap-2 px-5 py-3 border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:bg-gray-50 transition-colors">
+              <Printer className="h-4 w-4" /> Invoice
            </button>
-           <div className="flex rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-              {['pending', 'processing', 'shipped', 'delivered'].map((s) => (
-                <button
-                  key={s}
-                  disabled={updating || order.status === s}
-                  onClick={() => updateStatus(s)}
-                  className={cn(
-                    "px-4 py-3 text-[9px] font-black uppercase tracking-widest transition-all",
-                    order.status === s ? "bg-brand-dark text-white" : "bg-white text-gray-400 hover:bg-gray-50"
-                  )}
-                >
-                  {s}
-                </button>
-              ))}
-           </div>
+           {nextActions.map(action => (
+             <button
+               key={action.next}
+               disabled={updating}
+               onClick={() => updateStatus(action.next)}
+               className={cn("flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white transition-all hover:opacity-90 disabled:opacity-50", action.color)}
+             >
+               {action.label} <ArrowRight className="h-3.5 w-3.5" />
+             </button>
+           ))}
         </div>
       </div>
 
@@ -257,16 +285,79 @@ export default function OrderDetailPage() {
 
                 <div className="space-y-8">
                    <div>
-                      <label className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3 block">Custom Selection Data</label>
-                      <div className="space-y-3">
-                         {Object.entries(order.design_data || {}).map(([key, value]: [string, any]) => (
-                           <div key={key} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
-                              <span className="text-[10px] font-black uppercase tracking-widest text-white/60">{key.replace('_', ' ')}</span>
-                              <span className="text-xs font-black">{value}</span>
-                           </div>
-                         ))}
-                      </div>
-                   </div>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3 block">Custom Selection Data</label>
+                       <div className="space-y-3">
+                          {Object.entries(order.design_data || {}).map(([key, value]: [string, any]) => {
+                             if (!value) return null;
+
+                             if (key === 'vdpData') {
+                               return (
+                                 <div key={key} className="flex flex-col gap-2 p-4 bg-brand-cyan/10 rounded-2xl border border-brand-cyan/20">
+                                   <div className="flex justify-between items-center">
+                                      <span className="text-[10px] font-black uppercase tracking-widest text-brand-cyan">VDP Data Source</span>
+                                      <span className="text-xs font-black text-white">{value.rows?.length || 0} Records</span>
+                                   </div>
+                                   <button 
+                                     onClick={() => {
+                                       const csvContent = "data:text/csv;charset=utf-8," 
+                                          + value.headers.join(",") + "\n" 
+                                          + value.rows.map((r: any) => value.headers.map((h: any) => `"${r[h] || ''}"`).join(",")).join("\n");
+                                       const encodedUri = encodeURI(csvContent);
+                                       const link = document.createElement("a");
+                                       link.setAttribute("href", encodedUri);
+                                       link.setAttribute("download", `vdp_order_${order.id.slice(0,8)}.csv`);
+                                       document.body.appendChild(link);
+                                       link.click();
+                                     }}
+                                     className="w-full py-2 bg-brand-cyan text-brand-dark text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white transition-colors mt-2"
+                                   >
+                                     Download CSV List
+                                   </button>
+                                 </div>
+                               );
+                             }
+
+                             if (key === 'pageData') {
+                               return (
+                                 <div key={key} className="flex justify-between items-center p-4 bg-brand-pink/10 rounded-2xl border border-brand-pink/20">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-brand-pink">Multipage Package</span>
+                                    <button 
+                                      onClick={() => {
+                                        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(value));
+                                        const link = document.createElement("a");
+                                        link.setAttribute("href", dataStr);
+                                        link.setAttribute("download", `multipage_${order.id.slice(0,8)}.json`);
+                                        document.body.appendChild(link);
+                                        link.click();
+                                      }}
+                                      className="px-4 py-2 bg-brand-pink text-brand-dark text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white transition-colors"
+                                    >
+                                      Export Pages
+                                    </button>
+                                 </div>
+                               );
+                             }
+
+                             if (key === 'canvasState') {
+                               return (
+                                 <div key={key} className="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/10">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Canvas Engine Data</span>
+                                    <span className="text-xs font-black text-white/40 italic">Attached</span>
+                                 </div>
+                               );
+                             }
+
+                             if (typeof value === 'object') return null;
+
+                             return (
+                               <div key={key} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                                  <span className="text-[10px] font-black uppercase tracking-widest text-white/60">{key.replace('_', ' ')}</span>
+                                  <span className="text-xs font-black">{value}</span>
+                               </div>
+                             );
+                          })}
+                       </div>
+                    </div>
 
                    <div className="p-6 bg-brand-pink/10 rounded-3xl border border-brand-pink/20">
                       <p className="text-[10px] font-black text-brand-pink uppercase tracking-widest mb-2">Production Note</p>
@@ -311,25 +402,173 @@ export default function OrderDetailPage() {
 
           <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
              <div className="p-8 border-b border-gray-50 flex items-center gap-3">
+                <Truck className="h-5 w-5 text-brand-pink" />
+                <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Shipment Tracking</h2>
+             </div>
+             <div className="p-8 space-y-5">
+                <div className="space-y-4">
+                   <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Courier Name</label>
+                      <input 
+                        type="text" 
+                        value={trackingInfo.courier_name}
+                        onChange={(e) => setTrackingInfo({...trackingInfo, courier_name: e.target.value})}
+                        placeholder="e.g. BlueDart, Delhivery"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-brand-pink/20 outline-none text-xs font-bold transition-all"
+                      />
+                   </div>
+                   <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Tracking ID</label>
+                      <input 
+                        type="text" 
+                        value={trackingInfo.tracking_number}
+                        onChange={(e) => setTrackingInfo({...trackingInfo, tracking_number: e.target.value})}
+                        placeholder="Enter tracking number"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-brand-pink/20 outline-none text-xs font-bold transition-all"
+                      />
+                   </div>
+                   <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Est. Delivery Date</label>
+                      <input 
+                        type="date" 
+                        value={trackingInfo.estimated_delivery}
+                        onChange={(e) => setTrackingInfo({...trackingInfo, estimated_delivery: e.target.value})}
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-brand-pink/20 outline-none text-xs font-bold transition-all"
+                      />
+                   </div>
+                </div>
+                
+                <button 
+                  onClick={updateTrackingInfo}
+                  disabled={updating}
+                  className="w-full py-4 bg-brand-dark text-white hover:bg-brand-pink transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                >
+                   {updating ? 'Updating...' : 'Update Tracking Info'}
+                </button>
+             </div>
+          </section>
+
+          {/* --- DELIVERY VERIFICATION STATUS --- */}
+          <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
+            <div className="p-8 border-b border-gray-50 flex items-center gap-3">
+              <ShieldCheck className="h-5 w-5 text-brand-pink" />
+              <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Delivery Verification</h2>
+            </div>
+            <div className="p-8 space-y-5">
+              {order.delivery_disputed && (
+                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3">
+                  <ShieldAlert className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-black text-red-600 uppercase tracking-widest mb-1">Delivery Disputed!</p>
+                    <p className="text-xs font-medium text-red-500">{order.delivery_dispute_note || 'Customer reported non-receipt.'}</p>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Customer Confirmed</span>
+                <span className={cn("px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
+                  order.delivery_confirmed_by_customer
+                    ? 'bg-green-50 text-green-600 border-green-100'
+                    : 'bg-gray-50 text-gray-400 border-gray-100'
+                )}>
+                  {order.delivery_confirmed_by_customer
+                    ? `Yes — ${order.delivery_confirmed_at ? new Date(order.delivery_confirmed_at).toLocaleDateString() : ''}`
+                    : 'Awaiting'}
+                </span>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block">Admin Notes</label>
+                <textarea
+                  rows={3}
+                  value={adminNotes}
+                  onChange={e => setAdminNotes(e.target.value)}
+                  placeholder="Internal notes about this order..."
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-brand-pink/20 outline-none text-xs font-medium resize-none transition-all"
+                />
+                <button
+                  onClick={() => updateOrderField({ admin_notes: adminNotes })}
+                  disabled={updating}
+                  className="w-full py-3 bg-gray-900 text-white hover:bg-brand-pink transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                >
+                  Save Notes
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* --- COD PAYMENT RECONCILIATION --- */}
+          {isCOD && (
+            <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
+              <div className="p-8 border-b border-gray-50 flex items-center gap-3">
+                <Banknote className="h-5 w-5 text-brand-pink" />
+                <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">COD Reconciliation</h2>
+              </div>
+              <div className="p-8 space-y-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Cash Status</span>
+                  <span className={cn("px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
+                    order.cod_collection_status === 'collected' ? 'bg-sky-50 text-sky-600 border-sky-100' :
+                    order.cod_collection_status === 'cod_remitted' ? 'bg-green-50 text-green-600 border-green-100' :
+                    order.cod_collection_status === 'failed' ? 'bg-red-50 text-red-600 border-red-100' :
+                    'bg-yellow-50 text-yellow-600 border-yellow-100'
+                  )}>
+                    {order.cod_collection_status?.replace(/_/g, ' ') || 'Pending'}
+                  </span>
+                </div>
+                <div className="text-center py-2">
+                  <p className="text-2xl font-black text-brand-dark">₹{order.total_price?.toLocaleString()}</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cash to be collected</p>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  {order.cod_collection_status !== 'collected' && order.cod_collection_status !== 'cod_remitted' && (
+                    <button
+                      onClick={() => updateOrderField({ cod_collection_status: 'collected', cod_collected_at: new Date().toISOString(), payment_status: 'cod_collected' })}
+                      disabled={updating || order.status !== 'delivered'}
+                      className="w-full py-4 bg-sky-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-sky-600 transition-all disabled:opacity-40"
+                    >
+                      ✓ Mark Cash Collected
+                    </button>
+                  )}
+                  {order.cod_collection_status === 'collected' && (
+                    <button
+                      onClick={() => updateOrderField({ cod_remitted_at: new Date().toISOString(), payment_status: 'cod_remitted' })}
+                      disabled={updating}
+                      className="w-full py-4 bg-green-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-all disabled:opacity-40"
+                    >
+                      ✓ Mark Cash Remitted
+                    </button>
+                  )}
+                  {order.cod_collection_status !== 'failed' && order.cod_collection_status !== 'cod_remitted' && (
+                    <button
+                      onClick={() => updateOrderField({ cod_collection_status: 'failed', payment_status: 'failed' })}
+                      disabled={updating}
+                      className="w-full py-3 bg-red-50 text-red-500 border border-red-100 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all disabled:opacity-40"
+                    >
+                      ✗ Collection Failed
+                    </button>
+                  )}
+                </div>
+                {order.cod_collected_at && (
+                  <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center">
+                    Collected: {new Date(order.cod_collected_at).toLocaleString()}
+                  </p>
+                )}
+              </div>
+            </section>
+          )}
+
+          <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
+             <div className="p-8 border-b border-gray-50 flex items-center gap-3">
                 <MapPin className="h-5 w-5 text-brand-pink" />
-                <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Logistics</h2>
+                <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Delivery Address</h2>
              </div>
              <div className="p-8 space-y-6">
                 <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Shipping Address</p>
                    <p className="text-sm font-bold text-brand-dark leading-relaxed">
                       {order.shipping_address?.line1}<br />
                       {order.shipping_address?.city}, {order.shipping_address?.state}<br />
                       {order.shipping_address?.postal_code}, India
                    </p>
-                </div>
-
-                <div className="flex items-center gap-4 p-5 bg-brand-lightGray rounded-2xl border border-gray-100">
-                   <Truck className="h-6 w-6 text-brand-pink shrink-0" />
-                   <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Estimated Delivery</p>
-                      <p className="text-sm font-black text-brand-dark">{order.products.delivery_days}</p>
-                   </div>
                 </div>
              </div>
           </section>
@@ -351,7 +590,7 @@ export default function OrderDetailPage() {
                 </div>
                 <div className="flex items-center justify-between">
                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Gateway</span>
-                   <span className="text-sm font-black text-brand-dark">Razorpay</span>
+                   <span className="text-sm font-black text-brand-dark">{order.payment_method === 'COD' ? 'Cash on Delivery' : 'Razorpay'}</span>
                 </div>
                 <div className="pt-4 border-t border-gray-50">
                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Transaction ID</p>

@@ -11,9 +11,14 @@ export interface OrderInput {
   customization_details?: Json;
   total_price: number;
   shipping_address: Json;
+  payment_method?: 'Online' | 'COD';
+  payment_status?: string;
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
 }
 
 export async function createOrder(orderData: OrderInput) {
+  const isCOD = orderData.payment_method === 'COD';
   const { data, error } = await supabase
     .from('orders')
     .insert([
@@ -27,8 +32,11 @@ export async function createOrder(orderData: OrderInput) {
         customization_details: orderData.customization_details,
         total_price: orderData.total_price,
         shipping_address: orderData.shipping_address,
+        payment_method: orderData.payment_method || 'Online',
         status: 'pending',
-        payment_status: 'unpaid'
+        payment_status: orderData.payment_status || (isCOD ? 'pending_cod' : 'unpaid'),
+        razorpay_order_id: orderData.razorpay_order_id,
+        razorpay_payment_id: orderData.razorpay_payment_id,
       }
     ])
     .select()

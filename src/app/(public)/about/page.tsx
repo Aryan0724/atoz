@@ -30,11 +30,11 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto relative z-10">
            <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-cyan/10 rounded-full text-brand-cyan text-[10px] font-black uppercase tracking-widest mb-8">
               <Sparkles className="h-3 w-3" />
-              Impactful Printing
+              Quality Printing
            </div>
            <h1 className="text-6xl md:text-8xl font-black text-brand-dark tracking-tighter mb-8 leading-[0.9]">
-             Modern <span className="text-brand-pink italic">solutions</span> <br />
-             for India&apos;s <span className="underline decoration-brand-cyan/30">Top Brands.</span>
+             Printing <span className="text-brand-pink italic">solutions</span> <br />
+             for your <span className="underline decoration-brand-cyan/30">Business.</span>
            </h1>
            <p className="text-xl text-gray-400 font-medium max-w-2xl leading-relaxed">
              AtoZ Print is a complete printing and corporate gifting solutions provider offering premium-quality customized products for businesses, corporates, events, and individuals across India.
@@ -100,7 +100,7 @@ export default function AboutPage() {
            </div>
 
            <div className="space-y-8">
-              <h2 className="text-4xl font-black text-brand-dark tracking-tight">The AtoZ Advantage</h2>
+              <h2 className="text-4xl font-black text-brand-dark tracking-tight">Why Choose Us?</h2>
               <p className="text-lg text-gray-500 leading-relaxed font-medium">
                 At AtoZ Print, we combine a wide product range with full customization options to give your brand the edge it deserves. Our unique selling proposition lies in our fast turnaround time and consistent quality across all product categories.
               </p>
@@ -108,12 +108,12 @@ export default function AboutPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8">
                  <div className="p-8 border border-gray-100 rounded-3xl space-y-3">
                     <Zap className="h-8 w-8 text-brand-pink" />
-                    <h3 className="font-black text-brand-dark uppercase tracking-tight text-sm">Fast Turnaround</h3>
+                    <h3 className="font-black text-brand-dark uppercase tracking-tight text-sm">Fast Delivery</h3>
                     <p className="text-xs text-gray-400 font-medium">Standard delivery in 5-10 working days PAN India.</p>
                  </div>
                  <div className="p-8 border border-gray-100 rounded-3xl space-y-3">
                     <Sparkles className="h-8 w-8 text-brand-cyan" />
-                    <h3 className="font-black text-brand-dark uppercase tracking-tight text-sm">Full Customization</h3>
+                    <h3 className="font-black text-brand-dark uppercase tracking-tight text-sm">Easy Customization</h3>
                     <p className="text-xs text-gray-400 font-medium">Logo, Name, Text, and Color options on every product.</p>
                  </div>
               </div>
@@ -140,7 +140,7 @@ export default function AboutPage() {
 
       {/* Execution Pillars Section (Target Audience) */}
       <section className="max-w-7xl mx-auto px-6 py-32 text-center">
-         <h2 className="text-4xl md:text-5xl font-black text-brand-dark tracking-tight mb-16 underline decoration-brand-cyan/20 decoration-8 underline-offset-8">Serving All Sectors</h2>
+         <h2 className="text-4xl md:text-5xl font-black text-brand-dark tracking-tight mb-16 underline decoration-brand-cyan/20 decoration-8 underline-offset-8">Who We Serve</h2>
          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
               { title: "Corporates", desc: "Premium joined kits and official stationary.", icon: <Users2 /> },
@@ -175,6 +175,49 @@ export default function AboutPage() {
                </Link>
             </div>
          </div>
+      </section>
+
+      {/* Founder Section */}
+      <section className="max-w-7xl mx-auto px-6 py-24 bg-gray-50/50 rounded-[64px] mb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.8fr_1.2fr] gap-16 items-center">
+           <div className="relative group">
+              <div className="aspect-[4/5] bg-white rounded-[48px] overflow-hidden shadow-2xl border border-gray-100 p-3">
+                 <div className="relative w-full h-full rounded-[40px] overflow-hidden">
+                    <Image 
+                      src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2000&auto=format&fit=crop" 
+                      alt="Richa Jain - Founder"
+                      fill
+                      className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                    />
+                 </div>
+              </div>
+              <div className="absolute -bottom-6 -right-6 bg-brand-pink text-white p-8 rounded-3xl shadow-xl">
+                 <div className="text-sm font-black uppercase tracking-widest mb-1">Richa Jain</div>
+                 <div className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Founder & CEO</div>
+              </div>
+           </div>
+
+           <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-pink/10 rounded-full text-brand-pink text-[10px] font-black uppercase tracking-widest">
+                 Founder Story
+              </div>
+              <h2 className="text-4xl md:text-5xl font-black text-brand-dark tracking-tight leading-[1.1]">
+                Visionary leadership, <br/>
+                <span className="text-brand-pink italic">creative heart.</span>
+              </h2>
+              <div className="space-y-6 text-lg text-gray-500 font-medium leading-relaxed">
+                 <p>
+                    Richa Jain started AtoZ Prints with a simple yet powerful goal: to make premium-quality printing accessible to every brand in India. With a background in digital arts and a keen eye for business logistics, she noticed a massive gap between the high-end requirements of corporate giants and the limited capabilities of local vendors.
+                 </p>
+                 <p>
+                    In 2018, she launched the company with a single desktop printer and a firm belief that every brand, regardless of its size, deserves to look its absolute best. What started as a small home-based studio has now evolved into a tech-driven manufacturing powerhouse, trusted by over 500+ corporate partners and thousands of independent creators across the nation.
+                 </p>
+                 <p className="italic text-brand-dark font-bold border-l-4 border-brand-pink pl-6">
+                    "At AtoZ, we aren't just printing on products; we are printing your brand's future. Our mission is to ensure that your vision is delivered with the precision it deserves."
+                 </p>
+              </div>
+           </div>
+        </div>
       </section>
     </div>
   );

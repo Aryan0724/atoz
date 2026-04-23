@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/store/useCart';
 import { supabase } from '@/lib/supabase/client';
-import DesignerCanvas from '@/components/design/DesignerCanvas';
+import DesignerFactory from '@/components/design/DesignerFactory';
 import { CanvasObjectProperties, DesignerCanvasRef } from '@/types/canvas';
 import SidebarRail from '@/components/design/layout/SidebarRail';
 import SidebarPanel from '@/components/design/layout/SidebarPanel';
@@ -57,12 +57,27 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
   const [unitPrice, setUnitPrice] = useState<number>(product.base_price || 0);
   const [quantity, setQuantity] = useState<number>(product.moq || 1);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [discountValue, setDiscountValue] = useState<number>(0);
   const [selectedQuality, setSelectedQuality] = useState<string>('Standard');
   const [qualityPrices, setQualityPrices] = useState<Record<string, number>>({});
+  
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<any | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [couponMessage, setCouponMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [designPreviews, setDesignPreviews] = useState<{ front: string; back: string }>({ front: '', back: '' });
 
   const [activeTab, setActiveTab] = useState<SidebarTab | null>('product');
   const [mobilePanel, setMobilePanel] = useState<SidebarTab | null>(null);
+  
+  // VDP (Variable Data Printing) State
+  const [vdpData, setVdpData] = useState<{ headers: string[], rows: any[] } | null>(null);
+  const [vdpRowIndex, setVdpRowIndex] = useState(0);
+
+  // Multipage State
+  const [pageData, setPageData] = useState<any[]>(Array(12).fill(null));
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+
   const { addItem } = useCart();
 
   useEffect(() => {
@@ -100,17 +115,56 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     if (hasFrontDesign) base += 50;
     if (hasBackDesign) base += 50;
 
-    // Bulk Pricing Logic
-    let discount = 0;
-    if (quantity >= 50) discount = 20;
-    else if (quantity >= 10) discount = 10;
+    // 1. Calculate Bulk Discount (Dynamic)
+    let bulkDiscount = 0;
+    if (product.bulk_discount_rules && Array.isArray(product.bulk_discount_rules)) {
+      const sortedRules = [...product.bulk_discount_rules].sort((a, b) => b.quantity - a.quantity);
+      for (const rule of sortedRules) {
+        if (quantity >= rule.quantity) {
+          bulkDiscount = rule.discount;
+          break;
+        }
+      }
+    }
     
-    setDiscountPercent(discount);
-    
-    const finalUnitPrice = Math.round(base * (1 - discount / 100));
-    setUnitPrice(finalUnitPrice);
-    setTotalPrice(finalUnitPrice * quantity);
-  }, [layers, viewData, activeView, product, selectedQuality, quantity]);
+    // Calculate total if only bulk discount is applied
+    const totalWithBulk = Math.round(base * (1 - bulkDiscount / 100)) * quantity;
+
+    // 2. Calculate Promo Code Discount
+    let totalWithCoupon = base * quantity;
+    if (appliedCoupon) {
+      if (appliedCoupon.discount_type === 'percentage') {
+        totalWithCoupon = Math.round(base * (1 - appliedCoupon.discount_value / 100)) * quantity;
+      } else {
+        totalWithCoupon = Math.max(0, (base * quantity) - appliedCoupon.discount_value);
+      }
+      
+      // Enforce Minimum Order Value for Coupon based on Base Total (before discounts)
+      if ((base * quantity) < appliedCoupon.min_order_amount) {
+        totalWithCoupon = Infinity; // Invalidates coupon for this calculation
+      }
+    } else {
+      totalWithCoupon = Infinity;
+    }
+
+    // 3. Highest Wins Logic
+    if (appliedCoupon && totalWithCoupon < totalWithBulk) {
+       setTotalPrice(totalWithCoupon);
+       setUnitPrice(Math.round(totalWithCoupon / quantity));
+       if (appliedCoupon.discount_type === 'percentage') {
+          setDiscountPercent(appliedCoupon.discount_value);
+          setDiscountValue(0);
+       } else {
+          setDiscountPercent(0);
+          setDiscountValue(appliedCoupon.discount_value);
+       }
+    } else {
+       setTotalPrice(totalWithBulk);
+       setUnitPrice(Math.round(totalWithBulk / quantity));
+       setDiscountPercent(bulkDiscount);
+       setDiscountValue(0);
+    }
+  }, [layers, viewData, activeView, product, selectedQuality, quantity, appliedCoupon]);
 
   // Deep link support for "Import & Edit"
   useEffect(() => {
@@ -120,6 +174,55 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
       setMobilePanel('uploads');
     }
   }, []);
+
+  const validateCoupon = async () => {
+    if (!promoCodeInput.trim()) return;
+    setValidatingCoupon(true);
+    setCouponMessage(null);
+    setAppliedCoupon(null);
+
+    try {
+      const { data, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', promoCodeInput.toUpperCase().trim())
+        .single();
+
+      if (error || !data) {
+        setCouponMessage({ type: 'error', text: 'Invalid promo code' });
+        return;
+      }
+
+      if (!data.is_active) {
+        setCouponMessage({ type: 'error', text: 'Promo code is inactive' });
+        return;
+      }
+
+      if (data.expiry_date && new Date(data.expiry_date) < new Date()) {
+        setCouponMessage({ type: 'error', text: 'Promo code expired' });
+        return;
+      }
+
+      if (totalPrice < data.min_order_amount) {
+        setCouponMessage({ type: 'error', text: `Min order is ₹${data.min_order_amount}` });
+        return;
+      }
+
+      if (data.applicable_product_ids && data.applicable_product_ids.length > 0) {
+        if (!data.applicable_product_ids.includes(product.id)) {
+          setCouponMessage({ type: 'error', text: 'Not applicable to this product' });
+          return;
+        }
+      }
+
+      setAppliedCoupon(data);
+      setCouponMessage({ type: 'success', text: 'Applied!' });
+    } catch (err) {
+      setCouponMessage({ type: 'error', text: 'Validation failed' });
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
 
   const handleUpdateObjectById = (id: string, props: Partial<CanvasObjectProperties>) => {
     canvasRef.current?.updateObjectById(id, props);
@@ -186,7 +289,12 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
         product: product,
         quantity: quantity,
         quality_level: selectedQuality,
-        design_data: { color: selectedColor, canvasState: finalViewData },
+        design_data: { 
+          color: selectedColor, 
+          canvasState: finalViewData, 
+          vdpData: vdpData,
+          pageData: (product as any).design_mode === 'multipage' ? pageData : undefined 
+        },
         design_preview_url: dataUrl, // Instant placeholder
         unitPrice: unitPrice
       });
@@ -281,7 +389,11 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
 
       <div className="flex-1 flex overflow-hidden">
         <div className="hidden md:flex shrink-0">
-          <SidebarRail activeTab={activeTab} onTabChange={(tab) => activeTab === tab ? setActiveTab(null) : setActiveTab(tab)} />
+          <SidebarRail 
+            activeTab={activeTab} 
+            onTabChange={(tab) => activeTab === tab ? setActiveTab(null) : setActiveTab(tab)} 
+            designMode={(product as any).design_mode}
+          />
         </div>
 
         <div className="hidden md:block">
@@ -309,6 +421,24 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             onLockAllObjects={(lock) => canvasRef.current?.lockAllObjects(lock)}
             qualityPrices={qualityPrices}
             colorVariants={(product as any).color_variants || []}
+            designMode={(product as any).design_mode}
+            vdpData={vdpData}
+            vdpRowIndex={vdpRowIndex}
+            onVdpDataLoaded={(headers, rows) => setVdpData({ headers, rows })}
+            onVdpRowChange={setVdpRowIndex}
+            onVdpClear={() => { setVdpData(null); setVdpRowIndex(0); }}
+            pageData={pageData}
+            currentPageIndex={currentPageIndex}
+            onPageChange={(newIndex) => {
+              if (canvasRef.current) {
+                 const currentJson = canvasRef.current.getJson();
+                 const newPages = [...pageData];
+                 newPages[currentPageIndex] = currentJson;
+                 setPageData(newPages);
+                 canvasRef.current.loadJson(newPages[newIndex] || { objects: [], background: "" });
+              }
+              setCurrentPageIndex(newIndex);
+            }}
           />
         </div>
 
@@ -349,8 +479,8 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                 />
               </div>
             ) : (
-              <div className="w-full max-w-2xl aspect-[4/5] flex items-center justify-center transition-all duration-700 ease-out">
-                <DesignerCanvas 
+              <div className="w-full max-w-2xl flex items-center justify-center transition-all duration-700 ease-out">
+                <DesignerFactory 
                   ref={canvasRef}
                   productImage={(() => {
                     const variants = (product as any).color_variants || [];
@@ -385,6 +515,10 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                   onOutOfBoundsWarning={setIsOutOfBounds}
                   onLowQualityWarning={setIsLowQuality}
                   designArea={(product as any).design_areas?.[activeView]}
+                  designMode={(product as any).design_mode}
+                  designConfig={(product as any).design_config}
+                  vdpData={vdpData}
+                  vdpRowIndex={vdpRowIndex}
                 />
               </div>
             )}
@@ -482,9 +616,36 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                          </button>
                        </div>
                     </div>
+
+                    <div className="border-b border-gray-100 pb-3 mb-3">
+                       <div className="flex gap-2">
+                         <input
+                           type="text"
+                           placeholder="Promo Code"
+                           value={promoCodeInput}
+                           onChange={(e) => setPromoCodeInput(e.target.value)}
+                           className="flex-1 bg-gray-50 rounded-xl px-3 py-2 text-xs font-bold text-brand-dark uppercase placeholder:normal-case outline-none focus:bg-white focus:border focus:border-brand-pink/20 transition-all border border-transparent"
+                         />
+                         <button
+                           onClick={validateCoupon}
+                           disabled={validatingCoupon || !promoCodeInput}
+                           className="bg-brand-dark text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-pink transition-all disabled:opacity-50"
+                         >
+                           {validatingCoupon ? '...' : 'Apply'}
+                         </button>
+                       </div>
+                       {couponMessage && (
+                         <div className={cn("text-[9px] font-bold tracking-widest uppercase mt-2 pl-1", couponMessage.type === 'success' ? 'text-brand-cyan' : 'text-red-500')}>
+                           {couponMessage.text}
+                         </div>
+                       )}
+                    </div>
+
                     <div className="flex items-end justify-between">
                        <div className="flex flex-col">
-                         <span className="text-[9px] font-black text-brand-pink/50 uppercase tracking-[0.25em] mb-0.5">{selectedQuality} • {discountPercent > 0 ? `${discountPercent}% OFF` : 'Base'}</span>
+                         <span className="text-[9px] font-black text-brand-pink/50 uppercase tracking-[0.25em] mb-0.5">
+                           {selectedQuality} • {discountPercent > 0 ? `${discountPercent}% OFF` : (discountValue > 0 ? `₹${discountValue} OFF` : 'Base')}
+                         </span>
                          <div className="flex items-baseline gap-1">
                             <span className="text-sm font-black text-brand-dark italic mb-1">₹</span>
                             <span className="text-3xl font-black text-brand-dark tracking-tighter italic leading-none">{totalPrice.toLocaleString()}</span>

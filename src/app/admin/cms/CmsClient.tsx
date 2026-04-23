@@ -15,6 +15,7 @@ import {
   Shield,
   Palette,
   X,
+  Image as ImageIcon,
   CreditCard,
   Target
 } from 'lucide-react';
@@ -49,7 +50,11 @@ export default function ContentManagerClient({
   // --- HOME PAGE (Global) STATE --- //
   const [heroTitle, setHeroTitle] = useState(initialGlobalConfig?.hero?.title || '');
   const [heroSubtitle, setHeroSubtitle] = useState(initialGlobalConfig?.hero?.subtitle || '');
-  const [heroImage, setHeroImage] = useState(initialGlobalConfig?.hero?.image || '');
+  const [heroImages, setHeroImages] = useState<string[]>(
+    Array.isArray(initialGlobalConfig?.hero?.image) 
+      ? initialGlobalConfig.hero.image 
+      : (initialGlobalConfig?.hero?.image ? [initialGlobalConfig.hero.image] : [])
+  );
   const [bannerText, setBannerText] = useState(initialGlobalConfig?.topBanner?.text || '');
   const [bannerActive, setBannerActive] = useState(initialGlobalConfig?.topBanner?.isActive !== false);
   const [features, setFeatures] = useState<any[]>(initialGlobalConfig?.features || []);
@@ -78,7 +83,12 @@ export default function ContentManagerClient({
     };
 
     const globalPayload = {
-      hero: { title: heroTitle, subtitle: heroSubtitle, image: heroImage },
+      ...initialGlobalConfig,
+      hero: {
+        title: heroTitle,
+        subtitle: heroSubtitle,
+        image: heroImages
+      },
       topBanner: { text: bannerText, isActive: bannerActive },
       features,
       integrations: { pexelsApiKey },
@@ -122,6 +132,29 @@ export default function ContentManagerClient({
     }
   };
 
+  const handleMultiFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setLoading(true);
+    try {
+      const uploadPromises = files.map(file => uploadFile('public', `settings/${Date.now()}-${file.name}`, file));
+      const urls = await Promise.all(uploadPromises);
+      const validUrls = urls.filter(Boolean) as string[];
+      
+      if (validUrls.length > 0) {
+        setHeroImages(prev => [...prev, ...validUrls]);
+        toast.success(`${validUrls.length} image(s) uploaded!`);
+      }
+    } catch (err: any) {
+      toast.error('Upload failed: ' + err.message);
+    } finally {
+      setLoading(false);
+      // Reset input
+      e.target.value = '';
+    }
+  };
+
   // --- LIST HELPERS --- //
   const addFeature = () => setFeatures([...features, { title: 'New Feature', desc: 'Detail', icon: 'Zap', color: 'pink' }]);
   const removeFeature = (idx: number) => setFeatures(features.filter((_, i) => i !== idx));
@@ -134,17 +167,17 @@ export default function ContentManagerClient({
   return (
     <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[800px]">
       <div className="flex flex-wrap border-b border-gray-100 bg-gray-50/50 p-3 gap-2">
-        {(['home', 'services', 'settings'] as const).map(tab => (
+        {(['home', 'categories', 'settings'] as const).map(tab => (
           <button 
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => setActiveTab(tab as any)}
             className={cn(
               "flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all",
               activeTab === tab ? "bg-brand-dark text-white shadow-xl" : "text-gray-400 hover:bg-gray-100 hover:text-brand-dark"
             )}
           >
             {tab === 'home' && 'Storefront / Home'}
-            {tab === 'services' && 'Services / B2B Page'}
+            {tab === 'categories' && 'Category Guide / Hero'}
             {tab === 'settings' && 'Global Integrations'}
           </button>
         ))}
@@ -169,10 +202,25 @@ export default function ContentManagerClient({
                     <textarea rows={2} value={heroSubtitle} onChange={e => setHeroSubtitle(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-white border border-transparent focus:border-brand-pink/20 outline-none font-bold text-gray-600 shadow-sm" />
                   </div>
                   <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Hero Image Render</label>
-                    <div className="flex items-center gap-4">
-                       {heroImage && <img src={heroImage} alt="hero" className="w-16 h-16 rounded-xl object-cover" />}
-                       <input type="file" onChange={(e) => handleFileUpload(e, setHeroImage)} className="text-sm font-bold text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-brand-pink hover:file:bg-pink-100" />
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Hero Images (Slideshow)</label>
+                    <div className="flex flex-col gap-4">
+                       <div className="flex flex-wrap gap-4">
+                         {heroImages.map((img, i) => (
+                           <div key={i} className="relative group rounded-xl overflow-hidden border border-gray-200 shadow-sm w-24 h-24">
+                             <img src={img} alt="hero" className="w-full h-full object-cover" />
+                             <button onClick={() => setHeroImages(heroImages.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-white hover:bg-red-500 hover:text-white text-red-500 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-md">
+                               <X className="w-3 h-3" />
+                             </button>
+                           </div>
+                         ))}
+                         {heroImages.length === 0 && (
+                           <div className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
+                              <ImageIcon className="w-5 h-5 mb-1" />
+                              <span className="text-[8px] font-black uppercase">No Images</span>
+                           </div>
+                         )}
+                       </div>
+                       <input type="file" multiple accept="image/*" onChange={handleMultiFileUpload} className="text-sm font-bold text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-pink/10 file:text-brand-pink hover:file:bg-brand-pink/20 cursor-pointer transition-colors" />
                     </div>
                   </div>
                 </div>
@@ -203,18 +251,18 @@ export default function ContentManagerClient({
           </div>
         )}
 
-        {/* --- SERVICES PAGE TAB --- */}
-        {activeTab === 'services' && (
+        {/* --- CATEGORIES PAGE TAB --- */}
+        {activeTab === ('services' as any) || activeTab === ('categories' as any) ? (
           <div className="space-y-12 animate-in fade-in duration-500 max-w-4xl mx-auto">
              <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
-                <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight mb-6">Services Header</h3>
+                <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight mb-6">Category Landing Hero</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Heading</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Hero Title</label>
                     <input type="text" value={serviceHeroTitle} onChange={e => setServiceHeroTitle(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent focus:border-brand-pink/20 outline-none font-black text-brand-dark shadow-sm" />
                   </div>
                   <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Description</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Hero Description</label>
                     <textarea rows={2} value={serviceHeroSubtitle} onChange={e => setServiceHeroSubtitle(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent focus:border-brand-pink/20 outline-none font-bold text-gray-600 shadow-sm" />
                   </div>
                 </div>
@@ -222,29 +270,21 @@ export default function ContentManagerClient({
 
              <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight">Structured Offerings</h3>
-                  <button onClick={addServiceItem} className="px-5 py-2.5 bg-brand-pink text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:shadow-lg transition-all">Add Offering</button>
+                  <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight">Enterprise Solutions CTA</h3>
                 </div>
-                
-                <div className="space-y-6">
-                  {servicesList.map((service, i) => (
-                    <div key={i} className="bg-white p-6 rounded-[24px] border border-gray-100 relative group text-sm">
-                       <button onClick={() => removeServiceItem(i)} className="absolute top-4 right-4 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button>
-                       <div className="grid grid-cols-2 gap-4">
-                         <div className="space-y-3">
-                            <input type="text" value={service.title} onChange={e => updateServiceItem(i, 'title', e.target.value)} className="w-full font-black text-brand-dark capitalize focus:outline-brand-pink" placeholder="Service Name" />
-                            <textarea rows={3} value={service.desc} onChange={e => updateServiceItem(i, 'desc', e.target.value)} className="w-full text-xs font-medium text-gray-500 resize-none focus:outline-brand-pink" placeholder="Details" />
-                         </div>
-                         <select value={service.icon} onChange={e => updateServiceItem(i, 'icon', e.target.value)} className="self-start text-xs font-bold text-gray-500 focus:outline-none bg-gray-50 rounded-lg p-2 max-w-[150px]">
-                            {Object.keys(ICONS).map(icon => <option key={icon} value={icon}>{icon}</option>)}
-                         </select>
-                       </div>
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                   <div>
+                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">CTA Heading</label>
+                     <input type="text" value={ctaHeading} onChange={e => setCtaHeading(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent focus:border-brand-pink/20 outline-none font-black text-brand-dark shadow-sm" />
+                   </div>
+                   <div>
+                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">CTA Subtext</label>
+                     <textarea rows={2} value={ctaDesc} onChange={e => setCtaDesc(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent focus:border-brand-pink/20 outline-none font-bold text-gray-600 shadow-sm" />
+                   </div>
                 </div>
              </section>
           </div>
-        )}
+        ) : null}
 
         {/* --- SYSTEM INTEGRATIONS TAB --- */}
         {activeTab === 'settings' && (

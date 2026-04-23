@@ -16,7 +16,9 @@ import {
   Layout,
   LogOut,
   Clock,
-  FileText
+  FileText,
+  PenTool,
+  Tag
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
@@ -42,8 +44,10 @@ export default function AdminSidebar() {
     { name: 'Orders', href: '/admin/orders', icon: <ShoppingBag className="h-5 w-5" /> },
     { name: 'Inquiries', href: '/admin/inquiries', icon: <Zap className="h-5 w-5" /> },
     { name: 'Customers', href: '/admin/customers', icon: <Users className="h-5 w-5" /> },
-    { name: 'Abandoned', href: '/admin/analytics/abandoned', icon: <Clock className="h-5 w-5" /> },
-    { name: 'Core Site Content', href: '/admin/cms', icon: <FileText className="h-5 w-5" /> },
+    { name: 'Coupons', href: '/admin/coupons', icon: <Tag className="h-5 w-5" /> },
+    { name: 'Abandoned Carts', href: '/admin/analytics/abandoned', icon: <Clock className="h-5 w-5" /> },
+    { name: 'Website Content', href: '/admin/cms', icon: <FileText className="h-5 w-5" /> },
+    { name: 'Blogs', href: '/admin/blogs', icon: <PenTool className="h-5 w-5" /> },
   ];
 
   return (
@@ -58,7 +62,7 @@ export default function AdminSidebar() {
               className="object-contain mix-blend-multiply" 
             />
           </div>
-          <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-1">Console</span>
+          <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-1">Admin</span>
         </div>
 
         <nav className="space-y-1.5">

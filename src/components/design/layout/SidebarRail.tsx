@@ -6,15 +6,18 @@ import {
   Type, LayoutGrid, Square, Upload, Sparkles, FolderHeart, Image as ImageIcon, HelpCircle, Layout as LayoutIcon, Palette, Star, Layers, Grid, Image
 } from 'lucide-react';
 
-export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'shutterstock' | 'iconify' | 'layers' | 'patterns' | 'unsplash' | 'pexels';
+export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'shutterstock' | 'iconify' | 'layers' | 'patterns' | 'unsplash' | 'pexels' | 'data' | 'pages';
 
 interface SidebarRailProps {
   activeTab: SidebarTab | null;
   onTabChange: (tab: SidebarTab) => void;
+  designMode?: string;
 }
 
 const navItems: { id: SidebarTab; icon: React.ReactNode; label: string }[] = [
   { id: 'product', icon: <Palette className="h-5 w-5" />, label: 'Product' },
+  { id: 'data', icon: <Grid className="h-5 w-5" />, label: 'Data', mode: 'vdp' },
+  { id: 'pages', icon: <LayoutIcon className="h-5 w-5" />, label: 'Pages', mode: 'multipage' },
   { id: 'patterns', icon: <Grid className="h-5 w-5" />, label: 'Patterns' },
   { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },
   { id: 'graphics', icon: <Square className="h-5 w-5" />, label: 'Elements' },
@@ -24,13 +27,19 @@ const navItems: { id: SidebarTab; icon: React.ReactNode; label: string }[] = [
   { id: 'unsplash', icon: <ImageIcon className="h-5 w-5" />, label: 'Stock' },
   { id: 'uploads', icon: <Upload className="h-5 w-5" />, label: 'Upload' },
   { id: 'ai', icon: <Sparkles className="h-5 w-5 opacity-40" />, label: 'AI' },
-];
+] as any[];
 
-const SidebarRail = ({ activeTab, onTabChange }: SidebarRailProps) => {
+const SidebarRail = ({ activeTab, onTabChange, designMode = 'standard' }: SidebarRailProps) => {
+  if (designMode === 'intake_form') return null;
+
+  const filteredItems = navItems.filter(item => {
+    if (!item.mode) return true;
+    return item.mode === designMode;
+  });
   return (
     <div className="w-[78px] shrink-0 bg-white/70 backdrop-blur-3xl border-r border-white/20 flex flex-col items-center py-2 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.02)] ring-1 ring-black/5">
        <div className="w-full flex flex-col gap-1">
-         {navItems.map((item) => (
+         {filteredItems.map((item: any) => (
            <button
              key={item.id}
              onClick={() => onTabChange(item.id)}

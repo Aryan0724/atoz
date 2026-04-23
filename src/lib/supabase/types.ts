@@ -28,7 +28,7 @@ export interface Product {
   stock_quantity?: number;
   is_active?: boolean;
   quality_prices?: Record<string, number>;
-  bulk_pricing?: { min: number; discount: number }[];
+  bulk_discount_rules?: { quantity: number; discount: number }[];
   design_areas?: Record<string, { x: number; y: number; w: number; h: number }>;
   created_at?: string;
 }
@@ -55,11 +55,25 @@ export interface Order {
   id: string;
   user_id: string;
   total_price: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  payment_status?: 'unpaid' | 'paid' | 'failed' | 'refunded';
+  status: 'pending' | 'confirmed' | 'in_production' | 'dispatched' | 'out_for_delivery' | 'delivered' | 'cancelled';
+  payment_status?: 'unpaid' | 'paid' | 'failed' | 'refunded' | 'pending_cod' | 'cod_collected' | 'cod_remitted';
+  payment_method?: 'Online' | 'COD';
+  tracking_number?: string;
+  courier_name?: string;
+  estimated_delivery?: string;
+  tracking_url?: string;
   razorpay_order_id?: string;
   razorpay_payment_id?: string;
   shipping_address: any;
+  // Verification fields
+  delivery_confirmed_by_customer?: boolean;
+  delivery_confirmed_at?: string;
+  delivery_disputed?: boolean;
+  delivery_dispute_note?: string;
+  cod_collection_status?: 'not_applicable' | 'pending' | 'collected' | 'failed';
+  cod_collected_at?: string;
+  cod_remitted_at?: string;
+  admin_notes?: string;
   created_at: string;
   items?: OrderItem[];
 }
@@ -102,6 +116,11 @@ export interface CmsContent {
   author_name?: string;
   last_modified?: string;
   created_at?: string;
+  featured_image?: string;
+  excerpt?: string;
+  meta_description?: string;
+  tags?: string[];
+  reading_time?: number;
 }
 
 export interface Database {

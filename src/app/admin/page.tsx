@@ -110,8 +110,8 @@ export default function AdminDashboard() {
     <div className="p-10 max-w-7xl mx-auto">
       <header className="mb-12 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-1">Control <span className="text-brand-pink italic">Center</span></h1>
-          <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Aggregate Performance Metrics</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-1">Admin <span className="text-brand-pink italic">Panel</span></h1>
+          <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Overall Sales & Performance</p>
         </div>
         <div className="flex items-center gap-3 px-5 py-2.5 bg-white border border-gray-100 rounded-xl shadow-sm text-[11px] font-black uppercase tracking-widest text-gray-400">
            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Order Status Measurement */}
         <div className="bg-white p-8 rounded-3xl shadow-soft border border-gray-100">
-           <h2 className="text-sm font-bold text-brand-dark mb-8 uppercase tracking-widest opacity-40">Order Volume Map</h2>
+           <h2 className="text-sm font-bold text-brand-dark mb-8 uppercase tracking-widest opacity-40">Orders by Status</h2>
            <div className="space-y-6">
               {Object.entries(stats.statusDistribution).length > 0 ? Object.entries(stats.statusDistribution).map(([status, count]) => (
                 <div key={status} className="space-y-2">
@@ -182,8 +182,8 @@ export default function AdminDashboard() {
         {/* Recent Activity */}
         <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-soft border border-gray-100">
            <div className="flex items-center justify-between mb-10 border-b border-gray-50 pb-6">
-              <h2 className="text-sm font-bold text-brand-dark uppercase tracking-widest opacity-40">Recent Activity Log</h2>
-              <button onClick={() => router.push('/admin/orders')} className="text-[10px] font-black uppercase tracking-widest text-brand-pink hover:underline italic">Operational Archive</button>
+              <h2 className="text-sm font-bold text-brand-dark uppercase tracking-widest opacity-40">Recent Orders</h2>
+              <button onClick={() => router.push('/admin/orders')} className="text-[10px] font-black uppercase tracking-widest text-brand-pink hover:underline italic">View All Orders</button>
            </div>
            
            <div className="space-y-4">
@@ -221,13 +221,13 @@ export default function AdminDashboard() {
         {/* Quick Actions */}
         <div className="bg-brand-dark p-10 rounded-3xl text-white shadow-soft relative overflow-hidden">
            <div className="relative z-10">
-             <h2 className="text-sm font-bold mb-10 border-b border-white/5 pb-6 uppercase tracking-widest opacity-40">System Actions</h2>
+             <h2 className="text-sm font-bold mb-10 border-b border-white/5 pb-6 uppercase tracking-widest opacity-40">Quick Actions</h2>
              <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'Asset Intake', icon: <Plus className="h-4 w-4" />, color: 'pink', action: () => router.push('/admin/products/add') },
-                  { label: 'Catalog Sync', icon: <Package className="h-4 w-4" />, color: 'cyan', action: () => router.push('/admin/products') },
-                  { label: 'Order Stream', icon: <Activity className="h-4 w-4" />, color: 'white', action: () => router.push('/admin/orders') },
-                  { label: 'User Hub', icon: <Users className="h-4 w-4" />, color: 'pink', action: () => router.push('/admin/customers') },
+                  { label: 'Add Product', icon: <Plus className="h-4 w-4" />, color: 'pink', action: () => router.push('/admin/products/add') },
+                  { label: 'All Products', icon: <Package className="h-4 w-4" />, color: 'cyan', action: () => router.push('/admin/products') },
+                  { label: 'All Orders', icon: <Activity className="h-4 w-4" />, color: 'white', action: () => router.push('/admin/orders') },
+                  { label: 'All Customers', icon: <Users className="h-4 w-4" />, color: 'pink', action: () => router.push('/admin/customers') },
                 ].map((action) => (
                   <button 
                     key={action.label}

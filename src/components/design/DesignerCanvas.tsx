@@ -23,8 +23,16 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   onOutOfBoundsWarning,
   onLowQualityWarning,
   designArea,
-  disableTinting
+  disableTinting,
+  designMode = 'standard',
+  designConfig = {},
+  vdpData,
+  vdpRowIndex = 0
 }, ref) => {
+  const BASE_WIDTH = designConfig?.canvas_width || 500;
+  const BASE_HEIGHT = designConfig?.canvas_height || 625;
+  const CENTER_X = BASE_WIDTH / 2;
+  const CENTER_Y = BASE_HEIGHT / 2;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
@@ -38,13 +46,50 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     productColorRef.current = productColor;
   }, [productColor]);
 
+  // VDP Preview Logic
+  useEffect(() => {
+    if (!canvas || !vdpData || !vdpData.rows.length) return;
+    
+    const currentRow = vdpData.rows[vdpRowIndex];
+    if (!currentRow) return;
+
+    let canvasModified = false;
+
+    canvas.getObjects().forEach((obj: any) => {
+      if (obj.type === 'i-text' || obj.type === 'text') {
+        // Initialize original text if it contains placeholders and hasn't been saved yet
+        if (obj.text?.includes('{{') && !obj._originalText) {
+          obj.set('_originalText', obj.text);
+        }
+
+        // Apply replacements if we have an original text template
+        if (obj._originalText) {
+          let newText = obj._originalText;
+          vdpData.headers.forEach(header => {
+            const regex = new RegExp(`{{${header}}}`, 'gi');
+            newText = newText.replace(regex, currentRow[header] || '');
+          });
+          
+          if (obj.text !== newText) {
+            obj.set({ text: newText });
+            canvasModified = true;
+          }
+        }
+      }
+    });
+
+    if (canvasModified) {
+      canvas.renderAll();
+    }
+  }, [canvas, vdpData, vdpRowIndex]);
+
   // INITIALIZATION
   useEffect(() => {
     if (!canvasRef.current || canvas) return;
 
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-      width: 500,
-      height: 625,
+      width: BASE_WIDTH,
+      height: BASE_HEIGHT,
       preserveObjectStacking: true,
       selectionColor: 'rgba(24, 144, 255, 0.05)',
       selectionBorderColor: '#1890ff',
@@ -100,12 +145,12 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       // Center Guides (Existing)
       if ((fabricCanvas as any).showVGuide) {
         ctx.beginPath();
-        ctx.moveTo(250, 0); ctx.lineTo(250, 625);
+        ctx.moveTo(CENTER_X, 0); ctx.lineTo(CENTER_X, BASE_HEIGHT);
         ctx.stroke();
       }
       if ((fabricCanvas as any).showHGuide) {
         ctx.beginPath();
-        ctx.moveTo(0, 312.5); ctx.lineTo(500, 312.5);
+        ctx.moveTo(0, CENTER_Y); ctx.lineTo(BASE_WIDTH, CENTER_Y);
         ctx.stroke();
       }
 
@@ -115,13 +160,13 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
       ((fabricCanvas as any).vGuides || []).forEach((x: number) => {
         ctx.beginPath();
-        ctx.moveTo(x, 0); ctx.lineTo(x, 625);
+        ctx.moveTo(x, 0); ctx.lineTo(x, BASE_HEIGHT);
         ctx.stroke();
       });
 
       ((fabricCanvas as any).hGuides || []).forEach((y: number) => {
         ctx.beginPath();
-        ctx.moveTo(0, y); ctx.lineTo(500, y);
+        ctx.moveTo(0, y); ctx.lineTo(BASE_WIDTH, y);
         ctx.stroke();
       });
 
@@ -141,8 +186,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
     fabricCanvas.on('object:moving', (e: any) => {
       const obj = e.target;
-      const centerX = 250;
-      const centerY = 312.5;
+      const centerX = CENTER_X;
+      const centerY = CENTER_Y;
       const snapRange = 6;
       let guided = false;
 
@@ -233,9 +278,9 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       if (!entries?.[0]) return;
       const { width } = entries[0].contentRect;
       if (width === 0) return;
-      const scale = width / 500;
+      const scale = width / BASE_WIDTH;
       canvas.setWidth(width);
-      canvas.setHeight(625 * scale);
+      canvas.setHeight(BASE_HEIGHT * scale);
       canvas.setZoom(scale * zoomLevel);
       canvas.calcOffset();
       canvas.renderAll();
@@ -281,9 +326,9 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       }
 
       // Safely calculate scale to ensure we never get NaN if dimensions are missing
-      const w = img.width || 500;
-      const h = img.height || 500;
-      const scale = Math.min(500 / w, 625 / h);
+      const w = img.width || BASE_WIDTH;
+      const h = img.height || BASE_HEIGHT;
+      const scale = Math.min(BASE_WIDTH / w, BASE_HEIGHT / h);
       
       img.scale(scale);
       img.set({
@@ -291,8 +336,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         evented: false,
         originX: 'center',
         originY: 'center',
-        left: 250,
-        top: 312.5,
+        left: CENTER_X,
+        top: CENTER_Y,
         //@ts-ignore
         id: 'product_base_image',
       });
@@ -306,7 +351,16 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
           alpha: 1
         });
         img.filters = [filter];
-        img.applyFilters();
+        // Safety check: _element can be null if the image failed to load completely (e.g., CORS or 404)
+        if ((img as any)._element) {
+          try {
+            img.applyFilters();
+          } catch (e) {
+            console.warn("Failed to apply tinting filter:", e);
+          }
+        } else {
+          console.warn("Image element is missing, skipping filters.");
+        }
       }
 
       removeExisting();
@@ -344,14 +398,14 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       if (vLine) canvas.remove(vLine);
       if (hLine) canvas.remove(hLine);
 
-      if (Math.abs(centerX - 250) < SNAP_THRESHOLD) {
-        if (obj.originX === 'center') obj.set({ left: 250 }).setCoords();
-        vLine = new fabric.Line([250, 0, 250, 625], { stroke: '#4F46E5', strokeWidth: 1, selectable: false, evented: false, opacity: 0.5 });
+      if (Math.abs(centerX - CENTER_X) < SNAP_THRESHOLD) {
+        if (obj.originX === 'center') obj.set({ left: CENTER_X }).setCoords();
+        vLine = new fabric.Line([CENTER_X, 0, CENTER_X, BASE_HEIGHT], { stroke: '#4F46E5', strokeWidth: 1, selectable: false, evented: false, opacity: 0.5 });
         canvas.add(vLine);
       }
-      if (Math.abs(centerY - 312.5) < SNAP_THRESHOLD) {
-        if (obj.originY === 'center') obj.set({ top: 312.5 }).setCoords();
-        hLine = new fabric.Line([0, 312.5, 500, 312.5], { stroke: '#4F46E5', strokeWidth: 1, selectable: false, evented: false, opacity: 0.5 });
+      if (Math.abs(centerY - CENTER_Y) < SNAP_THRESHOLD) {
+        if (obj.originY === 'center') obj.set({ top: CENTER_Y }).setCoords();
+        hLine = new fabric.Line([0, CENTER_Y, BASE_WIDTH, CENTER_Y], { stroke: '#4F46E5', strokeWidth: 1, selectable: false, evented: false, opacity: 0.5 });
         canvas.add(hLine);
       }
       canvas.renderAll();
@@ -610,7 +664,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       if (!canvas) return;
       const obj = canvas.getActiveObject();
       if (!obj) return;
-      const bounds = { w: 500, h: 625 };
+      const bounds = { w: BASE_WIDTH, h: BASE_HEIGHT };
       if (pos === 'left') obj.set({ left: obj.getScaledWidth() / 2 });
       else if (pos === 'center') obj.set({ left: bounds.w / 2 });
       else if (pos === 'right') obj.set({ left: bounds.w - obj.getScaledWidth() / 2 });
@@ -654,10 +708,10 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
            repeat: 'repeat'
          });
          const rect = new fabric.Rect({
-           width: 250,
-           height: 250,
-           left: 250,
-           top: 312.5,
+           width: BASE_WIDTH / 2,
+           height: BASE_HEIGHT / 2.5,
+           left: CENTER_X,
+           top: CENTER_Y,
            originX: 'center',
            originY: 'center',
            fill: pattern,
@@ -673,7 +727,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   }), [canvas, addText, addImage, addShape, addIcon, addSvgGraphic, undo, redo, resetZoom, handleZoom, onObjectsUpdated, onHistoryChange, onObjectModified, onSelectionCleared, designArea]);
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-[500px] aspect-[4/5] bg-gray-50 rounded-[30px] overflow-hidden border border-gray-100 shadow-2xl flex items-center justify-center group isolate ring-1 ring-black/5" style={{ touchAction: 'none' }}>
+    <div ref={containerRef} className="relative w-full max-w-full bg-gray-50 rounded-[30px] overflow-hidden border border-gray-100 shadow-2xl flex items-center justify-center group isolate ring-1 ring-black/5" style={{ touchAction: 'none', aspectRatio: `${BASE_WIDTH}/${BASE_HEIGHT}` }}>
       <canvas ref={canvasRef} className="max-w-full h-auto drop-shadow-sm" />
     </div>
   );

@@ -55,14 +55,15 @@ export default function AddProductPage() {
     images: [] as string[],
     template_images: [] as string[],
     color_variants: [] as { name: string, hex: string, wireframe_images: string[] }[],
-    quality_levels: ['Standard', 'Premium'],
     quality_prices: {} as Record<string, number>,
-    bulk_pricing: [] as { min: number; discount: number }[],
+    bulk_discount_rules: [] as { quantity: number; discount: number }[],
     customization_fields: ['Logo', 'Text Color'],
     packaging_options: ['Standard Box'],
     supported_views: ['front', 'back', 'left', 'right'],
     specifications: {},
-    design_areas: {} as Record<string, { x: number, y: number, w: number, h: number }>
+    design_areas: {} as Record<string, { x: number, y: number, w: number, h: number }>,
+    design_mode: 'standard',
+    design_config: {} as any
   });
 
   useEffect(() => {
@@ -211,10 +212,10 @@ export default function AddProductPage() {
     if (min && discount) {
       setFormData({
         ...formData,
-        bulk_pricing: [
-          ...formData.bulk_pricing,
-          { min: parseInt(min), discount: parseInt(discount) }
-        ].sort((a, b) => a.min - b.min)
+        bulk_discount_rules: [
+          ...formData.bulk_discount_rules,
+          { quantity: parseInt(min), discount: parseInt(discount) }
+        ].sort((a, b) => a.quantity - b.quantity)
       });
     }
   };
@@ -313,6 +314,42 @@ export default function AddProductPage() {
                           placeholder="What makes this product special?"
                         />
                       </div>
+                      
+                      {/* DESIGNER MODE & CONFIG */}
+                      <div className="pt-8 border-t border-gray-100 mt-8">
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">Designer Configuration</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Engine Mode</label>
+                            <select 
+                              value={formData.design_mode}
+                              onChange={(e) => setFormData({ ...formData, design_mode: e.target.value })}
+                              className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-transparent focus:bg-white focus:border-brand-pink/20 transition-all outline-none font-bold text-brand-dark appearance-none cursor-pointer text-sm"
+                            >
+                               <option value="standard">Standard (Apparel/Freeform)</option>
+                               <option value="vdp">VDP (ID Cards/Data-driven)</option>
+                               <option value="multipage">Multi-page (Calendars)</option>
+                               <option value="intake_form">Intake Form (Complex Products)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Config JSON</label>
+                            <textarea 
+                              rows={4}
+                              value={JSON.stringify(formData.design_config, null, 2)}
+                              onChange={(e) => {
+                                try {
+                                  setFormData({ ...formData, design_config: JSON.parse(e.target.value) });
+                                } catch (err) {
+                                  // allow typing invalid JSON temporarily
+                                }
+                              }}
+                              className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-transparent focus:bg-white focus:border-brand-pink/20 transition-all outline-none font-mono text-[10px] text-gray-600 shadow-inner"
+                              placeholder='{"canvas_width": 500, ...}'
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </section>
                 </div>
@@ -382,23 +419,23 @@ export default function AddProductPage() {
                              </button>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                             {formData.bulk_pricing.map((tier, i) => (
+                             {formData.bulk_discount_rules.map((tier, i) => (
                                <div key={i} className="flex items-center justify-between p-5 bg-brand-dark text-white rounded-[24px] relative group overflow-hidden shadow-lg">
                                  <div className="relative z-10 flex gap-6 italic">
-                                   <div><span className="text-[8px] block opacity-40 uppercase mb-1">Qty</span><span className="text-xl font-black">{tier.min}+</span></div>
+                                   <div><span className="text-[8px] block opacity-40 uppercase mb-1">Qty</span><span className="text-xl font-black">{tier.quantity}+</span></div>
                                    <div><span className="text-[8px] block opacity-40 uppercase mb-1">Discount</span><span className="text-xl font-black text-brand-cyan">{tier.discount}%</span></div>
                                  </div>
-                                 <button onClick={() => {
-                                   const newTiers = [...formData.bulk_pricing];
+                                 <button type="button" onClick={() => {
+                                   const newTiers = [...formData.bulk_discount_rules];
                                    newTiers.splice(i, 1);
-                                   setFormData({...formData, bulk_pricing: newTiers});
+                                   setFormData({...formData, bulk_discount_rules: newTiers});
                                  }} className="p-2 bg-white/10 hover:bg-red-500 rounded-xl transition-all relative z-10 opacity-0 group-hover:opacity-100">
                                    <Trash2 className="h-4 w-4" />
                                  </button>
                                  <div className="absolute top-0 right-0 w-16 h-16 bg-brand-cyan/10 blur-2xl rounded-full" />
                                </div>
                              ))}
-                             {formData.bulk_pricing.length === 0 && (
+                             {formData.bulk_discount_rules.length === 0 && (
                                <div className="sm:col-span-2 p-10 border-2 border-dashed border-gray-100 rounded-3xl text-center">
                                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">No bulk discounts established</p>
                                </div>

@@ -22,6 +22,9 @@ interface Category {
   name: string;
   slug: string;
   description: string | null;
+  long_description: string | null;
+  image: string | null;
+  is_service: boolean;
   product_count?: number;
 }
 
@@ -40,8 +43,12 @@ export default function CategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [longDescription, setLongDescription] = useState('');
+  const [image, setImage] = useState('');
+  const [isService, setIsService] = useState(false);
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -52,17 +59,14 @@ export default function CategoriesPage() {
     try {
       const { data, error } = await supabase
         .from('categories')
-        .select('*');
+        .select('*')
+        .order('name');
 
       if (error) {
         console.warn("Categories fetch error:", error);
         setCategories([]);
       } else {
-        const categoriesWithCount = data.map((cat: any) => ({
-          ...cat,
-          product_count: 0
-        }));
-        setCategories(categoriesWithCount);
+        setCategories(data);
       }
     } catch (err) {
       console.error(err);
@@ -71,24 +75,50 @@ export default function CategoriesPage() {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const { uploadFile } = await import('@/lib/supabase/storage');
+      const url = await uploadFile('public', `categories/${Date.now()}-${file.name}`, file);
+      if (url) {
+        setImage(url);
+        toast.success("Image uploaded!");
+      }
+    } catch (err: any) {
+      toast.error("Upload failed: " + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     const slug = name.toLowerCase().replace(/ /g, '-');
     
-    // We intentionally removed 'description' from the DB payload early on to fix crashes
     try {
+      const payload = { 
+        name, 
+        slug, 
+        long_description: longDescription, 
+        image, 
+        is_service: isService 
+      };
+
       if (editingCategory) {
         const { error } = await supabase
           .from('categories')
-          .update({ name, slug })
+          .update(payload)
           .eq('id', editingCategory.id);
         if (error) throw error;
         toast.success("Category updated successfully!");
       } else {
         const { error } = await supabase
           .from('categories')
-          .insert({ name, slug });
+          .insert(payload);
         
         if (error) {
           if (error.code === '23505') {
@@ -101,9 +131,7 @@ export default function CategoriesPage() {
         toast.success("Category created successfully!");
       }
       setIsModalOpen(false);
-      setName('');
-      setDescription('');
-      setEditingCategory(null);
+      resetForm();
       fetchCategories();
     } catch (err: any) {
       toast.error(`Database Error: ${err.message || "Failed to save category"}`);
@@ -112,17 +140,26 @@ export default function CategoriesPage() {
     }
   };
 
+  const resetForm = () => {
+    setName('');
+    setDescription('');
+    setLongDescription('');
+    setImage('');
+    setIsService(false);
+    setEditingCategory(null);
+  };
+
   const handleDelete = async (id: string, slug: string) => {
     if (STANDARD_CATEGORIES.some(c => c.slug === slug)) {
-      if (!confirm("WARNING: This is a core standard category. Deleting it may impact generic system logic. Proceed?")) return;
+      if (!confirm("WARNING: This is a core standard category. Proceed?")) return;
     } else {
-      if (!confirm("Are you sure you want to delete this specific custom category?")) return;
+      if (!confirm("Are you sure you want to delete this category?")) return;
     }
     
     try {
       const { error } = await supabase.from('categories').delete().eq('id', id);
       if (error) throw error;
-      toast.success("Category wiped out");
+      toast.success("Category deleted");
       fetchCategories();
     } catch (err) {
       toast.error("Failed to delete category");
@@ -137,17 +174,17 @@ export default function CategoriesPage() {
         .map(sc => ({ name: sc.name, slug: sc.slug }));
 
       if (toInsert.length === 0) {
-        toast.info("All standard categories are already active.");
+        toast.info("Standard categories are already active.");
         setSeeding(false);
         return;
       }
 
       const { error } = await supabase.from('categories').insert(toInsert);
       if (error) throw error;
-      toast.success(`${toInsert.length} core categories integrated.`);
+      toast.success(`${toInsert.length} categories integrated.`);
       fetchCategories();
     } catch (err: any) {
-      toast.error("Failed to seed standard categories.");
+      toast.error("Failed to seed categories.");
     } finally {
       setSeeding(false);
     }
@@ -163,8 +200,8 @@ export default function CategoriesPage() {
     <div className="p-8 max-w-7xl mx-auto animate-in fade-in duration-500 pb-32">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
           <div>
-            <h1 className="text-4xl font-black text-brand-dark tracking-tighter italic mb-2">Product <span className="text-brand-pink">Categories</span></h1>
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Organize your store structure and catalog classification.</p>
+            <h1 className="text-4xl font-black text-brand-dark tracking-tighter italic mb-2">Category <span className="text-brand-pink">Studio</span></h1>
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Master control for store taxonomy and service catalogs.</p>
           </div>
           
           <div className="flex gap-4">
@@ -175,19 +212,17 @@ export default function CategoriesPage() {
                 className="px-6 py-3 bg-white text-brand-cyan border-2 border-brand-cyan/20 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-brand-cyan hover:text-white transition-all flex items-center gap-3 italic"
               >
                 {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-                Deploy System Cores ({missingCoreCount})
+                Deploy Cores ({missingCoreCount})
               </button>
             )}
             <button 
               onClick={() => {
-                setEditingCategory(null);
-                setName('');
-                setDescription('');
+                resetForm();
                 setIsModalOpen(true);
               }}
               className="px-6 py-3 bg-brand-dark text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-brand-dark/10 hover:bg-brand-pink hover:shadow-brand-pink/20 transition-all flex items-center gap-3 italic"
             >
-              <Plus className="h-4 w-4" /> Add Custom
+              <Plus className="h-4 w-4" /> New Category
             </button>
           </div>
         </header>
@@ -199,37 +234,51 @@ export default function CategoriesPage() {
              {/* Core System Categories */}
              <section>
                 <h3 className="text-sm font-black text-gray-400 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
-                  <div className="h-px bg-gray-200 flex-1" /> Core Taxonomy <div className="h-px bg-gray-200 flex-1" />
+                  <div className="h-px bg-gray-200 flex-1" /> Standard Categories <div className="h-px bg-gray-200 flex-1" />
                 </h3>
-                {coreCategories.length === 0 ? (
-                  <div className="py-12 flex flex-col items-center bg-gray-50/50 rounded-3xl border border-dashed border-gray-200 text-center">
-                    <p className="text-[11px] font-black uppercase tracking-widest text-gray-400">No core categories established yet</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {coreCategories.map((cat) => (
-                      <CategoryCard key={cat.id} cat={cat} isCore={true} onEdit={(c) => { setEditingCategory(c); setName(c.name); setIsModalOpen(true); }} onDelete={() => handleDelete(cat.id, cat.slug)} />
-                    ))}
-                  </div>
-                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {coreCategories.map((cat) => (
+                    <CategoryCard 
+                      key={cat.id} 
+                      cat={cat} 
+                      isCore={true} 
+                      onEdit={(c) => { 
+                        setEditingCategory(c); 
+                        setName(c.name); 
+                        setLongDescription(c.long_description || '');
+                        setImage(c.image || '');
+                        setIsService(c.is_service);
+                        setIsModalOpen(true); 
+                      }} 
+                      onDelete={() => handleDelete(cat.id, cat.slug)} 
+                    />
+                  ))}
+                </div>
              </section>
 
-             {/* Custom Updated Categories */}
+             {/* Custom Categories */}
              <section>
                 <h3 className="text-sm font-black text-gray-400 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
-                  <div className="h-px bg-brand-pink/20 flex-1" /> Custom Classifications <div className="h-px bg-brand-pink/20 flex-1" />
+                  <div className="h-px bg-brand-pink/20 flex-1" /> Premium Services & Custom <div className="h-px bg-brand-pink/20 flex-1" />
                 </h3>
-                {customCategories.length === 0 ? (
-                  <div className="py-12 flex flex-col items-center bg-pink-50/30 rounded-3xl border border-dashed border-brand-pink/20 text-center">
-                    <p className="text-[11px] font-black uppercase tracking-widest text-brand-pink/50">No unique custom categories added.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {customCategories.map((cat) => (
-                      <CategoryCard key={cat.id} cat={cat} isCore={false} onEdit={(c) => { setEditingCategory(c); setName(c.name); setIsModalOpen(true); }} onDelete={() => handleDelete(cat.id, cat.slug)} />
-                    ))}
-                  </div>
-                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {customCategories.map((cat) => (
+                    <CategoryCard 
+                      key={cat.id} 
+                      cat={cat} 
+                      isCore={false} 
+                      onEdit={(c) => { 
+                        setEditingCategory(c); 
+                        setName(c.name); 
+                        setLongDescription(c.long_description || '');
+                        setImage(c.image || '');
+                        setIsService(c.is_service);
+                        setIsModalOpen(true); 
+                      }} 
+                      onDelete={() => handleDelete(cat.id, cat.slug)} 
+                    />
+                  ))}
+                </div>
              </section>
           </div>
         )}
@@ -237,37 +286,87 @@ export default function CategoriesPage() {
         {/* Modal Logic */}
         {isModalOpen && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-brand-dark/40 backdrop-blur-sm animate-in fade-in duration-300">
-             <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden relative border border-white/20 animate-in zoom-in-95 duration-300">
-                <header className="p-8 border-b border-gray-50 flex items-center justify-between">
+             <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden relative border border-white/20 animate-in zoom-in-95 duration-300">
+                <header className="p-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
                    <h2 className="text-2xl font-black text-brand-dark tracking-tighter italic">
-                     {editingCategory ? "Edit" : "Add"} <span className="text-brand-pink">Class</span>
+                     {editingCategory ? "Update" : "Establish"} <span className="text-brand-pink">Category</span>
                    </h2>
                    <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                       <X className="h-5 w-5 text-gray-400" />
                    </button>
                 </header>
 
-                <form onSubmit={handleSave} className="p-8 space-y-6">
+                <form onSubmit={handleSave} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                   <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Display Name</label>
+                        <input
+                          required
+                          type="text"
+                          className="w-full bg-gray-50 border border-transparent rounded-2xl py-4 px-5 text-sm focus:bg-white focus:border-brand-pink outline-none transition-all font-bold text-brand-dark"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Type</label>
+                        <div className="flex gap-2">
+                           <button 
+                             type="button" 
+                             onClick={() => setIsService(false)}
+                             className={cn("flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all", !isService ? "bg-brand-dark text-white" : "bg-gray-50 text-gray-400")}
+                           >Product</button>
+                           <button 
+                             type="button" 
+                             onClick={() => setIsService(true)}
+                             className={cn("flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all", isService ? "bg-brand-pink text-white" : "bg-gray-50 text-gray-400")}
+                           >Service</button>
+                        </div>
+                      </div>
+                   </div>
+
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Classification Name</label>
-                      <input
-                        required
-                        type="text"
-                        className="w-full bg-gray-50 border border-transparent rounded-2xl py-4 px-5 text-sm focus:bg-white focus:border-brand-pink outline-none transition-all placeholder:text-gray-300 font-bold text-brand-dark"
-                        placeholder="e.g., Seasonal Accessories"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Hero Image</label>
+                      <div className="flex items-center gap-6 p-4 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                         {image ? (
+                           <div className="relative h-20 w-20 rounded-2xl overflow-hidden border border-white shadow-md">
+                             <img src={image} className="object-cover h-full w-full" />
+                             <button onClick={() => setImage('')} className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-lg"><Trash2 className="h-3 w-3" /></button>
+                           </div>
+                         ) : (
+                           <div className="h-20 w-20 bg-white rounded-2xl flex items-center justify-center text-gray-200"><Layout className="h-8 w-8" /></div>
+                         )}
+                         <div className="flex-1">
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              onChange={handleFileUpload} 
+                              className="text-xs font-bold text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-brand-pink/10 file:text-brand-pink hover:file:bg-brand-pink/20" 
+                            />
+                            {uploading && <Loader2 className="h-4 w-4 animate-spin text-brand-pink mt-2" />}
+                         </div>
+                      </div>
+                   </div>
+
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Elaborated Description</label>
+                      <textarea
+                        rows={5}
+                        className="w-full bg-gray-50 border border-transparent rounded-2xl py-4 px-5 text-sm focus:bg-white focus:border-brand-pink outline-none transition-all font-bold text-brand-dark resize-none"
+                        placeholder="Detail the service/category expertise..."
+                        value={longDescription}
+                        onChange={(e) => setLongDescription(e.target.value)}
                       />
                    </div>
 
                     <button
                       type="submit"
-                      disabled={saving}
-                      className="w-full py-4 bg-brand-dark text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-brand-dark/10 hover:bg-brand-pink transition-all flex items-center justify-center gap-3 disabled:opacity-50 italic"
+                      disabled={saving || uploading}
+                      className="w-full py-5 bg-brand-dark text-white rounded-[24px] font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-brand-dark/10 hover:bg-brand-pink transition-all flex items-center justify-center gap-3 disabled:opacity-50 italic"
                     >
-                      {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> syncing</> : <><CheckCircle2 className="h-4 w-4" /> Finalize Mapping</>}
+                      {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> processing</> : <><CheckCircle2 className="h-4 w-4" /> Commit Changes</>}
                     </button>
-                 </form>
+                </form>
               </div>
            </div>
          )}

@@ -20,8 +20,10 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Products', href: '/products' },
-    { name: 'Services', href: '/services' },
-    { name: 'Pricing', href: '/pricing' },
+    { name: 'Categories', href: '/category' },
+    { name: 'Prices', href: '/pricing' },
+    { name: 'Offers', href: '/offers' },
+    { name: 'Blog', href: '/blogs' },
     { name: 'About Us', href: '/about' },
   ];
 

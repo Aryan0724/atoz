@@ -21,12 +21,25 @@ import {
 import { cn } from '@/lib/utils';
 import ProductCard from '@/components/products/ProductCard';
 import Button from '@/components/common/Button';
+import TrustBadges from '@/components/common/TrustBadges';
 
 // --- Hero Section ---
 const Hero = ({ hero }: { hero: any }) => {
   const title = hero?.title || "Your Design.\nOur Impression.";
-  const subtitle = hero?.subtitle || "Elevate your brand identity with high-fidelity custom merchandise.";
-  const image = hero?.image || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1000&auto=format&fit=crop";
+  const subtitle = hero?.subtitle || "Get high-quality custom products for your brand.";
+  
+  const rawImage = hero?.image || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1000&auto=format&fit=crop";
+  const images = Array.isArray(rawImage) ? (rawImage.length > 0 ? rawImage : ["https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1000&auto=format&fit=crop"]) : [rawImage];
+  
+  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (images.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [images.length]);
 
   return (
     <section className="relative pt-12 pb-20 lg:pt-16 lg:pb-24 overflow-hidden bg-gradient-to-br from-surface via-surface to-surface-variant/20">
@@ -39,7 +52,7 @@ const Hero = ({ hero }: { hero: any }) => {
         >
           <div className="inline-flex items-center gap-2 py-1.5 px-3 bg-brand-pink/10 text-brand-pink font-bold text-[10px] tracking-widest uppercase rounded-lg mb-8 border border-brand-pink/20">
             <Star className="w-3.5 h-3.5 fill-current" />
-            The Premium Choice for Brands
+            Top Choice for Businesses
           </div>
           <h1 className="font-headline text-5xl md:text-7xl lg:text-8xl font-black text-on-surface leading-[1.05] tracking-tight mb-8 max-w-2xl italic uppercase">
             {title.split(/\\n|\n/).map((line: string, i: number) => (
@@ -80,12 +93,19 @@ const Hero = ({ hero }: { hero: any }) => {
             className="relative w-full aspect-square max-w-[600px]"
           >
             <div className="absolute inset-0 bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white/50 group">
-              <Image 
-                alt="High-fidelity product mockup" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                src={image}
-                fill
-              />
+              {images.map((img, idx) => (
+                <Image 
+                  key={idx}
+                  alt={`Product preview ${idx}`} 
+                  className={cn(
+                    "w-full h-full object-cover transition-all duration-1000 absolute inset-0",
+                    idx === currentImageIndex ? "opacity-100 scale-100 z-10" : "opacity-0 scale-105 z-0"
+                  )} 
+                  src={img}
+                  fill
+                  priority={idx === 0}
+                />
+              ))}
               <div className="absolute top-6 right-6 glass-panel px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 z-10 transition-all hover:scale-105 bg-white/90 backdrop-blur-md border border-white/50">
                 <div className="w-9 h-9 bg-brand-pink rounded-full flex items-center justify-center text-white shadow-lg shadow-brand-pink/20">
                   <ShieldCheck className="w-5 h-5" />
@@ -111,7 +131,7 @@ const TrustBar = ({ logos }: { logos?: string[] }) => {
   return (
     <section className="py-12 border-y border-gray-100 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-8">
-        <p className="text-center text-[9px] font-black uppercase tracking-[0.4em] text-gray-300 mb-10">Strategic Manufacturing Partners</p>
+        <p className="text-center text-[9px] font-black uppercase tracking-[0.4em] text-gray-300 mb-10">Our Trusted Partners</p>
         <div className="flex flex-wrap justify-center md:justify-between items-center gap-12 opacity-30 grayscale hover:grayscale-0 transition-opacity duration-700">
           {displayLogos.map((logo, idx) => (
             <span key={idx} className="text-xl font-bold font-headline tracking-tighter cursor-default lowercase opacity-60">{logo}</span>
@@ -168,13 +188,13 @@ const Testimonials = ({ testimonials, heading }: { testimonials?: any[], heading
     },
   ];
   const displayTestimonials = testimonials || defaultTestimonials;
-  const displayHeading = heading || "Trusted by <span className=\"text-brand-pink\">Creators</span> & Brands";
+  const displayHeading = heading || "Trusted by many <span className=\"text-brand-pink\">Businesses</span>";
 
   return (
     <section className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-8">
         <div className="text-center mb-20">
-          <span className="text-brand-pink font-bold text-[10px] uppercase tracking-widest border-b-2 border-brand-pink/20 pb-1">Intelligence Reports</span>
+          <span className="text-brand-pink font-bold text-[10px] uppercase tracking-widest border-b-2 border-brand-pink/20 pb-1">Reviews</span>
           <h2 
             className="font-headline text-5xl font-bold mt-6 tracking-tight"
             dangerouslySetInnerHTML={{ __html: displayHeading }}
@@ -257,6 +277,8 @@ const Features = ({ features }: { features?: any[] }) => {
   );
 };
 
+import BlogSection from '@/components/home/BlogSection';
+
 export default function HomePageClient({ products, config }: { products: any[], config: any }) {
   return (
     <div className="min-h-screen bg-white">
@@ -267,7 +289,9 @@ export default function HomePageClient({ products, config }: { products: any[], 
         testimonials={config?.testimonials} 
         heading={config?.testimonialsHeading} 
       />
-      <Features features={config?.features} />
+      <TrustBadges />
+      
+      <BlogSection />
       
       {/* Products & other sections remain with default styling but could further be dynamicized */}
       <section className="py-24 bg-white">
@@ -281,6 +305,49 @@ export default function HomePageClient({ products, config }: { products: any[], 
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Bulk Intelligence CTA */}
+      <section className="py-24 bg-gray-50 overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-8 grid lg:grid-cols-2 gap-20 items-center">
+           <motion.div
+             initial={{ opacity: 0, x: -30 }}
+             whileInView={{ opacity: 1, x: 0 }}
+             viewport={{ once: true }}
+           >
+              <span className="text-brand-pink font-black text-[10px] uppercase tracking-[0.3em] mb-6 block">Enterprise Tier Solutions</span>
+              <h2 className="text-5xl md:text-7xl font-black text-brand-dark uppercase italic tracking-tighter leading-none mb-10">
+                Corporate <br /> <span className="text-brand-pink">Ecosystems</span>
+              </h2>
+              <p className="text-lg text-gray-400 font-bold uppercase tracking-wide leading-relaxed mb-12">
+                 From 500 units to 50,000. Our industrial pipeline is optimized for massive corporate fulfillment with pinpoint precision.
+              </p>
+              <Link href="/corporate">
+                 <Button variant="primary" size="lg" className="rounded-xl px-12">
+                    Inquire for Bulk
+                 </Button>
+              </Link>
+           </motion.div>
+           <div className="relative">
+              <div className="absolute inset-0 bg-brand-pink/10 rounded-full blur-[100px] -z-10" />
+              <div className="bg-brand-dark rounded-[48px] p-12 shadow-2xl relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-brand-pink/20 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-brand-pink/30 transition-colors" />
+                 <div className="relative z-10 grid grid-cols-2 gap-8">
+                    {[
+                      { label: "SLA Guaranteed", val: "100%" },
+                      { label: "Fulfillment Speed", val: "48hr" },
+                      { label: "QC Audits", val: "5-Step" },
+                      { label: "Global Reach", val: "19k+" }
+                    ].map(s => (
+                      <div key={s.label}>
+                         <div className="text-4xl font-black text-brand-pink italic tracking-tighter mb-1">{s.val}</div>
+                         <div className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em]">{s.label}</div>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+           </div>
         </div>
       </section>
 

@@ -3,20 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
-  ShoppingBag, 
-  Search, 
-  Filter, 
-  Eye, 
-  Clock, 
-  CheckCircle2, 
-  Truck, 
-  AlertCircle,
-  MoreVertical,
-  Loader2,
-  ExternalLink,
-  ChevronLeft,
-  ChevronRight,
-  Activity
+  ShoppingBag, Search, Filter, Eye, Clock, CheckCircle2,
+  Truck, AlertCircle, MoreVertical, Loader2, ExternalLink,
+  ChevronLeft, ChevronRight, Activity, Factory, Send, Package,
+  ShieldAlert
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
@@ -104,21 +94,27 @@ export default function AdminOrdersPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending': return <Clock className="h-4 w-4" />;
-      case 'processing': return <Activity className="h-4 w-4" />;
-      case 'shipped': return <Truck className="h-4 w-4" />;
-      case 'delivered': return <CheckCircle2 className="h-4 w-4" />;
-      default: return <AlertCircle className="h-4 w-4" />;
+      case 'pending':          return <Clock className="h-4 w-4" />;
+      case 'confirmed':        return <CheckCircle2 className="h-4 w-4" />;
+      case 'in_production':   return <Factory className="h-4 w-4" />;
+      case 'dispatched':      return <Send className="h-4 w-4" />;
+      case 'out_for_delivery': return <Truck className="h-4 w-4" />;
+      case 'delivered':       return <Package className="h-4 w-4" />;
+      case 'cancelled':       return <AlertCircle className="h-4 w-4" />;
+      default:                return <Activity className="h-4 w-4" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending': return 'text-amber-600 bg-amber-50 border-amber-100';
-      case 'processing': return 'text-brand-cyan bg-cyan-50 border-cyan-100';
-      case 'shipped': return 'text-blue-600 bg-blue-50 border-blue-100';
-      case 'delivered': return 'text-green-600 bg-green-50 border-green-100';
-      default: return 'text-gray-600 bg-gray-50 border-gray-100';
+      case 'pending':          return 'text-amber-600 bg-amber-50 border-amber-100';
+      case 'confirmed':       return 'text-sky-600 bg-sky-50 border-sky-100';
+      case 'in_production':   return 'text-blue-600 bg-blue-50 border-blue-100';
+      case 'dispatched':      return 'text-violet-600 bg-violet-50 border-violet-100';
+      case 'out_for_delivery': return 'text-orange-600 bg-orange-50 border-orange-100';
+      case 'delivered':       return 'text-green-600 bg-green-50 border-green-100';
+      case 'cancelled':       return 'text-red-600 bg-red-50 border-red-100';
+      default:                return 'text-gray-600 bg-gray-50 border-gray-100';
     }
   };
 
@@ -161,9 +157,12 @@ export default function AdminOrdersPage() {
           >
             <option value="all">All Statuses</option>
             <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="in_production">In Production</option>
+            <option value="dispatched">Dispatched</option>
+            <option value="out_for_delivery">Out for Delivery</option>
             <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
           </select>
           <button className="px-6 py-4 bg-brand-dark text-white rounded-2xl flex items-center gap-2 text-sm font-bold hover:shadow-xl hover:shadow-gray-200 transition-all">
             <Filter className="h-4 w-4" />
@@ -181,6 +180,7 @@ export default function AdminOrdersPage() {
                 <th className="px-10 py-8 text-[10px] font-black uppercase tracking-widest text-gray-400">Order & Customer</th>
                 <th className="px-8 py-8 text-[10px] font-black uppercase tracking-widest text-gray-400">Date</th>
                 <th className="px-8 py-8 text-[10px] font-black uppercase tracking-widest text-gray-400">Amount</th>
+                <th className="px-8 py-8 text-[10px] font-black uppercase tracking-widest text-gray-400">Payment</th>
                 <th className="px-8 py-8 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
                 <th className="px-10 py-8 text-right text-[10px] font-black uppercase tracking-widest text-gray-400">Actions</th>
               </tr>
@@ -188,7 +188,7 @@ export default function AdminOrdersPage() {
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-10 py-32 text-center">
+                  <td colSpan={6} className="px-10 py-32 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <Loader2 className="h-12 w-12 text-brand-pink animate-spin" />
                       <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Syncing Orders...</p>
@@ -197,7 +197,7 @@ export default function AdminOrdersPage() {
                 </tr>
               ) : filteredOrders.length === 0 ? (
                 <tr>
-                   <td colSpan={5} className="px-10 py-32 text-center text-gray-400 font-medium">
+                   <td colSpan={6} className="px-10 py-32 text-center text-gray-400 font-medium">
                      No orders matching your criteria were found.
                    </td>
                 </tr>
@@ -220,6 +220,22 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-8 py-8">
                        <span className="font-black text-brand-dark">₹{order.total_price.toLocaleString()}</span>
+                    </td>
+                    <td className="px-8 py-8">
+                       <div className="flex flex-col gap-1">
+                          <span className={cn(
+                            "text-[10px] font-black uppercase tracking-widest",
+                            (order as any).payment_method === 'COD' ? "text-amber-500" : "text-brand-cyan"
+                          )}>
+                            {(order as any).payment_method || 'Online'}
+                          </span>
+                          <span className={cn(
+                            "text-[9px] font-bold uppercase tracking-tighter",
+                            (order as any).payment_status === 'paid' ? "text-green-500" : "text-red-400"
+                          )}>
+                            {(order as any).payment_status}
+                          </span>
+                       </div>
                     </td>
                     <td className="px-8 py-8">
                        <div className={cn(
