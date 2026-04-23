@@ -102,7 +102,7 @@ export default function ProductsContent({ initialProducts }: { initialProducts: 
                 Unlock <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-cyan italic">Volume Discounts</span> automatically.
               </h2>
               <p className="text-gray-400 font-medium mt-3 max-w-xl text-sm md:text-base leading-relaxed">
-                Whether you're stocking up on premium apparel or printing a massive batch of corporate ID cards using our VDP engine, our smart cart applies massive discounts as your quantity increases.
+                Whether you&apos;re stocking up on premium apparel or printing a massive batch of corporate ID cards using our VDP engine, our smart cart applies massive discounts as your quantity increases.
               </p>
             </div>
           </div>

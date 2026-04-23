@@ -213,7 +213,7 @@ export default function AboutPage() {
                     In 2018, she launched the company with a single desktop printer and a firm belief that every brand, regardless of its size, deserves to look its absolute best. What started as a small home-based studio has now evolved into a tech-driven manufacturing powerhouse, trusted by over 500+ corporate partners and thousands of independent creators across the nation.
                  </p>
                  <p className="italic text-brand-dark font-bold border-l-4 border-brand-pink pl-6">
-                    "At AtoZ, we aren't just printing on products; we are printing your brand's future. Our mission is to ensure that your vision is delivered with the precision it deserves."
+                    &quot;At AtoZ, we aren&apos;t just printing on products; we are printing your brand&apos;s future. Our mission is to ensure that your vision is delivered with the precision it deserves.&quot;
                  </p>
               </div>
            </div>

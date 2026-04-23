@@ -460,7 +460,7 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                     {[1,2,3,4,5].map(i => <Star key={i} className={cn("w-3 h-3 fill-current", i <= review.rating ? "text-brand-pink" : "text-gray-200")} />)}
                  </div>
                  <p className="text-sm text-gray-500 font-medium leading-relaxed italic uppercase tracking-wide">
-                    "{review.text}"
+                    &quot;{review.text}&quot;
                  </p>
                  <div className="mt-8 flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
