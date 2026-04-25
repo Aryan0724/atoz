@@ -198,6 +198,18 @@ export default function BlogEditor({ initialData, isEditing = false }: BlogEdito
                     </div>
                   </div>
                   <div>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 block mb-3">Content Type</label>
+                    <select 
+                      value={formData.type}
+                      onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as any }))}
+                      className="w-full px-6 py-4 rounded-xl bg-gray-50/50 border border-transparent focus:bg-white focus:border-brand-pink/20 focus:outline-none text-sm font-bold text-gray-600 transition-all"
+                    >
+                      <option value="Blog">Blog Post</option>
+                      <option value="Page">Static Page</option>
+                      <option value="Campaign">Campaign</option>
+                    </select>
+                  </div>
+                  <div>
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 block mb-3">Author Name</label>
                     <input 
                       type="text" 

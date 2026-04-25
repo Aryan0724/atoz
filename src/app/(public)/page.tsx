@@ -6,12 +6,12 @@ import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'A to Z Prints | Premium Custom Printing & Corporate Gifting',
-  description: 'Design and order high-quality custom apparel, drinkware, and stationery. From startup swag to corporate gifting, we bring your vision to life with precision printing.',
+  title: 'ATOZPRINTS | Premium Corporate Printing & Gifting',
+  description: 'Bespoke corporate printing and gifting solutions. We engineer tactile experiences that command absolute respect.',
   openGraph: {
-    title: 'A to Z Prints | Professional Custom Gear',
+    title: 'ATOZPRINTS | Premium Corporate Solutions',
     description: 'Expertly crafted custom apparel, accessories and stationery for brands that matter.',
-    images: ['https://images.unsplash.com/photo-1502920917128-1aa500764cbd?q=80&w=1200&auto=format&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1200&auto=format&fit=crop'],
   }
 };
 
@@ -45,7 +45,7 @@ export default async function HomePage() {
   ]);
 
   return (
-    <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="w-12 h-12 animate-spin text-brand-pink" /></div>}>
+    <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-brand-base"><Loader2 className="w-12 h-12 animate-spin text-brand-gold" /></div>}>
       <HomePageClient products={products} config={config} />
     </Suspense>
   );

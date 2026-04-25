@@ -14,17 +14,17 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
     
     const variants = {
-      primary: 'bg-brand-dark text-white hover:bg-brand-dark/90 shadow-md shadow-brand-dark/20 active:scale-95 transition-all',
-      secondary: 'bg-white border border-gray-200 text-brand-dark hover:bg-gray-50 shadow-sm active:scale-95 transition-all',
-      outline: 'bg-transparent border border-gray-200 text-brand-dark hover:border-brand-pink hover:text-brand-pink active:scale-95 transition-all',
-      ghost: 'bg-transparent text-brand-dark hover:bg-gray-100 active:scale-95 transition-all',
-      brand: 'bg-brand-pink text-white hover:bg-brand-pink/90 shadow-md shadow-brand-pink/30 active:scale-95 transition-all',
+      primary: 'bg-brand-darkBlue text-white hover:bg-brand-gold shadow-lg shadow-brand-darkBlue/20 active:scale-95 transition-all font-sans',
+      secondary: 'bg-white border border-brand-darkBlue/10 text-brand-darkBlue hover:bg-brand-base shadow-sm active:scale-95 transition-all font-sans',
+      outline: 'bg-transparent border border-brand-darkBlue/10 text-brand-darkBlue hover:border-brand-gold hover:text-brand-gold active:scale-95 transition-all font-sans',
+      ghost: 'bg-transparent text-brand-darkBlue hover:bg-brand-base active:scale-95 transition-all font-sans',
+      brand: 'bg-brand-gold text-white hover:bg-brand-gold/90 shadow-lg shadow-brand-gold/30 active:scale-95 transition-all font-sans',
     };
 
     const sizes = {
-      sm: 'px-4 py-2 text-xs font-bold rounded-lg',
-      md: 'px-6 py-3 text-sm font-bold rounded-xl',
-      lg: 'px-8 py-4 text-base font-bold rounded-xl',
+      sm: 'px-4 py-2 text-xs font-bold rounded-full',
+      md: 'px-6 py-3 text-sm font-bold rounded-full',
+      lg: 'px-10 py-4 text-sm font-bold rounded-full uppercase tracking-widest',
     };
 
     return (

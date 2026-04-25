@@ -2,58 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 26, 26, 26;
-  --background-start-rgb: 252, 252, 252;
-  --background-end-rgb: 252, 252, 252;
-}
+@layer base {
+  :root {
+    --brand-base: #F9F9F7;
+    --brand-blue: #1E3A8A;
+    --brand-darkBlue: #0B1120;
+    --brand-gold: #C5A059;
+  }
 
-html {
-  scroll-behavior: smooth;
-  font-size: 16px;
-}
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-stopped { overflow: hidden; }
 
-@media (max-width: 640px) {
-  html {
-    font-size: 17px;
+  body {
+    @apply bg-brand-base text-brand-blue antialiased selection:bg-brand-blue selection:text-white;
+    overflow-x: hidden;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      cursor: none;
+    }
   }
 }
 
-body {
-  color: #1a1a1a;
-  background: #fcfcfc;
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@layer components {
+  /* --- TYPOGRAPHY --- */
+  .text-huge {
+    font-size: clamp(4.5rem, 9.5vw, 13rem);
+    letter-spacing: -0.02em;
+  }
+  .text-display {
+    font-size: clamp(3rem, 6vw, 8rem);
+    line-height: 0.9;
+  }
+  
+  .leading-super-tight { line-height: 0.85 !important; }
 
-/* Premium Text Selection */
-::selection {
-  background-color: rgba(213, 63, 140, 0.15);
-  color: #D53F8C;
-}
+  /* --- CURSOR --- */
+  .cursor-dot {
+    @apply w-2 h-2 bg-brand-gold rounded-full fixed pointer-events-none z-[9999] top-0 left-0;
+  }
+  .cursor-circle {
+    @apply w-10 h-10 border border-brand-gold/50 rounded-full fixed pointer-events-none z-[9998] top-0 left-0 transition-[width,height,border-color,background-color] duration-300;
+  }
+  body.hovering .cursor-circle {
+    @apply w-20 h-20 bg-brand-gold/10 border-transparent backdrop-blur-[2px];
+  }
 
-/* Custom Scrollbar for a sleek look */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
+  /* --- NOISE TEXTURE --- */
+  .bg-noise {
+    @apply fixed inset-0 pointer-events-none z-50 opacity-[0.03];
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
 
-::-webkit-scrollbar-track {
-  background: #f9fafb;
-}
+  /* --- UTILS --- */
+  .image-reveal-wrapper { @apply overflow-hidden; }
+  
+  .loader-overlay {
+    @apply fixed inset-0 bg-brand-darkBlue z-[10000] flex justify-center items-center;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
-  border-radius: 10px;
-}
+  /* Stats Bars */
+  .stat-bar {
+    @apply transition-[height] duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)];
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
-}
+  /* Accordion */
+  .accordion-content { @apply max-h-0 overflow-hidden transition-[max-height,opacity] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] opacity-0; }
+  .accordion-item.active .accordion-content { @apply max-h-[500px] opacity-100; }
+  .accordion-item.active .icon-plus { @apply rotate-45; }
+  .accordion-item:hover { @apply bg-brand-blue/[0.02]; }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  /* Text Reveals */
+  .word { @apply relative inline-block; }
+  .char { @apply relative inline-block; }
+  .reveal-text-line { @apply overflow-hidden; }
+  
+  .reveal-fade { opacity: 0; }
+  .reveal-text { opacity: 0; }
+  .reveal-title { opacity: 0; }
+
+  .bento-card {
+    @apply transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)];
+  }
+  .bento-card:hover {
+    @apply scale-[0.98];
+  }
+
+  /* NAVBAR STYLES */
+  .nav-link {
+    @apply relative;
+  }
+  .nav-link::after {
+    content: '';
+    @apply absolute left-0 -bottom-1 w-0 h-px bg-brand-gold transition-[width] duration-300;
+  }
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+  
+  /* Legal Menu Animation */
+  .legal-menu {
+    @apply opacity-0 invisible translate-y-[10px] scale-[0.98] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)];
+  }
+  .group:hover .legal-menu {
+    @apply opacity-100 visible translate-y-0 scale-100;
+  }
+
+  /* Navbar Scroll State */
+  nav.scrolled {
+    @apply bg-brand-base/85 backdrop-blur-xl border-b border-brand-darkBlue/5 h-[90px];
+  }
+  nav.scrolled .flex {
+    @apply h-[90px];
   }
 }

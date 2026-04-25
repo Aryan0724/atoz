@@ -1,248 +1,154 @@
-"use client";
+'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, User as UserIcon, ShoppingBag, Menu, X, LogOut } from 'lucide-react';
+import { ChevronDown, ShoppingBag, LogOut, User as UserIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
 import { useCart } from '@/lib/store/useCart';
-import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
-import Button from '@/components/common/Button';
 
 const Navbar = () => {
   const pathname = usePathname();
-  const router = useRouter();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { setOpen, getItemCount } = useCart();
-  const [mounted, setMounted] = useState(false);
   const { user, profile, signOut } = useAuth();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const navLinks = [
-    { name: 'Products', href: '/products' },
-    { name: 'Categories', href: '/category' },
-    { name: 'Prices', href: '/pricing' },
-    { name: 'Offers', href: '/offers' },
-    { name: 'Blog', href: '/blogs' },
-    { name: 'About Us', href: '/about' },
-  ];
-
-  // Avoid hydration mismatch and setup Auth listener
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`);
-      setIsSearchOpen(false);
-      setSearchQuery('');
-    }
-  };
-
-  const handleSignOut = async () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('atoz_demo_admin');
-    }
-    await signOut();
-    setIsMenuOpen(false);
-  };
 
   const cartCount = mounted ? getItemCount() : 0;
 
   return (
-    <nav className="sticky top-0 w-full z-100 bg-white border-b border-gray-100 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <Link href="/" className="flex-shrink-0 flex items-center gap-3">
-            <div className="relative h-9 w-9">
-              <Image
-                src="/logo.png"
-                alt="AtoZ Print"
+    <nav 
+      id="navbar"
+      className={cn(
+        "fixed w-full z-[100] top-0 left-0 transition-all duration-500 ease-in-out border-b border-transparent",
+        isScrolled && "bg-brand-base/85 backdrop-blur-xl border-brand-darkBlue/5 h-[90px]"
+      )}
+    >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-12">
+        <div className={cn(
+          "flex justify-between items-center h-28 transition-all duration-500",
+          isScrolled && "h-[90px]"
+        )}>
+          {/* Navbar Logo */}
+          <Link href="/" className="group flex items-center gap-3 magnetic-target">
+            <div className="relative w-14 h-14 transition-transform duration-300 group-hover:scale-110">
+              <Image 
+                src="https://i.postimg.cc/BbgxQXMj/Whats-App-Image-2026-02-05-at-12-10-39.png" 
+                alt="ATOZPRINTS"
                 fill
                 className="object-contain"
-                priority
               />
             </div>
-            <span className="text-lg font-bold tracking-tighter text-brand-dark hidden sm:block">AtoZ Print</span>
+            <span className="font-serif font-bold text-3xl tracking-tight text-brand-darkBlue">ATOZ.</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-10">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "text-[13px] font-bold uppercase tracking-widest transition-all relative py-1",
-                  pathname === link.href
-                    ? "text-brand-pink"
-                    : "text-gray-400 hover:text-brand-dark"
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
+          <div className="hidden lg:flex items-center gap-10 font-sans font-medium text-sm uppercase tracking-widest text-brand-darkBlue">
+            <Link href="/" className={cn("nav-link transition-colors magnetic-target", pathname === '/' ? 'text-brand-gold' : 'hover:text-brand-gold')}>
+              Home
+            </Link>
+            <Link href="/about" className={cn("nav-link transition-colors magnetic-target", pathname === '/about' ? 'text-brand-gold' : 'hover:text-brand-gold')}>
+              About Us
+            </Link>
+            <Link href="/products" className={cn("nav-link transition-colors magnetic-target", pathname.startsWith('/products') ? 'text-brand-gold' : 'hover:text-brand-gold')}>
+              Products
+            </Link>
+            <Link href="/contact" className={cn("nav-link transition-colors magnetic-target", pathname === '/contact' ? 'text-brand-gold' : 'hover:text-brand-gold')}>
+              Contact Us
+            </Link>
+            <Link href="/faq" className={cn("nav-link transition-colors magnetic-target", pathname === '/faq' ? 'text-brand-gold' : 'hover:text-brand-gold')}>
+              FAQs
+            </Link>
 
-          {/* Icons and CTA */}
-          <div className="hidden lg:flex items-center space-x-6">
-            <div className="relative flex items-center">
-              <form
-                onSubmit={handleSearch}
-                className={cn(
-                  "flex items-center transition-all duration-300 overflow-hidden bg-gray-50 rounded-lg",
-                  isSearchOpen ? "w-64 px-4 py-2 border border-brand-pink/10" : "w-0 p-0"
-                )}
-              >
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent text-sm w-full focus:outline-none font-bold italic text-brand-dark placeholder:text-gray-300"
-                  autoFocus={isSearchOpen}
-                />
-              </form>
-              <button
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className={cn(
-                  "p-2.5 transition-colors",
-                  isSearchOpen ? "text-brand-pink" : "text-gray-400 hover:text-brand-dark"
-                )}
-              >
-                {isSearchOpen ? <X className="h-4 w-4" /> : <Search className="h-4 w-4" />}
-              </button>
+            {/* Legal Dropdown */}
+            <div className="relative group h-full flex items-center cursor-pointer magnetic-target">
+              <span className="hover:text-brand-gold transition-colors flex items-center gap-1 py-6">
+                Legal <ChevronDown className="w-3 h-3 mt-0.5 transition-transform duration-300 group-hover:rotate-180" />
+              </span>
+              
+              <div className="absolute top-full left-0 w-full h-4 bg-transparent" />
+
+              <div className="absolute top-[calc(100%-1rem)] right-0 w-56 bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(11,17,32,0.15)] border border-brand-darkBlue/5 rounded-2xl overflow-hidden legal-menu p-2 origin-top-right">
+                <Link href="/privacy" className="block px-6 py-4 text-[11px] uppercase tracking-widest hover:bg-brand-base hover:text-brand-gold rounded-xl transition-colors font-bold text-brand-darkBlue">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms" className="block px-6 py-4 text-[11px] uppercase tracking-widest hover:bg-brand-base hover:text-brand-gold rounded-xl transition-colors font-bold text-brand-darkBlue">
+                  Terms & Conditions
+                </Link>
+              </div>
             </div>
-
+            
+            {/* Cart Icon */}
             <button
               onClick={() => setOpen(true)}
-              className="p-2.5 text-gray-400 hover:text-brand-dark transition-colors relative"
+              className="p-2.5 text-brand-darkBlue hover:text-brand-gold transition-colors relative magnetic-target"
             >
-              <ShoppingBag className="h-4 w-4" />
+              <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 h-4 w-4 bg-brand-pink text-white text-[9px] font-black flex items-center justify-center rounded-lg shadow-sm">
+                <span className="absolute top-1 right-1 h-4 w-4 bg-brand-gold text-white text-[9px] font-black flex items-center justify-center rounded-lg shadow-sm">
                   {cartCount}
                 </span>
               )}
             </button>
 
             {mounted && user ? (
-              <div className="flex items-center gap-8 border-l border-gray-100 pl-8 h-10">
+              <div className="flex items-center gap-6 border-l border-brand-darkBlue/5 pl-6">
                 <Link
                   href={profile?.role === 'admin' ? '/admin' : '/dashboard'}
-                  className="flex items-center gap-3 group px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-all duration-300"
+                  className="flex items-center gap-3 group px-4 py-1.5 rounded-xl hover:bg-brand-base transition-all duration-300 magnetic-target"
                 >
-                   <div className="w-8 h-8 rounded-lg bg-brand-dark text-white flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-md shadow-brand-dark/10">
-                      <UserIcon className="h-4 w-4" />
-                   </div>
-                   <div className="flex flex-col text-left">
-                      <span className="text-[11px] font-black uppercase tracking-widest text-brand-dark leading-tight">Dashboard</span>
-                      <span className="text-[8px] font-bold text-gray-300 uppercase tracking-tighter leading-none">{profile?.role || 'User'}</span>
-                   </div>
+                  <div className="w-8 h-8 rounded-lg bg-brand-darkBlue text-white flex items-center justify-center group-hover:scale-110 transition-all duration-300">
+                    <UserIcon className="h-4 w-4" />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-brand-darkBlue leading-tight">Dashboard</span>
+                  </div>
                 </Link>
                 
-                <div className="h-6 w-px bg-gray-100 opacity-50" />
-
                 <button
-                  onClick={handleSignOut}
-                  className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                  onClick={() => signOut()}
+                  className="p-2 text-brand-darkBlue/30 hover:text-red-500 transition-all magnetic-target"
                   title="Sign Out"
                 >
                   <LogOut className="h-5 w-5" />
                 </button>
               </div>
             ) : (
-              <Link href="/login">
-                <Button variant="primary" size="sm" className="px-6">
-                  Sign In
-                </Button>
+              <Link href="/login" className="ml-6 px-10 py-4 bg-brand-darkBlue text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-gold transition-all duration-300 hover:shadow-lg hover:-translate-y-1 magnetic-target shadow-md">
+                Sign In
               </Link>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center space-x-4">
-            <button
+          {/* Mobile Menu Toggle (Simplified for now) */}
+          <div className="lg:hidden flex items-center gap-4">
+             <button
               onClick={() => setOpen(true)}
-              aria-label="Open mobile cart"
-              className="p-2 text-on-surface hover:text-brand-pink transition-colors relative"
+              className="p-2.5 text-brand-darkBlue relative"
             >
               <ShoppingBag className="h-6 w-6" />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 h-4 w-4 bg-brand-pink text-white text-[10px] flex items-center justify-center rounded-full">
+                <span className="absolute top-1 right-1 h-4 w-4 bg-brand-gold text-white text-[9px] font-black flex items-center justify-center rounded-lg shadow-sm">
                   {cartCount}
                 </span>
               )}
             </button>
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-              className="p-2 rounded-md text-on-surface hover:text-brand-pink focus:outline-none"
-            >
-              {isMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
-            </button>
+            <Link href="/login" className="p-2.5 text-brand-darkBlue">
+              <UserIcon className="h-6 w-6" />
+            </Link>
           </div>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-outline-variant/10 shadow-xl animate-in slide-in-from-top-2 duration-300 ease-out z-40">
-          <div className="px-4 pt-4 pb-8 space-y-2 max-h-[calc(100vh-80px)] overflow-y-auto">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsMenuOpen(false)}
-                className={cn(
-                  "block px-4 py-3 text-lg font-medium rounded-xl transition-all",
-                  pathname === link.href ? "text-brand-pink bg-brand-pink/5 font-bold" : "text-on-surface hover:bg-surface"
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
-
-            <div className="pt-6 px-4 space-y-3">
-              {mounted && user ? (
-                <>
-                  <Link
-                    href={profile?.role === 'admin' ? '/admin' : '/dashboard'}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-4 bg-surface rounded-xl text-on-surface font-semibold"
-                  >
-                    <UserIcon className="h-5 w-5 text-brand-pink" />
-                    {profile?.role === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full flex items-center gap-3 px-4 py-4 text-red-500 font-semibold hover:bg-red-50 rounded-xl transition-colors"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block w-full"
-                >
-                  <Button variant="primary" className="w-full py-4 text-lg">
-                    Sign In
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   );
 };

@@ -1,22 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Playfair_Display, Manrope } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import TopBanner from "@/components/layout/TopBanner";
-import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { Toaster } from 'sonner';
 import AuthProvider from "@/components/providers/AuthProvider";
 import dynamic from 'next/dynamic';
 import MetaPixel from "@/components/analytics/MetaPixel";
 import { Suspense } from 'react';
+import SmoothScroll from "@/components/common/SmoothScroll";
+import CustomCursor from "@/components/common/CustomCursor";
+import Preloader from "@/components/common/Preloader";
 
 const CartDrawer = dynamic(() => import("@/components/layout/CartDrawer"), { ssr: false });
 const SupportWidget = dynamic(() => import("@/components/layout/SupportWidget"), { ssr: false });
 
-const inter = Inter({ 
+const playfair = Playfair_Display({ 
   subsets: ["latin"],
-  variable: '--font-inter',
+  variable: '--font-playfair',
 });
 
 const manrope = Manrope({
@@ -25,13 +26,13 @@ const manrope = Manrope({
 });
 
 const siteConfig = {
-  name: "AtoZ Print",
-  description: "India's trusted premium printing & corporate gifting partner. Delivering high-quality, affordable, and reliable printing solutions across PAN India.",
+  name: "ATOZPRINTS",
+  description: "Bespoke corporate printing and gifting solutions. We engineer tactile experiences that command absolute respect.",
   url: "https://atozprint.in",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#E91E63",
+  themeColor: "#0B1120",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -41,7 +42,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: siteConfig.name,
+    default: "ATOZPRINTS | Premium Corporate Solutions",
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -52,7 +53,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_IN",
     url: siteConfig.url,
-    title: siteConfig.name,
+    title: "ATOZPRINTS | Premium Corporate Solutions",
     description: siteConfig.description,
     siteName: siteConfig.name,
     images: [
@@ -66,7 +67,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: siteConfig.name,
+    title: "ATOZPRINTS | Premium Corporate Solutions",
     description: siteConfig.description,
     images: ["https://atozprint.in/og-image.png"],
     creator: "@atozprints",
@@ -81,20 +82,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${manrope.variable} font-body antialiased`}>
+      <body className={`${playfair.variable} ${manrope.variable} font-sans antialiased`}>
         <Suspense fallback={null}>
           <MetaPixel />
         </Suspense>
         <AuthProvider>
-          <TopBanner />
-          <Navbar />
-          <main className="min-h-screen pb-16 lg:pb-0">
-            {children}
-          </main>
-          <Footer />
-          <MobileBottomNav />
-          <CartDrawer />
-          <SupportWidget />
+          <SmoothScroll>
+            <Preloader />
+            <CustomCursor />
+            <Navbar />
+            <main className="min-h-screen">
+              {children}
+            </main>
+            <Footer />
+            <CartDrawer />
+            <SupportWidget />
+          </SmoothScroll>
           <Toaster position="top-center" richColors />
         </AuthProvider>
       </body>

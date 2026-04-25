@@ -39,7 +39,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       viewport={{ once: true }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group bg-white rounded-2xl overflow-hidden border border-gray-100 transition-all duration-500 hover:border-brand-pink/20 hover:shadow-soft relative"
+      className="group bg-white rounded-[1.5rem] overflow-hidden border border-brand-darkBlue/5 transition-all duration-500 hover:border-brand-gold/20 hover:shadow-2xl relative"
     >
 
       <div
@@ -49,7 +49,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && (window.location.href = `/products/${product.slug}`)}
       >
-        <div className="aspect-[4/5] bg-gray-50 relative overflow-hidden p-6">
+        <div className="aspect-[4/5] bg-brand-base relative overflow-hidden p-6">
           {product.images && product.images.length > 0 && !imgError ? (
             <Image
               src={product.images[0]}
@@ -61,12 +61,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
             />
           ) : (
             <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center text-white p-6`}>
-              <span className="text-4xl font-black opacity-20 mb-2 tracking-tighter">{product.name.charAt(0)}</span>
+              <span className="text-4xl font-serif font-black opacity-20 mb-2 tracking-tighter">{product.name.charAt(0)}</span>
             </div>
           )}
           
           {/* MOQ Badge - Minimal */}
-          <div className="absolute top-4 left-4 px-3 py-1.5 rounded-lg bg-white/80 backdrop-blur-md border border-gray-100 text-brand-dark text-[10px] font-bold uppercase tracking-tight z-10 shadow-sm">
+          <div className="absolute top-4 left-4 px-3 py-1.5 rounded-lg bg-white/80 backdrop-blur-md border border-brand-darkBlue/5 text-brand-darkBlue text-[10px] font-sans font-bold uppercase tracking-tight z-10 shadow-sm">
             Min. {product.moq} Units
           </div>
 
@@ -79,40 +79,40 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 const added = await toggleFavorite(product.id);
                 if (added) toast.success(`${product.name} saved!`);
               }}
-              className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-sm hover:shadow-md transition-all group/heart cursor-pointer border border-gray-100"
+              className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-sm hover:shadow-md transition-all group/heart cursor-pointer border border-brand-darkBlue/5"
             >
-              <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-brand-pink text-brand-pink' : 'text-gray-400'}`} />
+              <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-brand-gold text-brand-gold' : 'text-gray-400'}`} />
             </button>            
           </div>
         </div>
 
         <div className="p-6">
-          <div className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-2 flex items-center gap-2">
+          <div className="text-[10px] font-sans font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
              {product.category || 'Product'}
-             <div className="h-0.5 w-4 bg-gray-100" />
+             <div className="h-px w-4 bg-brand-gold" />
           </div>
           
-          <h3 className="text-base font-bold text-brand-dark mb-4 transition-colors line-clamp-1 tracking-tight">
+          <h3 className="text-base font-serif font-bold text-brand-darkBlue mb-4 transition-colors line-clamp-1 tracking-tight">
             {product.name}
           </h3>
           
           <div className="flex items-end justify-between">
             <div className="flex flex-col">
-              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tight mb-0.5">Starting from</span>
+              <span className="text-[9px] font-sans font-bold text-slate-400 uppercase tracking-tight mb-0.5">Starting from</span>
               <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold text-brand-dark tracking-tight">₹{product.base_price}</span>
+                <span className="text-lg font-serif font-bold text-brand-darkBlue tracking-tight">₹{product.base_price}</span>
               </div>
             </div>
             
             <div className="flex items-center gap-2">
               <Link
                 href={`/customize/${product.slug}`}
-                className="h-10 px-4 rounded-lg bg-brand-dark text-white flex items-center justify-center font-black text-[9px] uppercase tracking-widest hover:bg-brand-pink transition-all duration-300"
+                className="h-10 px-4 rounded-lg bg-brand-darkBlue text-white flex items-center justify-center font-sans font-black text-[9px] uppercase tracking-widest hover:bg-brand-gold transition-all duration-300"
                 onClick={(e) => e.stopPropagation()}
               >
                 Customize
               </Link>
-              <div className="h-10 w-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-brand-dark group-hover:text-white group-hover:border-brand-dark transition-all duration-300">
+              <div className="h-10 w-10 rounded-lg bg-brand-base border border-brand-darkBlue/5 flex items-center justify-center text-slate-400 group-hover:bg-brand-darkBlue group-hover:text-white group-hover:border-brand-darkBlue transition-all duration-300">
                 <ShoppingBag className="h-4 w-4" />
               </div>
             </div>
@@ -130,22 +130,22 @@ const ProductCard = ({ product }: ProductCardProps) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsQuickViewOpen(false)}
-              className="fixed inset-0 bg-brand-dark/20 backdrop-blur-sm z-[1001]"
+              className="fixed inset-0 bg-brand-darkBlue/20 backdrop-blur-sm z-[1001]"
             />
             <motion.div 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-4xl bg-white rounded-[32px] shadow-2xl z-[1002] overflow-hidden flex flex-col md:flex-row"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-4xl bg-white rounded-[2rem] shadow-2xl z-[1002] overflow-hidden flex flex-col md:flex-row"
             >
               <button 
                 onClick={() => setIsQuickViewOpen(false)}
-                className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors z-20"
+                className="absolute top-6 right-6 p-2 bg-brand-base rounded-full hover:bg-brand-base/80 transition-colors z-20"
               >
-                <X className="w-5 h-5 text-gray-400" />
+                <X className="w-5 h-5 text-slate-400" />
               </button>
 
-              <div className="w-full md:w-1/2 bg-gray-50 aspect-square relative p-12">
+              <div className="w-full md:w-1/2 bg-brand-base aspect-square relative p-12">
                  <Image 
                     src={product.images?.[0] || ''} 
                     alt={product.name} 
@@ -155,28 +155,28 @@ const ProductCard = ({ product }: ProductCardProps) => {
               </div>
 
               <div className="w-full md:w-1/2 p-10 flex flex-col">
-                <div className="text-[10px] font-bold text-brand-pink uppercase tracking-widest mb-4">
+                <div className="text-[10px] font-sans font-bold text-brand-gold uppercase tracking-widest mb-4">
                   {product.category}
                 </div>
-                <h2 className="text-3xl font-bold text-brand-dark mb-6 tracking-tight">
+                <h2 className="text-3xl font-serif font-bold text-brand-darkBlue mb-6 tracking-tight">
                   {product.name}
                 </h2>
                 <div className="flex items-baseline gap-2 mb-8">
-                  <span className="text-2xl font-bold text-brand-dark tracking-tighter">₹{product.base_price}</span>
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">/ unit</span>
+                  <span className="text-2xl font-serif font-bold text-brand-darkBlue tracking-tighter">₹{product.base_price}</span>
+                  <span className="text-[10px] font-sans font-bold text-slate-400 uppercase tracking-widest">/ unit</span>
                 </div>
-                <p className="text-gray-500 text-sm leading-relaxed mb-10 line-clamp-4">
+                <p className="text-slate-500 text-sm font-sans leading-relaxed mb-10 line-clamp-4">
                   {product.description}
                 </p>
 
                 <div className="mt-auto flex flex-col gap-3">
                   <Link href={`/customize/${product.slug}`} className="w-full">
-                    <Button variant="primary" className="w-full py-4 text-[10px] tracking-widest uppercase">
+                    <Button variant="primary" className="w-full py-4 text-[10px] font-sans tracking-widest uppercase bg-brand-darkBlue hover:bg-brand-gold">
                        Custom Design Studio
                     </Button>
                   </Link>
                   <Link href={`/products/${product.slug}`} className="w-full">
-                    <Button variant="secondary" className="w-full py-4 text-[10px] tracking-widest uppercase border-gray-100">
+                    <Button variant="secondary" className="w-full py-4 text-[10px] font-sans tracking-widest uppercase border-brand-darkBlue/10 hover:border-brand-gold">
                       Explore Full Details
                     </Button>
                   </Link>

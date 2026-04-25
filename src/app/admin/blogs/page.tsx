@@ -31,25 +31,31 @@ export default function BlogManagerPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   useEffect(() => {
     fetchBlogs();
-  }, []);
+  }, [typeFilter]);
 
   const fetchBlogs = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('cms_content')
         .select('*')
-        .eq('type', 'Blog')
         .order('created_at', { ascending: false });
+
+      if (typeFilter !== 'all') {
+        query = query.eq('type', typeFilter);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setBlogs(data || []);
     } catch (err: any) {
-      console.error('Error fetching blogs:', err);
-      toast.error('Failed to load blogs: ' + err.message);
+      console.error('Error fetching content:', err);
+      toast.error('Failed to load content: ' + err.message);
     }
     setLoading(false);
   };
@@ -106,11 +112,11 @@ export default function BlogManagerPage() {
         <div>
           <Breadcrumbs items={[{ label: 'Admin', href: '/admin' }, { label: 'Blogs' }]} />
           <h1 className="text-5xl font-black text-brand-dark tracking-tighter mb-4 flex items-center gap-4">
-            Editorial <span className="text-brand-pink italic">Intelligence</span>
+            Custom <span className="text-brand-pink italic">Content Manager</span>
           </h1>
           <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-brand-pink" /> 
-            Active Blog Repository • {blogs.length} Articles
+            Active Repository • {blogs.length} Items
           </p>
         </div>
         <Link 
@@ -144,6 +150,15 @@ export default function BlogManagerPage() {
             <option value="all">All Status</option>
             <option value="published">Published</option>
             <option value="draft">Drafts</option>
+          </select>
+          <select 
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="px-8 py-4 bg-gray-50/50 border border-transparent rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 focus:outline-none focus:bg-white focus:border-brand-pink/10 transition-all cursor-pointer"
+          >
+            <option value="all">All Types</option>
+            <option value="Blog">Blogs Only</option>
+            <option value="Page">Pages Only</option>
           </select>
           <button className="px-6 py-4 bg-gray-50/50 text-gray-400 rounded-2xl flex items-center gap-2 text-xs font-black uppercase tracking-widest hover:bg-white hover:text-brand-dark border border-transparent hover:border-gray-100 transition-all">
             <Filter className="h-4 w-4" />
@@ -203,10 +218,12 @@ export default function BlogManagerPage() {
 
               <div className="p-8 flex-1 flex flex-col">
                 <div className="flex items-center gap-4 mb-4">
-                  <span className="text-[10px] font-black text-brand-pink uppercase tracking-widest bg-brand-pink/5 px-3 py-1 rounded-lg border border-brand-pink/10">Blog Post</span>
-                  <span className="text-[10px] font-bold text-gray-300 uppercase tracking-tighter flex items-center gap-1.5">
-                    <Clock className="w-3 h-3" /> {blog.reading_time || 5} Min Read
-                  </span>
+                  <span className="text-[10px] font-black text-brand-pink uppercase tracking-widest bg-brand-pink/5 px-3 py-1 rounded-lg border border-brand-pink/10">{blog.type}</span>
+                  {blog.type === 'Blog' && (
+                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-tighter flex items-center gap-1.5">
+                      <Clock className="w-3 h-3" /> {blog.reading_time || 5} Min Read
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-xl font-black text-brand-dark leading-tight mb-4 group-hover:text-brand-pink transition-colors line-clamp-2">{blog.title}</h3>
                 <p className="text-xs font-medium text-gray-400 line-clamp-3 mb-6 leading-relaxed">

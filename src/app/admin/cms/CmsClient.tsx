@@ -45,7 +45,7 @@ export default function ContentManagerClient({
   initialGlobalConfig: any;
 }) {
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'home' | 'services' | 'settings'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'categories' | 'about' | 'faq' | 'contact' | 'pricing' | 'settings'>('home');
 
   // --- HOME PAGE (Global) STATE --- //
   const [heroTitle, setHeroTitle] = useState(initialGlobalConfig?.hero?.title || '');
@@ -69,34 +69,100 @@ export default function ContentManagerClient({
   // --- SYSTEM INTEGRATIONS (Global) STATE --- //
   const [pexelsApiKey, setPexelsApiKey] = useState(initialGlobalConfig?.integrations?.pexelsApiKey || '');
 
-  const handleSave = async () => {
-    setLoading(true);
+    // --- ABOUT PAGE STATE --- //
+    const [aboutHero, setAboutHero] = useState(initialCmsConfig?.about?.hero || {
+      title: "The Architects of Legacy.",
+      subtitle: "We don't just put ink on paper. We translate corporate identity into tangible assets."
+    });
+    const [aboutPhilosophy, setAboutPhilosophy] = useState(initialCmsConfig?.about?.philosophy || []);
+    const [aboutTimeline, setAboutTimeline] = useState(initialCmsConfig?.about?.timeline || []);
+    const [aboutProcess, setAboutProcess] = useState(initialCmsConfig?.about?.process || []);
+    const [aboutTeam, setAboutTeam] = useState(initialCmsConfig?.about?.team || []);
+    const [aboutQuote, setAboutQuote] = useState(initialCmsConfig?.about?.quote || {
+      text: "We don't build for the transaction. We build for the legacy.",
+      author: "Rajesh Verma",
+      role: "Founder, ATOZPRINTS"
+    });
 
-    const cmsPayload = {
-      services: {
-        heroTitle: serviceHeroTitle,
-        heroSubtitle: serviceHeroSubtitle,
-        servicesList,
-        ctaHeading,
-        ctaDesc
-      }
-    };
+    // --- FAQ PAGE STATE --- //
+    const [faqHero, setFaqHero] = useState(initialCmsConfig?.faq?.hero || {
+      title: "The Knowledge Base.",
+      subtitle: "Support Center"
+    });
+    const [faqs, setFaqs] = useState(initialCmsConfig?.faq?.items || []);
 
-    const globalPayload = {
-      ...initialGlobalConfig,
-      hero: {
-        title: heroTitle,
-        subtitle: heroSubtitle,
-        image: heroImages
-      },
-      topBanner: { text: bannerText, isActive: bannerActive },
-      features,
-      integrations: { pexelsApiKey },
-      stats: initialGlobalConfig?.stats || [],
-      testimonials: initialGlobalConfig?.testimonials || [],
-      trustLogos: initialGlobalConfig?.trustLogos || [],
-      pricing: initialGlobalConfig?.pricing || {}
-    };
+    // --- CONTACT PAGE STATE --- //
+    const [contactHero, setContactHero] = useState(initialCmsConfig?.contact?.hero || {
+      title: "Let's Engineer Your Legacy.",
+      subtitle: "Get in Touch"
+    });
+    const [contactInfo, setContactInfo] = useState(initialCmsConfig?.contact?.info || {
+      email: "hello@atozprints.in",
+      phone: "+91 98765 43210",
+      address: "12, Okhla Industrial Estate, Phase III, New Delhi, India 110020"
+    });
+    const [contactSocials, setContactSocials] = useState(initialCmsConfig?.contact?.socials || {
+      instagram: "#",
+      linkedin: "#",
+      twitter: "#"
+    });
+
+    const [pricingTiers, setPricingTiers] = useState<any[]>(initialGlobalConfig?.pricing?.tiers || [
+      { min: 1, discount: 0 },
+      { min: 20, discount: 5 },
+      { min: 50, discount: 10 },
+      { min: 100, discount: 20 }
+    ]);
+
+    const handleSave = async () => {
+      setLoading(true);
+
+      const cmsPayload = {
+        ...initialCmsConfig,
+        services: {
+          heroTitle: serviceHeroTitle,
+          heroSubtitle: serviceHeroSubtitle,
+          servicesList,
+          ctaHeading,
+          ctaDesc
+        },
+        about: {
+          hero: aboutHero,
+          philosophy: aboutPhilosophy,
+          timeline: aboutTimeline,
+          process: aboutProcess,
+          team: aboutTeam,
+          quote: aboutQuote
+        },
+        faq: {
+          hero: faqHero,
+          items: faqs
+        },
+        contact: {
+          hero: contactHero,
+          info: contactInfo,
+          socials: contactSocials
+        }
+      };
+
+      const globalPayload = {
+        ...initialGlobalConfig,
+        hero: {
+          title: heroTitle,
+          subtitle: heroSubtitle,
+          image: heroImages
+        },
+        topBanner: { text: bannerText, isActive: bannerActive },
+        features,
+        integrations: { pexelsApiKey },
+        stats: initialGlobalConfig?.stats || [],
+        testimonials: initialGlobalConfig?.testimonials || [],
+        trustLogos: initialGlobalConfig?.trustLogos || [],
+        pricing: {
+          ...initialGlobalConfig?.pricing,
+          tiers: pricingTiers
+        }
+      };
 
     try {
       // Execute multi-document update
@@ -167,7 +233,7 @@ export default function ContentManagerClient({
   return (
     <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[800px]">
       <div className="flex flex-wrap border-b border-gray-100 bg-gray-50/50 p-3 gap-2">
-        {(['home', 'categories', 'settings'] as const).map(tab => (
+        {(['home', 'categories', 'about', 'faq', 'contact', 'pricing', 'settings'] as const).map(tab => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab as any)}
@@ -176,9 +242,13 @@ export default function ContentManagerClient({
               activeTab === tab ? "bg-brand-dark text-white shadow-xl" : "text-gray-400 hover:bg-gray-100 hover:text-brand-dark"
             )}
           >
-            {tab === 'home' && 'Storefront / Home'}
-            {tab === 'categories' && 'Category Guide / Hero'}
-            {tab === 'settings' && 'Global Integrations'}
+            {tab === 'home' && 'Home'}
+            {tab === 'categories' && 'Categories'}
+            {tab === 'about' && 'About Us'}
+            {tab === 'faq' && 'FAQ'}
+            {tab === 'contact' && 'Contact'}
+            {tab === 'pricing' && 'Pricing'}
+            {tab === 'settings' && 'Global'}
           </button>
         ))}
       </div>
@@ -247,6 +317,197 @@ export default function ContentManagerClient({
                       </div>
                     ))}
                  </div>
+             </section>
+          </div>
+        )}
+
+        {/* --- ABOUT PAGE TAB --- */}
+        {activeTab === 'about' && (
+          <div className="space-y-12 animate-in fade-in duration-500 max-w-4xl mx-auto pb-20">
+            <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+              <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight mb-6">About Hero</h3>
+              <div className="space-y-4">
+                <input type="text" value={aboutHero.title} onChange={e => setAboutHero({...aboutHero, title: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border border-transparent focus:border-brand-pink/20 outline-none font-black text-brand-dark shadow-sm" placeholder="Hero Title" />
+                <textarea rows={3} value={aboutHero.subtitle} onChange={e => setAboutHero({...aboutHero, subtitle: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border border-transparent focus:border-brand-pink/20 outline-none font-bold text-gray-600 shadow-sm" placeholder="Hero Subtitle" />
+              </div>
+            </section>
+
+            <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight">Our Philosophy</h3>
+                <button onClick={() => setAboutPhilosophy([...aboutPhilosophy, { title: 'New Value', desc: 'Detail' }])} className="px-5 py-2.5 bg-brand-dark text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Add Value</button>
+              </div>
+              <div className="space-y-4">
+                {aboutPhilosophy.map((phil: any, i: number) => (
+                  <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 space-y-3">
+                    <div className="flex justify-between">
+                      <input type="text" value={phil.title} onChange={e => {
+                        const n = [...aboutPhilosophy]; n[i].title = e.target.value; setAboutPhilosophy(n);
+                      }} className="text-sm font-black text-brand-dark uppercase tracking-widest focus:outline-none w-full" placeholder="Title" />
+                      <button onClick={() => setAboutPhilosophy(aboutPhilosophy.filter((_: any, idx: number) => idx !== i))} className="text-red-400"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                    <textarea value={phil.desc} onChange={e => {
+                      const n = [...aboutPhilosophy]; n[i].desc = e.target.value; setAboutPhilosophy(n);
+                    }} className="w-full text-xs font-bold text-gray-500 focus:outline-none" placeholder="Description" />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight">Evolution Timeline</h3>
+                <button onClick={() => setAboutTimeline([...aboutTimeline, { year: '2024', title: 'Milestone', desc: 'Detail', img: '' }])} className="px-5 py-2.5 bg-brand-dark text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Add Milestone</button>
+              </div>
+              <div className="space-y-4">
+                {aboutTimeline.map((item: any, i: number) => (
+                  <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 space-y-4">
+                    <div className="flex gap-4">
+                      <input type="text" value={item.year} onChange={e => {
+                        const n = [...aboutTimeline]; n[i].year = e.target.value; setAboutTimeline(n);
+                      }} className="w-24 text-sm font-black text-brand-dark focus:outline-none" placeholder="Year" />
+                      <input type="text" value={item.title} onChange={e => {
+                        const n = [...aboutTimeline]; n[i].title = e.target.value; setAboutTimeline(n);
+                      }} className="flex-1 text-sm font-black text-brand-dark focus:outline-none" placeholder="Title" />
+                      <button onClick={() => setAboutTimeline(aboutTimeline.filter((_: any, idx: number) => idx !== i))} className="text-red-400"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                    <textarea value={item.desc} onChange={e => {
+                      const n = [...aboutTimeline]; n[i].desc = e.target.value; setAboutTimeline(n);
+                    }} className="w-full text-xs font-bold text-gray-500 focus:outline-none" placeholder="Description" />
+                    <div className="flex items-center gap-4">
+                      {item.img && <img src={item.img} className="w-12 h-12 rounded object-cover" />}
+                      <input type="file" onChange={e => handleFileUpload(e, (url) => {
+                         const n = [...aboutTimeline]; n[i].img = url; setAboutTimeline(n);
+                      })} className="text-[8px]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* --- FAQ PAGE TAB --- */}
+        {activeTab === 'faq' && (
+          <div className="space-y-12 animate-in fade-in duration-500 max-w-4xl mx-auto pb-20">
+            <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+              <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight mb-6">FAQ Hero</h3>
+              <div className="space-y-4">
+                <input type="text" value={faqHero.title} onChange={e => setFaqHero({...faqHero, title: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-black text-brand-dark" placeholder="Hero Title" />
+                <input type="text" value={faqHero.subtitle} onChange={e => setFaqHero({...faqHero, subtitle: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-bold text-gray-600" placeholder="Support Center" />
+              </div>
+            </section>
+
+            <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight">Question & Answers</h3>
+                <button onClick={() => setFaqs([...faqs, { category: 'general', q: 'New Question', a: 'Detail' }])} className="px-5 py-2.5 bg-brand-dark text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Add FAQ</button>
+              </div>
+              <div className="space-y-4">
+                {faqs.map((faq: any, i: number) => (
+                  <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 space-y-3">
+                    <div className="flex gap-4">
+                      <select value={faq.category} onChange={e => {
+                        const n = [...faqs]; n[i].category = e.target.value; setFaqs(n);
+                      }} className="text-[10px] font-black uppercase tracking-widest bg-gray-50 rounded-lg px-3 py-1 outline-none">
+                        <option value="ordering">Ordering</option>
+                        <option value="design">Design</option>
+                        <option value="logistics">Logistics</option>
+                        <option value="sustainability">Sustainability</option>
+                        <option value="general">General</option>
+                      </select>
+                      <input type="text" value={faq.q} onChange={e => {
+                        const n = [...faqs]; n[i].q = e.target.value; setFaqs(n);
+                      }} className="flex-1 text-sm font-black text-brand-dark focus:outline-none" placeholder="Question" />
+                      <button onClick={() => setFaqs(faqs.filter((_: any, idx: number) => idx !== i))} className="text-red-400"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                    <textarea value={faq.a} onChange={e => {
+                      const n = [...faqs]; n[i].a = e.target.value; setFaqs(n);
+                    }} className="w-full text-xs font-bold text-gray-500 focus:outline-none" placeholder="Answer" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* --- CONTACT PAGE TAB --- */}
+        {activeTab === 'contact' && (
+          <div className="space-y-12 animate-in fade-in duration-500 max-w-4xl mx-auto pb-20">
+            <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+              <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight mb-6">Contact Hero</h3>
+              <div className="space-y-4">
+                <input type="text" value={contactHero.title} onChange={e => setContactHero({...contactHero, title: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-black text-brand-dark" placeholder="Hero Title" />
+                <input type="text" value={contactHero.subtitle} onChange={e => setContactHero({...contactHero, subtitle: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-bold text-gray-600" placeholder="Hero Subtitle" />
+              </div>
+            </section>
+
+            <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+              <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight mb-6">Direct Info</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Email</label>
+                  <input type="text" value={contactInfo.email} onChange={e => setContactInfo({...contactInfo, email: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-bold text-brand-dark" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Phone</label>
+                  <input type="text" value={contactInfo.phone} onChange={e => setContactInfo({...contactInfo, phone: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-bold text-brand-dark" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Address</label>
+                  <textarea rows={3} value={contactInfo.address} onChange={e => setContactInfo({...contactInfo, address: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-bold text-brand-dark" />
+                </div>
+              </div>
+            </section>
+
+            <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+              <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight mb-6">Social Media</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Instagram Link</label>
+                  <input type="text" value={contactSocials.instagram} onChange={e => setContactSocials({...contactSocials, instagram: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-bold text-brand-dark" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">LinkedIn Link</label>
+                  <input type="text" value={contactSocials.linkedin} onChange={e => setContactSocials({...contactSocials, linkedin: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-bold text-brand-dark" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Twitter Link</label>
+                  <input type="text" value={contactSocials.twitter} onChange={e => setContactSocials({...contactSocials, twitter: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-bold text-brand-dark" />
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* --- PRICING PAGE TAB --- */}
+        {activeTab === 'pricing' && (
+          <div className="space-y-12 animate-in fade-in duration-500 max-w-4xl mx-auto pb-20">
+             <section className="bg-gray-50 p-8 rounded-[32px] border border-gray-100 shadow-sm">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xl font-black italic text-brand-dark uppercase tracking-tight">Bulk Discount Tiers</h3>
+                  <button onClick={() => setPricingTiers([...pricingTiers, { min: 200, discount: 25 }])} className="px-5 py-2.5 bg-brand-dark text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Add Tier</button>
+                </div>
+                <div className="space-y-4">
+                  {pricingTiers.map((tier: any, i: number) => (
+                    <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 flex items-center gap-6">
+                      <div className="flex-1">
+                        <label className="text-[8px] font-black text-gray-400 uppercase mb-1 block">Min Quantity</label>
+                        <input type="number" value={tier.min} onChange={e => {
+                          const n = [...pricingTiers]; n[i].min = parseInt(e.target.value) || 0; setPricingTiers(n);
+                        }} className="w-full text-sm font-black text-brand-dark focus:outline-none" />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-[8px] font-black text-gray-400 uppercase mb-1 block">Discount %</label>
+                        <input type="number" value={tier.discount} onChange={e => {
+                          const n = [...pricingTiers]; n[i].discount = parseInt(e.target.value) || 0; setPricingTiers(n);
+                        }} className="w-full text-sm font-black text-brand-dark focus:outline-none" />
+                      </div>
+                      <button onClick={() => setPricingTiers(pricingTiers.filter((_: any, idx: number) => idx !== i))} className="text-red-400"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                  <p className="text-[9px] font-bold text-gray-400 italic mt-4">Note: These tiers apply globally unless overridden at the product level.</p>
+                </div>
              </section>
           </div>
         )}

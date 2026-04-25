@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQs | ATOZPRINTS</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- GSAP & Lenis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/split-type"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            base: '#F9F9F7',
+                            surface: '#ffffff',
+                            blue: '#1E3A8A',
+                            darkBlue: '#0B1120',
+                            gold: '#C5A059',
+                            goldLight: '#E5D4B3',
+                            charcoal: '#1A1A1A',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Manrope', 'sans-serif'],
+                    },
+                    cursor: {
+                        none: 'none',
+                    },
+                    animation: {
+                        'float': 'float 10s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html.lenis, html.lenis body { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        .lenis.lenis-stopped { overflow: hidden; }
+        
+        body {
+            background-color: #F9F9F7;
+            color: #1E3A8A;
+            cursor: none;
+            overflow-x: hidden;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .text-huge { font-size: clamp(4.5rem, 9.5vw, 13rem); letter-spacing: -0.02em; }
+        .text-display { font-size: clamp(3rem, 6vw, 8rem); line-height: 0.9; }
+
+        /* Cursor */
+        .cursor-dot { width: 8px; height: 8px; background: #C5A059; border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; top: 0; left: 0; transform: translate(-50%, -50%); }
+        .cursor-circle { width: 40px; height: 40px; border: 1px solid rgba(197, 160, 89, 0.5); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; top: 0; left: 0; transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, border-color 0.3s, background-color 0.3s; }
+        body.hovering .cursor-circle { width: 80px; height: 80px; background-color: rgba(197, 160, 89, 0.1); border-color: transparent; backdrop-filter: blur(2px); }
+
+        /* Loader */
+        .loader-overlay { position: fixed; inset: 0; background: #0B1120; z-index: 10000; display: flex; justify-content: center; align-items: center; }
+
+        /* Navbar */
+        nav.scrolled { background-color: rgba(249, 249, 247, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(11, 17, 32, 0.05); height: 90px; }
+        .nav-link { position: relative; }
+        .nav-link::after { content: ''; position: absolute; left: 0; bottom: -4px; width: 0; height: 1px; background-color: #C5A059; transition: width 0.3s ease; }
+        .nav-link:hover::after { width: 100%; }
+        .legal-menu { opacity: 0; visibility: hidden; transform: translateY(10px) scale(0.98); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .group:hover .legal-menu { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+
+        /* --- FAQ SPECIFIC STYLES --- */
+        
+        /* Category Tabs */
+        .category-btn {
+            text-align: left;
+            padding: 1.5rem;
+            border-left: 2px solid rgba(11, 17, 32, 0.1);
+            transition: all 0.4s ease;
+            color: #64748b;
+        }
+        .category-btn.active {
+            border-left-color: #C5A059;
+            color: #0B1120;
+            padding-left: 2.5rem;
+            background: linear-gradient(90deg, rgba(197, 160, 89, 0.05), transparent);
+        }
+
+        /* Search Input */
+        .search-container {
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 3rem;
+            font-size: 1.25rem;
+            color: white;
+            border-radius: 100px;
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #C5A059;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .search-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+
+        /* Accordion */
+        .faq-item {
+            border-bottom: 1px solid rgba(11, 17, 32, 0.1);
+            transition: all 0.5s ease;
+        }
+        .faq-item:hover {
+            border-color: #C5A059;
+            background: white;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+        }
+        .faq-answer {
+            height: 0;
+            overflow: hidden;
+        }
+        .faq-icon {
+            transition: transform 0.4s ease;
+        }
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+            color: #C5A059;
+        }
+        .faq-item.active .faq-question {
+            color: #C5A059;
+        }
+
+        /* Footer */
+        .footer-reveal-container { position: relative; z-index: 10; }
+        
+        .hide-item { display: none; }
+    </style>
+</head>
+<body class="antialiased text-brand-blue selection:bg-brand-blue selection:text-white">
+
+    <!-- UI ELEMENTS -->
+    <div class="cursor-dot hidden md:block"></div>
+    <div class="cursor-circle hidden md:block"></div>
+    
+    <!-- LOADER -->
+    <div class="loader-overlay" id="loader">
+        <div class="flex flex-col items-center">
+            <div class="relative mb-6">
+                <div class="w-24 h-24 border-t-2 border-brand-gold rounded-full animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                     <img src="https://i.postimg.cc/BbgxQXMj/Whats-App-Image-2026-02-05-at-12-10-39.png" class="w-12 h-12 object-contain" alt="Loading">
+                </div>
+            </div>
+            <div class="overflow-hidden h-8">
+                <span class="block text-brand-gold text-xs tracking-[0.4em] uppercase font-sans">Engineering Impressions</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="fixed w-full z-[100] top-0 left-0 transition-all duration-500 ease-in-out border-b border-transparent" id="navbar">
+        <div class="max-w-[1920px] mx-auto px-6 md:px-12">
+            <div class="flex justify-between items-center h-28 transition-all duration-500">
+                <a href="atozprints.html" class="group flex items-center gap-3 magnetic-target">
+                    <img src="https://i.postimg.cc/BbgxQXMj/Whats-App-Image-2026-02-05-at-12-10-39.png" class="w-14 h-14 object-contain relative z-10 transition-transform duration-300 group-hover:scale-110" alt="ATOZPRINTS">
+                    <span class="font-serif font-bold text-3xl tracking-tight text-brand-darkBlue">ATOZ.</span>
+                </a>
+
+                <div class="hidden lg:flex items-center gap-10 font-sans font-medium text-sm uppercase tracking-widest text-brand-darkBlue">
+                    <a href="atozprints.html" class="nav-link hover:text-brand-gold transition-colors magnetic-target">Home</a>
+                    <a href="about.html" class="nav-link hover:text-brand-gold transition-colors magnetic-target">About Us</a>
+                    <a href="atozprints.html#catalogue" class="nav-link hover:text-brand-gold transition-colors magnetic-target">Products</a>
+                    <a href="contact.html" class="nav-link hover:text-brand-gold transition-colors magnetic-target">Contact Us</a>
+                    <a href="#" class="nav-link text-brand-gold transition-colors magnetic-target">FAQs</a>
+
+                    <div class="relative group h-full flex items-center cursor-pointer magnetic-target">
+                        <span class="hover:text-brand-gold transition-colors flex items-center gap-1 py-6">
+                            Legal <i data-lucide="chevron-down" class="w-3 h-3 mt-0.5 transition-transform duration-300 group-hover:rotate-180"></i>
+                        </span>
+                        <div class="absolute top-full left-0 w-full h-4 bg-transparent"></div>
+                        <div class="absolute top-[calc(100%-1rem)] right-0 w-56 bg-white/95 backdrop-blur-xl shadow-2xl border border-brand-darkBlue/5 rounded-2xl overflow-hidden legal-menu p-2 origin-top-right">
+                            <a href="#" class="block px-6 py-4 text-[11px] uppercase tracking-widest hover:bg-brand-base hover:text-brand-gold rounded-xl transition-colors font-bold text-brand-darkBlue">Privacy Policy</a>
+                            <a href="#" class="block px-6 py-4 text-[11px] uppercase tracking-widest hover:bg-brand-base hover:text-brand-gold rounded-xl transition-colors font-bold text-brand-darkBlue">Terms & Conditions</a>
+                        </div>
+                    </div>
+                    
+                    <a href="atozprints.html#calculator" class="ml-6 px-10 py-4 bg-brand-darkBlue text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-gold transition-all duration-300 hover:shadow-lg hover:-translate-y-1 magnetic-target shadow-md">
+                        Estimate
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 1. HERO SECTION (SEARCH & TITLE) -->
+    <section class="relative min-h-[70vh] pt-40 pb-20 px-6 md:px-12 bg-brand-darkBlue text-white overflow-hidden flex flex-col justify-center items-center">
+        <!-- Ambient Background -->
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+        <div class="absolute top-[20%] right-[10%] w-96 h-96 bg-brand-gold/10 rounded-full blur-[120px] animate-float"></div>
+        
+        <div class="relative z-10 w-full max-w-4xl text-center">
+            <span class="text-brand-gold text-xs font-sans font-bold uppercase tracking-[0.4em] mb-8 block reveal-text">Support Center</span>
+            <h1 class="text-huge font-serif font-bold text-white leading-super-tight mb-12 reveal-title">
+                The Knowledge <br> <span class="italic text-brand-gold">Base.</span>
+            </h1>
+            
+            <!-- Search Bar -->
+            <div class="search-container max-w-2xl mx-auto reveal-fade opacity-0">
+                <i data-lucide="search" class="absolute left-8 top-1/2 -translate-y-1/2 text-brand-gold w-6 h-6"></i>
+                <input type="text" id="faqSearch" placeholder="Search for pricing, shipping, or materials..." class="search-input">
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. FAQ CONTENT (TABS & ACCORDION) -->
+    <section class="py-32 px-6 md:px-12 bg-brand-base relative">
+        <div class="max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-20">
+                
+                <!-- Sidebar: Categories (Sticky) -->
+                <div class="lg:col-span-3">
+                    <div class="sticky top-40 space-y-2" id="faq-categories">
+                        <h4 class="text-xs font-sans font-bold uppercase tracking-widest text-slate-400 mb-8 pl-6">Categories</h4>
+                        
+                        <button class="category-btn w-full font-serif text-2xl active" data-category="all">All Questions</button>
+                        <button class="category-btn w-full font-serif text-2xl" data-category="ordering">Ordering & Cost</button>
+                        <button class="category-btn w-full font-serif text-2xl" data-category="design">Design & Customization</button>
+                        <button class="category-btn w-full font-serif text-2xl" data-category="logistics">Shipping & Logistics</button>
+                        <button class="category-btn w-full font-serif text-2xl" data-category="sustainability">Sustainability</button>
+                    </div>
+                </div>
+
+                <!-- Main Content: Accordions -->
+                <div class="lg:col-span-9" id="faq-list">
+                    
+                    <!-- ORDERING -->
+                    <div class="faq-item py-8 cursor-pointer group" data-category="ordering">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-8">
+                                <span class="text-brand-gold font-serif text-xl opacity-50">01</span>
+                                <h3 class="text-2xl md:text-3xl font-serif text-brand-darkBlue faq-question transition-colors">What is the Minimum Order Quantity (MOQ)?</h3>
+                            </div>
+                            <i data-lucide="plus" class="w-6 h-6 text-brand-darkBlue faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="pt-8 pl-14 max-w-3xl">
+                                <p class="text-lg font-sans text-slate-600 leading-relaxed">
+                                    We cater to exclusive needs. Our standard MOQ is <strong>50 units</strong> for most items like diaries, calendars, and kits. However, for highly bespoke luxury projects, we can commission runs as small as <strong>25 units</strong> to ensure exclusivity. For non-custom items, there is no MOQ.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item py-8 cursor-pointer group" data-category="ordering">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-8">
+                                <span class="text-brand-gold font-serif text-xl opacity-50">02</span>
+                                <h3 class="text-2xl md:text-3xl font-serif text-brand-darkBlue faq-question transition-colors">Can I get a physical sample before bulk ordering?</h3>
+                            </div>
+                            <i data-lucide="plus" class="w-6 h-6 text-brand-darkBlue faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="pt-8 pl-14 max-w-3xl">
+                                <p class="text-lg font-sans text-slate-600 leading-relaxed">
+                                    Absolutely. We believe in tactile proof. For bulk inquiries (>500 units), we send a complimentary "ATOZ Essentials" box. For smaller orders, a paid sample kit is available (approx ₹1500), which is fully refundable upon order confirmation.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item py-8 cursor-pointer group" data-category="ordering">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-8">
+                                <span class="text-brand-gold font-serif text-xl opacity-50">03</span>
+                                <h3 class="text-2xl md:text-3xl font-serif text-brand-darkBlue faq-question transition-colors">Do you offer GST invoices?</h3>
+                            </div>
+                            <i data-lucide="plus" class="w-6 h-6 text-brand-darkBlue faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="pt-8 pl-14 max-w-3xl">
+                                <p class="text-lg font-sans text-slate-600 leading-relaxed">
+                                    Yes, all our pricing is exclusive of GST (usually 18% for print goods). You will receive a fully compliant GST invoice for every transaction, allowing you to claim input tax credit.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DESIGN -->
+                    <div class="faq-item py-8 cursor-pointer group" data-category="design">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-8">
+                                <span class="text-brand-gold font-serif text-xl opacity-50">04</span>
+                                <h3 class="text-2xl md:text-3xl font-serif text-brand-darkBlue faq-question transition-colors">I don't have a design. Can you help?</h3>
+                            </div>
+                            <i data-lucide="plus" class="w-6 h-6 text-brand-darkBlue faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="pt-8 pl-14 max-w-3xl">
+                                <p class="text-lg font-sans text-slate-600 leading-relaxed">
+                                    Our in-house design studio is at your service. Whether you have print-ready files or just a logo and a rough idea, we adapt your brand identity into a tangible masterpiece. Basic layout is free, while complex structural design is chargeable.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item py-8 cursor-pointer group" data-category="design">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-8">
+                                <span class="text-brand-gold font-serif text-xl opacity-50">05</span>
+                                <h3 class="text-2xl md:text-3xl font-serif text-brand-darkBlue faq-question transition-colors">What file formats do you accept?</h3>
+                            </div>
+                            <i data-lucide="plus" class="w-6 h-6 text-brand-darkBlue faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="pt-8 pl-14 max-w-3xl">
+                                <p class="text-lg font-sans text-slate-600 leading-relaxed">
+                                    For the highest quality print, we require vector files (.AI, .EPS, .PDF) or high-resolution images (300 DPI minimum). Text should be converted to outlines to ensure font accuracy.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LOGISTICS -->
+                    <div class="faq-item py-8 cursor-pointer group" data-category="logistics">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-8">
+                                <span class="text-brand-gold font-serif text-xl opacity-50">06</span>
+                                <h3 class="text-2xl md:text-3xl font-serif text-brand-darkBlue faq-question transition-colors">What is your turnaround time?</h3>
+                            </div>
+                            <i data-lucide="plus" class="w-6 h-6 text-brand-darkBlue faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="pt-8 pl-14 max-w-3xl">
+                                <p class="text-lg font-sans text-slate-600 leading-relaxed">
+                                    Speed meets precision. Standard orders typically ship within <strong>5-7 business days</strong> after design approval. Complex kits with custom dyes, embossing, or molds may require 10-12 days. Rush options (48h) are available for select items like business cards.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item py-8 cursor-pointer group" data-category="logistics">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-8">
+                                <span class="text-brand-gold font-serif text-xl opacity-50">07</span>
+                                <h3 class="text-2xl md:text-3xl font-serif text-brand-darkBlue faq-question transition-colors">Do you ship to individual employee addresses?</h3>
+                            </div>
+                            <i data-lucide="plus" class="w-6 h-6 text-brand-darkBlue faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="pt-8 pl-14 max-w-3xl">
+                                <p class="text-lg font-sans text-slate-600 leading-relaxed">
+                                    Yes. We handle end-to-end logistics. Whether it's bulk delivery to your warehouse or dropshipping welcome kits to 1,000+ employee home addresses across India, we manage the entire chain securely.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUSTAINABILITY -->
+                    <div class="faq-item py-8 cursor-pointer group" data-category="sustainability">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-8">
+                                <span class="text-brand-gold font-serif text-xl opacity-50">08</span>
+                                <h3 class="text-2xl md:text-3xl font-serif text-brand-darkBlue faq-question transition-colors">Are your materials eco-friendly?</h3>
+                            </div>
+                            <i data-lucide="plus" class="w-6 h-6 text-brand-darkBlue faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="pt-8 pl-14 max-w-3xl">
+                                <p class="text-lg font-sans text-slate-600 leading-relaxed">
+                                    We offer a dedicated "Eco-Luxe" line featuring FSC-certified recycled papers, soy-based organic inks, and plastic-free packaging options. We strive to minimize our carbon footprint without compromising on the premium feel.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. STILL HAVE QUESTIONS? (CTA BANNER) -->
+    <section class="py-32 px-6 md:px-12 bg-white">
+        <div class="max-w-[1600px] mx-auto bg-brand-darkBlue rounded-[3rem] p-16 md:p-32 text-center relative overflow-hidden">
+            <!-- Decorative Elements -->
+            <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+            <div class="absolute top-10 left-10 w-32 h-32 border border-brand-gold/20 rounded-full animate-[float_6s_infinite]"></div>
+            <div class="absolute bottom-10 right-10 w-48 h-48 bg-brand-blue/20 rounded-full blur-3xl"></div>
+
+            <div class="relative z-10">
+                <span class="text-brand-gold text-xs font-sans font-bold uppercase tracking-[0.3em] mb-6 block">Still Curious?</span>
+                <h2 class="text-5xl md:text-7xl font-serif text-white mb-10">Cannot find what you're <br> <span class="italic text-brand-gold">looking for?</span></h2>
+                <p class="text-slate-400 font-sans text-lg max-w-xl mx-auto mb-12">Our team is ready to answer specific technical questions or discuss custom requirements.</p>
+                <div class="flex flex-col md:flex-row justify-center gap-6">
+                    <a href="contact.html" class="px-10 py-5 bg-brand-gold text-brand-darkBlue font-bold uppercase tracking-widest rounded-full hover:bg-white transition-all magnetic-target">Contact Support</a>
+                    <a href="tel:+919876543210" class="px-10 py-5 border border-white/20 text-white font-bold uppercase tracking-widest rounded-full hover:bg-white hover:text-brand-darkBlue transition-all magnetic-target">Call Us Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="bg-brand-darkBlue text-white footer-reveal-container">
+        <footer class="min-h-screen flex flex-col justify-between pt-32 pb-12 px-6 md:px-12 relative overflow-hidden" id="contact">
+            <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-blue/10 rounded-full blur-[150px] pointer-events-none"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 relative z-10">
+                <div class="md:col-span-8">
+                    <img src="https://i.postimg.cc/BbgxQXMj/Whats-App-Image-2026-02-05-at-12-10-39.png" class="w-24 h-auto mb-10 object-contain" alt="Logo">
+                    <span class="text-brand-gold text-xs font-sans font-bold uppercase tracking-[0.4em] mb-8 block">Start a Project</span>
+                    <h2 class="text-display leading-[0.8] mb-12 text-white/90 font-serif font-bold">
+                        Let's Make <br> <span class="italic text-brand-gold">History.</span>
+                    </h2>
+                    <a href="mailto:hello@atozprints.in" class="text-2xl md:text-4xl border-b border-white/20 pb-4 hover:text-brand-gold hover:border-brand-gold transition-all font-sans font-light magnetic-target inline-block">hello@atozprints.in</a>
+                </div>
+                
+                <div class="md:col-span-4 flex flex-col justify-end space-y-16">
+                    <div class="grid grid-cols-2 gap-12">
+                        <div>
+                            <span class="block text-[10px] font-sans font-bold uppercase tracking-widest text-slate-500 mb-6">HQ</span>
+                            <p class="text-base font-sans text-slate-300 leading-relaxed">12, Okhla Industrial Estate<br>Phase III, New Delhi<br>India 110020</p>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-sans font-bold uppercase tracking-widest text-slate-500 mb-6">Connect</span>
+                            <ul class="text-base font-sans text-slate-300 space-y-4">
+                                <li><a href="#" class="hover:text-brand-gold magnetic-target inline-block">Instagram</a></li>
+                                <li><a href="#" class="hover:text-brand-gold magnetic-target inline-block">LinkedIn</a></li>
+                                <li><a href="#" class="hover:text-brand-gold magnetic-target inline-block">Behance</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-end pt-24 border-t border-white/5 mt-auto">
+                <div class="mb-8 md:mb-0">
+                    <h3 class="text-[15vw] leading-none font-serif font-bold text-white/5 select-none pointer-events-none">ATOZ.</h3>
+                </div>
+                <div class="flex gap-8 text-[10px] font-sans font-bold uppercase tracking-widest text-slate-600">
+                    <span>© 2026 ATOZPRINTS</span>
+                    <a href="#" class="hover:text-white transition-colors">Privacy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+        lucide.createIcons();
+
+        const lenis = new Lenis({ duration: 1.5, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), direction: 'vertical', smooth: true });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Loader
+            const tl = gsap.timeline();
+            tl.to(".loader-overlay", { yPercent: -100, duration: 1.5, ease: "power4.inOut", delay: 0.5 })
+              .to(".hero-text", { y: 0, duration: 1.5, stagger: 0.1, ease: "power4.out" }, "-=0.8")
+              .to(".reveal-title", { y: 0, opacity: 1, duration: 1.2, ease: "power3.out" }, "-=1")
+              .to(".reveal-fade", { opacity: 1, duration: 1, ease: "power2.out" }, "-=0.5");
+
+            // Text Reveal
+            if (typeof SplitType !== 'undefined') {
+                const titles = document.querySelectorAll('.reveal-title');
+                titles.forEach(title => {
+                    const splitTitle = new SplitType(title, { types: 'lines, words' });
+                    gsap.from(splitTitle.words, { y: 50, opacity: 0, duration: 1.2, stagger: 0.05, ease: "power3.out", scrollTrigger: { trigger: title, start: "top 85%" } });
+                });
+                
+                const texts = document.querySelectorAll('.reveal-text');
+                texts.forEach(text => {
+                    gsap.from(text, { y: 30, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: text, start: "top 90%" } });
+                });
+            }
+
+            // --- ACCORDION LOGIC WITH GSAP ---
+            const accordions = document.querySelectorAll('.faq-item');
+            
+            accordions.forEach(acc => {
+                acc.addEventListener('click', () => {
+                    const isActive = acc.classList.contains('active');
+                    const content = acc.querySelector('.faq-answer');
+                    
+                    // Close all others
+                    accordions.forEach(item => {
+                        if(item !== acc && item.classList.contains('active')) {
+                            item.classList.remove('active');
+                            gsap.to(item.querySelector('.faq-answer'), { height: 0, duration: 0.4, ease: "power2.inOut" });
+                        }
+                    });
+
+                    // Toggle Current
+                    if(isActive) {
+                        acc.classList.remove('active');
+                        gsap.to(content, { height: 0, duration: 0.4, ease: "power2.inOut" });
+                    } else {
+                        acc.classList.add('active');
+                        gsap.set(content, { height: "auto" });
+                        gsap.from(content, { height: 0, duration: 0.4, ease: "power2.inOut" });
+                    }
+                });
+            });
+
+            // --- CATEGORY FILTER LOGIC ---
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            const faqList = document.getElementById('faq-list');
+            const faqItems = document.querySelectorAll('.faq-item');
+
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active state
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const category = btn.getAttribute('data-category');
+
+                    // Filter
+                    faqItems.forEach(item => {
+                        const itemCat = item.getAttribute('data-category');
+                        
+                        if(category === 'all' || itemCat === category) {
+                            item.classList.remove('hide-item');
+                            gsap.to(item, { opacity: 1, y: 0, duration: 0.4, display: 'block' });
+                        } else {
+                            gsap.to(item, { opacity: 0, y: 20, duration: 0.3, onComplete: () => item.classList.add('hide-item') });
+                        }
+                    });
+                    
+                    // Re-calculate scroll layout
+                    setTimeout(() => ScrollTrigger.refresh(), 500);
+                });
+            });
+
+            // --- SEARCH LOGIC ---
+            const searchInput = document.getElementById('faqSearch');
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                
+                faqItems.forEach(item => {
+                    const text = item.innerText.toLowerCase();
+                    if(text.includes(term)) {
+                        item.classList.remove('hide-item');
+                        gsap.set(item, { display: 'block', opacity: 1 });
+                    } else {
+                        item.classList.add('hide-item');
+                        gsap.set(item, { display: 'none', opacity: 0 });
+                    }
+                });
+                ScrollTrigger.refresh();
+            });
+
+            // Navbar Scroll
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) navbar.classList.add('scrolled');
+                else navbar.classList.remove('scrolled');
+            });
+
+            // Cursor
+            const cursorDot = document.querySelector('.cursor-dot');
+            const cursorCircle = document.querySelector('.cursor-circle');
+            window.addEventListener('mousemove', (e) => {
+                gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: 0.1 });
+                gsap.to(cursorCircle, { x: e.clientX, y: e.clientY, duration: 0.3 });
+            });
+            document.querySelectorAll('.magnetic-target').forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    document.body.classList.add('hovering');
+                    gsap.to(cursorCircle, { scale: 1.5 });
+                });
+                el.addEventListener('mouseleave', () => {
+                    document.body.classList.remove('hovering');
+                    gsap.to(cursorCircle, { scale: 1 });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

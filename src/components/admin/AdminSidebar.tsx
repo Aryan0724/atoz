@@ -47,7 +47,7 @@ export default function AdminSidebar() {
     { name: 'Coupons', href: '/admin/coupons', icon: <Tag className="h-5 w-5" /> },
     { name: 'Abandoned Carts', href: '/admin/analytics/abandoned', icon: <Clock className="h-5 w-5" /> },
     { name: 'Website Content', href: '/admin/cms', icon: <FileText className="h-5 w-5" /> },
-    { name: 'Blogs', href: '/admin/blogs', icon: <PenTool className="h-5 w-5" /> },
+    { name: 'Custom Pages', href: '/admin/blogs', icon: <PenTool className="h-5 w-5" /> },
   ];
 
   return (
