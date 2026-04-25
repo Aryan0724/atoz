@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronDown, ShoppingBag, LogOut, User as UserIcon } from 'lucide-react';
+import { ChevronDown, ShoppingBag, LogOut, User as UserIcon, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/lib/store/useCart';
@@ -15,6 +15,7 @@ const Navbar = () => {
   const { user, profile, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -24,6 +25,11 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close menu on route change
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   const cartCount = mounted ? getItemCount() : 0;
 
@@ -130,7 +136,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Toggle (Simplified for now) */}
+          {/* Mobile Menu Toggle */}
           <div className="lg:hidden flex items-center gap-4">
              <button
               onClick={() => setOpen(true)}
@@ -143,10 +149,35 @@ const Navbar = () => {
                 </span>
               )}
             </button>
-            <Link href="/login" className="p-2.5 text-brand-darkBlue">
-              <UserIcon className="h-6 w-6" />
-            </Link>
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2.5 text-brand-darkBlue"
+            >
+              {isMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
+            </button>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <div className={cn(
+        "fixed inset-0 bg-brand-base z-[90] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden",
+        isMenuOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-full"
+      )}>
+        <div className="flex flex-col items-center justify-center h-full gap-8 p-12">
+          <Link href="/" className="text-4xl font-serif font-bold text-brand-darkBlue">Home</Link>
+          <Link href="/about" className="text-4xl font-serif font-bold text-brand-darkBlue">About Us</Link>
+          <Link href="/products" className="text-4xl font-serif font-bold text-brand-darkBlue">Products</Link>
+          <Link href="/contact" className="text-4xl font-serif font-bold text-brand-darkBlue">Contact Us</Link>
+          <Link href="/faq" className="text-4xl font-serif font-bold text-brand-darkBlue">FAQs</Link>
+          
+          <div className="w-full h-px bg-brand-darkBlue/10 my-4" />
+          
+          {mounted && user ? (
+             <Link href={profile?.role === 'admin' ? '/admin' : '/dashboard'} className="text-xl font-sans font-bold uppercase tracking-widest text-brand-gold">Dashboard</Link>
+          ) : (
+             <Link href="/login" className="px-12 py-5 bg-brand-darkBlue text-white rounded-full text-sm font-bold uppercase tracking-widest shadow-xl">Sign In</Link>
+          )}
         </div>
       </div>
     </nav>

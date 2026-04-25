@@ -15,7 +15,13 @@ import { supabase } from '@/lib/supabase/client';
 
 gsap.registerPlugin(ScrollTrigger);
 
-
+const CATEGORIES = [
+  { id: 'all', label: 'All Questions' },
+  { id: 'ordering', label: 'Ordering & Cost' },
+  { id: 'design', label: 'Design & Customization' },
+  { id: 'logistics', label: 'Shipping & Logistics' },
+  { id: 'sustainability', label: 'Sustainability' }
+];
 
 export default function FAQPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -122,29 +128,24 @@ export default function FAQPage() {
             
             {/* Sidebar: Categories */}
             <div className="lg:col-span-3">
-              <div className="sticky top-40 space-y-2">
-                <h4 className="text-xs font-sans font-bold uppercase tracking-widest text-slate-400 mb-8 pl-6">Categories</h4>
-                
-                {[
-                  { id: 'all', label: 'All Questions' },
-                  { id: 'ordering', label: 'Ordering & Cost' },
-                  { id: 'design', label: 'Design & Customization' },
-                  { id: 'logistics', label: 'Shipping & Logistics' },
-                  { id: 'sustainability', label: 'Sustainability' }
-                ].map((cat) => (
-                  <button 
-                    key={cat.id}
-                    onClick={() => setActiveCategory(cat.id)}
-                    className={cn(
-                      "w-full text-left p-6 border-l-2 transition-all font-serif text-2xl",
-                      activeCategory === cat.id 
-                        ? "border-brand-gold text-brand-darkBlue bg-gradient-to-r from-brand-gold/5 to-transparent pl-10" 
-                        : "border-brand-darkBlue/10 text-slate-400 hover:border-brand-gold hover:text-brand-darkBlue"
-                    )}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
+              <div className="sticky top-24 lg:top-40 z-20 bg-brand-base/80 backdrop-blur-sm lg:bg-transparent -mx-6 px-6 lg:mx-0 lg:px-0">
+                <h4 className="hidden lg:block text-xs font-sans font-bold uppercase tracking-widest text-slate-400 mb-8 pl-6">Categories</h4>
+                <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible py-4 lg:py-0 scrollbar-hide no-scrollbar">
+                  {CATEGORIES.map((cat: any) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={cn(
+                        "whitespace-nowrap px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-left flex-shrink-0",
+                        activeCategory === cat.id 
+                          ? "bg-brand-gold text-white shadow-xl shadow-brand-gold/20" 
+                          : "bg-white text-slate-400 hover:bg-gray-50 border border-brand-darkBlue/5"
+                      )}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

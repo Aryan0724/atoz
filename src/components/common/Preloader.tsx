@@ -7,6 +7,14 @@ export default function Preloader() {
   const loaderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const hasLoaded = sessionStorage.getItem('atoz_loaded');
+    if (hasLoaded) {
+      if (loaderRef.current) {
+        loaderRef.current.style.display = 'none';
+      }
+      return;
+    }
+
     const tl = gsap.timeline();
     tl.to(loaderRef.current, {
       yPercent: -100,
@@ -17,6 +25,7 @@ export default function Preloader() {
         if (loaderRef.current) {
           loaderRef.current.style.display = 'none';
         }
+        sessionStorage.setItem('atoz_loaded', 'true');
       }
     });
   }, []);

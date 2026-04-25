@@ -178,21 +178,21 @@ export default function HomePageClient({ products, config }: { products: any[], 
       <div className="py-12 border-y border-brand-blue/10 bg-white overflow-hidden relative z-20">
         <div className="w-full inline-flex flex-nowrap overflow-hidden">
           <div className="flex items-center justify-center md:justify-start [&_span]:mx-8 animate-marquee whitespace-nowrap">
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Luxury Business Cards</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Premium Packaging</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Corporate Gifting</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Event Stationery</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Custom Diaries</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">ID Solutions</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Welcome Kits</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Luxury Business Cards</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Premium Packaging</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Corporate Gifting</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Event Stationery</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Custom Diaries</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">ID Solutions</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Welcome Kits</span>
             {/* Duplicate */}
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Luxury Business Cards</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Premium Packaging</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Corporate Gifting</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Event Stationery</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Custom Diaries</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">ID Solutions</span>
-            <span className="text-5xl font-serif italic text-brand-darkBlue">Welcome Kits</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Luxury Business Cards</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Premium Packaging</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Corporate Gifting</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Event Stationery</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Custom Diaries</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">ID Solutions</span>
+            <span className="text-3xl md:text-5xl font-serif italic text-brand-darkBlue">Welcome Kits</span>
           </div>
         </div>
       </div>
@@ -203,7 +203,7 @@ export default function HomePageClient({ products, config }: { products: any[], 
         <div className="max-w-[1400px] mx-auto text-center relative z-10">
           <span className="text-brand-gold text-xs font-sans font-bold uppercase tracking-widest mb-12 block">Our Philosophy</span>
           
-          <p id="manifesto-text" className="text-4xl md:text-6xl lg:text-7xl font-serif leading-[1.2] opacity-80 mb-24">
+          <p id="manifesto-text" className="text-3xl md:text-6xl lg:text-7xl font-serif leading-[1.2] opacity-80 mb-24">
             Your brand isn&apos;t just a logo. It is the weight of the paper. The brilliance of the foil. The texture of the grain. We engineer impressions that linger long after the meeting ends. Excellence is not an act, but a habit.
           </p>
           
@@ -233,7 +233,7 @@ export default function HomePageClient({ products, config }: { products: any[], 
         <div className="max-w-[1800px] mx-auto">
           <div className="mb-24 text-center md:text-left">
             <div className="overflow-hidden">
-              <h2 className="text-6xl md:text-8xl font-serif text-brand-darkBlue reveal-title">Comprehensive <br /> <span className="italic text-brand-gold">Mastery.</span></h2>
+              <h2 className="text-4xl md:text-8xl font-serif text-brand-darkBlue reveal-title">Comprehensive <br /> <span className="italic text-brand-gold">Mastery.</span></h2>
             </div>
             <div className="overflow-hidden mt-6">
               <p className="text-lg font-sans text-slate-500 max-w-xl reveal-text">Integrating artisanal craftsmanship with industrial scale.</p>
@@ -325,7 +325,7 @@ export default function HomePageClient({ products, config }: { products: any[], 
           <div className="flex flex-col items-center text-center mb-32">
             <span className="text-brand-gold font-sans font-bold tracking-[0.4em] text-xs uppercase mb-6">The Collection</span>
             <div className="overflow-hidden">
-              <h2 className="text-6xl md:text-8xl leading-none mb-6 text-brand-darkBlue font-serif reveal-title">
+              <h2 className="text-4xl md:text-8xl leading-none mb-6 text-brand-darkBlue font-serif reveal-title">
                 Curated <span className="italic text-brand-blue/30">Essentials</span>
               </h2>
             </div>
