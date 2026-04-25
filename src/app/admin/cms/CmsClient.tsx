@@ -233,7 +233,7 @@ export default function ContentManagerClient({
   return (
     <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[800px]">
       <div className="flex flex-wrap border-b border-gray-100 bg-gray-50/50 p-3 gap-2">
-        {(['home', 'categories', 'about', 'faq', 'contact', 'pricing', 'settings'] as const).map(tab => (
+        {(['home', 'categories', 'about', 'faq', 'contact', 'pricing', 'settings'] as const).map((tab: string) => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab as any)}
@@ -275,7 +275,7 @@ export default function ContentManagerClient({
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Hero Images (Slideshow)</label>
                     <div className="flex flex-col gap-4">
                        <div className="flex flex-wrap gap-4">
-                         {heroImages.map((img, i) => (
+                         {heroImages.map((img: string, i: number) => (
                            <div key={i} className="relative group rounded-xl overflow-hidden border border-gray-200 shadow-sm w-24 h-24">
                              <img src={img} alt="hero" className="w-full h-full object-cover" />
                              <button onClick={() => setHeroImages(heroImages.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-white hover:bg-red-500 hover:text-white text-red-500 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-md">
@@ -304,14 +304,14 @@ export default function ContentManagerClient({
                   <button onClick={addFeature} className="px-5 py-2.5 bg-brand-dark text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-pink transition-all">Add Feature</button>
                  </div>
                  <div className="space-y-4">
-                    {features.map((feat, i) => (
+                    {features.map((feat: any, i: number) => (
                       <div key={i} className="flex gap-4 p-4 rounded-2xl bg-white border border-gray-100 items-start group">
                          <div className="flex-1 space-y-3">
                             <input type="text" value={feat.title} onChange={e => updateFeature(i, 'title', e.target.value)} className="w-full text-sm font-black text-brand-dark uppercase tracking-widest focus:outline-none" placeholder="Feature Title" />
                             <input type="text" value={feat.desc} onChange={e => updateFeature(i, 'desc', e.target.value)} className="w-full text-xs font-bold text-gray-500 focus:outline-none" placeholder="Description" />
                          </div>
                          <select value={feat.icon} onChange={e => updateFeature(i, 'icon', e.target.value)} className="text-xs font-bold text-gray-500 focus:outline-none bg-gray-50 rounded-lg p-2">
-                            {Object.keys(ICONS).map(icon => <option key={icon} value={icon}>{icon}</option>)}
+                             {Object.keys(ICONS).map((icon: string) => <option key={icon} value={icon}>{icon}</option>)}
                          </select>
                          <button onClick={() => removeFeature(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button>
                       </div>

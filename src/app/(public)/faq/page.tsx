@@ -150,7 +150,7 @@ export default function FAQPage() {
 
             {/* Main Content: Accordions */}
             <div className="lg:col-span-9 space-y-4">
-              {filteredFaqs.length > 0 ? filteredFaqs.map((faq, idx) => (
+              {filteredFaqs.length > 0 ? filteredFaqs.map((faq: any, idx: number) => (
                 <div 
                   key={faq.id} 
                   className={cn(
