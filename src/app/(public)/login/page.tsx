@@ -90,7 +90,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-white flex overflow-hidden">
       {/* Visual Side - Hidden on Mobile */}
-      <div className="hidden lg:flex lg:w-1/2 bg-brand-dark relative overflow-hidden flex-col justify-between p-20 text-white">
+      <div className="hidden lg:flex lg:w-1/2 bg-brand-darkBlue relative overflow-hidden flex-col justify-between p-20 text-white" style={{ backgroundColor: '#0B1120' }}>
         <div className="absolute inset-0 z-0">
            <div className="absolute top-[20%] right-[-10%] w-[70%] h-[70%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
            <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-brand-pink/10 rounded-full blur-[100px]" />
@@ -153,7 +153,7 @@ export default function LoginPage() {
             <div className="relative h-12 w-40 mx-auto mb-10">
                <Image src="/logo.png" alt="Logo" fill className="object-contain mix-blend-multiply" />
             </div>
-            <h2 className="text-4xl font-black text-brand-dark tracking-tighter italic uppercase mb-4">Welcome Back</h2>
+            <h2 className="text-4xl font-black text-brand-darkBlue tracking-tighter italic uppercase mb-4">Welcome Back</h2>
             <p className="text-gray-400 font-bold uppercase tracking-widest text-xs italic">Continue your creative journey</p>
           </div>
 
@@ -201,7 +201,7 @@ export default function LoginPage() {
                  required
                  value={email}
                  onChange={(e) => setEmail(e.target.value)}
-                 className="w-full px-6 py-3.5 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-pink focus:ring-4 focus:ring-brand-pink/5 outline-none transition-all font-bold text-brand-dark placeholder:text-gray-300 shadow-inner" 
+                 className="w-full px-6 py-3.5 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-pink focus:ring-4 focus:ring-brand-pink/5 outline-none transition-all font-bold text-brand-darkBlue placeholder:text-gray-300 shadow-inner" 
                  placeholder="name@company.com" 
                />
             </div>
@@ -217,7 +217,7 @@ export default function LoginPage() {
                  value={password}
                  onChange={(e) => setPassword(e.target.value)}
                  placeholder="••••••••" 
-                 className="w-full px-6 py-3.5 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-pink focus:ring-4 focus:ring-brand-pink/5 outline-none transition-all font-bold text-brand-dark placeholder:text-gray-300 shadow-inner" 
+                 className="w-full px-6 py-3.5 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-pink focus:ring-4 focus:ring-brand-pink/5 outline-none transition-all font-bold text-brand-darkBlue placeholder:text-gray-300 shadow-inner" 
                />
             </div>
 
@@ -225,12 +225,13 @@ export default function LoginPage() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full py-4.5 bg-brand-dark text-white rounded-[24px] text-lg font-black uppercase tracking-widest hover:bg-brand-pink shadow-2xl shadow-brand-dark/20 transition-all active:scale-95 disabled:opacity-50 italic flex items-center justify-center gap-3"
+                className="w-full py-4.5 bg-brand-darkBlue text-white rounded-[24px] text-lg font-black uppercase tracking-widest hover:bg-brand-pink shadow-2xl shadow-brand-darkBlue/20 transition-all active:scale-95 disabled:opacity-50 italic flex items-center justify-center gap-3"
+                style={{ backgroundColor: '#0B1120' }}
               >
                 {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : (
                   <>
-                    <Fingerprint className="w-6 h-6" />
-                    Sign In
+                  <Fingerprint className="w-6 h-6" />
+                    Sign In Now
                   </>
                 )}
               </button>

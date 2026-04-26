@@ -8,6 +8,10 @@
     --brand-blue: #1E3A8A;
     --brand-darkBlue: #0B1120;
     --brand-gold: #C5A059;
+    --brand-dark: #0B1120;
+    --brand-pink: #EB337E;
+    --brand-cyan: #2DD4BF;
+    --brand-lime: #BEF264;
   }
 
   html.lenis, html.lenis body { height: auto; }
@@ -135,4 +139,17 @@
   nav.scrolled .flex {
     @apply h-[90px];
   }
+
+  /* --- BRAND UTILITIES --- */
+  .bg-brand-dark { background-color: var(--brand-dark) !important; }
+  .text-brand-dark { color: var(--brand-dark) !important; }
+  .bg-brand-darkBlue { background-color: var(--brand-dark) !important; }
+  .text-brand-darkBlue { color: var(--brand-dark) !important; }
+  .bg-brand-pink { background-color: var(--brand-pink) !important; }
+  .text-brand-pink { color: var(--brand-pink) !important; }
+  .border-brand-pink { border-color: var(--brand-pink) !important; }
+  .bg-brand-cyan { background-color: var(--brand-cyan) !important; }
+  .text-brand-cyan { color: var(--brand-cyan) !important; }
+  .bg-brand-lime { background-color: var(--brand-lime) !important; }
+  .text-brand-lime { color: var(--brand-lime) !important; }
 }

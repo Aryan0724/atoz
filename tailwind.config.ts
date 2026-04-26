@@ -14,6 +14,10 @@ const config: Config = {
           surface: '#ffffff',
           blue: '#1E3A8A',     /* Royal Blue */
           darkBlue: '#0B1120', /* Deep Navy */
+          dark: '#0B1120',     /* Alias for consistency */
+          pink: '#EB337E',     /* Brand Pink */
+          cyan: '#2DD4BF',     /* Brand Cyan */
+          lime: '#BEF264',     /* Brand Lime */
           gold: '#C5A059',     /* Muted Gold */
           goldLight: '#E5D4B3',
           charcoal: '#1A1A1A',
@@ -32,6 +36,9 @@ const config: Config = {
       animation: {
         'marquee': 'marquee 40s linear infinite',
         'float': 'float 10s ease-in-out infinite',
+      },
+      spacing: {
+        '4.5': '1.125rem', // 18px
       },
       keyframes: {
         marquee: {
