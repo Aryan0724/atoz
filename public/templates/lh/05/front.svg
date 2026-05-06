@@ -1,0 +1,7 @@
+<!-- lh_05_front.svg: Artistic Border -->
+<svg width="800" height="1131" viewBox="0 0 800 1131" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="1131" fill="#FFF7ED"/>
+  <rect x="30" y="30" width="740" height="1071" stroke="#F97316" stroke-width="1" stroke-opacity="0.2"/>
+  <circle cx="50" cy="50" r="40" fill="#F97316" fill-opacity="0.05"/>
+  <rect x="700" y="1031" width="50" height="50" fill="#F97316" fill-opacity="0.05"/>
+</svg>

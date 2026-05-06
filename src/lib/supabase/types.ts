@@ -30,6 +30,8 @@ export interface Product {
   quality_prices?: Record<string, number>;
   bulk_discount_rules?: { quantity: number; discount: number }[];
   design_areas?: Record<string, { x: number; y: number; w: number; h: number }>;
+  design_mode?: 'standard' | 'vdp' | 'multipage' | 'intake_form' | 'template_form';
+  design_config?: any;
   created_at?: string;
 }
 

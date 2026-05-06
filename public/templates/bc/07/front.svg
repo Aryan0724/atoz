@@ -1,0 +1,8 @@
+<!-- bc_07_front.svg: Elegant Floral -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="#FFF7ED"/>
+  <path d="M0 0C100 50 150 150 100 250S0 350 0 350V0Z" fill="#F472B6" fill-opacity="0.1"/>
+  <path d="M1050 600C950 550 900 450 950 350S1050 250 1050 250V600Z" fill="#F472B6" fill-opacity="0.1"/>
+  <rect x="100" y="100" width="850" height="400" rx="40" stroke="#F472B6" stroke-width="1" stroke-opacity="0.3"/>
+  <circle cx="150" cy="150" r="30" fill="white" stroke="#F472B6" stroke-width="1"/>
+</svg>

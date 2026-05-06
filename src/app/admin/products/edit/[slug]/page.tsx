@@ -33,6 +33,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Category } from '@/lib/supabase/types';
 import DesignAreaSelector from '@/components/admin/DesignAreaSelector';
+import TemplateFieldMapper from '@/components/admin/TemplateFieldMapper';
+import TemplateFieldBuilder from '@/components/admin/TemplateFieldBuilder';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -45,6 +47,7 @@ export default function EditProductPage() {
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [editingArea, setEditingArea] = useState<{ url: string, sideIndex: number, sideKey: string } | null>(null);
+  const [editingTemplateMappings, setEditingTemplateMappings] = useState<{ url: string, index: number } | null>(null);
   const viewKeys = ['front', 'back', 'left', 'right'];
   
   const [formData, setFormData] = useState<any>({
@@ -135,7 +138,7 @@ export default function EditProductPage() {
     if (slug) fetchData();
   }, [slug, router]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'gallery' | 'color_variant' = 'gallery', colorIndex?: number, viewIndex?: number) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'gallery' | 'color_variant' | 'template' = 'gallery', colorIndex?: number, viewIndex?: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -154,6 +157,13 @@ export default function EditProductPage() {
           return { ...prev, color_variants: newVariants };
         });
         toast.success('Color view image uploaded');
+      } else if (type === 'template' && viewIndex !== undefined) {
+        setFormData((prev: any) => {
+          const newTemplates = [...(prev.template_images || ['', '', '', ''])];
+          newTemplates[viewIndex] = publicUrl;
+          return { ...prev, template_images: newTemplates };
+        });
+        toast.success('Template mockup uploaded');
       } else {
         setFormData((prev: any) => ({ ...prev, images: [...prev.images, publicUrl] }));
         toast.success('Gallery image uploaded');
@@ -384,25 +394,41 @@ export default function EditProductPage() {
                                <option value="vdp">VDP (ID Cards/Data-driven)</option>
                                <option value="multipage">Multi-page (Calendars)</option>
                                <option value="intake_form">Intake Form (Complex Products)</option>
+                               <option value="template_form">Template Form (Business Cards)</option>
                             </select>
                           </div>
-                          <div>
-                            <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Config JSON</label>
-                            <textarea 
-                              rows={4}
-                              value={JSON.stringify(formData.design_config, null, 2)}
-                              onChange={(e) => {
-                                try {
-                                  setFormData({ ...formData, design_config: JSON.parse(e.target.value) });
-                                } catch (err) {
-                                  // allow typing invalid JSON temporarily
-                                }
-                              }}
-                              className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-transparent focus:bg-white focus:border-brand-pink/20 transition-all outline-none font-mono text-[10px] text-gray-600 shadow-inner"
-                              placeholder='{"canvas_width": 500, ...}'
+                          {!(formData.design_mode === 'template_form' || formData.design_mode === 'intake_form') && (
+                            <div>
+                              <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Config JSON</label>
+                              <textarea 
+                                rows={4}
+                                value={JSON.stringify(formData.design_config, null, 2)}
+                                onChange={(e) => {
+                                  try {
+                                    setFormData({ ...formData, design_config: JSON.parse(e.target.value) });
+                                  } catch (err) {
+                                    // allow typing invalid JSON temporarily
+                                  }
+                                }}
+                                className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-transparent focus:bg-white focus:border-brand-pink/20 transition-all outline-none font-mono text-[10px] text-gray-600 shadow-inner"
+                                placeholder='{"canvas_width": 500, ...}'
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {(formData.design_mode === 'template_form' || formData.design_mode === 'intake_form') && (
+                          <div className="mt-8 border border-gray-100 rounded-3xl p-6 bg-white shadow-sm">
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-brand-pink mb-4 ml-1 flex items-center gap-2">
+                              Visual Field Builder
+                            </label>
+                            <p className="text-[11px] text-gray-400 mb-6 ml-1">Define the dynamic fields (Name, Phone, Logo, etc.) that your customers will fill out. These fields will be mapped to the template mockups in Step 3.</p>
+                            <TemplateFieldBuilder 
+                              fields={formData.design_config?.fields || []}
+                              onChange={(fields) => setFormData({ ...formData, design_config: { ...formData.design_config, fields } })}
                             />
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   </section>
@@ -507,17 +533,29 @@ export default function EditProductPage() {
                     <div className="flex items-center justify-between mb-8">
                        <h2 className="text-xl font-black text-brand-dark flex items-center gap-3 italic uppercase tracking-tighter">
                           <div className="h-6 w-1 bg-brand-pink rounded-full"></div>
-                          Color Product Variations (Wireframes)
+                          {formData.design_mode === 'template_form' || formData.design_mode === 'intake_form' 
+                            ? 'Template Mockups & Fields' 
+                            : 'Color Product Variations (Wireframes)'}
                        </h2>
-                       <button type="button" onClick={() => setFormData((prev: any) => ({ ...prev, color_variants: [...prev.color_variants, { name: 'New Color', hex: '#000000', wireframe_images: ['', '', '', ''] }] }))} className="px-4 py-2 bg-[#6C5CE7]/10 text-[#6C5CE7] hover:bg-[#6C5CE7] hover:text-white transition-all text-[9px] font-black uppercase tracking-widest rounded-full border shadow-sm">+ Add Variant</button>
+                       <button type="button" onClick={() => setFormData((prev: any) => ({ ...prev, color_variants: [...prev.color_variants, { name: (formData.design_mode === 'template_form' || formData.design_mode === 'intake_form') ? 'New Template' : 'New Color', hex: '#000000', wireframe_images: ['', '', '', ''] }] }))} className="px-4 py-2 bg-[#6C5CE7]/10 text-[#6C5CE7] hover:bg-[#6C5CE7] hover:text-white transition-all text-[9px] font-black uppercase tracking-widest rounded-full border shadow-sm">
+                         {formData.design_mode === 'template_form' || formData.design_mode === 'intake_form' ? '+ Add Template' : '+ Add Variant'}
+                       </button>
                     </div>
 
                     {(!formData.color_variants || formData.color_variants.length === 0) ? (
-                       <div className="p-10 border-2 border-dashed border-gray-100 rounded-3xl text-center mb-8">
-                         <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">No variations established. Add a variant to define product colors and views.</p>
+                       <div className="p-10 border-2 border-dashed border-gray-100 rounded-3xl text-center mb-8 bg-gray-50/50">
+                         <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                           {formData.design_mode === 'template_form' || formData.design_mode === 'intake_form' ? 'No templates established. Add a template design to upload mockups.' : 'No variations established. Add a variant to define product colors and views.'}
+                         </p>
                        </div>
                     ) : (
-                       <div className="space-y-4 mb-8">
+                       <div className="space-y-6 mb-8">
+                         {formData.design_mode === 'template_form' || formData.design_mode === 'intake_form' ? (
+                           <div className="p-6 bg-brand-pink/5 rounded-2xl border border-brand-pink/10 mb-6">
+                             <h4 className="text-xs font-black text-brand-pink uppercase tracking-widest mb-2 flex items-center gap-2"><Info className="h-4 w-4" /> Multiple Design Templates</h4>
+                             <p className="text-[11px] text-brand-dark/70 leading-relaxed">You can offer multiple distinct designs for this product (e.g. &quot;Modern Red&quot;, &quot;Classic Minimal&quot;). Add a template below, upload its Front and Back mockups, and click **Map Fields** to position the dynamic text.</p>
+                           </div>
+                         ) : null}
                          {formData.color_variants.map((variant: any, colorIdx: number) => (
                            <div key={colorIdx} className="flex flex-col gap-6 p-6 rounded-3xl border border-gray-100 bg-gray-50/50 relative group">
                               <button type="button" onClick={() => {
@@ -526,35 +564,41 @@ export default function EditProductPage() {
                                 setFormData({...formData, color_variants: newV});
                               }} className="absolute top-4 right-4 p-2 bg-white hover:bg-red-500 hover:text-white rounded-xl text-gray-400 transition-all shadow-sm"><Trash2 className="h-4 w-4" /></button>
                               
-                              <div className="flex-1 space-y-4">
+                              <div className="flex-1 space-y-4 pr-12">
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
-                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 block mb-2">Color Name</label>
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 block mb-2">
+                                      {formData.design_mode === 'template_form' || formData.design_mode === 'intake_form' ? 'Template Design Name' : 'Color Name'}
+                                    </label>
                                     <input type="text" value={variant.name} onChange={(e) => {
                                         const newV = [...formData.color_variants];
                                         newV[colorIdx].name = e.target.value;
                                         setFormData({...formData, color_variants: newV});
                                       }}
                                       className="w-full px-4 py-3 rounded-xl bg-white border border-gray-100 focus:border-brand-pink/20 transition-all font-bold text-sm outline-none"
-                                      placeholder="e.g. Midnight Black"
+                                      placeholder={formData.design_mode === 'template_form' || formData.design_mode === 'intake_form' ? "e.g. Modern Minimalist" : "e.g. Midnight Black"}
                                     />
                                   </div>
-                                  <div>
-                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 block mb-2">Hex Code</label>
-                                    <div className="flex gap-2">
-                                      <input type="color" value={variant.hex} onChange={(e) => {
-                                        const newV = [...formData.color_variants];
-                                        newV[colorIdx].hex = e.target.value;
-                                        setFormData({...formData, color_variants: newV});
-                                      }} className="w-12 h-[46px] rounded-xl cursor-pointer border-0 bg-transparent" />
-                                      <input type="text" value={variant.hex.toUpperCase()} readOnly className="w-full px-4 py-3 rounded-xl bg-gray-100 border-transparent font-bold text-sm outline-none text-gray-500 uppercase" />
+                                  {!(formData.design_mode === 'template_form' || formData.design_mode === 'intake_form') && (
+                                    <div>
+                                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 block mb-2">Hex Code</label>
+                                      <div className="flex gap-2">
+                                        <input type="color" value={variant.hex} onChange={(e) => {
+                                          const newV = [...formData.color_variants];
+                                          newV[colorIdx].hex = e.target.value;
+                                          setFormData({...formData, color_variants: newV});
+                                        }} className="w-12 h-[46px] rounded-xl cursor-pointer border-0 bg-transparent" />
+                                        <input type="text" value={variant.hex.toUpperCase()} readOnly className="w-full px-4 py-3 rounded-xl bg-gray-100 border-transparent font-bold text-sm outline-none text-gray-500 uppercase" />
+                                      </div>
                                     </div>
-                                  </div>
+                                  )}
                                 </div>
                               </div>
 
                               <div>
-                                <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 block mb-3">Viewing Angles (Wireframes)</label>
+                                <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 block mb-3">
+                                  {formData.design_mode === 'template_form' || formData.design_mode === 'intake_form' ? 'Template Mockups (Front / Back)' : 'Viewing Angles (Wireframes)'}
+                                </label>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                   {[
                                     { label: 'Front View', idx: 0 },
@@ -563,19 +607,34 @@ export default function EditProductPage() {
                                     { label: 'Right Side', idx: 3 },
                                   ].map((view) => (
                                     <div key={view.idx} className="space-y-2">
-                                      <label className="text-[8px] font-black text-gray-300 uppercase tracking-[0.2em] block text-center">{view.label}</label>
+                                      <label className="text-[8px] font-black text-gray-300 uppercase tracking-[0.2em] block text-center">
+                                        {view.label}
+                                        {formData.design_config?.mappings?.[`${colorIdx}_${view.idx}`] && (
+                                          <span className="ml-1 text-brand-pink">• Mapped</span>
+                                        )}
+                                      </label>
                                       <div className="aspect-[3/4] rounded-2xl overflow-hidden border-2 border-dashed border-gray-200 bg-white hover:border-brand-pink/30 hover:bg-gray-50 transition-all cursor-pointer relative group/view flex items-center justify-center">
                                         {(variant.wireframe_images && variant.wireframe_images[view.idx]) ? (
                                           <>
                                             <img src={variant.wireframe_images[view.idx]} alt={view.label} className="w-full h-full object-contain p-2" />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/view:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 px-4">
-                                               <button 
-                                                 type="button" 
-                                                 onClick={() => setEditingArea({ url: variant.wireframe_images[view.idx], sideIndex: view.idx, sideKey: viewKeys[view.idx] })}
-                                                 className="w-full py-2 bg-brand-pink text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg"
-                                               >
-                                                 Define Area
-                                               </button>
+                                              {(formData.design_mode === 'template_form' || formData.design_mode === 'intake_form') ? (
+                                                 <button 
+                                                   type="button" 
+                                                   onClick={() => setEditingTemplateMappings({ url: variant.wireframe_images[view.idx], index: `${colorIdx}_${view.idx}` as any })}
+                                                   className="w-full py-2 bg-brand-cyan text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg"
+                                                 >
+                                                   Map Fields
+                                                 </button>
+                                              ) : (
+                                                 <button 
+                                                   type="button" 
+                                                   onClick={() => setEditingArea({ url: variant.wireframe_images[view.idx], sideIndex: view.idx, sideKey: viewKeys[view.idx] })}
+                                                   className="w-full py-2 bg-brand-pink text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg"
+                                                 >
+                                                   Define Area
+                                                 </button>
+                                              )}
                                                <button type="button" onClick={() => { const newV = [...formData.color_variants]; newV[colorIdx].wireframe_images[view.idx] = ''; setFormData({...formData, color_variants: newV}); }} className="w-full py-2 bg-white/10 hover:bg-red-500 backdrop-blur-md rounded-xl text-[10px] font-black text-white uppercase transition-all">Remove</button>
                                             </div>
                                           </>
@@ -799,22 +858,27 @@ export default function EditProductPage() {
           }}
         />
       )}
-      {editingArea && (
-        <DesignAreaSelector
-          imageUrl={editingArea.url}
-          label={`${editingArea.sideKey.toUpperCase()} VIEW DESIGN AREA`}
-          initialArea={formData.design_areas?.[editingArea.sideKey]}
-          onCancel={() => setEditingArea(null)}
-          onSave={(area) => {
+      {editingTemplateMappings && (
+        <TemplateFieldMapper 
+          imageUrl={editingTemplateMappings.url}
+          label={`Template Mockup ${editingTemplateMappings.index + 1}`}
+          fields={formData.design_config?.fields || []}
+          initialMappings={formData.design_config?.mappings?.[editingTemplateMappings.index] || {}}
+          onCancel={() => setEditingTemplateMappings(null)}
+          onSave={(mappings) => {
+            const currentMappings = formData.design_config?.mappings || {};
             setFormData({
               ...formData,
-              design_areas: {
-                ...(formData.design_areas || {}),
-                [editingArea.sideKey]: area
+              design_config: {
+                ...formData.design_config,
+                mappings: {
+                  ...currentMappings,
+                  [editingTemplateMappings.index]: mappings
+                }
               }
             });
-            setEditingArea(null);
-            toast.success(`${editingArea.sideKey} design area updated`);
+            setEditingTemplateMappings(null);
+            toast.success(`Template mappings saved`);
           }}
         />
       )}

@@ -1,0 +1,7 @@
+<!-- id_10_front.svg: Executive Platinum -->
+<svg width="600" height="1050" viewBox="0 0 600 1050" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="1050" fill="#000000"/>
+  <rect x="50" y="50" width="500" height="950" stroke="#94A3B8" stroke-width="2"/>
+  <path d="M50 200H550" stroke="#94A3B8" stroke-width="1" stroke-opacity="0.3"/>
+  <circle cx="300" cy="350" r="120" stroke="#94A3B8" stroke-width="2"/>
+</svg>

@@ -1,0 +1,7 @@
+<!-- lh_10_front.svg: Eco Green -->
+<svg width="800" height="1131" viewBox="0 0 800 1131" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="1131" fill="#F0FDF4"/>
+  <circle cx="800" cy="0" r="300" fill="#10B981" fill-opacity="0.05"/>
+  <rect x="50" y="50" width="80" height="80" rx="40" stroke="#10B981" stroke-width="2"/>
+  <path d="M50 1081H750" stroke="#10B981" stroke-width="4" stroke-linecap="round"/>
+</svg>

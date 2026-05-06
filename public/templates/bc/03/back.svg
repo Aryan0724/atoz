@@ -1,0 +1,7 @@
+<!-- bc_03_back.svg: Creative Artisan -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="#92400E"/>
+  <rect x="475" y="250" width="100" height="100" stroke="white" stroke-width="2" stroke-opacity="0.2"/>
+  <path d="M0 0L200 0L0 200V0Z" fill="white" fill-opacity="0.1"/>
+  <path d="M1050 600L850 600L1050 400V600Z" fill="white" fill-opacity="0.1"/>
+</svg>

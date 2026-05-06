@@ -14,6 +14,7 @@ import Preloader from "@/components/common/Preloader";
 
 const CartDrawer = dynamic(() => import("@/components/layout/CartDrawer"), { ssr: false });
 const SupportWidget = dynamic(() => import("@/components/layout/SupportWidget"), { ssr: false });
+const DevAdminBypass = dynamic(() => import("@/components/common/DevAdminBypass"), { ssr: false });
 
 const playfair = Playfair_Display({ 
   subsets: ["latin"],
@@ -97,6 +98,7 @@ export default function RootLayout({
             <Footer />
             <CartDrawer />
             <SupportWidget />
+            <DevAdminBypass />
           </SmoothScroll>
           <Toaster position="top-center" richColors />
         </AuthProvider>

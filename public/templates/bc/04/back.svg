@@ -1,0 +1,6 @@
+<!-- bc_04_back.svg: Luxury Executive -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="#000000"/>
+  <rect x="450" y="225" width="150" height="150" stroke="#D4AF37" stroke-width="2"/>
+  <path d="M525 225V375M450 300H600" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.5"/>
+</svg>

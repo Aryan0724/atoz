@@ -24,6 +24,23 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
+const SeoPreview = ({ title, slug, description }: { title: string, slug: string, description: string }) => {
+  return (
+    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6 font-sans">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400">G</div>
+        <span className="text-[10px] text-gray-500 tracking-tight">www.atozprints.com › blogs › {slug || '...'}</span>
+      </div>
+      <h4 className="text-lg text-[#1a0dab] hover:underline cursor-pointer font-medium mb-1 line-clamp-1">
+        {title || 'Article Title Preview'} | AtoZ Prints Blog
+      </h4>
+      <p className="text-sm text-[#4d5156] line-clamp-2 leading-relaxed">
+        {description || 'Enter a meta description to see how your article will appear in search results. This should be between 150-160 characters for optimal visibility.'}
+      </p>
+    </div>
+  );
+};
+
 interface BlogEditorProps {
   initialData?: Partial<CmsContent>;
   isEditing?: boolean;
@@ -289,14 +306,31 @@ export default function BlogEditor({ initialData, isEditing = false }: BlogEdito
               
               <div className="space-y-6 relative z-10">
                 <div>
-                  <label className="text-[8px] font-black uppercase tracking-widest text-white/40 block mb-2">Meta Description</label>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-[8px] font-black uppercase tracking-widest text-white/40 block">Meta Description</label>
+                    <span className={cn(
+                      "text-[8px] font-black uppercase tracking-widest",
+                      formData.meta_description?.length || 0 > 160 ? "text-red-400" : "text-white/20"
+                    )}>
+                      {formData.meta_description?.length || 0}/160
+                    </span>
+                  </div>
                   <textarea 
                     rows={3}
                     value={formData.meta_description}
                     onChange={e => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
-                    className="w-full px-5 py-4 rounded-xl bg-white/5 border border-white/10 focus:border-brand-pink/40 outline-none text-xs font-medium text-white/80 resize-none"
+                    className="w-full px-5 py-4 rounded-xl bg-white/5 border border-white/10 focus:border-brand-pink/40 outline-none text-xs font-medium text-white/80 resize-none mb-6"
                     placeholder="Search engine description..."
                   />
+                </div>
+
+                <div className="pt-4 border-t border-white/10">
+                   <label className="text-[8px] font-black uppercase tracking-widest text-brand-pink block mb-4">Google Search Preview</label>
+                   <SeoPreview 
+                     title={formData.title || ''} 
+                     slug={formData.slug || ''} 
+                     description={formData.meta_description || ''} 
+                   />
                 </div>
                 
                 <div>

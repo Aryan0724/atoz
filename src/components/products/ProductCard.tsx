@@ -30,6 +30,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const { isFavorite, toggleFavorite } = useWishlist();
   const isFav = isFavorite(product.id);
+  const isTemplateForm = product.design_mode === 'template_form' || 
+                        ['id-card', 'letter-head', 'business-card', 'wedding-card', 'custom-calendar', 'corporate-notebook', 'diary-with-logo', 'custom-pen'].includes(product.slug);
   const gradient = product.category ? (categoryGradients[product.category] || 'from-gray-400 to-gray-600') : 'from-gray-400 to-gray-600';
   
   return (
@@ -110,7 +112,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 className="h-10 px-4 rounded-lg bg-brand-darkBlue text-white flex items-center justify-center font-sans font-black text-[9px] uppercase tracking-widest hover:bg-brand-gold transition-all duration-300"
                 onClick={(e) => e.stopPropagation()}
               >
-                Customize
+                {isTemplateForm ? 'Fill Details' : 'Customize'}
               </Link>
               <div className="h-10 w-10 rounded-lg bg-brand-base border border-brand-darkBlue/5 flex items-center justify-center text-slate-400 group-hover:bg-brand-darkBlue group-hover:text-white group-hover:border-brand-darkBlue transition-all duration-300">
                 <ShoppingBag className="h-4 w-4" />
@@ -172,7 +174,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 <div className="mt-auto flex flex-col gap-3">
                   <Link href={`/customize/${product.slug}`} className="w-full">
                     <Button variant="primary" className="w-full py-4 text-[10px] font-sans tracking-widest uppercase bg-brand-darkBlue hover:bg-brand-gold">
-                       Custom Design Studio
+                       {isTemplateForm ? 'Fill & Order' : 'Custom Design Studio'}
                     </Button>
                   </Link>
                   <Link href={`/products/${product.slug}`} className="w-full">

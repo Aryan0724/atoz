@@ -92,3 +92,16 @@ DO $$ BEGIN
       WITH CHECK (auth.uid() = user_id);
   END IF;
 END $$;
+
+-- ---------------------------------------------------------------
+-- PART 4: Designer Mode Extension
+-- Adds 'template_form' to the allowed design_mode values
+-- ---------------------------------------------------------------
+ALTER TABLE public.products 
+  DROP CONSTRAINT IF EXISTS products_design_mode_check;
+
+ALTER TABLE public.products 
+  ADD CONSTRAINT products_design_mode_check 
+  CHECK (design_mode IN ('standard', 'vdp', 'multipage', 'intake_form', 'template_form'));
+
+COMMENT ON COLUMN public.products.design_mode IS 'The design engine mode: standard, vdp, multipage, intake_form, or template_form.';

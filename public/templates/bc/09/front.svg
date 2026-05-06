@@ -1,0 +1,8 @@
+<!-- bc_09_front.svg: Modern Architectural -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="white"/>
+  <rect width="1050" height="150" fill="#111827"/>
+  <line x1="50" y1="150" x2="50" y2="600" stroke="#111827" stroke-width="2"/>
+  <rect x="80" y="40" width="70" height="70" fill="white" fill-opacity="0.1" stroke="white" stroke-width="1"/>
+  <path d="M0 600L1050 600L1050 550L0 600Z" fill="#111827" fill-opacity="0.05"/>
+</svg>

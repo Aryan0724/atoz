@@ -1,0 +1,7 @@
+<!-- wc_10_front.svg: Elegant Border -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="#FFF1F2"/>
+  <rect x="40" y="40" width="970" height="520" stroke="#E11D48" stroke-width="4" stroke-opacity="0.1"/>
+  <rect x="60" y="60" width="930" height="480" stroke="#E11D48" stroke-width="1" stroke-opacity="0.1"/>
+  <path d="M525 40V100" stroke="#E11D48" stroke-width="2" stroke-opacity="0.2"/>
+</svg>

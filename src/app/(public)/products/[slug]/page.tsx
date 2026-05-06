@@ -15,22 +15,15 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const supabase = createClient();
-  let product = null;
+  const { data: dbProduct } = await supabase
+    .from('products')
+    .select('*')
+    .eq('slug', params.slug)
+    .single();
 
-  try {
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .eq('slug', params.slug)
-      .single();
-    product = data;
-  } catch (e) {
-    console.warn('Metadata fetch failed, falling back to mock data:', e);
-  }
-
-  if (!product) {
-    product = mockProducts.find(p => p.slug === params.slug);
-  }
+  const mockProduct = mockProducts.find(p => p.slug === params.slug || (params.slug === 'id-card-custom' && p.slug === 'id-card') || (params.slug === 'business-card-custom' && p.slug === 'business-card') || (params.slug === 'wedding-card-custom' && p.slug === 'wedding-card') || (params.slug === 'letter-head-custom' && p.slug === 'letter-head'));
+  
+  const product = mockProduct ? { ...(mockProduct as any), ...(dbProduct as any) } : dbProduct;
 
   if (!product) return {
     title: 'Product Not Found | A to Z Prints'
@@ -67,7 +60,9 @@ export default async function ProductDetailPage({ params }: Props) {
     .eq('slug', params.slug)
     .single();
 
-  const finalProduct = product || mockProducts.find(p => p.slug === params.slug);
+  const mockProduct = mockProducts.find(p => p.slug === params.slug || (params.slug === 'id-card-custom' && p.slug === 'id-card') || (params.slug === 'business-card-custom' && p.slug === 'business-card') || (params.slug === 'wedding-card-custom' && p.slug === 'wedding-card') || (params.slug === 'letter-head-custom' && p.slug === 'letter-head'));
+  
+  const finalProduct = mockProduct ? { ...(mockProduct as any), ...(product as any) } : product;
 
   if (!finalProduct) {
      return (

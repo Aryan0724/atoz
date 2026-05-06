@@ -44,10 +44,12 @@ export interface DesignerCanvasProps {
   onLowQualityWarning?: (isLowQuality: boolean) => void;
   designArea?: { x: number; y: number; w: number; h: number };
   disableTinting?: boolean;
-  designMode?: 'standard' | 'vdp' | 'multipage' | 'intake_form';
+  designMode?: 'standard' | 'vdp' | 'multipage' | 'intake_form' | 'template_form';
   designConfig?: any;
+  product?: any;
   vdpData?: { headers: string[], rows: any[] } | null;
   vdpRowIndex?: number;
+  initialTemplateIndex?: number;
 }
 
 export interface DesignerCanvasRef {

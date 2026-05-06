@@ -1,0 +1,6 @@
+<!-- wc_09_front.svg: Classic Calligraphy -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="white"/>
+  <path d="M100 100L950 100M100 500L950 500" stroke="#111827" stroke-width="1" stroke-opacity="0.05"/>
+  <circle cx="525" cy="300" r="200" stroke="#111827" stroke-width="1" stroke-opacity="0.03"/>
+</svg>

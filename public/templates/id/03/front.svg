@@ -1,0 +1,7 @@
+<!-- id_03_front.svg: Medical Safe -->
+<svg width="600" height="1050" viewBox="0 0 600 1050" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="1050" fill="#F0FDFA"/>
+  <rect width="600" height="100" fill="#0D9488"/>
+  <rect x="200" y="150" width="200" height="200" rx="100" stroke="#0D9488" stroke-width="4"/>
+  <path d="M300 220V280M270 250H330" stroke="#0D9488" stroke-width="4" stroke-opacity="0.2"/>
+</svg>

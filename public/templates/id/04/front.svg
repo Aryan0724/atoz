@@ -1,0 +1,7 @@
+<!-- id_04_front.svg: Security Bold -->
+<svg width="600" height="1050" viewBox="0 0 600 1050" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="1050" fill="#FACC15"/>
+  <rect width="600" height="150" fill="black"/>
+  <rect x="150" y="200" width="300" height="300" stroke="black" stroke-width="4"/>
+  <rect x="50" y="900" width="500" height="50" fill="black"/>
+</svg>

@@ -1,0 +1,6 @@
+<!-- lh_02_front.svg: Modern Sidebar -->
+<svg width="800" height="1131" viewBox="0 0 800 1131" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="1131" fill="white"/>
+  <rect width="10" height="1131" fill="#10B981"/>
+  <rect x="50" y="50" width="60" height="60" rx="30" stroke="#10B981" stroke-width="2" stroke-dasharray="8 4"/>
+</svg>

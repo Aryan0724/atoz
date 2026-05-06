@@ -1,0 +1,7 @@
+<!-- lh_06_front.svg: Classic Stationery -->
+<svg width="800" height="1131" viewBox="0 0 800 1131" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="1131" fill="#FEFCE8"/>
+  <rect x="20" y="20" width="760" height="1091" stroke="#713F12" stroke-width="4"/>
+  <path d="M20 120H780" stroke="#713F12" stroke-width="1"/>
+  <rect x="40" y="40" width="60" height="60" stroke="#713F12" stroke-width="2"/>
+</svg>

@@ -20,7 +20,7 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { createOrder } from '@/lib/supabase/orderActions';
+import { createOrder, createCompleteOrder } from '@/lib/supabase/orderActions';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -240,22 +240,22 @@ export default function CheckoutPage() {
                 .in('id', attemptIds);
             }
 
-            for (const item of items) {
-              await createOrder({
-                user_id: user?.id || null,
-                product_id: item.product.id,
-                quantity: item.quantity,
-                quality_level: item.quality_level,
-                design_data: item.design_data,
-                design_preview_url: item.design_preview_url,
-                total_price: item.unitPrice ? item.unitPrice * item.quantity : (item.product.base_price || 0) * item.quantity,
-                shipping_address: formData as any,
-                payment_method: 'Online',
-                payment_status: 'paid',
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-              });
-            }
+            await createCompleteOrder({
+              user_id: user?.id || null,
+              total_price: total,
+              shipping_address: formData as any,
+              payment_method: 'Online',
+              payment_status: 'paid',
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+            }, items.map(item => ({
+              product_id: item.product.id,
+              quantity: item.quantity,
+              quality_level: item.quality_level,
+              design_data: item.design_data,
+              design_preview_url: item.design_preview_url,
+              unitPrice: item.unitPrice
+            })));
             
             trackPurchase(response.razorpay_order_id || 'manual', total, items);
             clearCart();
@@ -293,20 +293,20 @@ export default function CheckoutPage() {
   const handlePlaceCODOrder = async () => {
     setIsProcessing(true);
     try {
-      for (const item of items) {
-        await createOrder({
-          user_id: user?.id || null,
-          product_id: item.product.id,
-          quantity: item.quantity,
-          quality_level: item.quality_level,
-          design_data: item.design_data,
-          design_preview_url: item.design_preview_url,
-          total_price: item.unitPrice ? item.unitPrice * item.quantity : (item.product.base_price || 0) * item.quantity,
-          shipping_address: formData as any,
-          payment_method: 'COD',
-          payment_status: 'pending_cod',
-        });
-      }
+      await createCompleteOrder({
+        user_id: user?.id || null,
+        total_price: total,
+        shipping_address: formData as any,
+        payment_method: 'COD',
+        payment_status: 'pending_cod',
+      }, items.map(item => ({
+        product_id: item.product.id,
+        quantity: item.quantity,
+        quality_level: item.quality_level,
+        design_data: item.design_data,
+        design_preview_url: item.design_preview_url,
+        unitPrice: item.unitPrice
+      })));
       clearCart();
       router.push('/checkout/success');
     } catch (err) {

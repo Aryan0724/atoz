@@ -2,7 +2,7 @@
 
 -- 1. Add designer mode and config to products table
 ALTER TABLE products
-ADD COLUMN IF NOT EXISTS design_mode TEXT DEFAULT 'standard' CHECK (design_mode IN ('standard', 'vdp', 'multipage', 'intake_form')),
+ADD COLUMN IF NOT EXISTS design_mode TEXT DEFAULT 'standard' CHECK (design_mode IN ('standard', 'vdp', 'multipage', 'intake_form', 'template_form')),
 ADD COLUMN IF NOT EXISTS design_config JSONB DEFAULT '{}';
 
 -- 2. Add sample configurations for existing categories (optional but helpful)
@@ -50,5 +50,5 @@ SET design_mode = 'multipage',
 WHERE category ILIKE '%Calendar%';
 
 -- Add comment for documentation
-COMMENT ON COLUMN products.design_mode IS 'The design engine mode: standard (apparel), vdp (ID cards), multipage (calendars), or intake_form (complex items).';
+COMMENT ON COLUMN products.design_mode IS 'The design engine mode: standard, vdp, multipage, intake_form, or template_form.';
 COMMENT ON COLUMN products.design_config IS 'Configuration object containing canvas dimensions, safe zones, and mode-specific settings.';

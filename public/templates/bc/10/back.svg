@@ -1,0 +1,6 @@
+<!-- bc_10_back.svg: High-Contrast Bold -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="#111827"/>
+  <rect x="0" y="280" width="1050" height="40" fill="#DC2626"/>
+  <rect x="425" y="200" width="200" height="200" rx="10" fill="#111827" stroke="white" stroke-width="2"/>
+</svg>

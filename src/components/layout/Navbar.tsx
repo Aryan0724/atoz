@@ -22,8 +22,39 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
+
+    // Nav Dot Logic
+    const links = document.querySelectorAll('.nav-link');
+    const dot = document.querySelector('.nav-dot') as HTMLElement;
+    
+    const handleMouseEnter = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      const parentRect = target.parentElement?.getBoundingClientRect();
+      if (dot && parentRect) {
+        dot.style.opacity = '1';
+        dot.style.left = `${rect.left - parentRect.left + rect.width/2 - 3}px`;
+        dot.style.top = `${rect.top - parentRect.top - 10}px`;
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (dot) dot.style.opacity = '0';
+    };
+
+    links.forEach(link => {
+      link.addEventListener('mouseenter', handleMouseEnter);
+      link.addEventListener('mouseleave', handleMouseLeave);
+    });
+
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      links.forEach(link => {
+        link.removeEventListener('mouseenter', handleMouseEnter);
+        link.removeEventListener('mouseleave', handleMouseLeave);
+      });
+    };
   }, []);
 
   // Close menu on route change
@@ -56,10 +87,19 @@ const Navbar = () => {
                 className="object-contain"
               />
             </div>
-            <span className="font-serif font-bold text-3xl tracking-tight text-brand-darkBlue">ATOZ.</span>
+            <div className="flex flex-col">
+              <span className="font-serif font-bold text-3xl tracking-tight text-brand-darkBlue leading-none">ATOZ.</span>
+              <div className="flex items-center gap-1 mt-1">
+                <div className="w-1 h-1 bg-brand-gold rounded-full animate-pulse"></div>
+                <span className="text-[8px] font-sans font-bold uppercase tracking-[0.2em] text-brand-gold">Excellence</span>
+              </div>
+            </div>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-10 font-sans font-medium text-sm uppercase tracking-widest text-brand-darkBlue">
+          <div className="hidden lg:flex items-center gap-10 font-sans font-medium text-sm uppercase tracking-widest text-brand-darkBlue relative">
+            {/* Magnetic Hover Dot Indicator */}
+            <div className="absolute -top-10 left-0 w-1.5 h-1.5 bg-brand-gold rounded-full opacity-0 transition-all duration-500 pointer-events-none nav-dot shadow-[0_0_10px_#C5A059]"></div>
+
             <Link href="/" className={cn("nav-link transition-colors magnetic-target", pathname === '/' ? 'text-brand-gold' : 'hover:text-brand-gold')}>
               Home
             </Link>
@@ -73,7 +113,7 @@ const Navbar = () => {
               Contact Us
             </Link>
             <Link href="/faq" className={cn("nav-link transition-colors magnetic-target", pathname === '/faq' ? 'text-brand-gold' : 'hover:text-brand-gold')}>
-              FAQs
+              Insights
             </Link>
 
             {/* Legal Dropdown */}
@@ -130,7 +170,7 @@ const Navbar = () => {
                 </button>
               </div>
             ) : (
-              <Link href="/login" className="ml-6 px-10 py-4 bg-brand-darkBlue text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-gold transition-all duration-300 hover:shadow-lg hover:-translate-y-1 magnetic-target shadow-md">
+              <Link href="/login" className="ml-6 px-10 py-4 bg-brand-darkBlue text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-gold transition-all duration-500 hover:shadow-[0_20px_40px_-10px_rgba(197,160,89,0.3)] hover:-translate-y-1 magnetic-target shadow-md border border-transparent hover:border-brand-gold/30">
                 Sign In
               </Link>
             )}
@@ -169,7 +209,7 @@ const Navbar = () => {
           <Link href="/about" className="text-4xl font-serif font-bold text-brand-darkBlue">About Us</Link>
           <Link href="/products" className="text-4xl font-serif font-bold text-brand-darkBlue">Products</Link>
           <Link href="/contact" className="text-4xl font-serif font-bold text-brand-darkBlue">Contact Us</Link>
-          <Link href="/faq" className="text-4xl font-serif font-bold text-brand-darkBlue">FAQs</Link>
+          <Link href="/faq" className="text-4xl font-serif font-bold text-brand-darkBlue">Insights</Link>
           
           <div className="w-full h-px bg-brand-darkBlue/10 my-4" />
           

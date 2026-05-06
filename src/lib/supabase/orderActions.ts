@@ -17,37 +17,95 @@ export interface OrderInput {
   razorpay_payment_id?: string;
 }
 
-export async function createOrder(orderData: OrderInput) {
-  const isCOD = orderData.payment_method === 'COD';
-  const { data, error } = await supabase
+export async function createOrder(orderData: any) {
+  // 1. Create the order header
+  const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert([
       {
         user_id: orderData.user_id,
-        product_id: orderData.product_id,
-        quantity: orderData.quantity,
-        quality_level: orderData.quality_level,
-        design_data: orderData.design_data,
-        design_preview_url: orderData.design_preview_url,
-        customization_details: orderData.customization_details,
         total_price: orderData.total_price,
         shipping_address: orderData.shipping_address,
         payment_method: orderData.payment_method || 'Online',
-        status: 'pending',
-        payment_status: orderData.payment_status || (isCOD ? 'pending_cod' : 'unpaid'),
+        payment_status: orderData.payment_status || 'unpaid',
         razorpay_order_id: orderData.razorpay_order_id,
         razorpay_payment_id: orderData.razorpay_payment_id,
+        status: 'pending'
       }
     ])
     .select()
     .single();
 
-  if (error) {
-    console.error('Error creating order:', error);
-    throw error;
+  if (orderError) {
+    console.error('Error creating order header:', orderError);
+    throw orderError;
   }
 
-  return data;
+  // 2. Create the order item (single item fallback for existing logic)
+  const { error: itemError } = await supabase
+    .from('order_items')
+    .insert([
+      {
+        order_id: order.id,
+        product_id: orderData.product_id,
+        quantity: orderData.quantity,
+        unit_price: orderData.unit_price || (orderData.total_price / orderData.quantity),
+        quality_level: orderData.quality_level,
+        design_data: orderData.design_data,
+        design_preview_url: orderData.design_preview_url
+      }
+    ]);
+
+  if (itemError) {
+    console.error('Error creating order item:', itemError);
+    throw itemError;
+  }
+
+  return order;
+}
+
+/**
+ * Creates a complete order with multiple items in a single logical flow.
+ */
+export async function createCompleteOrder(orderData: any, items: any[]) {
+  // 1. Create the order header
+  const { data: order, error: orderError } = await supabase
+    .from('orders')
+    .insert([
+      {
+        user_id: orderData.user_id,
+        total_price: orderData.total_price,
+        shipping_address: orderData.shipping_address,
+        payment_method: orderData.payment_method || 'Online',
+        payment_status: orderData.payment_status || 'unpaid',
+        razorpay_order_id: orderData.razorpay_order_id,
+        razorpay_payment_id: orderData.razorpay_payment_id,
+        status: 'pending'
+      }
+    ])
+    .select()
+    .single();
+
+  if (orderError) throw orderError;
+
+  // 2. Create all items
+  const { error: itemsError } = await supabase
+    .from('order_items')
+    .insert(
+      items.map(item => ({
+        order_id: order.id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_price: item.unitPrice || item.unit_price,
+        quality_level: item.quality_level,
+        design_data: item.design_data,
+        design_preview_url: item.design_preview_url
+      }))
+    );
+
+  if (itemsError) throw itemsError;
+
+  return order;
 }
 
 export async function getUserOrders(userId: string) {

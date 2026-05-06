@@ -30,8 +30,9 @@ export default function AboutPage() {
         .eq('id', 'cms_pages')
         .single();
       
-      if (data?.config?.about) {
-        setCmsData(data.config.about);
+      // Config is stored at the top-level of the cms_pages row (not nested under 'about')
+      if (data?.config) {
+        setCmsData(data.config);
       }
       setLoading(false);
     }
@@ -88,9 +89,9 @@ export default function AboutPage() {
 
   if (loading) return <div className="min-h-screen bg-brand-base flex items-center justify-center"><div className="w-12 h-12 border-4 border-brand-gold border-t-transparent rounded-full animate-spin" /></div>;
 
-  const data = cmsData || {
+  const defaults = {
     hero: {
-      title: "The Architects of Legacy.",
+      title: "Architects of <span class='italic text-brand-gold font-medium'>Legacy.</span>",
       subtitle: "We don't just put ink on paper. We translate corporate identity into tangible assets that carry weight, texture, and authority."
     },
     philosophy: [
@@ -105,16 +106,23 @@ export default function AboutPage() {
       { year: '2026', title: 'The Future', desc: 'Integrating AI-driven design personalization and expanding our global footprint to 15 countries.', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop' }
     ],
     team: [
-      { name: 'Rajesh Verma', role: 'Founder', img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop' },
-      { name: 'Priya Malhotra', role: 'Design Head', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop' },
-      { name: 'Amit Singh', role: 'Production', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=1974&auto=format&fit=crop' },
-      { name: 'Sneha Kapoor', role: 'Relations', img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop' }
+      { name: 'Richa Jain', role: 'Founder & CEO', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop' },
+      { name: 'Aman Verma', role: 'Operations Head', img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop' },
+      { name: 'Sneha Kapoor', role: 'Design Lead', img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop' },
+      { name: 'Rahul Mehta', role: 'Marketing', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=1974&auto=format&fit=crop' }
     ],
     quote: {
       text: "We don't build for the transaction. We build for the legacy. Every print that leaves our press is a testament to permanence in a temporary world.",
-      author: "Rajesh Verma",
+      author: "Richa Jain",
       role: "Founder, ATOZPRINTS"
     }
+  };
+
+  const data = {
+    ...defaults,
+    ...cmsData,
+    hero: { ...defaults.hero, ...(cmsData?.hero || {}) },
+    quote: { ...defaults.quote, ...(cmsData?.quote || {}) }
   };
 
   return (

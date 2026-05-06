@@ -1,0 +1,72 @@
+[
+  {
+    "id": "cee3fb84-9b5f-4110-a839-d997b80340c1",
+    "name": "Premium Heavyweight Hoodie",
+    "slug": "premium-heavyweight-hoodie"
+  },
+  {
+    "id": "9ba91f7b-1d48-41fc-b859-7dea90fb319c",
+    "name": "Premium Coffee Mug",
+    "slug": "premium-coffee-mug"
+  },
+  {
+    "id": "56ec3570-7e0c-4c1b-bb72-37cd184a1fa7",
+    "name": "Executive Notebook",
+    "slug": "executive-notebook"
+  },
+  {
+    "id": "ef90cf90-7258-44eb-94b0-cca651774c45",
+    "name": "Calendar",
+    "slug": "calendar-custom"
+  },
+  {
+    "id": "07f58d45-14fc-4197-8041-c4ba537dc35a",
+    "name": "Wedding Card",
+    "slug": "wedding-card-custom"
+  },
+  {
+    "id": "cb899af0-c2fe-4852-8fe6-d73484ed0c69",
+    "name": "Employee Joining Kit",
+    "slug": "employee-joining-kit"
+  },
+  {
+    "id": "865304fd-7582-49ee-8fc8-9d1393c17cb4",
+    "name": "Diary with Logo",
+    "slug": "diary-with-logo"
+  },
+  {
+    "id": "08588f6f-984b-432f-9d42-368a615b9f16",
+    "name": "ID Card",
+    "slug": "id-card-custom"
+  },
+  {
+    "id": "f819bd11-5636-4061-bafc-2da39ba31c50",
+    "name": "Letter Head",
+    "slug": "letter-head-custom"
+  },
+  {
+    "id": "e76a592b-8523-4c37-800e-3678ade5a20c",
+    "name": "Bottle",
+    "slug": "bottle-custom"
+  },
+  {
+    "id": "1bc2b46e-14f1-4202-a63e-032b08721048",
+    "name": "Headphone",
+    "slug": "headphone-custom"
+  },
+  {
+    "id": "403e1ced-e15d-442f-804b-6a10eb9c3478",
+    "name": "Pen",
+    "slug": "pen-custom"
+  },
+  {
+    "id": "7a08ff4a-91dd-4be4-8531-c8d8f324000d",
+    "name": "Custom Premium T-Shirt",
+    "slug": "custom-premium-tshirt"
+  },
+  {
+    "id": "f31bd213-9d18-411e-b938-bfac59c8fc35",
+    "name": "Business Card",
+    "slug": "business-card-custom"
+  }
+]

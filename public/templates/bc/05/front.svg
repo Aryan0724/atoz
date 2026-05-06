@@ -1,0 +1,8 @@
+<!-- bc_05_front.svg: Eco Nature -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="#F8F9FA"/>
+  <rect width="320" height="600" fill="#365314" fill-opacity="0.03"/>
+  <circle cx="100" cy="500" r="80" fill="#365314" fill-opacity="0.05"/>
+  <path d="M50 50L100 50L75 100L50 50Z" fill="#365314"/>
+  <rect x="120" y="50" width="4" height="50" fill="#A3E635"/>
+</svg>

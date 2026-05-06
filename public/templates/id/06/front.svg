@@ -1,0 +1,7 @@
+<!-- id_06_front.svg: Minimalist Slate -->
+<svg width="600" height="1050" viewBox="0 0 600 1050" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="1050" fill="#F8FAFC"/>
+  <rect x="0" y="0" width="150" height="1050" fill="#334155"/>
+  <rect x="200" y="100" width="200" height="200" stroke="#334155" stroke-width="2"/>
+  <circle cx="75" cy="100" r="30" stroke="white" stroke-width="1" stroke-opacity="0.5"/>
+</svg>

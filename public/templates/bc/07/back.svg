@@ -1,0 +1,6 @@
+<!-- bc_07_back.svg: Elegant Floral -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="#F472B6"/>
+  <rect x="50" y="50" width="950" height="500" stroke="white" stroke-width="2" stroke-opacity="0.2"/>
+  <circle cx="525" cy="300" r="80" stroke="white" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="5 5"/>
+</svg>

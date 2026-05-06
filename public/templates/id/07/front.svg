@@ -1,0 +1,7 @@
+<!-- id_07_front.svg: Startup Energy -->
+<svg width="600" height="1050" viewBox="0 0 600 1050" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="1050" fill="white"/>
+  <rect x="0" y="0" width="600" height="50" fill="#F97316"/>
+  <rect x="225" y="150" width="150" height="150" rx="20" stroke="#F97316" stroke-width="2"/>
+  <path d="M0 800H600L0 1050V800Z" fill="#F97316" fill-opacity="0.1"/>
+</svg>

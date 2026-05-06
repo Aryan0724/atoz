@@ -22,7 +22,8 @@ import {
   Upload,
   PenTool,
   Star,
-  User
+  User,
+  Layout
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '@/components/products/ProductCard';
@@ -51,6 +52,9 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
   const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
   const [isChoiceModalOpen, setIsChoiceModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedTemplateIndex, setSelectedTemplateIndex] = useState(0);
+  const isTemplateForm = product.design_mode === 'template_form' || 
+                        ['id-card', 'letter-head', 'business-card', 'wedding-card', 'custom-calendar', 'corporate-notebook', 'diary-with-logo', 'custom-pen'].some(s => product.slug?.includes(s));
 
   useEffect(() => {
     const fetchRelatedData = async () => {
@@ -157,10 +161,10 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
         <div className="lg:grid lg:grid-cols-2 lg:gap-16">
           {/* Image Gallery */}
-          <div className="relative">
+          <div className="relative pt-6">
             <div className="aspect-[4/5] bg-gray-50 rounded-[40px] overflow-hidden shadow-sm border border-gray-100/50 p-12 transition-all duration-500">
               {product.images?.[selectedImageIndex] ? (
                 <Image 
@@ -236,6 +240,61 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
               {product.description}
             </p>
 
+            {/* Template Selection - Added for Dynamic Template Architecture */}
+            {isTemplateForm && (product as any).color_variants?.length > 0 && (
+              <div className="mb-10">
+                <div className="flex items-center justify-between mb-4">
+                  <label className="block text-sm font-bold text-brand-dark uppercase tracking-wider">
+                    Choose Design Template
+                  </label>
+                  <span className="text-[10px] font-black text-brand-pink uppercase tracking-widest bg-brand-pink/5 px-2 py-1 rounded">
+                    {(product as any).color_variants.length} Layouts Available
+                  </span>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+                  {(product as any).color_variants.map((template: any, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedTemplateIndex(idx);
+                        // Update preview image if available
+                        if (template.wireframe_images?.[0]) {
+                           // Find if this image exists in product.images to sync gallery
+                           const imgIdx = product.images?.indexOf(template.wireframe_images[0]);
+                           if (imgIdx !== -1 && imgIdx !== undefined) {
+                             setSelectedImageIndex(imgIdx);
+                           }
+                        }
+                      }}
+                      className={cn(
+                        "relative w-32 shrink-0 rounded-2xl overflow-hidden border-2 transition-all group/temp",
+                        product.slug?.includes('id-card') || product.slug?.includes('wedding') ? "aspect-[2/3]" : "aspect-[3.5/2]",
+                        selectedTemplateIndex === idx 
+                          ? "border-brand-pink ring-4 ring-brand-pink/5 shadow-lg" 
+                          : "border-gray-100 hover:border-gray-200 bg-gray-50"
+                      )}
+                    >
+                      <Image 
+                        src={template.wireframe_images?.[0] || template.image_url} 
+                        alt={template.name}
+                        fill
+                        className="object-cover group-hover/temp:scale-110 transition-transform duration-500"
+                      />
+                      <div className={cn(
+                        "absolute inset-0 bg-brand-dark/40 flex items-center justify-center opacity-0 transition-opacity",
+                        selectedTemplateIndex === idx && "opacity-100 bg-brand-pink/20"
+                      )}>
+                        {selectedTemplateIndex === idx && <Check className="w-6 h-6 text-white" />}
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-white/90 backdrop-blur-sm border-t border-gray-100">
+                        <p className="text-[8px] font-black text-brand-dark uppercase truncate">{template.name}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Quality Options */}
             <div className="mb-10">
               <div className="flex items-center justify-between mb-4">
@@ -252,17 +311,17 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                   </button>
                 )}
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {product.quality_levels?.map((level: string) => {
                   const priceBonus = product.quality_prices?.[level] || 0;
                   return (
                     <button
                       key={level}
                       onClick={() => setSelectedQuality(level)}
-                      className={`px-5 py-4 rounded-xl text-left transition-all relative overflow-hidden group/opt min-w-[140px] border-2 ${
+                      className={`px-5 py-4 rounded-xl text-left transition-all relative overflow-hidden group/opt min-w-[120px] border-2 ${
                         selectedQuality === level
-                          ? 'bg-brand-dark text-white border-brand-dark ring-4 ring-brand-dark/5'
-                          : 'bg-white border-gray-100 text-gray-500 hover:border-gray-300'
+                          ? 'bg-brand-dark text-white border-brand-dark ring-4 ring-brand-dark/5 shadow-xl'
+                          : 'bg-white border-gray-100 text-gray-500 hover:border-gray-300 shadow-sm'
                       }`}
                     >
                       <div className="flex flex-col">
@@ -338,7 +397,7 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                 className="w-full flex items-center justify-center gap-3 py-6 rounded-xl"
                 leftIcon={<Zap className="h-4 w-4 text-brand-pink" />}
               >
-                Customize Now
+                {isTemplateForm ? 'Fill Details' : 'Customize Now'}
               </Button>
               <Button 
                 onClick={handleAddToCart}
@@ -533,22 +592,26 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                             <Upload className="w-6 h-6" />
                          </div>
                          <div className="flex-1">
-                            <h4 className="font-bold text-lg mb-1">Upload My Design</h4>
-                            <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">Upload a file from your computer</p>
+                            <h4 className="font-bold text-lg mb-1 italic">Upload My Design</h4>
+                            <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">I have my own print-ready file</p>
                          </div>
                          <ChevronRight className="w-5 h-5 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                       </button>
 
                       <button 
-                        onClick={() => router.push(`/customize/${product.slug}`)}
+                        onClick={() => router.push(`/customize/${product.slug}?template=${selectedTemplateIndex}`)}
                         className="flex items-center gap-6 p-6 rounded-3xl bg-gray-50 hover:bg-brand-dark hover:text-white transition-all group text-left border border-gray-100"
                       >
                          <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-brand-cyan shadow-sm group-hover:bg-white/20 group-hover:text-white transition-colors">
-                            <PenTool className="w-6 h-6" />
+                            {isTemplateForm ? <Layout className="w-6 h-6" /> : <PenTool className="w-6 h-6" />}
                          </div>
                          <div className="flex-1">
-                            <h4 className="font-bold text-lg mb-1">Design Online</h4>
-                            <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">Use our online design tool</p>
+                            <h4 className="font-bold text-lg mb-1 italic">{isTemplateForm ? 'Fill Detail Form' : 'Design Online'}</h4>
+                            <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">
+                              {isTemplateForm 
+                                ? 'Enter details for professional layout' 
+                                : 'Use our online design tool'}
+                            </p>
                          </div>
                          <ChevronRight className="w-5 h-5 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                       </button>

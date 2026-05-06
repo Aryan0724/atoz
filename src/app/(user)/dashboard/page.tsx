@@ -683,7 +683,9 @@ export default function DashboardPage() {
                              <div className="flex items-center justify-between">
                                <div className="font-black text-lg text-brand-dark">₹{prod.base_price}</div>
                                <Link href={`/customize/${prod.slug}`} className="px-4 py-2 bg-brand-dark text-white text-[10px] uppercase font-black tracking-widest rounded-xl hover:bg-brand-pink transition-colors">
-                                 Customize
+                                 {prod.design_mode === 'template_form' || 
+                                  ['id-card', 'letter-head', 'business-card', 'wedding-card', 'custom-calendar', 'corporate-notebook', 'diary-with-logo', 'custom-pen'].includes(prod.slug) 
+                                  ? 'Fill Details' : 'Customize'}
                                </Link>
                              </div>
                            </div>

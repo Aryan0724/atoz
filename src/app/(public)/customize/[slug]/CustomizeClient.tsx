@@ -11,9 +11,9 @@ import SidebarPanel from '@/components/design/layout/SidebarPanel';
 import TopToolbar from '@/components/design/layout/TopToolbar';
 import FloatingToolbar from '@/components/design/layout/FloatingToolbar';
 import ThreeDPreview from '@/components/design/ThreeDPreview';
-import { canvasTemplates } from '@/lib/data/canvasTemplates';
+
 import {
-  ArrowLeft, Check, Loader2, Plus, RotateCcw, LayoutGrid, ZoomOut, ZoomIn, Hand, Info, Palette, Type, Square, Upload, Sparkles, Download, Shuffle, Minus
+  ArrowLeft, Check, CheckCircle2, Loader2, Plus, RotateCcw, LayoutGrid, ZoomOut, ZoomIn, Hand, Info, Palette, Type, Square, Upload, Sparkles, Download, Minus
 } from 'lucide-react';
 import Link from 'next/link';
 import { Product } from '@/lib/supabase/types';
@@ -79,6 +79,21 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   const { addItem } = useCart();
+  const [initialTemplateIndex, setInitialTemplateIndex] = useState<number>(0);
+
+  useEffect(() => {
+    // Read query parameters
+    const params = new URLSearchParams(window.location.search);
+    const templateIdx = params.get('template');
+    if (templateIdx) {
+      setInitialTemplateIndex(parseInt(templateIdx));
+    }
+    
+    if (params.get('autoOpen') === 'uploads') {
+      setActiveTab('uploads');
+      setMobilePanel('uploads');
+    }
+  }, []);
 
   useEffect(() => {
     let base = product.base_price || 0;
@@ -266,10 +281,13 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
 
   const handleFinishDesign = async () => {
     const currentJson = canvasRef.current?.getJson();
-    const hasAnyDesign = (currentJson?.objects?.length || 0) > 0 || Object.values(viewData).some((v: any) => v?.objects?.length > 0);
+    const isTemplateForm = (product as any).design_mode === 'template_form';
+    const hasAnyDesign = isTemplateForm 
+      ? Object.keys(currentJson?.formData || {}).length > 0 
+      : (currentJson?.objects?.length || 0) > 0 || Object.values(viewData).some((v: any) => v?.objects?.length > 0);
 
     if (!hasAnyDesign) {
-      toast.error("Please add a design element before saving!");
+      toast.error(isTemplateForm ? "Please fill in the details before saving!" : "Please add a design element before saving!");
       return;
     }
 
@@ -334,8 +352,14 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     }
   };
 
+  const isTemplateForm = (product as any).design_mode === 'template_form' || 
+                        ['id-card', 'letter-head', 'business-card', 'wedding-card', 'custom-calendar', 'corporate-notebook', 'diary-with-logo', 'custom-pen'].some(s => product.slug?.includes(s));
+
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-[#f7f7f2] overflow-hidden">
+    <div className={cn(
+      "z-[100] flex flex-col bg-[#fbfbf9]",
+      isTemplateForm ? "min-h-screen relative" : "fixed inset-0 overflow-hidden"
+    )}>
       <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 z-50 flex-shrink-0">
         <div className="flex items-center gap-4">
           <Link href="/products" className="p-2 hover:bg-gray-50 rounded-lg text-gray-400 hover:text-brand-dark transition-colors">
@@ -345,18 +369,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
           <button className="p-2 text-gray-400 hover:text-brand-dark transition-colors"><Info className="h-5 w-5" /></button>
           <button onClick={() => canvasRef.current?.undo?.()} className="p-2 text-gray-400 hover:text-brand-dark transition-colors"><RotateCcw className="h-5 w-5 -scale-x-100" /></button>
           <button onClick={() => canvasRef.current?.redo?.()} className="p-2 text-gray-400 hover:text-brand-dark transition-colors"><RotateCcw className="h-5 w-5" /></button>
-          <div className="h-6 w-px bg-gray-100 mx-1" />
-          <button 
-            onClick={() => {
-              const random = canvasTemplates[Math.floor(Math.random() * canvasTemplates.length)];
-              canvasRef.current?.loadJson(random.json);
-              import('sonner').then(({ toast }) => toast.success(`✨ "${random.name}" applied!`));
-            }}
-            className="flex items-center gap-2 px-4 py-1.5 bg-brand-pink/10 hover:bg-brand-pink text-brand-pink hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all italic"
-          >
-            <Shuffle className="h-3.5 w-3.5" />
-            Surprise Me
-          </button>
+
           <div className="h-6 w-px bg-gray-100 mx-1" />
           <button 
             onClick={() => canvasRef.current?.downloadDesign()}
@@ -387,21 +400,27 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <div className="hidden md:flex shrink-0">
-          <SidebarRail 
-            activeTab={activeTab} 
-            onTabChange={(tab) => activeTab === tab ? setActiveTab(null) : setActiveTab(tab)} 
-            designMode={(product as any).design_mode}
-          />
-        </div>
+      <div className={cn(
+        "flex",
+        isTemplateForm ? "flex-col" : "flex-1 overflow-hidden"
+      )}>
+        {!isTemplateForm && (
+          <div className="hidden md:flex shrink-0">
+            <SidebarRail 
+              activeTab={activeTab} 
+              onTabChange={(tab) => activeTab === tab ? setActiveTab(null) : setActiveTab(tab)} 
+              designMode={(product as any).design_mode}
+            />
+          </div>
+        )}
 
-        <div className="hidden md:block">
-          <SidebarPanel 
-            activeTab={activeTab}
-            onClose={() => setActiveTab(null)}
-            productColor={selectedColor}
-            onProductColorChange={setSelectedColor}
+        {!isTemplateForm && (
+          <div className="hidden md:block">
+            <SidebarPanel 
+              activeTab={activeTab}
+              onClose={() => setActiveTab(null)}
+              productColor={selectedColor}
+              onProductColorChange={setSelectedColor}
             selectedQuality={selectedQuality}
             onQualityChange={setSelectedQuality}
             onAddText={(text) => canvasRef.current?.addText(text)}
@@ -429,38 +448,47 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             onVdpClear={() => { setVdpData(null); setVdpRowIndex(0); }}
             pageData={pageData}
             currentPageIndex={currentPageIndex}
-            onPageChange={(newIndex) => {
-              if (canvasRef.current) {
-                 const currentJson = canvasRef.current.getJson();
-                 const newPages = [...pageData];
-                 newPages[currentPageIndex] = currentJson;
-                 setPageData(newPages);
-                 canvasRef.current.loadJson(newPages[newIndex] || { objects: [], background: "" });
-              }
-              setCurrentPageIndex(newIndex);
-            }}
-          />
-        </div>
-
-        <main className="flex-1 flex flex-col relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 z-20 flex flex-wrap justify-center p-2 md:p-4 pointer-events-none">
-            <div className="pointer-events-auto">
-              <TopToolbar 
-                activeObject={activeObject}
-                onUpdateActiveObject={(props) => canvasRef.current?.updateActiveObject(props)}
-                onDeleteActiveObject={() => canvasRef.current?.deleteActiveObject()}
-                onBringForward={() => canvasRef.current?.bringForward()}
-                onSendBackward={() => canvasRef.current?.sendBackward()}
-                onDuplicate={() => canvasRef.current?.duplicateActiveObject()}
-                onLockToggle={() => canvasRef.current?.toggleLock()}
-                onSetTextShadow={(options) => canvasRef.current?.setTextShadow(options)}
-                onSetTextOutline={(options) => canvasRef.current?.setTextOutline(options)}
-                onAlign={(pos) => canvasRef.current?.alignActiveObject(pos)}
-              />
-            </div>
+              onPageChange={(newIndex) => {
+                if (canvasRef.current) {
+                  const currentJson = canvasRef.current.getJson();
+                  const newPages = [...pageData];
+                  newPages[currentPageIndex] = currentJson;
+                  setPageData(newPages);
+                  canvasRef.current.loadJson(newPages[newIndex] || { objects: [], background: "" });
+                }
+                setCurrentPageIndex(newIndex);
+              }}
+            />
           </div>
+        )}
 
-          <div className="flex-1 flex items-center justify-center pt-16 md:pt-16 pb-16 md:pb-28 px-4 md:px-8 relative overflow-hidden">
+        <main className={cn(
+          "flex flex-col relative",
+          isTemplateForm ? "w-full" : "flex-1 overflow-hidden"
+        )}>
+          {!isTemplateForm && (
+            <div className="absolute top-0 left-0 right-0 z-20 flex flex-wrap justify-center p-2 md:p-4 pointer-events-none">
+              <div className="pointer-events-auto">
+                <TopToolbar 
+                  activeObject={activeObject}
+                  onUpdateActiveObject={(props) => canvasRef.current?.updateActiveObject(props)}
+                  onDeleteActiveObject={() => canvasRef.current?.deleteActiveObject()}
+                  onBringForward={() => canvasRef.current?.bringForward()}
+                  onSendBackward={() => canvasRef.current?.sendBackward()}
+                  onDuplicate={() => canvasRef.current?.duplicateActiveObject()}
+                  onLockToggle={() => canvasRef.current?.toggleLock()}
+                  onSetTextShadow={(options) => canvasRef.current?.setTextShadow(options)}
+                  onSetTextOutline={(options) => canvasRef.current?.setTextOutline(options)}
+                  onAlign={(pos) => canvasRef.current?.alignActiveObject(pos)}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className={cn(
+            "flex items-center justify-center relative",
+            isTemplateForm ? "w-full" : "flex-1 pt-16 md:pt-16 pb-16 md:pb-28 px-4 md:px-8 overflow-hidden"
+          )}>
             {isOutOfBounds && (
               <div className="absolute top-24 left-1/2 -translate-x-1/2 z-40 bg-orange-500 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl animate-bounce">
                 Outside Print Area
@@ -479,12 +507,18 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                 />
               </div>
             ) : (
-              <div className="w-full max-w-2xl flex items-center justify-center transition-all duration-700 ease-out">
+              <div className={cn(
+                "w-full transition-all duration-700 ease-out flex items-center justify-center",
+                isTemplateForm ? "w-full" : "max-w-6xl"
+              )}>
                 <DesignerFactory 
                   ref={canvasRef}
+                  product={product}
+                  designMode={isTemplateForm ? 'template_form' : (product as any).design_mode}
+                  designConfig={(product as any).design_config}
                   productImage={(() => {
                     const variants = (product as any).color_variants || [];
-                    const exactMatch = variants.find((v: any) => v.hex.toLowerCase() === selectedColor.toLowerCase());
+                    const exactMatch = variants.find((v: any) => v.hex?.toLowerCase() === selectedColor.toLowerCase());
                     
                     let bgImages: string[] = [];
                     // Ensure the wireframe array actually has strings inside it
@@ -515,154 +549,148 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                   onOutOfBoundsWarning={setIsOutOfBounds}
                   onLowQualityWarning={setIsLowQuality}
                   designArea={(product as any).design_areas?.[activeView]}
-                  designMode={(product as any).design_mode}
-                  designConfig={(product as any).design_config}
                   vdpData={vdpData}
                   vdpRowIndex={vdpRowIndex}
+                  initialTemplateIndex={initialTemplateIndex}
                 />
               </div>
             )}
 
-            <div className="absolute bottom-8 left-8 flex items-center gap-3 z-40 bg-white shadow-float border border-gray-100 rounded-2xl p-1.5 isolate">
-              <div className="flex items-center gap-0.5">
-                <button onClick={() => canvasRef.current?.zoomOut()} className="p-2 hover:bg-gray-50 rounded-lg text-gray-500 transition-colors"><ZoomOut className="h-4 w-4" /></button>
-                <div className="px-2 min-w-[50px] text-center"><span className="text-[11px] font-black text-brand-dark">{(Math.round((canvasRef.current as any)?.zoomLevel * 100 || 100))}%</span></div>
-                <button onClick={() => canvasRef.current?.zoomIn()} className="p-2 hover:bg-gray-50 rounded-lg text-gray-500 transition-colors"><ZoomIn className="h-4 w-4" /></button>
+            {!isTemplateForm && (
+              <div className="absolute bottom-8 left-8 flex items-center gap-3 z-40 bg-white shadow-float border border-gray-100 rounded-2xl p-1.5 isolate">
+                <div className="flex items-center gap-0.5">
+                  <button onClick={() => canvasRef.current?.zoomOut()} className="p-2 hover:bg-gray-50 rounded-lg text-gray-500 transition-colors"><ZoomOut className="h-4 w-4" /></button>
+                  <div className="px-2 min-w-[50px] text-center"><span className="text-[11px] font-black text-brand-dark">{(Math.round((canvasRef.current as any)?.zoomLevel * 100 || 100))}%</span></div>
+                  <button onClick={() => canvasRef.current?.zoomIn()} className="p-2 hover:bg-gray-50 rounded-lg text-gray-500 transition-colors"><ZoomIn className="h-4 w-4" /></button>
+                </div>
+                <div className="w-px h-6 bg-gray-100" />
+                <button 
+                  onClick={() => {
+                    const newMode = !isPanning;
+                    setIsPanning(newMode);
+                    canvasRef.current?.setPanning?.(newMode);
+                  }}
+                  className={cn(
+                    "p-2 rounded-lg transition-colors",
+                    isPanning ? "bg-brand-olive text-white" : "text-gray-400 hover:text-brand-dark"
+                  )}
+                >
+                  <Hand className="h-4 w-4" />
+                </button>
               </div>
-              <div className="w-px h-6 bg-gray-100" />
-              <button 
-                onClick={() => {
-                  const newMode = !isPanning;
-                  setIsPanning(newMode);
-                  canvasRef.current?.setPanning?.(newMode);
-                }}
-                className={cn(
-                  "p-2 rounded-lg transition-colors",
-                  isPanning ? "bg-brand-olive text-white" : "text-gray-400 hover:text-brand-dark"
-                )}
-              >
-                <Hand className="h-4 w-4" />
-              </button>
-            </div>
+            )}
 
-            <div className="absolute bottom-16 md:bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40 overflow-x-auto w-full md:w-auto px-4 justify-start md:justify-center no-scrollbar pb-2">
-               {[
-                 { id: 'front', label: 'Front side' },
-                 { id: 'back', label: 'Back side' },
-                 { id: 'left', label: 'Left side' },
-                 { id: 'right', label: 'Right side' },
-               ].filter(v => {
-                  // Smart Filtering: Only show view if an image exists for it in the current color
-                  const variants = (product as any).color_variants || [];
-                  const exactMatch = variants.find((ev: any) => ev.hex.toLowerCase() === selectedColor.toLowerCase());
-                  
-                  let bgImages: string[] = [];
-                  if (exactMatch?.wireframe_images && exactMatch.wireframe_images.some((img: string) => img)) {
-                    bgImages = exactMatch.wireframe_images;
-                  } else if (exactMatch?.image_url) {
-                    bgImages = [exactMatch.image_url, exactMatch.image_url, exactMatch.image_url, exactMatch.image_url];
-                  } else {
-                    const wireframes = (product as any).wireframe_images || [];
-                    bgImages = wireframes.some((img: string) => img)
-                      ? wireframes
-                      : ((product as any).template_images?.length > 0 ? (product as any).template_images : product.images || []);
-                  }
+            {!isTemplateForm && (
+              <div className="absolute bottom-16 md:bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40 overflow-x-auto w-full md:w-auto px-4 justify-start md:justify-center no-scrollbar pb-2">
+                {[
+                  { id: 'front', label: 'Front side' },
+                  { id: 'back', label: 'Back side' },
+                  { id: 'left', label: 'Left side' },
+                  { id: 'right', label: 'Right side' },
+                ].filter(v => {
+                    // Smart Filtering: Only show view if an image exists for it in the current color
+                    const variants = (product as any).color_variants || [];
+                    const exactMatch = variants.find((ev: any) => ev.hex?.toLowerCase() === selectedColor.toLowerCase());
+                    
+                    let bgImages: string[] = [];
+                    if (exactMatch?.wireframe_images && exactMatch.wireframe_images.some((img: string) => img)) {
+                      bgImages = exactMatch.wireframe_images;
+                    } else if (exactMatch?.image_url) {
+                      bgImages = [exactMatch.image_url, exactMatch.image_url, exactMatch.image_url, exactMatch.image_url];
+                    } else {
+                      const wireframes = (product as any).wireframe_images || [];
+                      bgImages = wireframes.some((img: string) => img)
+                        ? wireframes
+                        : ((product as any).template_images?.length > 0 ? (product as any).template_images : product.images || []);
+                    }
 
-                  const viewIdx = v.id === 'front' ? 0 : v.id === 'back' ? 1 : v.id === 'left' ? 2 : 3;
-                  return !!bgImages[viewIdx];
-                }).map((v) => (
-                  <button
-                    key={v.id}
-                    onClick={() => handleViewChange(v.id as any)}
-                    className={cn(
-                      "px-5 py-2 rounded-full text-[11px] font-black tracking-tight leading-none transition-all flex-shrink-0",
-                      activeView === v.id 
-                        ? "bg-brand-olive text-white shadow-[0_4px_12px_rgba(91,91,66,0.2)]" 
-                        : "bg-white text-gray-500 hover:bg-gray-50 shadow-soft border border-gray-100"
-                    )}
-                  >
-                    {v.label}
-                  </button>
-                ))}
-            </div>
+                    const viewIdx = v.id === 'front' ? 0 : v.id === 'back' ? 1 : v.id === 'left' ? 2 : 3;
+                    return !!bgImages[viewIdx];
+                  }).map((v) => (
+                    <button
+                      key={v.id}
+                      onClick={() => handleViewChange(v.id as any)}
+                      className={cn(
+                        "px-5 py-2 rounded-full text-[11px] font-black tracking-tight leading-none transition-all flex-shrink-0",
+                        activeView === v.id 
+                          ? "bg-brand-olive text-white shadow-[0_4px_12px_rgba(91,91,66,0.2)]" 
+                          : "bg-white text-gray-500 hover:bg-gray-50 shadow-soft border border-gray-100"
+                      )}
+                    >
+                      {v.label}
+                    </button>
+                  ))}
+              </div>
+            )}
 
-            <div className="absolute bottom-2 right-4 md:bottom-8 md:right-8 z-40 scale-75 md:scale-100 origin-bottom-right">
-               <div className="flex flex-col items-end gap-1.5 md:gap-2">
-                 <div className="bg-white/95 backdrop-blur-2xl px-6 py-5 rounded-[32px] border border-white/40 shadow-2xl shadow-brand-dark/5 ring-1 ring-black/5 w-80">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
+            <div className={cn(
+              "z-40 transition-all duration-500",
+              (product as any).design_mode === 'template_form' 
+                ? "fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-2xl border-t border-gray-100 p-6 flex items-center justify-center shadow-[0_-20px_40px_rgba(0,0,0,0.03)]" 
+                : "absolute bottom-2 right-4 md:bottom-8 md:right-8 scale-75 md:scale-100 origin-bottom-right"
+            )}>
+               <div className={cn(
+                 "flex items-center gap-6",
+                 (product as any).design_mode === 'template_form' ? "max-w-7xl w-full justify-between" : "flex-col items-end gap-1.5 md:gap-2"
+               )}>
+                 <div className={cn(
+                   "bg-white/95 backdrop-blur-2xl px-6 py-4 rounded-[32px] border border-white/40 shadow-2xl shadow-brand-dark/5 ring-1 ring-black/5 flex items-center gap-8",
+                   (product as any).design_mode === 'template_form' ? "w-auto" : "w-80 flex-col gap-4"
+                 )}>
+                    {/* Quantity */}
+                    <div className="flex items-center gap-4">
                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Quantity</span>
                        <div className="flex items-center gap-3 bg-[#f7f7f2] rounded-full p-1 border border-gray-100">
-                         <button 
-                           onClick={() => setQuantity(q => Math.max((product.moq || 1), q - 1))}
-                           className="w-6 h-6 rounded-full flex items-center justify-center bg-white text-gray-500 hover:text-brand-dark hover:shadow-sm transition-all"
-                         >
-                           <Minus className="w-3 h-3" />
-                         </button>
-                          <input 
-                            type="number"
-                            value={quantity}
-                            onChange={(e) => {
-                              const val = parseInt(e.target.value);
-                              setQuantity(isNaN(val) ? 0 : Math.max(0, val));
-                            }}
-                            onBlur={() => setQuantity(q => Math.max((product.moq || 1), q))}
-                            className="w-12 bg-transparent text-xs font-black text-brand-dark text-center outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
-                         <button 
-                           onClick={() => setQuantity(q => q + 1)}
-                           className="w-6 h-6 rounded-full flex items-center justify-center bg-white text-gray-500 hover:text-brand-dark hover:shadow-sm transition-all"
-                         >
-                           <Plus className="w-3 h-3" />
-                         </button>
+                          <button 
+                            onClick={() => setQuantity(q => Math.max((product.moq || 1), q - 1))}
+                            className="w-6 h-6 rounded-full flex items-center justify-center bg-white text-gray-500 hover:text-brand-dark hover:shadow-sm transition-all"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                           <input 
+                             type="number"
+                             value={quantity}
+                             onChange={(e) => {
+                               const val = parseInt(e.target.value);
+                               setQuantity(isNaN(val) ? 0 : Math.max(0, val));
+                             }}
+                             onBlur={() => setQuantity(q => Math.max((product.moq || 1), q))}
+                             className="w-12 bg-transparent text-xs font-black text-brand-dark text-center outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                           />
+                          <button 
+                            onClick={() => setQuantity(q => q + 1)}
+                            className="w-6 h-6 rounded-full flex items-center justify-center bg-white text-gray-500 hover:text-brand-dark hover:shadow-sm transition-all"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
                        </div>
                     </div>
 
-                    <div className="border-b border-gray-100 pb-3 mb-3">
-                       <div className="flex gap-2">
-                         <input
-                           type="text"
-                           placeholder="Promo Code"
-                           value={promoCodeInput}
-                           onChange={(e) => setPromoCodeInput(e.target.value)}
-                           className="flex-1 bg-gray-50 rounded-xl px-3 py-2 text-xs font-bold text-brand-dark uppercase placeholder:normal-case outline-none focus:bg-white focus:border focus:border-brand-pink/20 transition-all border border-transparent"
-                         />
-                         <button
-                           onClick={validateCoupon}
-                           disabled={validatingCoupon || !promoCodeInput}
-                           className="bg-brand-dark text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-pink transition-all disabled:opacity-50"
-                         >
-                           {validatingCoupon ? '...' : 'Apply'}
-                         </button>
-                       </div>
-                       {couponMessage && (
-                         <div className={cn("text-[9px] font-bold tracking-widest uppercase mt-2 pl-1", couponMessage.type === 'success' ? 'text-brand-cyan' : 'text-red-500')}>
-                           {couponMessage.text}
-                         </div>
-                       )}
-                    </div>
+                    <div className="h-8 w-px bg-gray-100 hidden md:block" />
 
-                    <div className="flex items-end justify-between">
-                       <div className="flex flex-col">
-                         <span className="text-[9px] font-black text-brand-pink/50 uppercase tracking-[0.25em] mb-0.5">
-                           {selectedQuality} • {discountPercent > 0 ? `${discountPercent}% OFF` : (discountValue > 0 ? `₹${discountValue} OFF` : 'Base')}
-                         </span>
-                         <div className="flex items-baseline gap-1">
-                            <span className="text-sm font-black text-brand-dark italic mb-1">₹</span>
-                            <span className="text-3xl font-black text-brand-dark tracking-tighter italic leading-none">{totalPrice.toLocaleString()}</span>
-                         </div>
-                       </div>
-                       <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest text-right">
-                         <div>₹{unitPrice}</div>
-                         <div>per unit</div>
+                    {/* Price Display */}
+                    <div className="flex flex-col">
+                       <span className="text-[9px] font-black text-brand-pink/50 uppercase tracking-[0.25em] mb-0.5">
+                         {selectedQuality} • {discountPercent > 0 ? `${discountPercent}% OFF` : 'Base'}
+                       </span>
+                       <div className="flex items-baseline gap-2">
+                          <span className="text-sm font-black text-brand-dark italic">₹</span>
+                          <span className="text-3xl font-black text-brand-dark tracking-tighter italic leading-none">{totalPrice.toLocaleString()}</span>
+                          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-2">₹{unitPrice}/unit</span>
                        </div>
                     </div>
                  </div>
+
                  <button 
                    onClick={handleFinishDesign}
                    disabled={isFinishing}
-                   className="px-10 py-5 bg-brand-dark text-white text-[11px] font-black uppercase tracking-[0.25em] rounded-[24px] shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:shadow-brand-pink/20 hover:bg-brand-pink transition-all transform hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 italic group"
+                   className={cn(
+                     "px-10 py-5 bg-brand-dark text-white rounded-[24px] text-[11px] font-black uppercase tracking-[0.25em] shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:bg-brand-pink transition-all flex items-center gap-3",
+                     isFinishing && "opacity-50"
+                   )}
                  >
-                   {isFinishing ? "Processing..." : "Add to Project"}
+                    {isFinishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                    {isFinishing ? "Processing..." : "Add to Project"}
                  </button>
                </div>
             </div>

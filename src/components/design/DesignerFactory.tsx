@@ -3,6 +3,7 @@
 import React from 'react';
 import DesignerCanvas from './DesignerCanvas';
 import IntakeFormDesigner from './modes/IntakeFormDesigner';
+import TemplateFormDesigner from './modes/TemplateFormDesigner';
 import { DesignerCanvasProps, DesignerCanvasRef } from '@/types/canvas';
 
 /**
@@ -19,6 +20,11 @@ const DesignerFactory = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>
   // Use the Intake Form engine for complex products (Packaging, Logo Design, etc.)
   if (designMode === 'intake_form') {
     return <IntakeFormDesigner {...props} ref={ref} />;
+  }
+
+  // Use the Template Form engine for standardized products (Business Cards, ID Cards, etc.)
+  if (designMode === 'template_form') {
+    return <TemplateFormDesigner {...props} ref={ref} />;
   }
 
   // Fallback to standard for 'standard', 'vdp', 'multipage'

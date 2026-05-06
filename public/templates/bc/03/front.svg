@@ -1,0 +1,8 @@
+<!-- bc_03_front.svg: Creative Artisan -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="#FFFBF0"/>
+  <circle cx="950" cy="100" r="150" fill="#FDE68A" fill-opacity="0.3"/>
+  <path d="M0 450C150 500 350 400 500 500S850 600 1050 500V600H0V450Z" fill="#92400E" fill-opacity="0.05"/>
+  <rect x="80" y="80" width="40" height="40" fill="#92400E"/>
+  <rect x="130" y="80" width="4" height="40" fill="#F59E0B"/>
+</svg>

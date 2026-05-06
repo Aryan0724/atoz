@@ -1,0 +1,8 @@
+<!-- bc_06_front.svg: Vibrant Startup -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="white"/>
+  <circle cx="900" cy="150" r="100" fill="#8B5CF6" fill-opacity="0.2"/>
+  <circle cx="950" cy="450" r="150" fill="#EC4899" fill-opacity="0.1"/>
+  <rect x="50" y="50" width="10" height="500" fill="#8B5CF6"/>
+  <rect x="70" y="50" width="4" height="500" fill="#EC4899" fill-opacity="0.3"/>
+</svg>

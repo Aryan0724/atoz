@@ -1,0 +1,7 @@
+<!-- wc_07_front.svg: Boho Chic -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="#FFFBEB"/>
+  <path d="M0 0V200C100 150 200 250 300 200S400 150 400 150V0H0Z" fill="#D97706" fill-opacity="0.05"/>
+  <circle cx="525" cy="50" r="100" fill="#D97706" fill-opacity="0.03"/>
+  <rect x="50" y="50" width="950" height="500" stroke="#D97706" stroke-width="1" stroke-opacity="0.1"/>
+</svg>

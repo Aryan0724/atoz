@@ -6,11 +6,11 @@ import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'ATOZPRINTS | Premium Corporate Printing & Gifting',
-  description: 'Bespoke corporate printing and gifting solutions. We engineer tactile experiences that command absolute respect.',
+  title: 'AtoZ Prints – Custom Printing Services Across India',
+  description: 'India’s trusted online printing partner offering T-shirts, mugs, business cards & more.',
   openGraph: {
-    title: 'ATOZPRINTS | Premium Corporate Solutions',
-    description: 'Expertly crafted custom apparel, accessories and stationery for brands that matter.',
+    title: 'AtoZ Prints – Custom Printing Services Across India',
+    description: 'India’s trusted online printing partner offering T-shirts, mugs, business cards & more.',
     images: ['https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1200&auto=format&fit=crop'],
   }
 };
@@ -37,16 +37,29 @@ async function getTopProducts() {
   return products;
 }
 
+async function getBlogs() {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('cms_content')
+    .select('*')
+    .eq('type', 'Blog')
+    .eq('status', 'published')
+    .order('created_at', { ascending: false })
+    .limit(3);
+  return data || [];
+}
+
 export default async function HomePage() {
   // Parallel fetch for speed
-  const [config, products] = await Promise.all([
+  const [config, products, blogs] = await Promise.all([
     getSiteConfig(),
-    getTopProducts()
+    getTopProducts(),
+    getBlogs()
   ]);
 
   return (
     <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-brand-base"><Loader2 className="w-12 h-12 animate-spin text-brand-gold" /></div>}>
-      <HomePageClient products={products} config={config} />
+      <HomePageClient products={products} config={config} blogs={blogs} />
     </Suspense>
   );
 }

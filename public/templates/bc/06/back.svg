@@ -1,0 +1,6 @@
+<!-- bc_06_back.svg: Vibrant Startup -->
+<svg width="1050" height="600" viewBox="0 0 1050 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1050" height="600" fill="#8B5CF6"/>
+  <rect x="425" y="200" width="200" height="200" rx="100" stroke="white" stroke-width="2" stroke-opacity="0.3" stroke-dasharray="10 5"/>
+  <rect x="475" y="250" width="100" height="100" fill="white" fill-opacity="0.1"/>
+</svg>
