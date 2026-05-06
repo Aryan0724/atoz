@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, X, Upload, Loader2, User, UserPlus } from 'lucide-react';
+import { Save, Plus, X, Upload, Loader2, User, UserPlus, Users } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { uploadFile } from '@/lib/supabase/storage';
 import { toast } from 'sonner';
@@ -293,7 +293,7 @@ export default function AboutUsEditor() {
                 <input 
                   type="text" 
                   value={member.role}
-                  onChange={updateTeamMember.bind(null, idx, 'role')}
+                  onChange={e => updateTeamMember(idx, 'role', e.target.value)}
                   placeholder="Role"
                   className="w-full bg-transparent border-b border-gray-100 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest focus:outline-none focus:border-brand-pink transition-colors"
                 />

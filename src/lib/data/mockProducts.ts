@@ -52,7 +52,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [],
     "design_mode": "standard",
     "design_config": {
@@ -121,7 +120,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [],
     "design_mode": "standard",
     "design_config": {},
@@ -172,7 +170,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [],
     "design_mode": "standard",
     "design_config": {},
@@ -227,7 +224,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [],
     "design_mode": "standard",
     "design_config": {},
@@ -282,7 +278,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [
       {
         "name": "Elite Doli 11",
@@ -4321,7 +4316,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [],
     "design_mode": "standard",
     "design_config": {},
@@ -4376,7 +4370,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [],
     "design_mode": "standard",
     "design_config": {},
@@ -4431,7 +4424,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [
       {
         "name": "Minimalist Elite 11",
@@ -7576,7 +7568,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [
       {
         "name": "Executive Elite 11",
@@ -9389,7 +9380,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [],
     "design_mode": "standard",
     "design_config": {},
@@ -9444,7 +9434,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [],
     "design_mode": "standard",
     "design_config": {},
@@ -9503,7 +9492,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [
       {
         "hex": "#000000",
@@ -9588,7 +9576,6 @@ export const mockProducts: Product[] = [
       "Premium": 400,
       "Standard": 85
     },
-    "bulk_pricing": [],
     "color_variants": [],
     "design_mode": "standard",
     "design_config": {
@@ -9671,7 +9658,6 @@ export const mockProducts: Product[] = [
       }
     },
     "quality_prices": {},
-    "bulk_pricing": [],
     "color_variants": [
       {
         "name": "Luxury Elite 11",
@@ -11674,5 +11660,40 @@ export const mockProducts: Product[] = [
       ]
     },
     "bulk_discount_rules": []
+  }
+];
+export const mockPricingCategories = [
+  {
+    id: 'stationery',
+    name: 'Corporate Stationery',
+    icon: 'stationery',
+    headers: ['10+', '50+', '100+', '500+'],
+    items: [
+      { name: 'Executive Business Cards', unit: 'Units', tiers: [10, 8, 6, 4] },
+      { name: 'Letterheads (Premium)', unit: 'Units', tiers: [15, 12, 10, 8] },
+      { name: 'Custom ID Cards', unit: 'Units', tiers: [150, 120, 100, 80] }
+    ]
+  },
+  {
+    id: 'apparel',
+    name: 'Custom Apparel',
+    icon: 'apparel',
+    headers: ['10+', '25+', '50+', '100+'],
+    items: [
+      { name: 'Premium Cotton T-Shirts', unit: 'Units', tiers: [450, 400, 350, 300] },
+      { name: 'Corporate Polos', unit: 'Units', tiers: [650, 600, 550, 500] },
+      { name: 'Heavyweight Hoodies', unit: 'Units', tiers: [1250, 1150, 1050, 950] }
+    ]
+  },
+  {
+    id: 'drinkware',
+    name: 'Bespoke Drinkware',
+    icon: 'drinkware',
+    headers: ['20+', '50+', '100+', '250+'],
+    items: [
+      { name: 'Ceramic Coffee Mugs', unit: 'Units', tiers: [180, 160, 140, 120] },
+      { name: 'Insulated Water Bottles', unit: 'Units', tiers: [850, 800, 750, 700] },
+      { name: 'Travel Tumblers', unit: 'Units', tiers: [550, 500, 450, 400] }
+    ]
   }
 ];

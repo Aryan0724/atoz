@@ -326,7 +326,7 @@ export default function HomePageClient({ config: initialConfig, products = [], b
                 </div>
                 <div>
                   <h3 className="text-4xl font-serif mb-4 text-brand-darkBlue group-hover:text-brand-gold transition-colors">Bespoke Design Studio</h3>
-                  <p className="text-lg font-sans text-slate-500 max-w-md">Architecting your brand's visual language from vectorization to intricate foil stamping.</p>
+                  <p className="text-lg font-sans text-slate-500 max-w-md">Architecting your brand&apos;s visual language from vectorization to intricate foil stamping.</p>
                 </div>
               </div>
               <Image src="https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=2071&auto=format&fit=crop" alt="Design" fill className="object-cover opacity-10 group-hover:opacity-20 group-hover:scale-105 transition-all duration-700" />
