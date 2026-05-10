@@ -6,7 +6,7 @@ import {
   Type, LayoutGrid, Square, Upload, Sparkles, FolderHeart, Image as ImageIcon, HelpCircle, Layout as LayoutIcon, Palette, Star, Layers, Grid, Image
 } from 'lucide-react';
 
-export type SidebarTab = 'product' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'shutterstock' | 'iconify' | 'layers' | 'patterns' | 'unsplash' | 'pexels' | 'data' | 'pages';
+export type SidebarTab = 'product' | 'quick_edit' | 'layouts' | 'uploads' | 'ai' | 'text' | 'library' | 'graphics' | 'shutterstock' | 'iconify' | 'layers' | 'patterns' | 'unsplash' | 'pexels' | 'data' | 'pages';
 
 interface SidebarRailProps {
   activeTab: SidebarTab | null;
@@ -16,7 +16,8 @@ interface SidebarRailProps {
 
 const navItems: { id: SidebarTab; icon: React.ReactNode; label: string; mode?: string }[] = [
   { id: 'product', icon: <Palette className="h-5 w-5" />, label: 'Product' },
-  { id: 'data', icon: <Grid className="h-5 w-5" />, label: 'Data', mode: 'vdp' },
+  { id: 'quick_edit', icon: <LayoutIcon className="h-5 w-5" />, label: 'Quick Edit' },
+  { id: 'layouts', icon: <LayoutGrid className="h-5 w-5" />, label: 'Layouts' },
   { id: 'pages', icon: <LayoutIcon className="h-5 w-5" />, label: 'Pages', mode: 'multipage' },
   { id: 'patterns', icon: <Grid className="h-5 w-5" />, label: 'Patterns' },
   { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },

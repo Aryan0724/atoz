@@ -35,6 +35,20 @@ export default function TrackOrderClient({ order }: TrackOrderClientProps) {
   const [disputeNote, setDisputeNote] = useState('');
   const [disputeOpen, setDisputeOpen] = useState(false);
   const [localOrder, setLocalOrder] = useState(order);
+  const [liveTracking, setLiveTracking] = useState<any>(null);
+
+  React.useEffect(() => {
+    if (localOrder?.tracking_number && localOrder?.courier_name === 'Shiprocket') {
+      fetch(`/api/shipping/track/${localOrder.tracking_number}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) {
+            setLiveTracking(data);
+          }
+        })
+        .catch(err => console.error('Tracking fetch failed', err));
+    }
+  }, [localOrder]);
 
   const normalizedStatus = LEGACY_MAP[localOrder.status] || localOrder.status;
   const currentStepIndex = STATUS_STEPS.findIndex(s => s.key === normalizedStatus);
@@ -286,6 +300,39 @@ export default function TrackOrderClient({ order }: TrackOrderClientProps) {
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estimated Arrival</p>
                           </div>
                        </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Live Shiprocket Tracking */}
+                {liveTracking && liveTracking.tracking_data && (
+                  <div className="mt-8 p-8 bg-brand-pink/5 rounded-[32px] border border-brand-pink/10">
+                    <div className="flex items-center gap-3 mb-6">
+                       <Box className="h-5 w-5 text-brand-pink animate-pulse" />
+                       <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-pink">Live Shiprocket Status</h4>
+                    </div>
+                    
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                         <span className="text-sm font-black text-brand-dark uppercase tracking-tight">
+                           {liveTracking.tracking_data.shipment_track?.[0]?.current_status || 'Updating...'}
+                         </span>
+                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                           Last updated: {liveTracking.tracking_data.shipment_track?.[0]?.last_update_date || 'N/A'}
+                         </span>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {liveTracking.tracking_data.shipment_track_activities?.slice(0, 3).map((activity: any, idx: number) => (
+                          <div key={idx} className="flex gap-4 items-start">
+                            <div className="w-2 h-2 rounded-full bg-brand-pink mt-1.5 shrink-0" />
+                            <div>
+                              <p className="text-xs font-black text-brand-dark uppercase tracking-tight">{activity.activity}</p>
+                              <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">{activity.location} · {activity.date}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}

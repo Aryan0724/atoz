@@ -153,3 +153,17 @@
   .bg-brand-lime { background-color: var(--brand-lime) !important; }
   .text-brand-lime { color: var(--brand-lime) !important; }
 }
+
+/* Custom Cursor Control */
+.no-custom-cursor, .no-custom-cursor * {
+  cursor: auto !important;
+}
+
+body:has(.no-custom-cursor:hover) .cursor-dot,
+body:has(.no-custom-cursor:hover) .cursor-circle {
+  display: none !important;
+}
+
+body:has(.no-custom-cursor:hover) {
+  cursor: auto !important;
+}

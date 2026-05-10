@@ -448,6 +448,16 @@ export default function CheckoutPage() {
                           />
                        </div>
                        <div className="space-y-3">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">State</label>
+                          <input 
+                            name="state"
+                            value={formData.state}
+                            onChange={handleInputChange}
+                            className="w-full px-8 py-5 rounded-[24px] bg-gray-50/50 border border-transparent focus:bg-white focus:border-brand-pink/20 outline-none transition-all font-bold text-brand-dark shadow-inner"
+                            placeholder="e.g. Maharashtra"
+                          />
+                       </div>
+                       <div className="space-y-3">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Pincode</label>
                           <input 
                             name="pincode"
@@ -503,7 +513,7 @@ export default function CheckoutPage() {
 
                     <button 
                       onClick={() => setStep('review')}
-                      disabled={!formData.email || !formData.fullName || !formData.address}
+                      disabled={!formData.email || !formData.fullName || !formData.address || !formData.city || !formData.state || !formData.pincode}
                       className="w-full py-5 bg-brand-dark text-white font-black rounded-2xl text-base uppercase tracking-[0.2em] hover:bg-brand-pink shadow-xl shadow-brand-dark/10 transition-all flex items-center justify-center gap-4 disabled:opacity-30 disabled:grayscale italic group"
                     >
                       Step Two: Review

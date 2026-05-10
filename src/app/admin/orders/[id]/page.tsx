@@ -60,6 +60,27 @@ export default function OrderDetailPage() {
     }
   };
 
+  const shipWithShiprocket = async () => {
+    setUpdating(true);
+    try {
+      const res = await fetch('/api/shipping/ship-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to ship order');
+      
+      toast.success('Order pushed to Shiprocket successfully!');
+      // Refresh order data
+      window.location.reload();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   useEffect(() => {
     async function fetchOrder() {
       try {
@@ -438,13 +459,24 @@ export default function OrderDetailPage() {
                    </div>
                 </div>
                 
-                <button 
-                  onClick={updateTrackingInfo}
-                  disabled={updating}
-                  className="w-full py-4 bg-brand-dark text-white hover:bg-brand-pink transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
-                >
-                   {updating ? 'Updating...' : 'Update Tracking Info'}
-                </button>
+                <div className="flex flex-col gap-3">
+                  <button 
+                    onClick={updateTrackingInfo}
+                    disabled={updating}
+                    className="w-full py-4 bg-brand-dark text-white hover:bg-brand-pink transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                  >
+                     {updating ? 'Updating...' : 'Update Tracking Info'}
+                  </button>
+
+                  <button 
+                    onClick={shipWithShiprocket}
+                    disabled={updating || order.status === 'shipped' || order.status === 'delivered'}
+                    className="w-full py-4 bg-brand-pink text-white hover:bg-brand-dark transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                     <Box className="h-4 w-4" />
+                     {updating ? 'Processing...' : 'Ship with Shiprocket'}
+                  </button>
+                </div>
              </div>
           </section>
 

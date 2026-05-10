@@ -28,10 +28,10 @@ interface CustomizeClientProps {
 }
 
 const mobileTools: { id: SidebarTab; icon: React.ReactNode; label: string }[] = [
+  { id: 'quick_edit', icon: <LayoutGrid className="h-5 w-5" />, label: 'Quick Edit' },
   { id: 'product', icon: <Palette className="h-5 w-5" />, label: 'Product' },
   { id: 'text', icon: <Type className="h-5 w-5" />, label: 'Text' },
   { id: 'graphics', icon: <Square className="h-5 w-5" />, label: 'Elements' },
-  { id: 'iconify', icon: <Sparkles className="h-5 w-5" />, label: 'Icons' },
   { id: 'uploads', icon: <Upload className="h-5 w-5" />, label: 'Upload' },
 ];
 
@@ -79,19 +79,24 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   const { addItem } = useCart();
-  const [initialTemplateIndex, setInitialTemplateIndex] = useState<number>(0);
+  const [selectedTemplateIndex, setSelectedTemplateIndex] = useState<number>(0);
 
   useEffect(() => {
     // Read query parameters
     const params = new URLSearchParams(window.location.search);
     const templateIdx = params.get('template');
     if (templateIdx) {
-      setInitialTemplateIndex(parseInt(templateIdx));
+      setSelectedTemplateIndex(parseInt(templateIdx));
     }
     
     if (params.get('autoOpen') === 'uploads') {
       setActiveTab('uploads');
       setMobilePanel('uploads');
+    }
+
+    // NEW: If the product is a template-form product, default to the 'quick_edit' tab
+    if ((product as any).design_mode === 'template_form' || (product as any).design_config?.mappings) {
+      setActiveTab('quick_edit' as any);
     }
   }, []);
 
@@ -352,8 +357,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     }
   };
 
-  const isTemplateForm = (product as any).design_mode === 'template_form' || 
-                        ['id-card', 'letter-head', 'business-card', 'wedding-card', 'custom-calendar', 'corporate-notebook', 'diary-with-logo', 'custom-pen'].some(s => product.slug?.includes(s));
+  const isTemplateForm = (product as any).design_mode === 'template_form';
 
   return (
     <div className={cn(
@@ -421,15 +425,19 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
               onClose={() => setActiveTab(null)}
               productColor={selectedColor}
               onProductColorChange={setSelectedColor}
-            selectedQuality={selectedQuality}
-            onQualityChange={setSelectedQuality}
-            onAddText={(text) => canvasRef.current?.addText(text)}
-            onAddImage={(url) => canvasRef.current?.addImage(url)}
-            onAddShape={(type) => canvasRef.current?.addShape(type)}
-            onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
-            onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
-            onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
-            onUpdateObject={handleUpdateObjectById}
+              selectedQuality={selectedQuality}
+              onQualityChange={setSelectedQuality}
+              onAddText={(text) => canvasRef.current?.addText(text)}
+              onAddImage={(url) => canvasRef.current?.addImage(url)}
+              onAddShape={(type) => canvasRef.current?.addShape(type)}
+              onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
+              onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
+              onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
+              onTemplateChange={setSelectedTemplateIndex}
+              selectedTemplateIndex={selectedTemplateIndex}
+              designConfig={(product as any).design_config}
+              activeView={activeView}
+              onUpdateObject={handleUpdateObjectById}
             activeObject={activeObject}
             onSelectionCleared={() => setActiveObject(null)}
             layers={layers}
@@ -551,7 +559,8 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                   designArea={(product as any).design_areas?.[activeView]}
                   vdpData={vdpData}
                   vdpRowIndex={vdpRowIndex}
-                  initialTemplateIndex={initialTemplateIndex}
+                  activeView={activeView}
+                  initialTemplateIndex={selectedTemplateIndex}
                 />
               </div>
             )}
@@ -631,7 +640,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             )}>
                <div className={cn(
                  "flex items-center gap-6",
-                 (product as any).design_mode === 'template_form' ? "max-w-7xl w-full justify-between" : "flex-col items-end gap-1.5 md:gap-2"
+                 isTemplateForm ? "max-w-7xl w-full justify-between" : "flex-col items-end gap-1.5 md:gap-2"
                )}>
                  <div className={cn(
                    "bg-white/95 backdrop-blur-2xl px-6 py-4 rounded-[32px] border border-white/40 shadow-2xl shadow-brand-dark/5 ring-1 ring-black/5 flex items-center gap-8",
@@ -715,6 +724,10 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                    onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
                    onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
                    onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
+                   onTemplateChange={setSelectedTemplateIndex}
+                   selectedTemplateIndex={selectedTemplateIndex}
+                   designConfig={(product as any).design_config}
+                   activeView={activeView}
                    onUpdateObject={handleUpdateObjectById}
                    layers={layers}
                    productCategory={product.category || "Apparel"}

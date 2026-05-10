@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { X, Grid } from 'lucide-react';
+import { X, Grid, Trash2 } from 'lucide-react';
 
 
 const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>((props, ref) => {
@@ -33,6 +33,204 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const [selectedColor, setSelectedColor] = useState('#FFD700');
   const [selectedQuality, setSelectedQuality] = useState('Standard Matte');
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+
+  // --- DRAG & DROP AND CUSTOM ELEMENTS STATE ---
+  const [localMappings, setLocalMappings] = useState<Record<string, any>>({});
+  const [customFields, setCustomFields] = useState<any[]>([]);
+  const [activeField, setActiveField] = useState<string | null>(null);
+  
+  // Dragging / Resizing Math
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
+  const [initialFieldPos, setInitialFieldPos] = useState({ x: 0, y: 0, w: 0, h: 0 });
+
+  const isPreview = props.activeView === '3d';
+
+  const baseFields = (designConfig?.fields && designConfig.fields.length > 0) ? designConfig.fields : [
+    { id: 'name', label: 'Full Name', type: 'text', icon: 'User', placeholder: 'e.g. John Doe' },
+    { id: 'title', label: 'Job Title', type: 'text', icon: 'Briefcase', placeholder: 'e.g. Creative Director' },
+    { id: 'phone', label: 'Phone Number', type: 'text', icon: 'Phone', placeholder: '+91 98765 43210' },
+    { id: 'email', label: 'Email Address', type: 'email', icon: 'Mail', placeholder: 'john@example.com' },
+    { id: 'address', label: 'Address', type: 'textarea', icon: 'MapPin', placeholder: 'Enter address...' },
+  ];
+
+  const allFields = [...baseFields, ...customFields];
+
+  // Initialize mappings when template or side changes
+  React.useEffect(() => {
+    const key = `${selectedDesignIndex}_${selectedSideIndex}`;
+    const initialMappings = designConfig?.mappings?.[key] || designConfig?.mappings?.[selectedSideIndex] || {};
+    
+    // Merge existing custom mappings if any exist for this view
+    setLocalMappings(prev => {
+       const merged = { ...initialMappings };
+       // Keep custom fields that might have been added
+       customFields.forEach(f => {
+          if (prev[f.id]) merged[f.id] = prev[f.id];
+       });
+       return merged;
+    });
+  }, [selectedDesignIndex, selectedSideIndex, designConfig]); // Removed customFields dependency
+
+  // Handle Dragging & Resizing
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if ((!isDragging && !isResizing) || !activeField) return;
+
+      const container = document.getElementById('template-preview-container');
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const canvasSize = { w: rect.width, h: rect.height };
+
+      const dx = ((e.clientX - dragStartPos.x) / canvasSize.w) * 100;
+      const dy = ((e.clientY - dragStartPos.y) / canvasSize.h) * 100;
+
+      setLocalMappings(prev => {
+        const field = prev[activeField];
+        if (!field) return prev;
+
+        if (isDragging) {
+           return {
+             ...prev,
+             [activeField]: {
+               ...field,
+               x: Math.max(0, Math.min(100 - (field.w || 0), initialFieldPos.x + dx)),
+               y: Math.max(0, Math.min(100 - (field.h || 0), initialFieldPos.y + dy))
+             }
+           };
+        } else if (isResizing) {
+           return {
+             ...prev,
+             [activeField]: {
+               ...field,
+               w: Math.max(10, Math.min(100 - initialFieldPos.x, initialFieldPos.w + dx)),
+               // Optionally allow height resize, or let text determine it.
+               // We will allow h resize so it can wrap better if needed.
+               h: Math.max(5, Math.min(100 - initialFieldPos.y, initialFieldPos.h + dy))
+             }
+           };
+        }
+        
+        return prev;
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+    };
+
+    if (isDragging || isResizing) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos]);
+
+  const handleMouseDown = (e: React.MouseEvent, fieldId: string, action: 'move' | 'resize') => {
+    if (isPreview) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveField(fieldId);
+    
+    if (action === 'move') setIsDragging(true);
+    if (action === 'resize') setIsResizing(true);
+    
+    setDragStartPos({ x: e.clientX, y: e.clientY });
+    setInitialFieldPos({
+       x: localMappings[fieldId]?.x || 0,
+       y: localMappings[fieldId]?.y || 0,
+       w: localMappings[fieldId]?.w || 30,
+       h: localMappings[fieldId]?.h || 10
+    });
+  };
+
+  const handleAddCustomField = (type: 'text' | 'image') => {
+    const newId = `custom_${Date.now()}`;
+    const newField = {
+      id: newId,
+      label: `Custom ${type === 'text' ? 'Text' : 'Image'}`,
+      type,
+      placeholder: type === 'text' ? 'Enter custom text' : undefined,
+      isCustom: true
+    };
+    
+    setCustomFields(prev => [...prev, newField]);
+    setLocalMappings(prev => ({
+       ...prev,
+       [newId]: {
+          x: 10,
+          y: 10,
+          w: type === 'text' ? 40 : 20,
+          h: type === 'text' ? 10 : 20,
+          fontSize: 16,
+          color: '#FFD700',
+          align: 'left'
+       }
+    }));
+    setActiveField(newId);
+  };
+
+  const updateFontStyle = (fieldId: string, style: 'bold' | 'italic') => {
+    setLocalMappings(prev => {
+      const f = prev[fieldId];
+      if (!f) return prev;
+      if (style === 'bold') {
+        return { ...prev, [fieldId]: { ...f, fontWeight: f.fontWeight === 'bold' ? 'normal' : 'bold' } };
+      }
+      return { ...prev, [fieldId]: { ...f, italic: !f.italic } };
+    });
+  };
+
+  const updateFontFamily = (fieldId: string, family: string) => {
+    setLocalMappings(prev => {
+      const f = prev[fieldId];
+      if (!f) return prev;
+      return { ...prev, [fieldId]: { ...f, fontFamily: family } };
+    });
+  };
+
+  const updateFontSize = (fieldId: string, delta: number) => {
+    setLocalMappings(prev => {
+      const f = prev[fieldId];
+      if (!f) return prev;
+      return {
+        ...prev,
+        [fieldId]: {
+          ...f,
+          fontSize: Math.max(6, (f.fontSize || 14) + delta)
+        }
+      };
+    });
+  };
+
+  const updateTextAlign = (fieldId: string, align: 'left' | 'center' | 'right') => {
+    setLocalMappings(prev => {
+      const f = prev[fieldId];
+      if (!f) return prev;
+      return { ...prev, [fieldId]: { ...f, align } };
+    });
+  };
+
+  const removeCustomField = (fieldId: string) => {
+    setCustomFields(prev => prev.filter(f => f.id !== fieldId));
+    setLocalMappings(prev => {
+      const next = { ...prev };
+      delete next[fieldId];
+      return next;
+    });
+    if (activeField === fieldId) setActiveField(null);
+    setFormData(prev => {
+      const next = { ...prev };
+      delete next[fieldId];
+      return next;
+    });
+  };
 
 
   const designs = (product as any).color_variants?.length > 0 
@@ -99,6 +297,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         templateIndex: selectedDesignIndex,
         sideIndex: selectedSideIndex,
         formData: formData,
+        customMappings: localMappings,
+        customFields: customFields,
         color: selectedColor,
         quality: selectedQuality
     }),
@@ -113,13 +313,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
 
 
-  const fields = (designConfig?.fields && designConfig.fields.length > 0) ? designConfig.fields : [
-    { id: 'name', label: 'Full Name', type: 'text', icon: 'User', placeholder: 'e.g. John Doe' },
-    { id: 'title', label: 'Job Title', type: 'text', icon: 'Briefcase', placeholder: 'e.g. Creative Director' },
-    { id: 'phone', label: 'Phone Number', type: 'text', icon: 'Phone', placeholder: '+91 98765 43210' },
-    { id: 'email', label: 'Email Address', type: 'email', icon: 'Mail', placeholder: 'john@example.com' },
-    { id: 'address', label: 'Address', type: 'textarea', icon: 'MapPin', placeholder: 'Enter address...' },
-  ];
+  // Fields are now handled by allFields derived from baseFields + customFields
 
   const getIcon = (iconName: string) => {
     const icons: Record<string, any> = {
@@ -148,340 +342,372 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-[#fcfcfc]">
-      {/* 1. HERO PREVIEW SECTION - Clean and Minimal */}
-      <section className="relative w-full border-b border-gray-100 flex flex-col items-center justify-center py-12 px-4">
-        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-           <div className={cn(
-             "relative w-full flex items-center justify-center mb-6",
-             product.slug?.includes('wedding') || product.slug?.includes('id-card') || product.slug?.includes('letter-head') 
-               ? "min-h-[500px]" 
-               : "aspect-[21/9]"
-           )}>
-              <AnimatePresence mode="wait">
-                 <motion.div 
-                  key={`${selectedDesignIndex}-${selectedSideIndex}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={cn(
-                    "relative h-full bg-white rounded-xl shadow-lg border border-gray-200 p-1",
-                    product.slug?.includes('id-card') ? "aspect-[2/3]" : 
-                    product.slug?.includes('wedding') ? "aspect-[2/3]" :
-                    product.slug?.includes('letter-head') ? "aspect-[1/1.41]" : 
-                    "aspect-[3.5/2]"
-                  )}
-                >
-                   {currentPreview ? (
-                     <div className="w-full h-full flex items-center justify-center rounded-lg overflow-hidden relative bg-gray-50 p-4">
-                       <div className="relative inline-block max-w-full max-h-full">
-                         <img 
-                           src={currentPreview} 
-                           alt="Preview" 
-                           style={{ filter: selectedColor === '#FFFFFF' ? 'none' : `hue-rotate(${selectedDesignIndex * 20}deg) brightness(0.9)` }}
-                           className="max-w-full max-h-full object-contain pointer-events-none shadow-sm"
-                         />
-                         
-                          {/* DYNAMIC TEXT OVERLAY */}
-                        <div className="absolute inset-0 pointer-events-none z-10">
-                            {(() => {
-                               const mappings = designConfig?.mappings?.[`${selectedDesignIndex}_${selectedSideIndex}`] || designConfig?.mappings?.[selectedSideIndex];
-                               
-                               if (mappings && Object.keys(mappings).length > 0) {
-                                  // Absolute mapped mode (using native percentages 0-100)
-                                  return fields.map((field: any) => {
-                                     const mapping = mappings[field.id];
-                                     if (!mapping) return null;
-                                     
-                                     const hasWidth = !!mapping.w;
-                                     
-                                     // Determine anchor points
-                                     const left = `${mapping.x}%`;
-                                     const top = `${mapping.y}%`;
-                                     
-                                     // Transform logic: 
-                                     // x-axis: center at x if align=center, right-aligned at x if align=right
-                                     // y-axis: always from the top (mapping.y is the top edge)
-                                     const transform = mapping.align === 'center' 
-                                       ? 'translateX(-50%)' 
-                                       : mapping.align === 'right' 
-                                         ? 'translateX(-100%)' 
-                                         : 'none';
-
-                                     // Smart maxWidth to prevent overflow
-                                     const autoMaxWidth = mapping.align === 'center'
-                                       ? (Math.min(mapping.x, 100 - mapping.x) * 2)
-                                       : mapping.align === 'right'
-                                         ? mapping.x
-                                         : (100 - mapping.x);
-
-                                     return (
-                                        <div
-                                          key={field.id}
-                                          style={{
-                                            position: 'absolute',
-                                            left,
-                                            top,
-                                            width: hasWidth ? `${mapping.w}%` : 'auto',
-                                            height: mapping.h ? `${mapping.h}%` : 'auto',
-                                            transform,
-                                            fontSize: mapping.fontSize ? `${mapping.fontSize}px` : undefined,
-                                            fontWeight: mapping.fontWeight || 'normal',
-                                            fontFamily: mapping.fontFamily || 'inherit',
-                                            fontStyle: mapping.italic ? 'italic' : 'normal',
-                                            textAlign: mapping.align || 'left',
-                                            color: formData[field.id]?.color || mapping.color || '#FFD700',
-                                            opacity: mapping.opacity !== undefined ? mapping.opacity : 1,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: mapping.align === 'center' ? 'center' : mapping.align === 'right' ? 'flex-end' : 'flex-start',
-                                            justifyContent: 'center',
-                                            lineHeight: '1.2',
-                                            maxWidth: mapping.maxWidth ? `${mapping.maxWidth}%` : `${autoMaxWidth}%`
-                                          }}
-                                          className="transition-all duration-300 overflow-visible"
-                                        >
-                                          {field.type === 'image' ? (
-                                             formData[field.id]?.text ? (
-                                                <img src={formData[field.id].text} alt={field.label} className="max-w-full max-h-full object-contain" />
-                                             ) : (
-                                                <div className="w-full h-full border border-dashed border-gray-200 flex flex-col items-center justify-center bg-gray-50/50">
-                                                   <Upload className="w-4 h-4 text-gray-300 mb-1" />
-                                                   <span className="text-[8px] font-black uppercase text-gray-300">Logo</span>
-                                                </div>
-                                             )
-                                          ) : (
-                                            <span className={cn(
-                                              "whitespace-pre-line px-1",
-                                              mapping.italic && "italic"
-                                            )}>
-                                              {formData[field.id]?.text || field.placeholder?.replace('e.g. ', '') || field.label}
-                                            </span>
-                                          )}
-                                        </div>
-                                     );
-                                  });
-                               }
-
-                               return null;
-                          })()}
-                       </div>
-                       </div>
-                    </div>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300 font-medium">
-                       {product.name}
-                    </div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-           </div>
-           
-           <div className="flex flex-col items-center gap-6 w-full max-w-4xl">
-               {/* 1. Enhanced Design Template Selector */}
-                {designs.length > 1 && (
-                  <div className="w-full flex flex-col items-center gap-2">
-                    <div className="flex items-center justify-between w-full mb-1 px-4">
-                       <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Select Design Style</p>
-                       <button 
-                         onClick={() => setIsGalleryOpen(true)}
-                         className="flex items-center gap-2 text-[10px] font-black text-brand-pink uppercase tracking-widest hover:opacity-70 transition-opacity"
-                       >
-                         <LayoutGrid className="w-3 h-3" />
-                         View All
-                       </button>
-                    </div>
-
-                    <div className="relative w-full group">
-                      <div 
-                        id="template-scroller"
-                        className="flex gap-3 bg-white/50 backdrop-blur-md rounded-3xl p-2 shadow-sm border border-gray-100 overflow-x-auto no-scrollbar scroll-smooth"
-                      >
-                          {designs.map((d: any, idx: number) => (
-                             <button 
-                                key={idx}
-                                onClick={() => setSelectedDesignIndex(idx)}
-                                className={cn(
-                                  "px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 border-2",
-                                  selectedDesignIndex === idx 
-                                    ? "bg-brand-dark text-white border-brand-dark shadow-xl shadow-brand-dark/20 scale-[1.02]" 
-                                    : "bg-white text-gray-400 border-transparent hover:border-gray-100 hover:text-brand-dark"
-                                )}
-                             >
-                                {d.name || `Template ${idx + 1}`}
-                             </button>
-                          ))}
-                      </div>
-                      
-                      {/* Navigation Overlays (Desktop Only) */}
-                      <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#fcfcfc] to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#fcfcfc] to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
-                      
-                      <button 
-                        onClick={() => {
-                          const scroller = document.getElementById('template-scroller');
-                          if (scroller) scroller.scrollLeft -= 200;
-                        }}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-brand-dark opacity-0 group-hover:opacity-100 transition-all z-20"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const scroller = document.getElementById('template-scroller');
-                          if (scroller) scroller.scrollLeft += 200;
-                        }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:text-brand-dark opacity-0 group-hover:opacity-100 transition-all z-20"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-               
-               {/* 2. Side View Selector (Front/Back) */}
-               <div className="flex flex-col items-center gap-2">
-                  <div className="flex gap-2 bg-gray-100/50 backdrop-blur-md rounded-2xl p-1.5 border border-gray-200/50 shadow-inner">
-                     {[
-                       { idx: 0, label: 'Front Side' },
-                       { idx: 1, label: 'Back Side' },
-                       { idx: 2, label: 'Left Side' },
-                       { idx: 3, label: 'Right Side' }
-                     ].filter(view => currentDesign?.wireframe_images?.[view.idx]).map((view) => (
-                        <button 
-                           key={view.idx}
-                           onClick={() => setSelectedSideIndex(view.idx)}
-                           className={cn(
-                             "px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden",
-                             selectedSideIndex === view.idx 
-                               ? "text-white shadow-lg" 
-                               : "text-gray-400 hover:text-brand-dark"
-                           )}
-                        >
-                           {selectedSideIndex === view.idx && (
-                             <motion.div 
-                               layoutId="activeSide"
-                               className="absolute inset-0 bg-brand-pink z-0"
-                               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                             />
-                           )}
-                           <span className="relative z-10 italic">{view.label}</span>
-                        </button>
-                     ))}
-                  </div>
-               </div>
+    <div className="w-full min-h-[calc(100vh-60px)] md:h-[calc(100vh-60px)] flex flex-col md:flex-row bg-[#fbfbf9] overflow-hidden">
+      
+      {/* LEFT PANEL: Form and Config */}
+      <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 h-full overflow-y-auto border-r border-gray-100 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 custom-scrollbar">
+        <div className="p-6 md:p-8 space-y-10">
+          
+          {/* Template Selection */}
+          {designs.length > 1 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                 <h3 className="text-sm font-semibold text-brand-dark">Design Style</h3>
+                 <button 
+                   onClick={() => setIsGalleryOpen(true)}
+                   className="flex items-center gap-1.5 text-[10px] font-black text-brand-pink uppercase tracking-widest hover:opacity-70 transition-opacity"
+                 >
+                   <LayoutGrid className="w-3 h-3" />
+                   View All
+                 </button>
+              </div>
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                 {designs.map((d: any, idx: number) => (
+                    <button 
+                       key={idx}
+                       onClick={() => setSelectedDesignIndex(idx)}
+                       className={cn(
+                         "px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 border",
+                         selectedDesignIndex === idx 
+                           ? "bg-brand-dark text-white border-brand-dark shadow-md" 
+                           : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+                       )}
+                    >
+                       {d.name || `Template ${idx + 1}`}
+                    </button>
+                 ))}
+              </div>
             </div>
-        </div>
-      </section>
+          )}
 
-      {/* 2. MAIN CONFIGURATION INTERFACE - Sleek */}
-      <section className="w-full max-w-5xl mx-auto py-12 px-6">
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          {/* Form Details */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-brand-dark tracking-tight">Customization Details</h2>
+              <div className="flex gap-1.5">
+                 <button 
+                   onClick={() => handleAddCustomField('text')}
+                   className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-md transition-all text-[10px] font-black uppercase tracking-widest text-brand-pink"
+                 >
+                   <Type className="w-3 h-3" /> Text
+                 </button>
+                 <button 
+                   onClick={() => handleAddCustomField('image')}
+                   className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-md transition-all text-[10px] font-black uppercase tracking-widest text-brand-pink"
+                 >
+                   <Upload className="w-3 h-3" /> Image
+                 </button>
+              </div>
+            </div>
             
-            {/* Left Column: Form Details */}
-            <div className="space-y-8">
-               <div>
-                  <h2 className="text-xl font-bold text-brand-dark tracking-tight mb-1">Customization Details</h2>
-                  <p className="text-sm text-gray-500">Fill out your information to generate a live proof.</p>
-               <div className="space-y-6">
-                  {fields.map((field: any) => (
-                    <div key={field.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100/50 shadow-sm transition-all hover:bg-white hover:shadow-md">
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">{field.label}</label>
-                        
-                        {/* Compact Color Picker for Each Field */}
-                        {field.type !== 'image' && (
-                          <div className="flex gap-1.5 p-1 bg-gray-100 rounded-full">
-                            {['#FFD700', '#FFFFFF', '#000000', '#FF1493', '#800000', '#1A4D2E'].map(c => (
-                              <button 
-                                key={c}
-                                onClick={() => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), color: c } }))}
-                                className={cn(
-                                  "w-3.5 h-3.5 rounded-full border border-white shadow-sm transition-transform hover:scale-125",
-                                  (formData[field.id]?.color || '#FFD700') === c ? "ring-2 ring-brand-pink ring-offset-1" : ""
-                                )}
-                                style={{ backgroundColor: c }}
-                              />
-                            ))}
-                          </div>
-                        )}
+            <div className="space-y-4">
+              {allFields.map((field: any) => (
+                <div key={field.id} className="p-4 bg-gray-50/50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">{field.label}</label>
+                    {field.type !== 'image' && (
+                      <div className="flex gap-1">
+                        {['#FFD700', '#FFFFFF', '#000000', '#FF1493', '#800000', '#1A4D2E'].map(c => (
+                          <button 
+                            key={c}
+                            onClick={() => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), color: c } }))}
+                            className={cn(
+                              "w-3.5 h-3.5 rounded-full border border-gray-200 transition-transform hover:scale-110",
+                              (formData[field.id]?.color || '#FFD700') === c ? "ring-2 ring-brand-pink ring-offset-1 border-white" : ""
+                            )}
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
                       </div>
-
-                      {field.type === 'textarea' ? (
-                        <textarea 
-                           rows={3}
-                           value={formData[field.id]?.text || ''}
-                           onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: e.target.value } }))}
-                           placeholder={field.placeholder}
-                           className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm text-brand-dark resize-none placeholder:text-gray-300"
-                        />
-                      ) : field.type === 'image' ? (
-                        <label className="flex items-center gap-4 p-3 border border-gray-100 bg-white rounded-xl hover:border-brand-pink/20 transition-all cursor-pointer group">
-                           <div className="w-12 h-12 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-                              {formData[field.id]?.text ? (
-                                 <img src={formData[field.id].text} alt="Preview" className="w-full h-full object-contain" />
-                              ) : (
-                                 <Upload className="w-5 h-5 text-gray-300 group-hover:text-brand-pink transition-colors" />
-                              )}
-                           </div>
-                           <div className="flex-1 min-w-0">
-                              <p className="text-xs font-bold text-gray-700">{formData[field.id]?.text ? 'Logo Uploaded' : 'Upload Logo/Image'}</p>
-                              <p className="text-[10px] text-gray-400 truncate">Click to browse or drag and drop</p>
-                           </div>
-                           <input 
-                              type="file" 
-                              className="hidden" 
-                              onChange={(e) => {
-                                 const file = e.target.files?.[0];
-                                 if (file) {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: reader.result as string } }));
-                                    reader.readAsDataURL(file);
-                                 }
-                              }} 
-                           />
-                        </label>
-                      ) : (
-                        <input 
-                           type="text"
-                           value={formData[field.id]?.text || ''}
-                           onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: e.target.value } }))}
-                           placeholder={field.placeholder}
-                           className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm text-brand-dark placeholder:text-gray-300"
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-               </div>
-            </div>
-
-            {/* Right Column: Material & Options */}
-            <div className="space-y-10">
-               <div>
-                  <h3 className="text-sm font-semibold text-brand-dark mb-4">Paper & Finish</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                     {['Standard Matte', 'Premium Gloss', 'Silk Finish', 'Velvet Touch'].map(q => (
-                        <button 
-                           key={q} 
-                           onClick={() => setSelectedQuality(q)}
-                           className={cn(
-                           "px-4 py-3 rounded-lg border transition-all text-xs font-medium text-left flex items-center justify-between",
-                           selectedQuality === q 
-                              ? "border-brand-dark text-brand-dark bg-gray-50" 
-                              : "border-gray-200 text-gray-600 hover:border-gray-300"
-                           )}
-                        >
-                           {q}
-                           {selectedQuality === q && <Check className="w-3.5 h-3.5" />}
-                        </button>
-                     ))}
+                    )}
                   </div>
-               </div>
 
+                  {field.type === 'textarea' ? (
+                    <textarea 
+                       rows={2}
+                       value={formData[field.id]?.text || ''}
+                       onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: e.target.value } }))}
+                       placeholder={field.placeholder}
+                       className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm resize-none"
+                    />
+                  ) : field.type === 'image' ? (
+                    <label className="flex items-center gap-3 p-2 border border-dashed border-gray-300 bg-white rounded-xl hover:border-brand-pink/50 transition-all cursor-pointer">
+                       <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+                          {formData[field.id]?.text ? (
+                             <img src={formData[field.id].text} alt="Preview" className="w-full h-full object-contain" />
+                          ) : (
+                             <Upload className="w-4 h-4 text-gray-400" />
+                          )}
+                       </div>
+                       <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-gray-700">{formData[field.id]?.text ? 'Logo Selected' : 'Upload Logo'}</p>
+                       </div>
+                       <input 
+                          type="file" 
+                          className="hidden" 
+                          onChange={(e) => {
+                             const file = e.target.files?.[0];
+                             if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: reader.result as string } }));
+                                reader.readAsDataURL(file);
+                             }
+                          }} 
+                       />
+                    </label>
+                  ) : (
+                    <input 
+                       type="text"
+                       value={formData[field.id]?.text || ''}
+                       onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: e.target.value } }))}
+                       placeholder={field.placeholder}
+                       className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm"
+                    />
+                  )}
+                </div>
+              ))}
             </div>
-         </div>
-      </section>
+          </div>
+          
+        </div>
+      </div>
+
+      {/* RIGHT PANEL: Live Preview Area */}
+      <div className="flex-1 h-full relative flex flex-col bg-gray-50 no-custom-cursor">
+        
+        {/* Side Controls (Front/Back) */}
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30">
+          <div className="flex gap-1.5 bg-white/80 backdrop-blur-md rounded-2xl p-1.5 border border-gray-200 shadow-sm">
+             {[
+               { idx: 0, label: 'Front Side' },
+               { idx: 1, label: 'Back Side' },
+               { idx: 2, label: 'Left Side' },
+               { idx: 3, label: 'Right Side' }
+             ].filter(view => currentDesign?.wireframe_images?.[view.idx]).map((view) => (
+                <button 
+                   key={view.idx}
+                   onClick={() => setSelectedSideIndex(view.idx)}
+                   className={cn(
+                     "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden",
+                     selectedSideIndex === view.idx 
+                       ? "text-white shadow-md" 
+                       : "text-gray-500 hover:text-brand-dark hover:bg-gray-50"
+                   )}
+                >
+                   {selectedSideIndex === view.idx && (
+                     <motion.div 
+                       layoutId="activeSide"
+                       className="absolute inset-0 bg-brand-dark z-0"
+                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                     />
+                   )}
+                   <span className="relative z-10 italic">{view.label}</span>
+                </button>
+             ))}
+          </div>
+        </div>
+
+        {/* The Actual Preview Canvas */}
+        <div className="flex-1 w-full h-full p-8 md:p-12 flex items-center justify-center overflow-hidden">
+           <AnimatePresence mode="wait">
+             <motion.div 
+              key={`${selectedDesignIndex}-${selectedSideIndex}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              className={cn(
+                "relative bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden",
+                // Remove fixed min/max heights, let the flexbox and aspect ratio control it
+                "h-full max-h-full max-w-full flex items-center justify-center",
+                product.slug?.includes('id-card') ? "aspect-[2/3]" : 
+                product.slug?.includes('wedding') ? "aspect-[2/3]" :
+                product.slug?.includes('letter-head') ? "aspect-[1/1.41]" : 
+                "aspect-[3.5/2]"
+              )}
+            >
+               {currentPreview ? (
+                 <div 
+                    id="template-preview-container" 
+                    className="relative w-full h-full"
+                    style={{ containerType: 'inline-size' }}
+                 >
+                   <img 
+                     src={currentPreview} 
+                     alt="Preview" 
+                     style={{ filter: selectedColor === '#FFFFFF' ? 'none' : `hue-rotate(${selectedDesignIndex * 20}deg) brightness(0.9)` }}
+                     className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                   />
+                   
+                   {/* DYNAMIC TEXT OVERLAY */}
+                   <div className="absolute inset-0 z-10" onClick={() => setActiveField(null)}>
+                      {(() => {
+                         if (localMappings && Object.keys(localMappings).length > 0) {
+                            return allFields.map((field: any) => {
+                               const mapping = localMappings[field.id];
+                               if (!mapping) return null;
+                               
+                               const hasWidth = !!mapping.w;
+                               const left = `${mapping.x}%`;
+                               const top = `${mapping.y}%`;
+                               const transform = mapping.align === 'center' 
+                                 ? 'translateX(-50%)' 
+                                 : mapping.align === 'right' 
+                                   ? 'translateX(-100%)' 
+                                   : 'none';
+
+                               const autoMaxWidth = mapping.align === 'center'
+                                 ? (Math.min(mapping.x, 100 - mapping.x) * 2)
+                                 : mapping.align === 'right'
+                                   ? mapping.x
+                                   : (100 - mapping.x);
+
+                               // CQI SCALING for text
+                               // Base width of template assumed ~500px for mappings
+                               const baseFontSize = mapping.fontSize || 14;
+                               const cqiSize = (baseFontSize / 500) * 100;
+
+                               return (
+                                  <div
+                                    key={field.id}
+                                    onMouseDown={(e) => handleMouseDown(e, field.id, 'move')}
+                                    onClick={(e) => e.stopPropagation()}
+                                    style={{
+                                      position: 'absolute',
+                                      left,
+                                      top,
+                                      width: hasWidth ? `${mapping.w}%` : 'auto',
+                                      height: mapping.h ? `${mapping.h}%` : 'auto',
+                                      transform,
+                                      fontSize: `${cqiSize}cqi`,
+                                      fontWeight: mapping.fontWeight || 'normal',
+                                      fontFamily: mapping.fontFamily || 'inherit',
+                                      fontStyle: mapping.italic ? 'italic' : 'normal',
+                                      textAlign: mapping.align || 'left',
+                                      color: formData[field.id]?.color || mapping.color || '#FFD700',
+                                      opacity: mapping.opacity !== undefined ? mapping.opacity : 1,
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      alignItems: mapping.align === 'center' ? 'center' : mapping.align === 'right' ? 'flex-end' : 'flex-start',
+                                      justifyContent: 'center',
+                                      lineHeight: '1.2',
+                                      maxWidth: mapping.maxWidth ? `${mapping.maxWidth}%` : `${autoMaxWidth}%`,
+                                      cursor: isPreview ? 'default' : 'move',
+                                      border: (activeField === field.id && !isPreview) ? '2px dashed rgba(233, 30, 99, 0.5)' : '2px solid transparent',
+                                      padding: (activeField === field.id && !isPreview) ? '0.5cqi' : '0.5cqi',
+                                      boxSizing: 'border-box'
+                                    }}
+                                    className={cn(
+                                       "transition-colors overflow-visible group",
+                                       !isPreview && "hover:border-gray-300 hover:border-dashed"
+                                    )}
+                                  >
+                                    {field.type === 'image' ? (
+                                       formData[field.id]?.text ? (
+                                          <img src={formData[field.id].text} alt={field.label} className="w-full h-full object-contain pointer-events-none" />
+                                       ) : (
+                                          <div className={cn("w-full h-full border border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50/50 pointer-events-none p-1", isPreview && "opacity-0")}>
+                                             <Upload style={{ width: '3cqi', height: '3cqi' }} className="text-gray-400 mb-0.5" />
+                                             <span style={{ fontSize: '1.5cqi' }} className="font-black uppercase text-gray-400 text-center">Image</span>
+                                          </div>
+                                       )
+                                    ) : (
+                                      <span className={cn(
+                                        "whitespace-pre-line pointer-events-none",
+                                        mapping.italic && "italic"
+                                      )}>
+                                        {formData[field.id]?.text || field.placeholder?.replace('e.g. ', '') || field.label}
+                                      </span>
+                                    )}
+
+                                    {/* Resize Handle scaled with CQI */}
+                                    {!isPreview && activeField === field.id && (
+                                       <div 
+                                         onMouseDown={(e) => handleMouseDown(e, field.id, 'resize')}
+                                         style={{ width: '2cqi', height: '4cqi', maxWidth: '12px', maxHeight: '24px', minWidth: '6px', minHeight: '12px' }}
+                                         className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-brand-pink rounded-full cursor-ew-resize opacity-100 transition-opacity flex items-center justify-center shadow-md z-20"
+                                       >
+                                          <div className="w-0.5 h-1/2 bg-white/80 rounded-full" />
+                                       </div>
+                                    )}
+
+                                    {/* Floating Formatting Toolbar */}
+                                    {!isPreview && activeField === field.id && (
+                                      <div 
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-lg shadow-xl border border-gray-100 flex items-center gap-2 p-1.5 z-50 cursor-default pointer-events-auto"
+                                        style={{ fontSize: '12px', width: 'max-content' }}
+                                      >
+                                         <div className="flex gap-1 border-r border-gray-100 pr-2">
+                                           {['#FFD700', '#FFFFFF', '#000000', '#FF1493', '#800000', '#1A4D2E'].map(c => (
+                                             <button 
+                                               key={c}
+                                               onClick={() => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), color: c } }))}
+                                               className={cn("w-4 h-4 rounded-full border border-gray-200 hover:scale-110 transition-transform", (formData[field.id]?.color || mapping.color || '#FFD700') === c && "ring-2 ring-brand-pink ring-offset-1")}
+                                               style={{ backgroundColor: c }}
+                                             />
+                                           ))}
+                                         </div>
+                                         {field.type !== 'image' && (
+                                            <>
+                                              <div className="flex gap-1 border-r border-gray-100 pr-2">
+                                                <button onClick={() => updateFontSize(field.id, -1)} className="p-1 hover:bg-gray-100 rounded text-gray-600 font-bold" title="Smaller">A-</button>
+                                                <button onClick={() => updateFontSize(field.id, 1)} className="p-1 hover:bg-gray-100 rounded text-gray-600 font-bold" title="Bigger">A+</button>
+                                              </div>
+                                              <div className="flex gap-1 border-r border-gray-100 pr-2">
+                                                <button 
+                                                  onClick={() => updateFontStyle(field.id, 'bold')} 
+                                                  className={cn("p-1 rounded font-bold w-6 h-6 flex items-center justify-center", mapping.fontWeight === 'bold' ? "bg-brand-pink text-white" : "hover:bg-gray-100 text-gray-500")}
+                                                  title="Bold"
+                                                >B</button>
+                                                <button 
+                                                  onClick={() => updateFontStyle(field.id, 'italic')} 
+                                                  className={cn("p-1 rounded italic w-6 h-6 flex items-center justify-center", mapping.italic ? "bg-brand-pink text-white" : "hover:bg-gray-100 text-gray-500")}
+                                                  title="Italic"
+                                                >I</button>
+                                              </div>
+                                              <div className="flex gap-1 border-r border-gray-100 pr-2">
+                                                <select 
+                                                  value={mapping.fontFamily || 'Inter'} 
+                                                  onChange={(e) => updateFontFamily(field.id, e.target.value)}
+                                                  className="text-[10px] bg-gray-50 border-none rounded px-1 outline-none"
+                                                >
+                                                  <option value="Inter">Inter</option>
+                                                  <option value="Roboto">Roboto</option>
+                                                  <option value="Playfair Display">Playfair</option>
+                                                  <option value="Montserrat">Montserrat</option>
+                                                </select>
+                                              </div>
+                                              <div className="flex gap-1 border-r border-gray-100 pr-2">
+                                                <button onClick={() => updateTextAlign(field.id, 'left')} className={cn("p-1 rounded font-bold", mapping.align === 'left' ? "bg-gray-200 text-brand-dark" : "hover:bg-gray-100 text-gray-500")}>L</button>
+                                                <button onClick={() => updateTextAlign(field.id, 'center')} className={cn("p-1 rounded font-bold", mapping.align === 'center' ? "bg-gray-200 text-brand-dark" : "hover:bg-gray-100 text-gray-500")}>C</button>
+                                                <button onClick={() => updateTextAlign(field.id, 'right')} className={cn("p-1 rounded font-bold", mapping.align === 'right' ? "bg-gray-200 text-brand-dark" : "hover:bg-gray-100 text-gray-500")}>R</button>
+                                              </div>
+                                            </>
+                                         )}
+                                         {customFields.some((f: any) => f.id === field.id) && (
+                                           <div className="pl-1">
+                                             <button onClick={() => removeCustomField(field.id)} className="p-1 hover:bg-red-50 text-red-500 rounded"><Trash2 className="w-3 h-3" /></button>
+                                           </div>
+                                         )}
+                                      </div>
+                                    )}
+                                  </div>
+                               );
+                            });
+                         }
+                         return null;
+                    })()}
+                 </div>
+               </div>
+             ) : (
+               <div className="w-full h-full flex items-center justify-center text-gray-300 font-medium">
+                  {product.name}
+               </div>
+             )}
+            </motion.div>
+           </AnimatePresence>
+        </div>
+      </div>
 
       {/* 3. TEMPLATE GALLERY MODAL */}
       <AnimatePresence>

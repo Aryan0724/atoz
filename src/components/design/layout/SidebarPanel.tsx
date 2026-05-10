@@ -152,6 +152,10 @@ interface SidebarPanelProps {
   pageData?: any[];
   currentPageIndex?: number;
   onPageChange?: (index: number) => void;
+  onTemplateChange?: (index: number) => void;
+  selectedTemplateIndex?: number;
+  designConfig?: any;
+  activeView?: 'front' | 'back' | 'left' | 'right' | '3d';
 }
 
 const SidebarPanel = ({ 
@@ -188,7 +192,11 @@ const SidebarPanel = ({
   onVdpClear,
   pageData = [],
   currentPageIndex = 0,
-  onPageChange
+  onPageChange,
+  onTemplateChange,
+  selectedTemplateIndex = 0,
+  designConfig = {},
+  activeView = 'front'
 }: SidebarPanelProps) => {
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -380,6 +388,98 @@ const SidebarPanel = ({
       </div>
 
       <div className="flex-1 overflow-y-auto">
+        {/* ─── QUICK EDIT TAB ──────────────────────────────────── */}
+        {activeTab === 'quick_edit' && (
+          <div className="p-5 space-y-6">
+            <header>
+               <h4 className="text-[10px] font-black text-brand-pink uppercase tracking-[0.2em] mb-1 italic">Personalize Template</h4>
+               <p className="text-xs text-gray-500 font-medium">Update the fields below to see live changes on your design.</p>
+            </header>
+
+            <div className="space-y-5">
+              {(() => {
+                 const viewIdx = activeView === 'back' ? 1 : 0;
+                 const key = `${selectedTemplateIndex}_${viewIdx}`;
+                 const mappings = designConfig?.mappings?.[key] || designConfig?.mappings?.[viewIdx];
+                 
+                 if (!mappings) {
+                   return (
+                     <div className="p-8 text-center bg-gray-50 rounded-[32px] border border-gray-100">
+                        <LayoutIcon className="h-10 w-10 text-gray-200 mx-auto mb-3" />
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No predefined fields for this view</p>
+                        <button 
+                          onClick={() => onAddText("Your Text Here")}
+                          className="mt-4 px-4 py-2 bg-brand-olive text-white text-[10px] font-black rounded-xl uppercase tracking-widest"
+                        >
+                          Add Custom Text
+                        </button>
+                     </div>
+                   );
+                 }
+
+                 return Object.entries(mappings).map(([fieldName, config]: [string, any]) => {
+                    const canvasObjId = `mapping_${fieldName}`;
+                    // Find the object in layers to get its current text
+                    const layer = layers.find(l => l.id === canvasObjId);
+                    
+                    return (
+                      <div key={fieldName} className="group">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block ml-1 group-focus-within:text-brand-pink transition-colors">
+                          {fieldName.replace(/_/g, ' ')}
+                        </label>
+                        <div className="relative">
+                          <input 
+                            type="text"
+                            placeholder={`Enter ${fieldName.replace(/_/g, ' ')}...`}
+                            className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-3.5 text-sm font-medium focus:border-brand-pink/30 focus:ring-4 focus:ring-brand-pink/5 transition-all outline-none shadow-sm"
+                            value={layer?.name || ''}
+                            onChange={(e) => onUpdateObject?.(canvasObjId, { text: e.target.value })}
+                          />
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 opacity-0 group-focus-within:opacity-100 transition-opacity">
+                             <div className="w-1.5 h-1.5 rounded-full bg-brand-pink animate-pulse" />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                 });
+              })()}
+            </div>
+
+            <div className="pt-6 border-t border-gray-50">
+               <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-4">Want more freedom?</p>
+               <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => {
+                      onAddText("New Text Line");
+                      toast.success("Text added! You can now drag and place it.");
+                    }}
+                    className="flex flex-col items-center gap-2 p-4 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-brand-pink/20 rounded-2xl transition-all group"
+                  >
+                     <Type className="h-5 w-5 text-gray-400 group-hover:text-brand-pink" />
+                     <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">Add Text</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      // Trigger upload
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'image/*';
+                      input.onchange = (e: any) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleLocalFileUpload(file);
+                      };
+                      input.click();
+                    }}
+                    className="flex flex-col items-center gap-2 p-4 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-brand-pink/20 rounded-2xl transition-all group"
+                  >
+                     <Upload className="h-5 w-5 text-gray-400 group-hover:text-brand-pink" />
+                     <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">Add Logo</span>
+                  </button>
+               </div>
+            </div>
+          </div>
+        )}
+
         {/* ─── TEXT TAB ───────────────────────────────────────── */}
         {activeTab === 'text' && (
           <div className="p-4 space-y-2">
@@ -1105,6 +1205,50 @@ const SidebarPanel = ({
                   </button>
                 ))}
              </div>
+          </div>
+        )}
+        {/* ─── LAYOUTS TAB ─────────────────────────────────────── */}
+        {activeTab === 'layouts' && (
+          <div className="p-5 space-y-6">
+            <SectionLabel>Available Layouts</SectionLabel>
+            {colorVariants.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4">
+                {colorVariants.map((variant, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      onTemplateChange?.(index);
+                      toast.success(`Layout ${variant.name || index + 1} applied!`);
+                    }}
+                    className={cn(
+                      "aspect-[3.5/2] rounded-2xl border-2 transition-all relative group overflow-hidden bg-gray-50 flex flex-col",
+                      selectedTemplateIndex === index ? "border-brand-pink shadow-lg shadow-brand-pink/10" : "border-transparent hover:border-gray-200"
+                    )}
+                    style={{ aspectRatio: productCategory?.includes('ID Card') || productCategory?.includes('Wedding') ? '2/3' : '3.5/2' }}
+                  >
+                    <img 
+                      src={variant.wireframe_images?.[0] || variant.image_url} 
+                      alt={variant.name} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className={cn(
+                      "absolute inset-0 bg-brand-dark/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity",
+                      selectedTemplateIndex === index && "opacity-100 bg-brand-pink/20"
+                    )}>
+                      {selectedTemplateIndex === index && <Check className="w-6 h-6 text-white" />}
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-white/90 backdrop-blur-sm border-t border-gray-100">
+                      <p className="text-[9px] font-black text-brand-dark uppercase truncate">{variant.name || `Layout ${index + 1}`}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="py-20 text-center bg-gray-50 rounded-[32px] border border-dashed border-gray-200">
+                <LayoutGrid className="h-10 w-10 text-gray-200 mx-auto mb-3" />
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-10">No predefined layouts for this product</p>
+              </div>
+            )}
           </div>
         )}
       </div>

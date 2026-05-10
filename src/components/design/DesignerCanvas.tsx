@@ -27,7 +27,9 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   designMode = 'standard',
   designConfig = {},
   vdpData,
-  vdpRowIndex = 0
+  vdpRowIndex = 0,
+  initialTemplateIndex = 0,
+  activeView = 'front'
 }, ref) => {
   const BASE_WIDTH = designConfig?.canvas_width || 500;
   const BASE_HEIGHT = designConfig?.canvas_height || 625;
@@ -368,6 +370,48 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       canvas.renderAll();
     }, { crossOrigin: 'anonymous' });
   }, [canvas, productImage, productColor]);
+  
+  // POPULATE TEMPLATE MAPPINGS
+  useEffect(() => {
+    if (!canvas || !designConfig?.mappings) return;
+
+    // View index mapping: front=0, back=1
+    const viewIdx = activeView === 'back' ? 1 : 0;
+    const key = `${initialTemplateIndex}_${viewIdx}`;
+    const mappings = designConfig.mappings[key];
+
+    if (!mappings) return;
+
+    // Clear existing mapping objects to avoid duplication when switching templates
+    const existing = canvas.getObjects().filter((obj: any) => obj._isMapping);
+    existing.forEach(obj => canvas.remove(obj));
+
+    Object.entries(mappings).forEach(([fieldName, config]: [string, any]) => {
+      const left = (config.x / 100) * BASE_WIDTH;
+      const top = (config.y / 100) * BASE_HEIGHT;
+      
+      const text = new fabric.IText(fieldName.toUpperCase(), {
+        left,
+        top,
+        fontSize: config.fontSize || 24,
+        fontWeight: config.fontWeight || 'normal',
+        fontFamily: config.fontFamily || 'Inter',
+        fill: config.color || '#000000',
+        originX: config.align === 'center' ? 'center' : (config.align === 'right' ? 'right' : 'left'),
+        originY: 'center',
+        textAlign: config.align || 'left',
+        //@ts-ignore
+        id: `mapping_${fieldName}`,
+        _isMapping: true,
+        name: fieldName
+      });
+
+      canvas.add(text);
+    });
+
+    canvas.renderAll();
+    onObjectsUpdated?.();
+  }, [canvas, initialTemplateIndex, designConfig, activeView]);
 
   // Guidelines and Interaction Events
 
@@ -511,6 +555,12 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       const targetObj = canvas.getObjects().find((obj: any) => obj.id === id);
       if (!targetObj) return;
 
+      // Handle Text Updates
+      if (properties.text !== undefined && (targetObj.type === 'i-text' || targetObj.type === 'text')) {
+        (targetObj as fabric.IText).set('text', properties.text);
+      }
+
+      if (properties.fill !== undefined) targetObj.set('fill', properties.fill);
       if (properties.visible !== undefined) targetObj.set('visible', properties.visible);
       if (properties.locked !== undefined) {
         targetObj.set({
@@ -520,6 +570,15 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
           hoverCursor: properties.locked ? 'default' : 'move'
         });
       }
+
+      // Sync other properties if needed
+      if (properties.left !== undefined) targetObj.set('left', properties.left);
+      if (properties.top !== undefined) targetObj.set('top', properties.top);
+      if (properties.fontSize !== undefined && (targetObj.type === 'i-text' || targetObj.type === 'text')) {
+         (targetObj as fabric.IText).set('fontSize', properties.fontSize);
+      }
+
+      targetObj.setCoords();
       canvas.renderAll();
       onObjectsUpdated?.();
       onHistoryChange?.();
