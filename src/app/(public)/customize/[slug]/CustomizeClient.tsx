@@ -95,6 +95,8 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     }
 
     // NEW: If the product is a template-form product, default to the 'quick_edit' tab
+    if ((product as any).design_mode === 'template_form' || (product as any).design_config?.mappings) {
+      setActiveTab('quick_edit' as any);
     }
   }, [product]); // eslint-disable-line react-hooks/exhaustive-deps
 
