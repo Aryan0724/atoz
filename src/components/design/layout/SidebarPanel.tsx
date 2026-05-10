@@ -142,7 +142,7 @@ interface SidebarPanelProps {
   onAddPattern?: (url: string) => void;
   onClearDesign?: () => void;
   qualityPrices?: Record<string, number>;
-  colorVariants?: { name: string, hex: string, image_url: string }[];
+  colorVariants?: { name: string, hex: string, image_url: string, wireframe_images?: string[] }[];
   designMode?: string;
   vdpData?: { headers: string[], rows: any[] } | null;
   vdpRowIndex?: number;
