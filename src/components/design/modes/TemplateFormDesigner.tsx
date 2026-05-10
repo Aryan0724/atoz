@@ -71,7 +71,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
        });
        return merged;
     });
-  }, [selectedDesignIndex, selectedSideIndex, designConfig]); // Removed customFields dependency
+  }, [selectedDesignIndex, selectedSideIndex, designConfig]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle Dragging & Resizing
   React.useEffect(() => {

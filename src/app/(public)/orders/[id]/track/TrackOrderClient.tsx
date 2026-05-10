@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Package, Truck, CheckCircle2, Clock, MapPin, Calendar,
   ArrowLeft, ChevronRight, ShieldCheck, AlertCircle,
-  ThumbsUp, ThumbsDown, Banknote, Factory, Send
+  ThumbsUp, ThumbsDown, Banknote, Factory, Send, Layout
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
@@ -308,7 +308,7 @@ export default function TrackOrderClient({ order }: TrackOrderClientProps) {
                 {liveTracking && liveTracking.tracking_data && (
                   <div className="mt-8 p-8 bg-brand-pink/5 rounded-[32px] border border-brand-pink/10">
                     <div className="flex items-center gap-3 mb-6">
-                       <Box className="h-5 w-5 text-brand-pink animate-pulse" />
+                       <Package className="h-5 w-5 text-brand-pink animate-pulse" />
                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-pink">Live Shiprocket Status</h4>
                     </div>
                     

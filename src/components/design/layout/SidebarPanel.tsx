@@ -10,7 +10,7 @@ import { podGraphics, podGraphicCategories } from '@/lib/data/podGraphics';
 import { toast } from 'sonner';
 import IconifyTab from '@/components/design/controls/tabs/IconifyTab';
 import { 
-  Type, Loader2, Upload, Plus, Search, LayoutGrid, X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes, Wand2, History, RefreshCcw, Download, Trash2, ArrowRight, Layers, Lock, Unlock, Eye, EyeOff, Minus, ShieldAlert
+  Type, Loader2, Upload, Plus, Search, LayoutGrid, X, Sparkles, Check, ChevronRight, Grid, Image as ImageIcon, Shapes, Wand2, History, RefreshCcw, Download, Trash2, ArrowRight, Layers, Lock, Unlock, Eye, EyeOff, Minus, ShieldAlert, Layout
 } from 'lucide-react';
 import StockTab from '@/components/design/controls/tabs/StockTab';
 import VdpDataTab from '@/components/design/controls/tabs/VdpDataTab';
@@ -405,7 +405,7 @@ const SidebarPanel = ({
                  if (!mappings) {
                    return (
                      <div className="p-8 text-center bg-gray-50 rounded-[32px] border border-gray-100">
-                        <LayoutIcon className="h-10 w-10 text-gray-200 mx-auto mb-3" />
+                        <Layout className="h-10 w-10 text-gray-200 mx-auto mb-3" />
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No predefined fields for this view</p>
                         <button 
                           onClick={() => onAddText("Your Text Here")}
