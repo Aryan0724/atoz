@@ -95,10 +95,8 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     }
 
     // NEW: If the product is a template-form product, default to the 'quick_edit' tab
-    if ((product as any).design_mode === 'template_form' || (product as any).design_config?.mappings) {
-      setActiveTab('quick_edit' as any);
     }
-  }, []);
+  }, [product]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let base = product.base_price || 0;
@@ -126,7 +124,12 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
          qPrices[q] = Math.round(baseAmount * m) - baseAmount;
        }
     });
+    setUnitPrice(base);
     setQualityPrices(qPrices);
+  }, [product, selectedQuality]);
+
+  useEffect(() => {
+    let base = unitPrice;
 
     // Design adjustments
     const hasFrontDesign = activeView === 'front' ? layers.length > 0 : (viewData.front?.objects?.length > 0);
