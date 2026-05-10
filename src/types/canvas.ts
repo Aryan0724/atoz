@@ -50,7 +50,7 @@ export interface DesignerCanvasProps {
   vdpData?: { headers: string[], rows: any[] } | null;
   vdpRowIndex?: number;
   initialTemplateIndex?: number;
-  activeView?: 'front' | 'back' | 'left' | 'right';
+  activeView?: 'front' | 'back' | 'left' | 'right' | '3d';
 }
 
 export interface DesignerCanvasRef {
