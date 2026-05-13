@@ -13,7 +13,7 @@ import FloatingToolbar from '@/components/design/layout/FloatingToolbar';
 import ThreeDPreview from '@/components/design/ThreeDPreview';
 
 import {
-  ArrowLeft, Check, CheckCircle2, Loader2, Plus, RotateCcw, LayoutGrid, ZoomOut, ZoomIn, Hand, Info, Palette, Type, Square, Upload, Sparkles, Download, Minus
+  ArrowLeft, Check, CheckCircle2, Loader2, Plus, RotateCcw, LayoutGrid, ZoomOut, ZoomIn, Hand, Info, Palette, Type, Square, Upload, Sparkles, Download, Minus, Eye, EyeOff
 } from 'lucide-react';
 import Link from 'next/link';
 import { Product } from '@/lib/supabase/types';
