@@ -28,6 +28,14 @@ import { X, Grid, Trash2 } from 'lucide-react';
 const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>((props, ref) => {
   const { product, designConfig, onObjectsUpdated, initialTemplateIndex } = props;
 
+
+  const [formData, setFormData] = useState<Record<string, { text: string, color?: string }>>({});
+  const [selectedDesignIndex, setSelectedDesignIndex] = useState(initialTemplateIndex || 0);
+  const [selectedSideIndex, setSelectedSideIndex] = useState(0); // 0=Front, 1=Back
+  const [selectedColor, setSelectedColor] = useState('#FFD700');
+  const [selectedQuality, setSelectedQuality] = useState('Standard Matte');
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+
   const designs = (product as any).color_variants?.length > 0 
     ? (product as any).color_variants 
     : [
@@ -38,12 +46,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       ];
 
   const currentDesign = designs[selectedDesignIndex] || designs[0];
-  const [formData, setFormData] = useState<Record<string, { text: string, color?: string }>>({});
-  const [selectedDesignIndex, setSelectedDesignIndex] = useState(initialTemplateIndex || 0);
-  const [selectedSideIndex, setSelectedSideIndex] = useState(0); // 0=Front, 1=Back
-  const [selectedColor, setSelectedColor] = useState('#FFD700');
-  const [selectedQuality, setSelectedQuality] = useState('Standard Matte');
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   // --- DRAG & DROP AND CUSTOM ELEMENTS STATE ---
   const [localMappings, setLocalMappings] = useState<Record<string, any>>({});
