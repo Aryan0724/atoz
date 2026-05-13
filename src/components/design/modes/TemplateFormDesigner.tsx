@@ -37,17 +37,24 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const designs = (product as any).color_variants?.length > 0 
-    ? (product as any).color_variants 
-    : [
-        { 
-          name: 'Default Design', 
-          wireframe_images: designConfig?.templates?.map((t: any) => t.preview) || product.template_images || product.images || []
-        }
-      ];
+  // 1. STATE & CALCULATIONS
+  const designs = React.useMemo(() => {
+    return (product as any).color_variants?.length > 0 
+      ? (product as any).color_variants 
+      : [
+          { 
+            name: 'Default Design', 
+            wireframe_images: designConfig?.templates?.map((t: any) => t.preview) || product.template_images || product.images || []
+          }
+        ];
+  }, [product, designConfig]);
 
   const currentDesign = designs[selectedDesignIndex] || designs[0];
-
+  
+  const allFields = React.useMemo(() => {
+    const baseFields = designConfig?.templates?.[selectedDesignIndex]?.fields || product.template_fields || [];
+    return [...baseFields, ...customFields];
+  }, [designConfig, selectedDesignIndex, product.template_fields, customFields]);
   // --- DRAG & DROP AND CUSTOM ELEMENTS STATE ---
   const [localMappings, setLocalMappings] = useState<Record<string, any>>({});
   const [customFields, setCustomFields] = useState<any[]>([]);
@@ -97,58 +104,63 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         const rect = container.getBoundingClientRect();
         const canvasSize = { w: rect.width, h: rect.height };
 
-        const clientX = e.clientX;
-        const clientY = e.clientY;
+  React.useEffect(() => {
+    if (!isDragging && !isResizing) return;
 
-        const dx = ((clientX - dragStartPos.x) / canvasSize.w) * 100;
-        const dy = ((clientY - dragStartPos.y) / canvasSize.h) * 100;
+    const handleMove = (e: PointerEvent) => {
+      const container = containerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      if (!w || !h) return;
 
-        setLocalMappings(prev => {
-          const field = prev[activeField];
-          if (!field) return prev;
+      const dx = ((e.clientX - dragStartPos.x) / w) * 100;
+      const dy = ((e.clientY - dragStartPos.y) / h) * 100;
 
-          if (isDragging) {
-             return {
-               ...prev,
-               [activeField]: {
-                 ...field,
-                 x: Math.max(0, Math.min(100 - (field.w || 0), initialFieldPos.x + dx)),
-                 y: Math.max(0, Math.min(100 - (field.h || 0), initialFieldPos.y + dy))
-               }
-             };
-          } else if (isResizing) {
-             return {
-               ...prev,
-               [activeField]: {
-                 ...field,
-                 w: Math.max(10, Math.min(100 - initialFieldPos.x, initialFieldPos.w + dx)),
-                 h: Math.max(5, Math.min(100 - initialFieldPos.y, initialFieldPos.h + dy))
-               }
-             };
-          }
-          
-          return prev;
-        });
-      };
+      setLocalMappings(prev => {
+        const field = prev[activeField];
+        if (!field) return prev;
 
-      const handleEnd = () => {
-        setIsDragging(false);
-        setIsResizing(false);
-        onObjectsUpdated?.();
-      };
+        if (isDragging) {
+          return {
+            ...prev,
+            [activeField]: {
+              ...field,
+              x: initialFieldPos.x + dx,
+              y: initialFieldPos.y + dy
+            }
+          };
+        } else if (isResizing) {
+          return {
+            ...prev,
+            [activeField]: {
+              ...field,
+              w: Math.max(5, initialFieldPos.w + dx),
+              h: Math.max(2, initialFieldPos.h + dy)
+            }
+          };
+        }
+        return prev;
+      });
+    };
 
-      if (isDragging || isResizing) {
-        window.addEventListener('pointermove', handleMove);
-        window.addEventListener('pointerup', handleEnd);
-        window.addEventListener('pointercancel', handleEnd);
-      }
+    const handleEnd = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+      onObjectsUpdated?.();
+    };
 
-      return () => {
-        window.removeEventListener('pointermove', handleMove);
-        window.removeEventListener('pointerup', handleEnd);
-        window.removeEventListener('pointercancel', handleEnd);
-      };
-  }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos]);
+    window.addEventListener('pointermove', handleMove, { passive: true });
+    window.addEventListener('pointerup', handleEnd);
+    window.addEventListener('pointercancel', handleEnd);
+
+    return () => {
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerup', handleEnd);
+      window.removeEventListener('pointercancel', handleEnd);
+    };
+  }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos, onObjectsUpdated]);
 
   const handleStart = (e: React.PointerEvent, fieldId: string, action: 'move' | 'resize') => {
     if (isPreview) return;
@@ -435,7 +447,10 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   };
   
   React.useEffect(() => {
-    onObjectsUpdated?.();
+    const timer = setTimeout(() => {
+      onObjectsUpdated?.();
+    }, 1000); // Debounce preview generation
+    return () => clearTimeout(timer);
   }, [onObjectsUpdated, formData]);
 
   return (
@@ -611,7 +626,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                         touchAction: 'none',
                                       }}
                                       className={cn(
-                                        "transition-all overflow-visible select-none"
+                                        "overflow-visible select-none",
+                                        !isDragging && !isResizing && "transition-all duration-300 ease-out"
                                       )}
                                     >
 
