@@ -257,14 +257,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     });
   };
 
-  const updateTextAlign = (fieldId: string, align: 'left' | 'center' | 'right') => {
-    setLocalMappings(prev => {
-      const f = prev[fieldId];
-      if (!f) return prev;
-      return { ...prev, [fieldId]: { ...f, align } };
-    });
-  };
-
   const removeCustomField = (fieldId: string) => {
     setCustomFields(prev => prev.filter(f => f.id !== fieldId));
     setLocalMappings(prev => {
@@ -502,17 +494,9 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                const hasWidth = !!mapping.w;
                                const left = `${mapping.x}%`;
                                const top = `${mapping.y}%`;
-                               const transform = mapping.align === 'center' 
-                                 ? 'translateX(-50%)' 
-                                 : mapping.align === 'right' 
-                                   ? 'translateX(-100%)' 
-                                   : 'none';
+                               const transform = 'none';
 
-                               const autoMaxWidth = mapping.align === 'center'
-                                 ? (Math.min(mapping.x, 100 - mapping.x) * 2)
-                                 : mapping.align === 'right'
-                                   ? mapping.x
-                                   : (100 - mapping.x);
+                               const autoMaxWidth = (100 - mapping.x);
 
                                // CQI SCALING for text
                                // Base width of template assumed ~500px for mappings
@@ -545,12 +529,12 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                         fontWeight: mapping.fontWeight || 'normal',
                                         fontFamily: mapping.fontFamily || 'inherit',
                                         fontStyle: mapping.italic ? 'italic' : 'normal',
-                                        textAlign: mapping.align || 'left',
+                                        textAlign: 'left',
                                         color: formData[field.id]?.color || mapping.color || '#FFD700',
                                         opacity: mapping.opacity !== undefined ? mapping.opacity : 1,
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        alignItems: mapping.align === 'center' ? 'center' : mapping.align === 'right' ? 'flex-end' : 'flex-start',
+                                        alignItems: 'flex-start',
                                         justifyContent: 'center',
                                         lineHeight: mapping.lineHeight || '1.2',
                                         maxWidth: mapping.maxWidth ? `${mapping.maxWidth}%` : `${autoMaxWidth}%`,
@@ -676,9 +660,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                                  </select>
                                                </div>
                                                <div className="flex gap-0.5">
-                                                 <button onClick={() => updateTextAlign(field.id, 'left')} className={cn("w-5 h-5 rounded text-[9px] font-bold", mapping.align === 'left' ? "bg-gray-100 text-brand-dark" : "hover:bg-gray-100 text-gray-400")}>L</button>
-                                                 <button onClick={() => updateTextAlign(field.id, 'center')} className={cn("w-5 h-5 rounded text-[9px] font-bold", mapping.align === 'center' ? "bg-gray-100 text-brand-dark" : "hover:bg-gray-100 text-gray-400")}>C</button>
-                                                 <button onClick={() => updateTextAlign(field.id, 'right')} className={cn("w-5 h-5 rounded text-[9px] font-bold", mapping.align === 'right' ? "bg-gray-100 text-brand-dark" : "hover:bg-gray-100 text-gray-400")}>R</button>
+                                                 <button onClick={() => removeCustomField(field.id)} className="w-5 h-5 rounded text-[9px] hover:bg-red-50 text-red-500 flex items-center justify-center" title="Delete Element"><Trash2 className="w-3 h-3" /></button>
                                                </div>
                                              </>
                                           )}
