@@ -401,22 +401,24 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="bg-[#f0f0e8] p-1 rounded-xl flex items-center">
-            <button 
-              onClick={() => { if (isPreviewMode) { handleViewChange('front'); } }}
-              className={cn(
-                "px-4 md:px-6 py-1.5 text-[10px] md:text-[11px] font-black rounded-lg tracking-tight uppercase transition-all",
-                !isPreviewMode ? "bg-brand-olive text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
-              )}
-            >Edit</button>
-            <button 
-              onClick={() => { if (!isPreviewMode) { handleViewChange('3d'); } }}
-              className={cn(
-                "px-4 md:px-6 py-1.5 text-[10px] md:text-[11px] font-black rounded-lg tracking-tight uppercase transition-all",
-                isPreviewMode ? "bg-brand-olive text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
-              )}
-            >Preview</button>
-          </div>
+          {!isTemplateForm && (
+            <div className="bg-[#f0f0e8] p-1 rounded-xl flex items-center">
+              <button 
+                onClick={() => { if (isPreviewMode) { handleViewChange('front'); } }}
+                className={cn(
+                  "px-4 md:px-6 py-1.5 text-[10px] md:text-[11px] font-black rounded-lg tracking-tight uppercase transition-all",
+                  !isPreviewMode ? "bg-brand-olive text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
+                )}
+              >Edit</button>
+              <button 
+                onClick={() => { if (!isPreviewMode) { handleViewChange('3d'); } }}
+                className={cn(
+                  "px-4 md:px-6 py-1.5 text-[10px] md:text-[11px] font-black rounded-lg tracking-tight uppercase transition-all",
+                  isPreviewMode ? "bg-brand-olive text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
+                )}
+              >Preview</button>
+            </div>
+          )}
         </div>
       </header>
 
