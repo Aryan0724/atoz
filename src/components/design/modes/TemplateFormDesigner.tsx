@@ -52,9 +52,20 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const currentDesign = designs[selectedDesignIndex] || designs[0];
   
   const allFields = React.useMemo(() => {
-    const baseFields = designConfig?.templates?.[selectedDesignIndex]?.fields || product.template_fields || [];
+    const templateFields = designConfig?.templates?.[selectedDesignIndex]?.fields || product.template_fields;
+    const globalFields = (designConfig?.fields && designConfig.fields.length > 0) ? designConfig.fields : null;
+    
+    const baseFields = templateFields || globalFields || [
+      { id: 'name', label: 'Full Name', type: 'text', icon: 'User', placeholder: 'e.g. John Doe' },
+      { id: 'title', label: 'Job Title', type: 'text', icon: 'Briefcase', placeholder: 'e.g. Creative Director' },
+      { id: 'phone', label: 'Phone Number', type: 'text', icon: 'Phone', placeholder: '+91 98765 43210' },
+      { id: 'email', label: 'Email Address', type: 'email', icon: 'Mail', placeholder: 'john@example.com' },
+      { id: 'address', label: 'Address', type: 'textarea', icon: 'MapPin', placeholder: 'Enter address...' },
+    ];
+    
     return [...baseFields, ...customFields];
   }, [designConfig, selectedDesignIndex, product.template_fields, customFields]);
+
   // --- DRAG & DROP AND CUSTOM ELEMENTS STATE ---
   const [localMappings, setLocalMappings] = useState<Record<string, any>>({});
   const [customFields, setCustomFields] = useState<any[]>([]);
@@ -68,16 +79,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   const isPreview = props.activeView === '3d';
   const containerRef = React.useRef<HTMLDivElement>(null);
-
-  const baseFields = (designConfig?.fields && designConfig.fields.length > 0) ? designConfig.fields : [
-    { id: 'name', label: 'Full Name', type: 'text', icon: 'User', placeholder: 'e.g. John Doe' },
-    { id: 'title', label: 'Job Title', type: 'text', icon: 'Briefcase', placeholder: 'e.g. Creative Director' },
-    { id: 'phone', label: 'Phone Number', type: 'text', icon: 'Phone', placeholder: '+91 98765 43210' },
-    { id: 'email', label: 'Email Address', type: 'email', icon: 'Mail', placeholder: 'john@example.com' },
-    { id: 'address', label: 'Address', type: 'textarea', icon: 'MapPin', placeholder: 'Enter address...' },
-  ];
-
-  const allFields = [...baseFields, ...customFields];
 
   // Initialize mappings when template or side changes
   React.useEffect(() => {
