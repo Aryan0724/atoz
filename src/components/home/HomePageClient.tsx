@@ -390,14 +390,14 @@ export default function HomePageClient({ config: initialConfig, products = [], b
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
             {(products.length > 0 ? products : [
-              { id: '1', name: "Luxe Business Cards", price: 1499, image: "https://images.unsplash.com/photo-1589330694653-ded6df03f754?q=80&w=2000&auto=format&fit=crop" },
-              { id: '2', name: "Executive Leather Diary", price: 899, image: "https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=2000&auto=format&fit=crop" },
-              { id: '3', name: "Premium Onboarding Kit", price: 3499, image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=2000&auto=format&fit=crop" },
-              { id: '4', name: "Sustainable Packaging", price: 499, image: "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?q=80&w=2000&auto=format&fit=crop" },
-              { id: '5', name: "Corporate Letterheads", price: 1299, image: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=2000&auto=format&fit=crop" },
-              { id: '6', name: "Minimalist ID Cards", price: 299, image: "https://images.unsplash.com/photo-1598301257982-0cf014dcc523?q=80&w=2000&auto=format&fit=crop" },
-              { id: '7', name: "Branded Ceramic Mugs", price: 450, image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=2000&auto=format&fit=crop" },
-              { id: '8', name: "Premium Tech Swag", price: 2499, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2000&auto=format&fit=crop" }
+              { id: '1', slug: 'luxe-business-cards', name: "Luxe Business Cards", price: 1499, image: "https://images.unsplash.com/photo-1589330694653-ded6df03f754?q=80&w=2000&auto=format&fit=crop" },
+              { id: '2', slug: 'executive-leather-diary', name: "Executive Leather Diary", price: 899, image: "https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=2000&auto=format&fit=crop" },
+              { id: '3', slug: 'premium-onboarding-kit', name: "Premium Onboarding Kit", price: 3499, image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=2000&auto=format&fit=crop" },
+              { id: '4', slug: 'sustainable-packaging', name: "Sustainable Packaging", price: 499, image: "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?q=80&w=2000&auto=format&fit=crop" },
+              { id: '5', slug: 'corporate-letterheads', name: "Corporate Letterheads", price: 1299, image: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=2000&auto=format&fit=crop" },
+              { id: '6', slug: 'minimalist-id-cards', name: "Minimalist ID Cards", price: 299, image: "https://images.unsplash.com/photo-1598301257982-0cf014dcc523?q=80&w=2000&auto=format&fit=crop" },
+              { id: '7', slug: 'branded-ceramic-mugs', name: "Branded Ceramic Mugs", price: 450, image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=2000&auto=format&fit=crop" },
+              { id: '8', slug: 'premium-tech-swag', name: "Premium Tech Swag", price: 2499, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2000&auto=format&fit=crop" }
             ]).map((product: any, idx: number) => {
               // Intelligent image mapping for broken/placeholder DB images
               let finalImage = product.image_url || (product.images && product.images[0]) || product.image;
