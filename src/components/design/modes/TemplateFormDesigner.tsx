@@ -412,8 +412,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       >
         
         {/* Side Controls (Front/Back) - BOTTOM on mobile, TOP on desktop */}
-        <div className="absolute bottom-4 md:top-6 left-1/2 -translate-x-1/2 z-30 w-[95%] md:w-auto">
-          <div className="flex gap-1 bg-white/80 backdrop-blur-md rounded-xl md:rounded-2xl p-1 md:p-1.5 border border-gray-200 shadow-sm overflow-x-auto no-scrollbar">
+        <div className="absolute bottom-4 md:top-6 left-1/2 -translate-x-1/2 z-30 w-[95%] md:w-auto pointer-events-none">
+          <div className="flex gap-1 bg-white/80 backdrop-blur-md rounded-xl md:rounded-2xl p-1 md:p-1.5 border border-gray-200 shadow-sm overflow-x-auto no-scrollbar pointer-events-auto">
              {[
                { idx: 0, label: 'Front' },
                { idx: 1, label: 'Back' },
@@ -477,8 +477,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                    {/* Background click to deselect */}
                    <div className="absolute inset-0 z-0" onClick={() => setActiveField(null)} />
                    
-                   {/* Elements layer - pointer-events-auto so children can receive events */}
-                   <div className="absolute inset-0" style={{ zIndex: 10 }}>
+                   {/* Elements layer - z-index 50 to be above overlays, pointer-events-auto so children can receive events */}
+                   <div className="absolute inset-0" style={{ zIndex: 50 }}>
                       {(() => {
                          if (localMappings && Object.keys(localMappings).length > 0) {
                             return allFields.map((field: any) => {
