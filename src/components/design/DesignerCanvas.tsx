@@ -98,9 +98,11 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       selectionBorderColor: '#1890ff',
       selectionLineWidth: 1,
       allowTouchScrolling: false,
+      // @ts-ignore
       fireTouchEvents: true,
+      // @ts-ignore
       stopContextMenu: true,
-    });
+    } as any);
 
     fabricCanvas.on('drop', (e: any) => {
       const dropEvent = e.e as DragEvent;
