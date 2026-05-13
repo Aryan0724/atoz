@@ -8,6 +8,7 @@ import { useCanvasActions } from '@/hooks/design/useCanvasActions';
 import { loadGoogleFont } from '@/lib/fontUtils';
 import { DesignerCanvasProps, DesignerCanvasRef, getObjectProperties, CanvasObjectProperties } from '@/types/canvas';
 import { recolorWireframePng } from '@/lib/recolorWireframe';
+import { cn } from '@/lib/utils';
 
 const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(({
   productImage,
