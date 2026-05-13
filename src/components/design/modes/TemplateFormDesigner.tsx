@@ -504,7 +504,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                const baseFontSize = mapping.fontSize || 14;
                                const cqiSize = (baseFontSize / 500) * 100;
 
-                                                           <div
+                               return (
+                                  <div
                                       key={field.id}
                                       style={{
                                         position: 'absolute',
