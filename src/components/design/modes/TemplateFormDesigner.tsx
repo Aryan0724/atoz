@@ -89,7 +89,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   // Handle Dragging & Resizing
   React.useEffect(() => {
-      const handleMove = (e: MouseEvent | TouchEvent) => {
+      const handleMove = (e: PointerEvent) => {
         if ((!isDragging && !isResizing) || !activeField) return;
 
         const container = document.getElementById('template-preview-container');
@@ -97,8 +97,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         const rect = container.getBoundingClientRect();
         const canvasSize = { w: rect.width, h: rect.height };
 
-        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        const clientX = e.clientX;
+        const clientY = e.clientY;
 
         const dx = ((clientX - dragStartPos.x) / canvasSize.w) * 100;
         const dy = ((clientY - dragStartPos.y) / canvasSize.h) * 100;
@@ -137,34 +137,32 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       };
 
       if (isDragging || isResizing) {
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', handleEnd);
-        window.addEventListener('touchmove', handleMove, { passive: false });
-        window.addEventListener('touchend', handleEnd);
+        window.addEventListener('pointermove', handleMove);
+        window.addEventListener('pointerup', handleEnd);
+        window.addEventListener('pointercancel', handleEnd);
       }
 
       return () => {
-        window.removeEventListener('mousemove', handleMove);
-        window.removeEventListener('mouseup', handleEnd);
-        window.removeEventListener('touchmove', handleMove);
-        window.removeEventListener('touchend', handleEnd);
+        window.removeEventListener('pointermove', handleMove);
+        window.removeEventListener('pointerup', handleEnd);
+        window.removeEventListener('pointercancel', handleEnd);
       };
   }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos]);
 
-  const handleStart = (e: React.MouseEvent | React.TouchEvent, fieldId: string, action: 'move' | 'resize') => {
+  const handleStart = (e: React.PointerEvent, fieldId: string, action: 'move' | 'resize') => {
     if (isPreview) return;
     e.preventDefault(); 
     e.stopPropagation();
+    
+    // Capture pointer to ensure move/up work even if mouse leaves the element
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    
     setActiveField(fieldId);
     
     if (action === 'move') setIsDragging(true);
     if (action === 'resize') setIsResizing(true);
     
-    const touch = 'touches' in e ? e.touches[0] : null;
-    const clientX = touch ? touch.clientX : (e as React.MouseEvent).clientX;
-    const clientY = touch ? touch.clientY : (e as React.MouseEvent).clientY;
-
-    setDragStartPos({ x: clientX, y: clientY });
+    setDragStartPos({ x: e.clientX, y: e.clientY });
     setInitialFieldPos({
        x: localMappings[fieldId]?.x || 0,
        y: localMappings[fieldId]?.y || 0,
@@ -500,8 +498,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                return (
                                   <div
                                     key={field.id}
-                                    onMouseDown={(e) => handleStart(e, field.id, 'move')}
-                                    onTouchStart={(e) => handleStart(e, field.id, 'move')}
+                                    onPointerDown={(e) => handleStart(e, field.id, 'move')}
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       setActiveField(field.id);
@@ -557,8 +554,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                     {/* Resize Handle scaled with CQI */}
                                     {!isPreview && activeField === field.id && (
                                        <div 
-                                         onMouseDown={(e) => handleStart(e, field.id, 'resize')}
-                                         onTouchStart={(e) => handleStart(e, field.id, 'resize')}
+                                         onPointerDown={(e) => handleStart(e, field.id, 'resize')}
                                          style={{ width: '2cqi', height: '4cqi', maxWidth: '12px', maxHeight: '24px', minWidth: '6px', minHeight: '12px' }}
                                          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-brand-pink rounded-full cursor-ew-resize opacity-100 transition-opacity flex items-center justify-center shadow-md z-20"
                                        >
@@ -569,7 +565,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                     {/* Floating Formatting Toolbar */}
                                     {!isPreview && activeField === field.id && (
                                       <div 
-                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onPointerDown={(e) => e.stopPropagation()}
                                         className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-lg shadow-xl border border-gray-100 flex items-center gap-2 p-1.5 z-50 cursor-default pointer-events-auto"
                                         style={{ fontSize: '12px', width: 'max-content' }}
                                       >
