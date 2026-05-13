@@ -342,11 +342,11 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-60px)] md:h-[calc(100vh-60px)] flex flex-col md:flex-row bg-[#fbfbf9] overflow-hidden">
+    <div className="w-full min-h-[calc(100vh-60px)] md:h-[calc(100vh-60px)] flex flex-col-reverse md:flex-row bg-[#fbfbf9] overflow-hidden">
       
       {/* LEFT PANEL: Form and Config */}
-      <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 h-full overflow-y-auto border-r border-gray-100 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 custom-scrollbar">
-        <div className="p-6 md:p-8 space-y-10">
+      <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 h-auto md:h-full overflow-y-auto border-r border-gray-100 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 custom-scrollbar">
+        <div className="p-4 md:p-8 space-y-6 md:space-y-10">
           
           {/* Template Selection */}
           {designs.length > 1 && (
@@ -476,19 +476,19 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       <div className="flex-1 h-full relative flex flex-col bg-gray-50 no-custom-cursor">
         
         {/* Side Controls (Front/Back) */}
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30">
-          <div className="flex gap-1.5 bg-white/80 backdrop-blur-md rounded-2xl p-1.5 border border-gray-200 shadow-sm">
+        <div className="absolute top-4 md:top-6 left-1/2 -translate-x-1/2 z-30 w-[95%] md:w-auto">
+          <div className="flex gap-1 bg-white/80 backdrop-blur-md rounded-xl md:rounded-2xl p-1 md:p-1.5 border border-gray-200 shadow-sm overflow-x-auto no-scrollbar">
              {[
-               { idx: 0, label: 'Front Side' },
-               { idx: 1, label: 'Back Side' },
-               { idx: 2, label: 'Left Side' },
-               { idx: 3, label: 'Right Side' }
+               { idx: 0, label: 'Front' },
+               { idx: 1, label: 'Back' },
+               { idx: 2, label: 'Left' },
+               { idx: 3, label: 'Right' }
              ].filter(view => currentDesign?.wireframe_images?.[view.idx]).map((view) => (
                 <button 
                    key={view.idx}
                    onClick={() => setSelectedSideIndex(view.idx)}
                    className={cn(
-                     "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden",
+                     "px-4 md:px-6 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden shrink-0",
                      selectedSideIndex === view.idx 
                        ? "text-white shadow-md" 
                        : "text-gray-500 hover:text-brand-dark hover:bg-gray-50"
@@ -508,7 +508,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         </div>
 
         {/* The Actual Preview Canvas */}
-        <div className="flex-1 w-full h-full p-8 md:p-12 flex items-center justify-center overflow-hidden">
+        <div className="flex-1 w-full h-[50vh] md:h-full p-4 md:p-12 flex items-center justify-center overflow-hidden">
            <AnimatePresence mode="wait">
              <motion.div 
               key={`${selectedDesignIndex}-${selectedSideIndex}`}
@@ -722,7 +722,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-white w-full max-w-5xl h-[85vh] rounded-[40px] shadow-2xl overflow-hidden flex flex-col"
+              className="bg-white w-full max-w-5xl h-[90vh] md:h-[85vh] rounded-[32px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col"
             >
               <div className="px-10 py-8 border-b border-gray-100 flex items-center justify-between">
                 <div>
@@ -737,8 +737,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                   {designs.map((design: any, idx: number) => (
                     <button 
                       key={idx}

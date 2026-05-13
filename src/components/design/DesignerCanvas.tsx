@@ -786,7 +786,15 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   }), [canvas, addText, addImage, addShape, addIcon, addSvgGraphic, undo, redo, resetZoom, handleZoom, onObjectsUpdated, onHistoryChange, onObjectModified, onSelectionCleared, designArea]);
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-full bg-gray-50 rounded-[30px] overflow-hidden border border-gray-100 shadow-2xl flex items-center justify-center group isolate ring-1 ring-black/5" style={{ touchAction: 'none', aspectRatio: `${BASE_WIDTH}/${BASE_HEIGHT}` }}>
+    <div 
+      ref={containerRef} 
+      className="relative w-full max-w-full bg-gray-50 md:rounded-[30px] overflow-hidden border-y md:border border-gray-100 shadow-2xl flex items-center justify-center group isolate ring-1 ring-black/5" 
+      style={{ 
+        touchAction: 'none', 
+        aspectRatio: `${BASE_WIDTH}/${BASE_HEIGHT}`,
+        maxHeight: 'calc(100dvh - 280px)' // Reserve space for header, footer tools, and top toolbar
+      }}
+    >
       <canvas ref={canvasRef} className="max-w-full h-auto drop-shadow-sm" />
     </div>
   );

@@ -72,11 +72,11 @@ const IntakeFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>((p
   ];
 
   return (
-    <div className="w-full h-full min-h-[600px] bg-white rounded-[40px] p-10 border border-gray-100 shadow-2xl overflow-y-auto custom-scrollbar">
+    <div className="w-full h-full min-h-[500px] bg-white rounded-[24px] md:rounded-[40px] p-4 md:p-10 border border-gray-100 shadow-2xl overflow-y-auto custom-scrollbar">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md mx-auto space-y-10 py-4"
+        className="max-w-md mx-auto space-y-6 md:space-y-10 py-2 md:py-4"
       >
         <header className="text-center space-y-2">
           <div className="inline-flex items-center justify-center w-12 h-12 bg-brand-pink/10 rounded-2xl mb-2">

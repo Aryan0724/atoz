@@ -56,16 +56,16 @@ const TopToolbar = ({
   const isImage = activeObject.type === 'image';
 
   return (
-    <div className="min-h-14 h-auto md:h-14 border-b border-white/20 bg-white/70 backdrop-blur-2xl flex flex-wrap md:flex-nowrap items-center px-4 py-2 md:py-0 gap-2 z-20 shadow-xl shadow-black/[0.02] ring-1 ring-black/5 animate-in slide-in-from-top duration-500 overflow-x-auto no-scrollbar justify-center md:justify-start">
+    <div className="min-h-12 md:min-h-14 h-auto md:h-14 border-b border-white/20 bg-white/70 backdrop-blur-2xl flex flex-nowrap items-center px-2 md:px-4 py-1.5 md:py-0 gap-1 md:gap-2 z-20 shadow-xl shadow-black/[0.02] ring-1 ring-black/5 animate-in slide-in-from-top duration-500 overflow-x-auto no-scrollbar justify-start rounded-2xl md:rounded-none">
       
       <div className="h-8 w-px bg-gray-100 mx-2" />
 
       {/* ALIGNMENT TOOLS */}
       <div className="relative group">
-        <button className="h-9 px-3 hover:bg-gray-50 rounded-lg flex items-center gap-2 border border-transparent hover:border-gray-100 transition-all text-gray-500">
-          <Layers className="h-4 w-4" />
-          <span className="text-[10px] font-black uppercase tracking-widest">Align</span>
-          <ChevronDown className="h-3 w-3 opacity-50" />
+        <button className="h-8 md:h-9 px-2 md:px-3 hover:bg-gray-50 rounded-lg flex items-center gap-1 md:gap-2 border border-transparent hover:border-gray-100 transition-all text-gray-500">
+          <Layers className="h-3.5 w-3.5 md:h-4 md:w-4" />
+          <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">Align</span>
+          <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3 opacity-50" />
         </button>
         <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2 grid grid-cols-3 gap-1">
           {[
@@ -94,7 +94,7 @@ const TopToolbar = ({
       {/* COLOR PICKER - Available for all vector objects */}
       {!isImage && (
         <>
-          <div className="relative w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 shadow-sm overflow-hidden shrink-0 hover:border-brand-pink transition-colors" title="Change Color">
+          <div className="relative w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-lg border border-gray-200 shadow-sm overflow-hidden shrink-0 hover:border-brand-pink transition-colors" title="Change Color">
             <input 
               type="color" 
               value={activeObject.fill || '#000000'} 
@@ -114,9 +114,9 @@ const TopToolbar = ({
       {isText && (
         <>
           <div className="relative group">
-            <button className="h-9 px-3 hover:bg-gray-50 rounded-lg flex items-center gap-2 border border-transparent hover:border-gray-100 transition-all">
-              <span className="text-[11px] font-bold truncate max-w-[100px]" style={{ fontFamily: activeObject.fontFamily }}>
-                {fonts.find(f => f.family === activeObject.fontFamily)?.name || 'Default'}
+            <button className="h-8 md:h-9 px-2 md:px-3 hover:bg-gray-50 rounded-lg flex items-center gap-1 md:gap-2 border border-transparent hover:border-gray-100 transition-all">
+              <span className="text-[10px] md:text-[11px] font-bold truncate max-w-[80px] md:max-w-[100px]" style={{ fontFamily: activeObject.fontFamily }}>
+                {fonts.find(f => f.family === activeObject.fontFamily)?.name || 'Font'}
               </span>
               <ChevronDown className="h-3 w-3 text-gray-400" />
             </button>
@@ -333,9 +333,9 @@ const TopToolbar = ({
          </div>
          <button 
            onClick={onDeleteActiveObject}
-           className="h-9 w-9 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+           className="h-8 w-8 md:h-9 md:w-9 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all"
          >
-           <Trash2 className="h-4 w-4" />
+           <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
          </button>
       </div>
 
