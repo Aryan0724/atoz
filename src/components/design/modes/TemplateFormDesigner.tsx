@@ -67,6 +67,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const [initialFieldPos, setInitialFieldPos] = useState({ x: 0, y: 0, w: 0, h: 0 });
 
   const isPreview = props.activeView === '3d';
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const baseFields = (designConfig?.fields && designConfig.fields.length > 0) ? designConfig.fields : [
     { id: 'name', label: 'Full Name', type: 'text', icon: 'User', placeholder: 'e.g. John Doe' },
@@ -96,15 +97,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   // Handle Dragging & Resizing
   React.useEffect(() => {
-      const handleMove = (e: PointerEvent) => {
-        if ((!isDragging && !isResizing) || !activeField) return;
-
-        const container = document.getElementById('template-preview-container');
-        if (!container) return;
-        const rect = container.getBoundingClientRect();
-        const canvasSize = { w: rect.width, h: rect.height };
-
-  React.useEffect(() => {
     if (!isDragging && !isResizing) return;
 
     const handleMove = (e: PointerEvent) => {
@@ -119,13 +111,13 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       const dy = ((e.clientY - dragStartPos.y) / h) * 100;
 
       setLocalMappings(prev => {
-        const field = prev[activeField];
+        const field = prev[activeField!];
         if (!field) return prev;
 
         if (isDragging) {
           return {
             ...prev,
-            [activeField]: {
+            [activeField!]: {
               ...field,
               x: initialFieldPos.x + dx,
               y: initialFieldPos.y + dy
@@ -134,7 +126,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         } else if (isResizing) {
           return {
             ...prev,
-            [activeField]: {
+            [activeField!]: {
               ...field,
               w: Math.max(5, initialFieldPos.w + dx),
               h: Math.max(2, initialFieldPos.h + dy)
@@ -552,6 +544,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                {currentPreview ? (
                  <div 
                     id="template-preview-container" 
+                    ref={containerRef}
                     className="relative w-full h-full"
                     style={{ containerType: 'inline-size' }}
                  >
