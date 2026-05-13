@@ -546,9 +546,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                         touchAction: 'none',
                                       }}
                                       className={cn(
-                                        "transition-all overflow-visible select-none",
-                                        !isPreview && activeField === field.id && "ring-2 ring-brand-pink ring-dashed ring-offset-2",
-                                        !isPreview && activeField !== field.id && "hover:ring-1 hover:ring-gray-300"
+                                        "transition-all overflow-visible select-none"
                                       )}
                                     >
 
