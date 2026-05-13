@@ -539,59 +539,63 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                        !isPreview && "hover:ring-1 hover:ring-brand-pink/50 cursor-move"
                                     )}
                                   >
-                                    {/* DRAG HANDLE OVERLAY (invisible but catches events) */}
-                                    {!isPreview && (
-                                      <div 
-                                        className="absolute inset-0 z-0"
-                                        onPointerDown={(e) => handleStart(e, field.id, 'move')}
-                                      />
-                                    )}
-                                    {field.type === 'image' ? (
-                                       formData[field.id]?.text ? (
-                                          <img src={formData[field.id].text} alt={field.label} className="w-full h-full object-contain pointer-events-none" />
-                                       ) : (
-                                          <div className={cn("w-full h-full border border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50/50 pointer-events-none p-1", isPreview && "opacity-0")}>
-                                             <Upload style={{ width: '3cqi', height: '3cqi' }} className="text-gray-400 mb-0.5" />
-                                             <span style={{ fontSize: '1.5cqi' }} className="font-black uppercase text-gray-400 text-center">Image</span>
-                                          </div>
-                                       )
-                                    ) : (
-                                      <span className={cn(
-                                        "whitespace-pre-line pointer-events-none",
-                                        mapping.italic && "italic"
-                                      )}>
-                                        {formData[field.id]?.text || field.placeholder?.replace('e.g. ', '') || field.label}
-                                      </span>
-                                    )}
+                                    {/* Content Container */}
+                                    <div className="relative z-10 pointer-events-none w-full h-full flex flex-col justify-center">
+                                      {field.type === 'image' ? (
+                                         formData[field.id]?.text ? (
+                                            <img src={formData[field.id].text} alt={field.label} className="w-full h-full object-contain pointer-events-none" />
+                                         ) : (
+                                            <div className={cn("w-full h-full border border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50/50 pointer-events-none p-1", isPreview && "opacity-0")}>
+                                               <Upload style={{ width: '3cqi', height: '3cqi' }} className="text-gray-400 mb-0.5" />
+                                               <span style={{ fontSize: '1.5cqi' }} className="font-black uppercase text-gray-400 text-center">Image</span>
+                                            </div>
+                                         )
+                                      ) : (
+                                        <span className={cn(
+                                          "whitespace-pre-line pointer-events-none",
+                                          mapping.italic && "italic"
+                                        )}>
+                                          {formData[field.id]?.text || field.placeholder?.replace('e.g. ', '') || field.label}
+                                        </span>
+                                      )}
+                                    </div>
 
-                                    {/* Resize Handles (Corners) */}
+                                    {/* Resize Handles (Corners) - LARGER for better touch hit */}
                                     {!isPreview && activeField === field.id && (
                                        <>
-                                          {/* Bottom Right (Standard) */}
+                                          {/* Bottom Right */}
                                           <div 
                                             onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                            className="absolute -right-1 -bottom-1 w-4 h-4 bg-brand-pink rounded-full border-2 border-white shadow-md z-20 cursor-se-resize flex items-center justify-center"
+                                            className="absolute -right-3 -bottom-3 w-8 h-8 flex items-center justify-center z-50 cursor-se-resize"
                                           >
-                                             <div className="w-1.5 h-1.5 bg-white/50 rounded-full" />
+                                             <div className="w-5 h-5 bg-brand-pink rounded-full border-2 border-white shadow-xl flex items-center justify-center">
+                                                <div className="w-1.5 h-1.5 bg-white/50 rounded-full" />
+                                             </div>
                                           </div>
                                           
                                           {/* Bottom Left */}
                                           <div 
                                             onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                            className="absolute -left-1 -bottom-1 w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-sm z-20 cursor-sw-resize"
-                                          />
+                                            className="absolute -left-3 -bottom-3 w-8 h-8 flex items-center justify-center z-50 cursor-sw-resize"
+                                          >
+                                             <div className="w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-md" />
+                                          </div>
 
                                           {/* Top Right */}
                                           <div 
                                             onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                            className="absolute -right-1 -top-1 w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-sm z-20 cursor-ne-resize"
-                                          />
+                                            className="absolute -right-3 -top-3 w-8 h-8 flex items-center justify-center z-50 cursor-ne-resize"
+                                          >
+                                             <div className="w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-md" />
+                                          </div>
 
                                           {/* Top Left */}
                                           <div 
                                             onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                            className="absolute -left-1 -top-1 w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-sm z-20 cursor-nw-resize"
-                                          />
+                                            className="absolute -left-3 -top-3 w-8 h-8 flex items-center justify-center z-50 cursor-nw-resize"
+                                          >
+                                             <div className="w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-md" />
+                                          </div>
                                        </>
                                     )}
 
