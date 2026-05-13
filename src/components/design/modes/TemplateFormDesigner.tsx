@@ -404,8 +404,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         }}
       >
         
-        {/* Side Controls (Front/Back) */}
-        <div className="absolute top-2 md:top-6 left-1/2 -translate-x-1/2 z-30 w-[95%] md:w-auto">
+        {/* Side Controls (Front/Back) - BOTTOM on mobile, TOP on desktop */}
+        <div className="absolute bottom-4 md:top-6 left-1/2 -translate-x-1/2 z-30 w-[95%] md:w-auto">
           <div className="flex gap-1 bg-white/80 backdrop-blur-md rounded-xl md:rounded-2xl p-1 md:p-1.5 border border-gray-200 shadow-sm overflow-x-auto no-scrollbar">
              {[
                { idx: 0, label: 'Front' },
