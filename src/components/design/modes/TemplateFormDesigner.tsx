@@ -507,6 +507,18 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                return (
                                   <div
                                       key={field.id}
+                                      onPointerDown={(e) => {
+                                        if (!isPreview) {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          setActiveField(field.id);
+                                          setIsDragging(true);
+                                          setDragStartPos({ x: e.clientX, y: e.clientY });
+                                          const cur = localMappings[field.id] || {};
+                                          setInitialFieldPos({ x: cur.x || 0, y: cur.y || 0, w: cur.w || 30, h: cur.h || 10 });
+                                          try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch {}
+                                        }
+                                      }}
                                       style={{
                                         position: 'absolute',
                                         left,
@@ -529,20 +541,15 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                         maxWidth: mapping.maxWidth ? `${mapping.maxWidth}%` : `${autoMaxWidth}%`,
                                         zIndex: activeField === field.id ? 100 : 50,
                                         boxSizing: 'border-box',
-                                        pointerEvents: 'none' // Let events pass to the Hit Area child
+                                        cursor: isPreview ? 'default' : 'move',
+                                        touchAction: 'none',
                                       }}
-                                      className="transition-all overflow-visible group select-none"
-                                    >
-                                      {/* HIT AREA & DRAG HANDLE (This is what you touch) */}
-                                      {!isPreview && (
-                                        <div 
-                                          className={cn(
-                                            "absolute inset-0 pointer-events-auto cursor-move",
-                                            activeField === field.id ? "ring-2 ring-brand-pink ring-dashed ring-offset-2" : "hover:ring-1 hover:ring-gray-300"
-                                          )}
-                                          onPointerDown={(e) => handleStart(e, field.id, 'move')}
-                                        />
+                                      className={cn(
+                                        "transition-all overflow-visible select-none",
+                                        !isPreview && activeField === field.id && "ring-2 ring-brand-pink ring-dashed ring-offset-2",
+                                        !isPreview && activeField !== field.id && "hover:ring-1 hover:ring-gray-300"
                                       )}
+                                    >
 
                                       {/* CONTENT DISPLAY */}
                                       <div className="relative pointer-events-none w-full h-full flex flex-col justify-center select-none">
