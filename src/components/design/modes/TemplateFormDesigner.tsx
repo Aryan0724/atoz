@@ -27,6 +27,7 @@ import { X, Grid, Trash2 } from 'lucide-react';
 
 const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>((props, ref) => {
   const { product, designConfig, onObjectsUpdated, initialTemplateIndex } = props;
+  const designs = product?.designs || [];
   const [formData, setFormData] = useState<Record<string, { text: string, color?: string }>>({});
   const [selectedDesignIndex, setSelectedDesignIndex] = useState(initialTemplateIndex || 0);
   const [selectedSideIndex, setSelectedSideIndex] = useState(0); // 0=Front, 1=Back
@@ -56,6 +57,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   ];
 
   const allFields = [...baseFields, ...customFields];
+  const currentDesign = designs[selectedDesignIndex];
 
   // Initialize mappings when template or side changes
   React.useEffect(() => {
