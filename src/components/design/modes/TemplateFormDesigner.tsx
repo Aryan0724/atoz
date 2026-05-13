@@ -361,10 +361,10 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   return (
     <div className="w-full h-[calc(100dvh-60px)] md:h-[calc(100vh-60px)] flex flex-col md:flex-row bg-[#fbfbf9] overflow-hidden">
       
-      {/* RIGHT PANEL: Live Preview Area (TOP on mobile) */}
+      {/* RIGHT PANEL: Live Preview Area (TOP on mobile, RIGHT on desktop) */}
       <div 
         className={cn(
-          "w-full h-[45dvh] md:h-full relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0 border-b border-gray-100 md:border-b-0 order-1 md:order-2 transition-all",
+          "w-full md:flex-1 h-[45dvh] md:h-full relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0 border-b border-gray-100 md:border-b-0 order-1 md:order-2 transition-all",
           isDragOver && "ring-4 ring-brand-pink ring-inset bg-brand-pink/5"
         )}
         onDragOver={(e) => {
@@ -467,8 +467,10 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                      className="absolute inset-0 w-full h-full object-contain pointer-events-none"
                    />
                    
-                   {/* DYNAMIC TEXT OVERLAY */}
-                   <div className="absolute inset-0 z-10" onClick={() => setActiveField(null)}>
+                   {/* DYNAMIC TEXT OVERLAY - Split into background and elements */}
+                   <div className="absolute inset-0 z-0 pointer-events-auto" onClick={() => setActiveField(null)} />
+                   
+                   <div className="absolute inset-0 z-10 pointer-events-none">
                       {(() => {
                          if (localMappings && Object.keys(localMappings).length > 0) {
                             return allFields.map((field: any) => {
@@ -500,7 +502,10 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                     key={field.id}
                                     onMouseDown={(e) => handleStart(e, field.id, 'move')}
                                     onTouchStart={(e) => handleStart(e, field.id, 'move')}
-                                    onClick={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveField(field.id);
+                                    }}
                                     style={{
                                       position: 'absolute',
                                       left,
@@ -527,8 +532,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       boxSizing: 'border-box'
                                     }}
                                     className={cn(
-                                       "transition-colors overflow-visible group touch-none",
-                                       !isPreview && "hover:border-gray-300 hover:border-dashed"
+                                       "transition-colors overflow-visible group touch-none pointer-events-auto",
+                                       !isPreview && "hover:border-gray-300 hover:border-dashed cursor-move"
                                     )}
                                   >
                                     {field.type === 'image' ? (
@@ -627,8 +632,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                             });
                          }
                          return null;
-                    })()}
-                 </div>
+                     })()}
+                   </div>
                </div>
              ) : (
                <div className="w-full h-full flex items-center justify-center text-gray-300 font-medium">
