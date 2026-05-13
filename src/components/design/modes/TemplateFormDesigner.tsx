@@ -345,7 +345,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     <div className="w-full min-h-[calc(100vh-60px)] md:h-[calc(100vh-60px)] flex flex-col-reverse md:flex-row bg-[#fbfbf9] overflow-hidden">
       
       {/* LEFT PANEL: Form and Config */}
-      <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 h-auto md:h-full overflow-y-auto border-r border-gray-100 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 custom-scrollbar">
+      <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 flex-1 md:h-full overflow-y-auto border-r border-gray-100 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 custom-scrollbar">
         <div className="p-4 md:p-8 space-y-6 md:space-y-10">
           
           {/* Template Selection */}
@@ -473,10 +473,10 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       </div>
 
       {/* RIGHT PANEL: Live Preview Area */}
-      <div className="flex-1 h-full relative flex flex-col bg-gray-50 no-custom-cursor">
+      <div className="w-full h-[40vh] md:h-full relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0">
         
         {/* Side Controls (Front/Back) */}
-        <div className="absolute top-4 md:top-6 left-1/2 -translate-x-1/2 z-30 w-[95%] md:w-auto">
+        <div className="absolute top-2 md:top-6 left-1/2 -translate-x-1/2 z-30 w-[95%] md:w-auto">
           <div className="flex gap-1 bg-white/80 backdrop-blur-md rounded-xl md:rounded-2xl p-1 md:p-1.5 border border-gray-200 shadow-sm overflow-x-auto no-scrollbar">
              {[
                { idx: 0, label: 'Front' },
@@ -488,7 +488,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                    key={view.idx}
                    onClick={() => setSelectedSideIndex(view.idx)}
                    className={cn(
-                     "px-4 md:px-6 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden shrink-0",
+                     "px-3 md:px-6 py-1 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden shrink-0",
                      selectedSideIndex === view.idx 
                        ? "text-white shadow-md" 
                        : "text-gray-500 hover:text-brand-dark hover:bg-gray-50"
@@ -508,7 +508,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         </div>
 
         {/* The Actual Preview Canvas */}
-        <div className="flex-1 w-full h-[50vh] md:h-full p-4 md:p-12 flex items-center justify-center overflow-hidden">
+        <div className="flex-1 w-full p-2 md:p-12 flex items-center justify-center overflow-hidden">
            <AnimatePresence mode="wait">
              <motion.div 
               key={`${selectedDesignIndex}-${selectedSideIndex}`}

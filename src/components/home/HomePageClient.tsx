@@ -434,7 +434,7 @@ export default function HomePageClient({ config: initialConfig, products = [], b
               }
 
               return (
-                <Link key={idx} href={`/products/${product.id || '#'}`} className="group reveal-item">
+                <Link key={idx} href={`/products/${product.slug || product.id || '#'}`} className="group reveal-item">
                   <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden mb-8 shadow-xl bg-brand-base">
                     <Image 
                       src={finalImage || "https://images.unsplash.com/photo-1589330694653-ded6df03f754?q=80&w=2000&auto=format&fit=crop"} 
