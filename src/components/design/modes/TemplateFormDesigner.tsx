@@ -134,6 +134,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       const handleEnd = () => {
         setIsDragging(false);
         setIsResizing(false);
+        onObjectsUpdated?.();
       };
 
       if (isDragging || isResizing) {
@@ -338,7 +339,67 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         if (json?.formData) setFormData(json.formData);
     },
     getLayers: () => [],
-    getDesignDataUrl: async () => currentPreview,
+    getDesignDataUrl: async () => {
+      // Create a hidden canvas to render the design
+      const canvas = document.createElement('canvas');
+      const container = document.getElementById('template-preview-container');
+      if (!container) return currentPreview;
+
+      const rect = container.getBoundingClientRect();
+      canvas.width = 1200; // High res for preview
+      canvas.height = (rect.height / rect.width) * 1200;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return currentPreview;
+
+      // Draw base image
+      const baseImg = new Image();
+      baseImg.crossOrigin = "anonymous";
+      baseImg.src = currentPreview;
+      
+      await new Promise((resolve) => {
+        baseImg.onload = resolve;
+        baseImg.onerror = resolve;
+      });
+      
+      ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height);
+
+      // Draw elements
+      for (const field of allFields) {
+        const mapping = localMappings[field.id];
+        if (!mapping) continue;
+
+        const value = formData[field.id];
+        if (!value) continue;
+
+        const x = (mapping.x / 100) * canvas.width;
+        const y = (mapping.y / 100) * canvas.height;
+
+        if (field.type === 'image' && value) {
+           const itemImg = new Image();
+           itemImg.crossOrigin = "anonymous";
+           itemImg.src = value;
+           await new Promise((res) => { itemImg.onload = res; itemImg.onerror = res; });
+           const imgW = (mapping.w || 20) / 100 * canvas.width;
+           const imgH = itemImg.height / itemImg.width * imgW;
+           ctx.drawImage(itemImg, x, y, imgW, imgH);
+        } else if (field.type !== 'image' && typeof value === 'string') {
+           const fontSize = (mapping.fontSize || 14) / 500 * canvas.width;
+           ctx.font = `${mapping.italic ? 'italic ' : ''}${mapping.fontWeight || 'normal'} ${fontSize}px ${mapping.fontFamily || 'Inter'}`;
+           ctx.fillStyle = mapping.color || '#FFD700';
+           ctx.textAlign = 'left';
+           ctx.textBaseline = 'top';
+           
+           const lines = value.split('\n');
+           const lineHeight = (mapping.lineHeight || 1.2) * fontSize;
+           lines.forEach((line, i) => {
+             ctx.fillText(line, x, y + (i * lineHeight));
+           });
+        }
+      }
+
+      return canvas.toDataURL('image/png');
+    },
   } as any));
 
 
