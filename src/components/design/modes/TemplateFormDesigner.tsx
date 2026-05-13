@@ -607,57 +607,57 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
                                       {/* Formatting Toolbar */}
                                       {!isPreview && activeField === field.id && (
-                                        <div 
-                                          onPointerDown={(e) => e.stopPropagation()}
-                                          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-white rounded-xl shadow-2xl border border-gray-100 flex items-center gap-2 p-2 z-[120] pointer-events-auto cursor-default"
-                                        >
-                                         <div className="flex gap-1 border-r border-gray-100 pr-2">
-                                           {['#FFD700', '#FFFFFF', '#000000', '#FF1493', '#800000', '#1A4D2E'].map(c => (
-                                             <button 
-                                               key={c}
-                                               onClick={() => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), color: c } }))}
-                                               className={cn("w-4 h-4 rounded-full border border-gray-200 hover:scale-110 transition-transform", (formData[field.id]?.color || mapping.color || '#FFD700') === c && "ring-2 ring-brand-pink ring-offset-1")}
-                                               style={{ backgroundColor: c }}
-                                             />
-                                           ))}
-                                         </div>
-                                         {field.type !== 'image' && (
-                                            <>
-                                              <div className="flex gap-1 border-r border-gray-100 pr-2">
-                                                <button onClick={() => updateFontSize(field.id, -1)} className="p-1 hover:bg-gray-100 rounded text-gray-600 font-bold" title="Smaller">A-</button>
-                                                <button onClick={() => updateFontSize(field.id, 1)} className="p-1 hover:bg-gray-100 rounded text-gray-600 font-bold" title="Bigger">A+</button>
-                                              </div>
-                                              <div className="flex gap-1 border-r border-gray-100 pr-2">
-                                                <button 
-                                                  onClick={() => updateFontStyle(field.id, 'bold')} 
-                                                  className={cn("p-1 rounded font-bold w-6 h-6 flex items-center justify-center", mapping.fontWeight === 'bold' ? "bg-brand-pink text-white" : "hover:bg-gray-100 text-gray-500")}
-                                                  title="Bold"
-                                                >B</button>
-                                                <button 
-                                                  onClick={() => updateFontStyle(field.id, 'italic')} 
-                                                  className={cn("p-1 rounded italic w-6 h-6 flex items-center justify-center", mapping.italic ? "bg-brand-pink text-white" : "hover:bg-gray-100 text-gray-500")}
-                                                  title="Italic"
-                                                >I</button>
-                                              </div>
-                                              <div className="flex gap-1 border-r border-gray-100 pr-2">
-                                                <select 
-                                                  value={mapping.fontFamily || 'Inter'} 
-                                                  onChange={(e) => updateFontFamily(field.id, e.target.value)}
-                                                  className="text-[10px] bg-gray-50 border-none rounded px-1 outline-none"
-                                                >
-                                                  <option value="Inter">Inter</option>
-                                                  <option value="Roboto">Roboto</option>
-                                                  <option value="Playfair Display">Playfair</option>
-                                                  <option value="Montserrat">Montserrat</option>
-                                                </select>
-                                              </div>
-                                              <div className="flex gap-1 border-r border-gray-100 pr-2">
-                                                <button onClick={() => updateTextAlign(field.id, 'left')} className={cn("p-1 rounded font-bold", mapping.align === 'left' ? "bg-gray-200 text-brand-dark" : "hover:bg-gray-100 text-gray-500")}>L</button>
-                                                <button onClick={() => updateTextAlign(field.id, 'center')} className={cn("p-1 rounded font-bold", mapping.align === 'center' ? "bg-gray-200 text-brand-dark" : "hover:bg-gray-100 text-gray-500")}>C</button>
-                                                <button onClick={() => updateTextAlign(field.id, 'right')} className={cn("p-1 rounded font-bold", mapping.align === 'right' ? "bg-gray-200 text-brand-dark" : "hover:bg-gray-100 text-gray-500")}>R</button>
-                                              </div>
-                                            </>
-                                         )}
+                                         <div 
+                                           onPointerDown={(e) => e.stopPropagation()}
+                                           className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-white/95 backdrop-blur-sm rounded-lg shadow-xl border border-gray-200 flex items-center gap-1.5 p-1 z-[120] pointer-events-auto cursor-default scale-90 md:scale-100"
+                                         >
+                                          <div className="flex gap-1 border-r border-gray-100 pr-1.5">
+                                            {['#FFD700', '#FFFFFF', '#000000', '#FF1493', '#800000', '#1A4D2E'].map(c => (
+                                              <button 
+                                                key={c}
+                                                onClick={() => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), color: c } }))}
+                                                className={cn("w-3 h-3 rounded-full border border-gray-200 hover:scale-110 transition-transform", (formData[field.id]?.color || mapping.color || '#FFD700') === c && "ring-1 ring-brand-pink ring-offset-1")}
+                                                style={{ backgroundColor: c }}
+                                              />
+                                            ))}
+                                          </div>
+                                          {field.type !== 'image' && (
+                                             <>
+                                               <div className="flex gap-0.5 border-r border-gray-100 pr-1.5">
+                                                 <button onClick={() => updateFontSize(field.id, -1)} className="px-1 py-0.5 hover:bg-gray-100 rounded text-[9px] text-gray-500 font-bold" title="Smaller">A-</button>
+                                                 <button onClick={() => updateFontSize(field.id, 1)} className="px-1 py-0.5 hover:bg-gray-100 rounded text-[9px] text-gray-500 font-bold" title="Bigger">A+</button>
+                                               </div>
+                                               <div className="flex gap-0.5 border-r border-gray-100 pr-1.5">
+                                                 <button 
+                                                   onClick={() => updateFontStyle(field.id, 'bold')} 
+                                                   className={cn("w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center", mapping.fontWeight === 'bold' ? "bg-brand-pink text-white" : "hover:bg-gray-100 text-gray-500")}
+                                                   title="Bold"
+                                                 >B</button>
+                                                 <button 
+                                                   onClick={() => updateFontStyle(field.id, 'italic')} 
+                                                   className={cn("w-5 h-5 rounded text-[9px] italic flex items-center justify-center", mapping.italic ? "bg-brand-pink text-white" : "hover:bg-gray-100 text-gray-500")}
+                                                   title="Italic"
+                                                 >I</button>
+                                               </div>
+                                               <div className="flex gap-0.5 border-r border-gray-100 pr-1.5">
+                                                 <select 
+                                                   value={mapping.fontFamily || 'Inter'} 
+                                                   onChange={(e) => updateFontFamily(field.id, e.target.value)}
+                                                   className="text-[8px] bg-gray-50 border-none rounded px-1 py-0.5 outline-none cursor-pointer font-medium"
+                                                 >
+                                                   <option value="Inter">Inter</option>
+                                                   <option value="Roboto">Roboto</option>
+                                                   <option value="Playfair Display">Playfair</option>
+                                                   <option value="Montserrat">Montserrat</option>
+                                                 </select>
+                                               </div>
+                                               <div className="flex gap-0.5">
+                                                 <button onClick={() => updateTextAlign(field.id, 'left')} className={cn("w-5 h-5 rounded text-[9px] font-bold", mapping.align === 'left' ? "bg-gray-100 text-brand-dark" : "hover:bg-gray-100 text-gray-400")}>L</button>
+                                                 <button onClick={() => updateTextAlign(field.id, 'center')} className={cn("w-5 h-5 rounded text-[9px] font-bold", mapping.align === 'center' ? "bg-gray-100 text-brand-dark" : "hover:bg-gray-100 text-gray-400")}>C</button>
+                                                 <button onClick={() => updateTextAlign(field.id, 'right')} className={cn("w-5 h-5 rounded text-[9px] font-bold", mapping.align === 'right' ? "bg-gray-100 text-brand-dark" : "hover:bg-gray-100 text-gray-400")}>R</button>
+                                               </div>
+                                             </>
+                                          )}
                                          {customFields.some((f: any) => f.id === field.id) && (
                                            <div className="pl-1">
                                              <button onClick={() => removeCustomField(field.id)} className="p-1 hover:bg-red-50 text-red-500 rounded"><Trash2 className="w-3 h-3" /></button>
