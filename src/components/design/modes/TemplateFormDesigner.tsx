@@ -36,6 +36,20 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const [selectedQuality, setSelectedQuality] = useState('Standard Matte');
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  
+  // --- DRAG & DROP AND CUSTOM ELEMENTS STATE ---
+  const [localMappings, setLocalMappings] = useState<Record<string, any>>({});
+  const [customFields, setCustomFields] = useState<any[]>([]);
+  const [activeField, setActiveField] = useState<string | null>(null);
+  
+  // Dragging / Resizing Math
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
+  const [initialFieldPos, setInitialFieldPos] = useState({ x: 0, y: 0, w: 0, h: 0 });
+
+  const isPreview = props.activeView === '3d';
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   // 1. STATE & CALCULATIONS
   const designs = React.useMemo(() => {
@@ -65,20 +79,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     
     return [...baseFields, ...customFields];
   }, [designConfig, selectedDesignIndex, product.template_fields, customFields]);
-
-  // --- DRAG & DROP AND CUSTOM ELEMENTS STATE ---
-  const [localMappings, setLocalMappings] = useState<Record<string, any>>({});
-  const [customFields, setCustomFields] = useState<any[]>([]);
-  const [activeField, setActiveField] = useState<string | null>(null);
-  
-  // Dragging / Resizing Math
-  const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
-  const [initialFieldPos, setInitialFieldPos] = useState({ x: 0, y: 0, w: 0, h: 0 });
-
-  const isPreview = props.activeView === '3d';
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
   // Initialize mappings when template or side changes
   React.useEffect(() => {
