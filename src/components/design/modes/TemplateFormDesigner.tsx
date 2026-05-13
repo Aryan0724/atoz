@@ -75,73 +75,81 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   // Handle Dragging & Resizing
   React.useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if ((!isDragging && !isResizing) || !activeField) return;
+      const handleMove = (e: MouseEvent | TouchEvent) => {
+        if ((!isDragging && !isResizing) || !activeField) return;
 
-      const container = document.getElementById('template-preview-container');
-      if (!container) return;
-      const rect = container.getBoundingClientRect();
-      const canvasSize = { w: rect.width, h: rect.height };
+        const container = document.getElementById('template-preview-container');
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        const canvasSize = { w: rect.width, h: rect.height };
 
-      const dx = ((e.clientX - dragStartPos.x) / canvasSize.w) * 100;
-      const dy = ((e.clientY - dragStartPos.y) / canvasSize.h) * 100;
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 
-      setLocalMappings(prev => {
-        const field = prev[activeField];
-        if (!field) return prev;
+        const dx = ((clientX - dragStartPos.x) / canvasSize.w) * 100;
+        const dy = ((clientY - dragStartPos.y) / canvasSize.h) * 100;
 
-        if (isDragging) {
-           return {
-             ...prev,
-             [activeField]: {
-               ...field,
-               x: Math.max(0, Math.min(100 - (field.w || 0), initialFieldPos.x + dx)),
-               y: Math.max(0, Math.min(100 - (field.h || 0), initialFieldPos.y + dy))
-             }
-           };
-        } else if (isResizing) {
-           return {
-             ...prev,
-             [activeField]: {
-               ...field,
-               w: Math.max(10, Math.min(100 - initialFieldPos.x, initialFieldPos.w + dx)),
-               // Optionally allow height resize, or let text determine it.
-               // We will allow h resize so it can wrap better if needed.
-               h: Math.max(5, Math.min(100 - initialFieldPos.y, initialFieldPos.h + dy))
-             }
-           };
-        }
-        
-        return prev;
-      });
-    };
+        setLocalMappings(prev => {
+          const field = prev[activeField];
+          if (!field) return prev;
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      setIsResizing(false);
-    };
+          if (isDragging) {
+             return {
+               ...prev,
+               [activeField]: {
+                 ...field,
+                 x: Math.max(0, Math.min(100 - (field.w || 0), initialFieldPos.x + dx)),
+                 y: Math.max(0, Math.min(100 - (field.h || 0), initialFieldPos.y + dy))
+               }
+             };
+          } else if (isResizing) {
+             return {
+               ...prev,
+               [activeField]: {
+                 ...field,
+                 w: Math.max(10, Math.min(100 - initialFieldPos.x, initialFieldPos.w + dx)),
+                 h: Math.max(5, Math.min(100 - initialFieldPos.y, initialFieldPos.h + dy))
+               }
+             };
+          }
+          
+          return prev;
+        });
+      };
 
-    if (isDragging || isResizing) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    }
+      const handleEnd = () => {
+        setIsDragging(false);
+        setIsResizing(false);
+      };
 
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
+      if (isDragging || isResizing) {
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('touchend', handleEnd);
+      }
+
+      return () => {
+        window.removeEventListener('mousemove', handleMove);
+        window.removeEventListener('mouseup', handleEnd);
+        window.removeEventListener('touchmove', handleMove);
+        window.removeEventListener('touchend', handleEnd);
+      };
   }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos]);
 
-  const handleMouseDown = (e: React.MouseEvent, fieldId: string, action: 'move' | 'resize') => {
+  const handleStart = (e: React.MouseEvent | React.TouchEvent, fieldId: string, action: 'move' | 'resize') => {
     if (isPreview) return;
-    e.preventDefault();
+    // e.preventDefault(); // Might block scroll, be careful
     e.stopPropagation();
     setActiveField(fieldId);
     
     if (action === 'move') setIsDragging(true);
     if (action === 'resize') setIsResizing(true);
     
-    setDragStartPos({ x: e.clientX, y: e.clientY });
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+    setDragStartPos({ x: clientX, y: clientY });
     setInitialFieldPos({
        x: localMappings[fieldId]?.x || 0,
        y: localMappings[fieldId]?.y || 0,
@@ -342,7 +350,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-60px)] md:h-[calc(100vh-60px)] flex flex-col-reverse md:flex-row bg-[#fbfbf9] overflow-hidden">
+    <div className="w-full h-[calc(100dvh-60px)] md:h-[calc(100vh-60px)] flex flex-col md:flex-row bg-[#fbfbf9] overflow-hidden">
       
       {/* LEFT PANEL: Form and Config */}
       <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 flex-1 md:h-full overflow-y-auto border-r border-gray-100 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 custom-scrollbar">
@@ -473,7 +481,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       </div>
 
       {/* RIGHT PANEL: Live Preview Area */}
-      <div className="w-full h-[40vh] md:h-full relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0">
+      <div className="w-full h-[35vh] md:h-full relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0 border-b border-gray-100 md:border-b-0">
         
         {/* Side Controls (Front/Back) */}
         <div className="absolute top-2 md:top-6 left-1/2 -translate-x-1/2 z-30 w-[95%] md:w-auto">
@@ -569,7 +577,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                return (
                                   <div
                                     key={field.id}
-                                    onMouseDown={(e) => handleMouseDown(e, field.id, 'move')}
+                                    onMouseDown={(e) => handleStart(e, field.id, 'move')}
+                                    onTouchStart={(e) => handleStart(e, field.id, 'move')}
                                     onClick={(e) => e.stopPropagation()}
                                     style={{
                                       position: 'absolute',
@@ -597,7 +606,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       boxSizing: 'border-box'
                                     }}
                                     className={cn(
-                                       "transition-colors overflow-visible group",
+                                       "transition-colors overflow-visible group touch-none",
                                        !isPreview && "hover:border-gray-300 hover:border-dashed"
                                     )}
                                   >
@@ -622,7 +631,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                     {/* Resize Handle scaled with CQI */}
                                     {!isPreview && activeField === field.id && (
                                        <div 
-                                         onMouseDown={(e) => handleMouseDown(e, field.id, 'resize')}
+                                         onMouseDown={(e) => handleStart(e, field.id, 'resize')}
+                                         onTouchStart={(e) => handleStart(e, field.id, 'resize')}
                                          style={{ width: '2cqi', height: '4cqi', maxWidth: '12px', maxHeight: '24px', minWidth: '6px', minHeight: '12px' }}
                                          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-brand-pink rounded-full cursor-ew-resize opacity-100 transition-opacity flex items-center justify-center shadow-md z-20"
                                        >
