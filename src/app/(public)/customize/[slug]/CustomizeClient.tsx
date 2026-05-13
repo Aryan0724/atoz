@@ -190,7 +190,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
        setDiscountPercent(bulkDiscount);
        setDiscountValue(0);
     }
-  }, [layers, viewData, activeView, product, selectedQuality, quantity, appliedCoupon]);
+  }, [layers, viewData, activeView, product, selectedQuality, quantity, appliedCoupon, unitPrice]);
 
   // Deep link support for "Import & Edit"
   useEffect(() => {

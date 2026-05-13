@@ -80,7 +80,7 @@ const ThreeDPreview: React.FC<ThreeDPreviewProps> = ({
     };
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
-  }, [autoRotate]);
+  }, [autoRotate, rotateY]);
 
   const getColoredImageUrl = useCallback((url: string) => {
     let modifiedUrl = url;

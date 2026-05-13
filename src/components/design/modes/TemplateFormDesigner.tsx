@@ -375,7 +375,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         const x = (mapping.x / 100) * canvas.width;
         const y = (mapping.y / 100) * canvas.height;
 
-        if (field.type === 'image' && value) {
+        if (field.type === 'image' && typeof value === 'string') {
            const itemImg = new window.Image();
            itemImg.crossOrigin = "anonymous";
            itemImg.src = value;
@@ -383,14 +383,17 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
            const imgW = (mapping.w || 20) / 100 * canvas.width;
            const imgH = itemImg.height / itemImg.width * imgW;
            ctx.drawImage(itemImg, x, y, imgW, imgH);
-        } else if (field.type !== 'image' && typeof value === 'string') {
+        } else if (field.type !== 'image' && (typeof value === 'string' || typeof value === 'object')) {
+           const textContent = typeof value === 'string' ? value : (value as any).text || '';
+           if (!textContent) continue;
+
            const fontSize = (mapping.fontSize || 14) / 500 * canvas.width;
            ctx.font = `${mapping.italic ? 'italic ' : ''}${mapping.fontWeight || 'normal'} ${fontSize}px ${mapping.fontFamily || 'Inter'}`;
-           ctx.fillStyle = mapping.color || '#FFD700';
+           ctx.fillStyle = typeof value === 'object' ? (value as any).color || mapping.color || '#FFD700' : mapping.color || '#FFD700';
            ctx.textAlign = 'left';
            ctx.textBaseline = 'top';
            
-           const lines = value.split('\n');
+           const lines = String(textContent).split('\n');
            const lineHeight = (mapping.lineHeight || 1.2) * fontSize;
            lines.forEach((line, i) => {
              ctx.fillText(line, x, y + (i * lineHeight));
@@ -429,8 +432,11 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   const handleFieldChange = (id: string, value: any) => {
     setFormData(prev => ({ ...prev, [id]: value }));
-    onObjectsUpdated?.();
   };
+  
+  React.useEffect(() => {
+    onObjectsUpdated?.();
+  }, [onObjectsUpdated, formData]);
 
   return (
     <div className="w-full h-[calc(100dvh-60px)] md:h-[calc(100vh-60px)] flex flex-col md:flex-row bg-[#fbfbf9] overflow-hidden">
