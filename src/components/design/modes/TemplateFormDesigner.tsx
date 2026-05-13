@@ -243,6 +243,20 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     });
   };
 
+  const updateLineHeight = (fieldId: string, delta: number) => {
+    setLocalMappings(prev => {
+      const f = prev[fieldId];
+      if (!f) return prev;
+      return {
+        ...prev,
+        [fieldId]: {
+          ...f,
+          lineHeight: Math.max(0.8, Math.min(3, (f.lineHeight || 1.2) + delta))
+        }
+      };
+    });
+  };
+
   const updateTextAlign = (fieldId: string, align: 'left' | 'center' | 'right') => {
     setLocalMappings(prev => {
       const f = prev[fieldId];
@@ -538,7 +552,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                         flexDirection: 'column',
                                         alignItems: mapping.align === 'center' ? 'center' : mapping.align === 'right' ? 'flex-end' : 'flex-start',
                                         justifyContent: 'center',
-                                        lineHeight: '1.2',
+                                        lineHeight: mapping.lineHeight || '1.2',
                                         maxWidth: mapping.maxWidth ? `${mapping.maxWidth}%` : `${autoMaxWidth}%`,
                                         zIndex: activeField === field.id ? 100 : 50,
                                         boxSizing: 'border-box',
@@ -624,8 +638,18 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                           {field.type !== 'image' && (
                                              <>
                                                <div className="flex gap-0.5 border-r border-gray-100 pr-1.5">
-                                                 <button onClick={() => updateFontSize(field.id, -1)} className="px-1 py-0.5 hover:bg-gray-100 rounded text-[9px] text-gray-500 font-bold" title="Smaller">A-</button>
-                                                 <button onClick={() => updateFontSize(field.id, 1)} className="px-1 py-0.5 hover:bg-gray-100 rounded text-[9px] text-gray-500 font-bold" title="Bigger">A+</button>
+                                                 <button onClick={() => updateFontSize(field.id, -1)} className="px-1 py-0.5 hover:bg-gray-100 rounded text-[9px] text-gray-500 font-bold" title="Smaller Font">A-</button>
+                                                 <button onClick={() => updateFontSize(field.id, 1)} className="px-1 py-0.5 hover:bg-gray-100 rounded text-[9px] text-gray-500 font-bold" title="Bigger Font">A+</button>
+                                               </div>
+                                               <div className="flex gap-0.5 border-r border-gray-100 pr-1.5">
+                                                 <button onClick={() => updateLineHeight(field.id, -0.1)} className="px-1 py-0.5 hover:bg-gray-100 rounded text-[9px] text-gray-500 font-bold flex flex-col items-center leading-none" title="Decrease Line Height">
+                                                   <span className="mb-[-2px] block">⎯</span>
+                                                   <span className="block">⎯</span>
+                                                 </button>
+                                                 <button onClick={() => updateLineHeight(field.id, 0.1)} className="px-1 py-0.5 hover:bg-gray-100 rounded text-[9px] text-gray-500 font-bold flex flex-col items-center leading-none" title="Increase Line Height">
+                                                   <span className="mb-[1px] block text-[7px]">↑</span>
+                                                   <span className="block text-[7px]">↓</span>
+                                                 </button>
                                                </div>
                                                <div className="flex gap-0.5 border-r border-gray-100 pr-1.5">
                                                  <button 
