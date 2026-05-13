@@ -125,7 +125,14 @@ const AddTab = ({ onAddText, onAddImage, onAddShape, onTabChange }: AddTabProps)
                   onAddImage(img.urls.regular);
                   onTabChange('edit');
                 }}
-                className="relative aspect-square rounded-lg overflow-hidden group hover:ring-2 hover:ring-brand-pink transition-all bg-gray-100"
+                draggable={true}
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('application/atoz-element', JSON.stringify({
+                    type: 'image',
+                    url: img.urls.regular
+                  }));
+                }}
+                className="relative aspect-square rounded-lg overflow-hidden group hover:ring-2 hover:ring-brand-pink transition-all bg-gray-100 cursor-grab active:cursor-grabbing"
               >
                 <img 
                   src={img.urls.small} 

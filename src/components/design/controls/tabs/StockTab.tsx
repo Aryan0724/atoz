@@ -260,7 +260,14 @@ export default function StockTab({ onAddImage, onClose, provider = 'pexels' }: S
                       triggerUnsplashDownload(photo);
                       toast.success('Photo added to canvas!');
                     }}
-                    className="absolute inset-0 z-10"
+                    draggable={true}
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('application/atoz-element', JSON.stringify({
+                        type: 'image',
+                        url: photo.url
+                      }));
+                    }}
+                    className="absolute inset-0 z-10 cursor-grab active:cursor-grabbing"
                   />
                 </div>
               ))}

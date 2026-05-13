@@ -35,6 +35,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const [selectedColor, setSelectedColor] = useState('#FFD700');
   const [selectedQuality, setSelectedQuality] = useState('Standard Matte');
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const designs = (product as any).color_variants?.length > 0 
     ? (product as any).color_variants 
@@ -172,7 +173,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     });
   };
 
-  const handleAddCustomField = (type: 'text' | 'image') => {
+  const handleAddCustomField = (type: 'text' | 'image', initialValue?: string) => {
     const newId = `custom_${Date.now()}`;
     const newField = {
       id: newId,
@@ -183,6 +184,10 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     };
     
     setCustomFields(prev => [...prev, newField]);
+    if (initialValue) {
+       setFormData(prev => ({ ...prev, [newId]: { text: initialValue } }));
+    }
+
     setLocalMappings(prev => ({
        ...prev,
        [newId]: {
@@ -357,7 +362,47 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     <div className="w-full h-[calc(100dvh-60px)] md:h-[calc(100vh-60px)] flex flex-col md:flex-row bg-[#fbfbf9] overflow-hidden">
       
       {/* RIGHT PANEL: Live Preview Area (TOP on mobile) */}
-      <div className="w-full h-[45dvh] md:h-full relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0 border-b border-gray-100 md:border-b-0 order-1 md:order-2">
+      <div 
+        className={cn(
+          "w-full h-[45dvh] md:h-full relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0 border-b border-gray-100 md:border-b-0 order-1 md:order-2 transition-all",
+          isDragOver && "ring-4 ring-brand-pink ring-inset bg-brand-pink/5"
+        )}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragOver(true);
+        }}
+        onDragLeave={() => setIsDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragOver(false);
+
+          // Handle Files
+          if (e.dataTransfer.files.length) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('image/')) {
+               const reader = new FileReader();
+               reader.onload = (f) => {
+                 if (f.target?.result) {
+                    handleAddCustomField('image', f.target.result as string);
+                 }
+               };
+               reader.readAsDataURL(file);
+            }
+            return;
+          }
+
+          // Handle Sidebar Data
+          const data = e.dataTransfer.getData('application/atoz-element');
+          if (data) {
+            try {
+              const payload = JSON.parse(data);
+              if (payload.type === 'image') handleAddCustomField('image', payload.url);
+            } catch (err) {
+              console.error('Failed to parse dropped element:', err);
+            }
+          }
+        }}
+      >
         
         {/* Side Controls (Front/Back) */}
         <div className="absolute top-2 md:top-6 left-1/2 -translate-x-1/2 z-30 w-[95%] md:w-auto">

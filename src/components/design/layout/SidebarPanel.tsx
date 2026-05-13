@@ -508,7 +508,14 @@ const SidebarPanel = ({
                 <button
                   key={p.text}
                   onClick={() => onAddText(p.text)}
-                  className="p-2.5 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/20 rounded-xl text-left transition-all group hover:shadow-sm"
+                  draggable={true}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('application/atoz-element', JSON.stringify({
+                      type: 'text',
+                      text: p.text
+                    }));
+                  }}
+                  className="p-2.5 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/20 rounded-xl text-left transition-all group hover:shadow-sm cursor-grab active:cursor-grabbing"
                 >
                   <span className="block text-[10px] font-black text-[#1a1a1a] truncate" style={{ fontFamily: p.font }}>{p.text}</span>
                   <span className="text-[8px] text-gray-400 block mt-0.5">{p.desc}</span>
@@ -552,7 +559,14 @@ const SidebarPanel = ({
                 <button
                   key={f.family}
                   onClick={() => onAddText(f.sample)}
-                  className="p-3 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/20 rounded-xl text-left transition-all group hover:shadow-sm"
+                  draggable={true}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('application/atoz-element', JSON.stringify({
+                      type: 'text',
+                      text: f.sample
+                    }));
+                  }}
+                  className="p-3 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/20 rounded-xl text-left transition-all group hover:shadow-sm cursor-grab active:cursor-grabbing"
                 >
                   <span className="block text-base text-[#1a1a1a] truncate" style={{ fontFamily: f.family }}>
                     {f.sample}
@@ -593,7 +607,14 @@ const SidebarPanel = ({
                 <button
                   key={s.type}
                   onClick={() => onAddShape(s.type)}
-                  className="aspect-square flex flex-col items-center justify-center gap-1.5 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/25 rounded-xl transition-all group hover:shadow-sm text-[#5b5b42]"
+                  draggable={true}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('application/atoz-element', JSON.stringify({
+                      type: 'shape',
+                      shapeType: s.type
+                    }));
+                  }}
+                  className="aspect-square flex flex-col items-center justify-center gap-1.5 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/25 rounded-xl transition-all group hover:shadow-sm text-[#5b5b42] cursor-grab active:cursor-grabbing"
                 >
                   <div className="group-hover:scale-110 transition-transform">{s.preview}</div>
                   <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wide">{s.label}</span>
@@ -620,8 +641,16 @@ const SidebarPanel = ({
                       onAddSvgGraphic(graphic.svg, graphic.name);
                       toast.success(`${graphic.name} added to canvas!`);
                     }}
+                    draggable={true}
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('application/atoz-element', JSON.stringify({
+                        type: 'svg',
+                        svg: graphic.svg,
+                        name: graphic.name
+                      }));
+                    }}
                     title={graphic.name}
-                    className="flex flex-col items-center justify-center p-3 h-24 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/25 rounded-xl transition-all hover:shadow-sm"
+                    className="flex flex-col items-center justify-center p-3 h-24 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/25 rounded-xl transition-all hover:shadow-sm cursor-grab active:cursor-grabbing"
                   >
                     <div className="w-12 h-12 flex items-center justify-center mb-1" dangerouslySetInnerHTML={{ __html: graphic.svg }} />
                     <span className="text-[9px] text-gray-500 font-bold truncate w-full text-center tracking-wide">{graphic.name}</span>
@@ -650,8 +679,15 @@ const SidebarPanel = ({
                         onAddIcon(iconName);
                         toast.success(`${iconName} icon added!`);
                       }}
+                      draggable={true}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('application/atoz-element', JSON.stringify({
+                          type: 'icon',
+                          iconName
+                        }));
+                      }}
                       title={iconName}
-                      className="aspect-square flex flex-col items-center justify-center gap-1 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/25 rounded-xl transition-all hover:shadow-sm group"
+                      className="aspect-square flex flex-col items-center justify-center gap-1 bg-[#f7f7f2] hover:bg-white border border-transparent hover:border-[#5b5b42]/25 rounded-xl transition-all hover:shadow-sm group cursor-grab active:cursor-grabbing"
                     >
                       <svg viewBox="0 0 24 24" className="w-7 h-7 stroke-[#5b5b42] fill-none group-hover:stroke-[#1a1a1a] transition-colors" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d={pathData} />
@@ -738,7 +774,14 @@ const SidebarPanel = ({
                     <button
                       key={i}
                       onClick={() => onAddImage(url)}
-                      className="aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-[#5b5b42] transition-all group relative"
+                      draggable={true}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('application/atoz-element', JSON.stringify({
+                          type: 'image',
+                          url: url
+                        }));
+                      }}
+                      className="aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-[#5b5b42] transition-all group relative cursor-grab active:cursor-grabbing"
                     >
                       <img src={url} alt="upload" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
@@ -815,7 +858,14 @@ const SidebarPanel = ({
                    <div className="flex gap-2">
                      <button 
                        onClick={() => onAddImage(generatedImage)}
-                       className="flex-1 py-2.5 bg-white text-black text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
+                       draggable={true}
+                       onDragStart={(e) => {
+                         e.dataTransfer.setData('application/atoz-element', JSON.stringify({
+                           type: 'image',
+                           url: generatedImage
+                         }));
+                       }}
+                       className="flex-1 py-2.5 bg-white text-black text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-purple-50 transition-colors flex items-center justify-center gap-2 cursor-grab active:cursor-grabbing"
                      >
                        <Plus className="h-3.5 w-3.5" /> Add to Canvas
                      </button>
@@ -841,7 +891,14 @@ const SidebarPanel = ({
                     <button
                       key={idx}
                       onClick={() => onAddImage(item.url)}
-                      className="group relative aspect-square rounded-2xl overflow-hidden border-2 border-transparent hover:border-purple-400 transition-all shadow-sm"
+                      draggable={true}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('application/atoz-element', JSON.stringify({
+                          type: 'image',
+                          url: item.url
+                        }));
+                      }}
+                      className="group relative aspect-square rounded-2xl overflow-hidden border-2 border-transparent hover:border-purple-400 transition-all shadow-sm cursor-grab active:cursor-grabbing"
                     >
                       <img src={item.url} alt="History" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-purple-900/20 transition-all flex items-center justify-center">

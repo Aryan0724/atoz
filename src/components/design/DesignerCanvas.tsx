@@ -38,6 +38,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const { saveHistory, undo, redo } = useCanvasHistory(canvas);
   const { zoomLevel, handleZoom, resetZoom } = useCanvasGestures(canvas, containerRef);
@@ -97,7 +98,52 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       selectionBorderColor: '#1890ff',
       selectionLineWidth: 1,
       allowTouchScrolling: false,
+      fireTouchEvents: true,
+      stopContextMenu: true,
     });
+
+    fabricCanvas.on('drop', (e: any) => {
+      const dropEvent = e.e as DragEvent;
+      dropEvent.preventDefault();
+      setIsDragOver(false);
+
+      // Handle Files
+      if (dropEvent.dataTransfer?.files?.length) {
+        const file = dropEvent.dataTransfer.files[0];
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (f) => {
+            if (f.target?.result) {
+              addImage(f.target.result as string);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+        return;
+      }
+
+      // Handle Sidebar Data
+      const data = dropEvent.dataTransfer?.getData('application/atoz-element');
+      if (data) {
+        try {
+          const payload = JSON.parse(data);
+          if (payload.type === 'image') addImage(payload.url);
+          if (payload.type === 'icon') addIcon(payload.iconName);
+        } catch (err) {
+          console.error('Failed to parse dropped design element:', err);
+        }
+      }
+    });
+
+    fabricCanvas.on('dragover', (e: any) => {
+      e.e.preventDefault();
+      setIsDragOver(true);
+    });
+
+    fabricCanvas.on('dragleave', () => {
+      setIsDragOver(false);
+    });
+
 
     fabric.Object.prototype.set({
       transparentCorners: false,
@@ -788,11 +834,32 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full max-w-full bg-gray-50 md:rounded-[30px] overflow-hidden border-y md:border border-gray-100 shadow-2xl flex items-center justify-center group isolate ring-1 ring-black/5" 
+      className={cn(
+        "relative w-full max-w-full bg-gray-50 md:rounded-[30px] overflow-hidden border-y md:border border-gray-100 shadow-2xl flex items-center justify-center group isolate ring-1 ring-black/5 transition-all",
+        isDragOver && "ring-4 ring-brand-pink ring-inset bg-brand-pink/5"
+      )}
       style={{ 
         touchAction: 'none', 
         aspectRatio: `${BASE_WIDTH}/${BASE_HEIGHT}`,
-        maxHeight: 'calc(100dvh - 280px)' // Reserve space for header, footer tools, and top toolbar
+        maxHeight: 'calc(100dvh - 280px)' 
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+      }}
+      onDragLeave={() => setIsDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        
+        if (e.dataTransfer.files.length) {
+          const file = e.dataTransfer.files[0];
+          if (file.type.startsWith('image/')) {
+             const reader = new FileReader();
+             reader.onload = (f) => addImage(f.target?.result as string);
+             reader.readAsDataURL(file);
+          }
+        }
       }}
     >
       <canvas ref={canvasRef} className="max-w-full h-auto drop-shadow-sm" />
