@@ -589,8 +589,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                         <div 
                                           onPointerDown={(e) => e.stopPropagation()}
                                           className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-white rounded-xl shadow-2xl border border-gray-100 flex items-center gap-2 p-2 z-[120] pointer-events-auto cursor-default"
-                                          style={{ fontSize: '12px', width: 'max-content' }}
-                                        >                >
+                                        >
                                          <div className="flex gap-1 border-r border-gray-100 pr-2">
                                            {['#FFD700', '#FFFFFF', '#000000', '#FF1493', '#800000', '#1A4D2E'].map(c => (
                                              <button 
