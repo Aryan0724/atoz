@@ -27,7 +27,17 @@ import { X, Grid, Trash2 } from 'lucide-react';
 
 const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>((props, ref) => {
   const { product, designConfig, onObjectsUpdated, initialTemplateIndex } = props;
-  const designs = product?.designs || [];
+
+  const designs = (product as any).color_variants?.length > 0 
+    ? (product as any).color_variants 
+    : [
+        { 
+          name: 'Default Design', 
+          wireframe_images: designConfig?.templates?.map((t: any) => t.preview) || product.template_images || product.images || []
+        }
+      ];
+
+  const currentDesign = designs[selectedDesignIndex] || designs[0];
   const [formData, setFormData] = useState<Record<string, { text: string, color?: string }>>({});
   const [selectedDesignIndex, setSelectedDesignIndex] = useState(initialTemplateIndex || 0);
   const [selectedSideIndex, setSelectedSideIndex] = useState(0); // 0=Front, 1=Back
@@ -57,7 +67,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   ];
 
   const allFields = [...baseFields, ...customFields];
-  const currentDesign = designs[selectedDesignIndex];
 
   // Initialize mappings when template or side changes
   React.useEffect(() => {
@@ -244,16 +253,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   };
 
 
-  const designs = (product as any).color_variants?.length > 0 
-    ? (product as any).color_variants 
-    : [
-        { 
-          name: 'Default Design', 
-          wireframe_images: designConfig?.templates?.map((t: any) => t.preview) || product.template_images || product.images || []
-        }
-      ];
-
-  const currentDesign = designs[selectedDesignIndex] || designs[0];
   const currentPreview = currentDesign?.wireframe_images?.[selectedSideIndex] || currentDesign?.image_url || currentDesign?.wireframe_images?.[0] || '';
 
   // Expose methods to maintain compatibility with the DesignerCanvas interface
