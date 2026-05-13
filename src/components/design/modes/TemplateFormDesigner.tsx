@@ -353,136 +353,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   return (
     <div className="w-full h-[calc(100dvh-60px)] md:h-[calc(100vh-60px)] flex flex-col md:flex-row bg-[#fbfbf9] overflow-hidden">
       
-      {/* LEFT PANEL: Form and Config */}
-      <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 flex-1 md:h-full overflow-y-auto border-r border-gray-100 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 custom-scrollbar">
-        <div className="p-4 md:p-8 space-y-6 md:space-y-10">
-          
-          {/* Template Selection */}
-          {designs.length > 1 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                 <h3 className="text-sm font-semibold text-brand-dark">Design Style</h3>
-                 <button 
-                   onClick={() => setIsGalleryOpen(true)}
-                   className="flex items-center gap-1.5 text-[10px] font-black text-brand-pink uppercase tracking-widest hover:opacity-70 transition-opacity"
-                 >
-                   <LayoutGrid className="w-3 h-3" />
-                   View All
-                 </button>
-              </div>
-              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                 {designs.map((d: any, idx: number) => (
-                    <button 
-                       key={idx}
-                       onClick={() => setSelectedDesignIndex(idx)}
-                       className={cn(
-                         "px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 border",
-                         selectedDesignIndex === idx 
-                           ? "bg-brand-dark text-white border-brand-dark shadow-md" 
-                           : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
-                       )}
-                    >
-                       {d.name || `Template ${idx + 1}`}
-                    </button>
-                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* Form Details */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-brand-dark tracking-tight">Customization Details</h2>
-              <div className="flex gap-1.5">
-                 <button 
-                   onClick={() => handleAddCustomField('text')}
-                   className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-md transition-all text-[10px] font-black uppercase tracking-widest text-brand-pink"
-                 >
-                   <Type className="w-3 h-3" /> Text
-                 </button>
-                 <button 
-                   onClick={() => handleAddCustomField('image')}
-                   className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-md transition-all text-[10px] font-black uppercase tracking-widest text-brand-pink"
-                 >
-                   <Upload className="w-3 h-3" /> Image
-                 </button>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              {allFields.map((field: any) => (
-                <div key={field.id} className="p-4 bg-gray-50/50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:border-gray-200">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">{field.label}</label>
-                    {field.type !== 'image' && (
-                      <div className="flex gap-1">
-                        {['#FFD700', '#FFFFFF', '#000000', '#FF1493', '#800000', '#1A4D2E'].map(c => (
-                          <button 
-                            key={c}
-                            onClick={() => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), color: c } }))}
-                            className={cn(
-                              "w-3.5 h-3.5 rounded-full border border-gray-200 transition-transform hover:scale-110",
-                              (formData[field.id]?.color || '#FFD700') === c ? "ring-2 ring-brand-pink ring-offset-1 border-white" : ""
-                            )}
-                            style={{ backgroundColor: c }}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {field.type === 'textarea' ? (
-                    <textarea 
-                       rows={2}
-                       value={formData[field.id]?.text || ''}
-                       onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: e.target.value } }))}
-                       placeholder={field.placeholder}
-                       className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm resize-none"
-                    />
-                  ) : field.type === 'image' ? (
-                    <label className="flex items-center gap-3 p-2 border border-dashed border-gray-300 bg-white rounded-xl hover:border-brand-pink/50 transition-all cursor-pointer">
-                       <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-                          {formData[field.id]?.text ? (
-                             <img src={formData[field.id].text} alt="Preview" className="w-full h-full object-contain" />
-                          ) : (
-                             <Upload className="w-4 h-4 text-gray-400" />
-                          )}
-                       </div>
-                       <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-gray-700">{formData[field.id]?.text ? 'Logo Selected' : 'Upload Logo'}</p>
-                       </div>
-                       <input 
-                          type="file" 
-                          className="hidden" 
-                          onChange={(e) => {
-                             const file = e.target.files?.[0];
-                             if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: reader.result as string } }));
-                                reader.readAsDataURL(file);
-                             }
-                          }} 
-                       />
-                    </label>
-                  ) : (
-                    <input 
-                       type="text"
-                       value={formData[field.id]?.text || ''}
-                       onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: e.target.value } }))}
-                       placeholder={field.placeholder}
-                       className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-          
-        </div>
-      </div>
-
-      {/* RIGHT PANEL: Live Preview Area */}
-      <div className="w-full h-[35vh] md:h-full relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0 border-b border-gray-100 md:border-b-0">
+      {/* RIGHT PANEL: Live Preview Area (TOP on mobile) */}
+      <div className="w-full h-[35vh] md:h-full relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0 border-b border-gray-100 md:border-b-0 order-1 md:order-2">
         
         {/* Side Controls (Front/Back) */}
         <div className="absolute top-2 md:top-6 left-1/2 -translate-x-1/2 z-30 w-[95%] md:w-auto">
@@ -717,6 +589,132 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
              )}
             </motion.div>
            </AnimatePresence>
+        </div>
+      </div>
+
+      {/* LEFT PANEL: Form and Config (BOTTOM on mobile) */}
+      <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 flex-1 md:h-full overflow-y-auto border-r border-gray-100 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 custom-scrollbar order-2 md:order-1">
+        <div className="p-4 md:p-8 space-y-6 md:space-y-10">
+          
+          {/* Template Selection */}
+          {designs.length > 1 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                 <h3 className="text-sm font-semibold text-brand-dark">Design Style</h3>
+                 <button 
+                   onClick={() => setIsGalleryOpen(true)}
+                   className="flex items-center gap-1.5 text-[10px] font-black text-brand-pink uppercase tracking-widest hover:opacity-70 transition-opacity"
+                 >
+                   <LayoutGrid className="w-3 h-3" /> View All
+                 </button>
+              </div>
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                  {designs.map((d: any, idx: number) => (
+                     <button 
+                        key={idx}
+                        onClick={() => setSelectedDesignIndex(idx)}
+                        className={cn(
+                          "px-6 py-3 rounded-2xl border-2 text-[10px] font-black uppercase tracking-widest transition-all shrink-0",
+                          selectedDesignIndex === idx 
+                            ? "bg-brand-dark text-white border-brand-dark shadow-md" 
+                            : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+                        )}
+                     >
+                        {d.name || `Template ${idx + 1}`}
+                     </button>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Form Details */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-brand-dark tracking-tight">Customization Details</h2>
+              <div className="flex gap-1.5">
+                  <button 
+                    onClick={() => handleAddCustomField('text')}
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-md transition-all text-[10px] font-black uppercase tracking-widest text-brand-pink"
+                  >
+                    <Type className="w-3 h-3" /> Text
+                  </button>
+                  <button 
+                    onClick={() => handleAddCustomField('image')}
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-md transition-all text-[10px] font-black uppercase tracking-widest text-brand-pink"
+                  >
+                    <Upload className="w-3 h-3" /> Image
+                  </button>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {allFields.map((field: any) => (
+                <div key={field.id} className="p-4 bg-gray-50/50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">{field.label}</label>
+                    {field.type !== 'image' && (
+                      <div className="flex gap-1">
+                        {['#FFD700', '#FFFFFF', '#000000', '#FF1493', '#800000', '#1A4D2E'].map(c => (
+                          <button 
+                            key={c}
+                            onClick={() => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), color: c } }))}
+                            className={cn(
+                              "w-3.5 h-3.5 rounded-full border border-gray-200 transition-transform hover:scale-110",
+                              (formData[field.id]?.color || '#FFD700') === c ? "ring-2 ring-brand-pink ring-offset-1 border-white" : ""
+                            )}
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {field.type === 'textarea' ? (
+                    <textarea 
+                       rows={2}
+                       value={formData[field.id]?.text || ''}
+                       onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: e.target.value } }))}
+                       placeholder={field.placeholder}
+                       className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm resize-none"
+                    />
+                  ) : field.type === 'image' ? (
+                    <label className="flex items-center gap-3 p-2 border border-dashed border-gray-300 bg-white rounded-xl hover:border-brand-pink/50 transition-all cursor-pointer">
+                       <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+                          {formData[field.id]?.text ? (
+                             <img src={formData[field.id].text} alt="Preview" className="w-full h-full object-contain" />
+                          ) : (
+                             <Upload className="w-4 h-4 text-gray-400" />
+                          )}
+                       </div>
+                       <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-gray-700">{formData[field.id]?.text ? 'Logo Selected' : 'Upload Logo'}</p>
+                       </div>
+                       <input 
+                          type="file" 
+                          className="hidden" 
+                          onChange={(e) => {
+                             const file = e.target.files?.[0];
+                             if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: reader.result as string } }));
+                                reader.readAsDataURL(file);
+                             }
+                          }} 
+                       />
+                    </label>
+                  ) : (
+                    <input 
+                       type="text"
+                       value={formData[field.id]?.text || ''}
+                       onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: e.target.value } }))}
+                       placeholder={field.placeholder}
+                       className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
