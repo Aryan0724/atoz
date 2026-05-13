@@ -149,18 +149,24 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       };
   }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos]);
 
-  const handleStart = (e: React.PointerEvent, fieldId: string, action: 'move' | 'resize') => {
+  const handleStart = (e: React.PointerEvent, fieldId: string, action: 'move' | 'resize' | 'resize-tl' | 'resize-tr' | 'resize-bl' | 'resize-br') => {
     if (isPreview) return;
     e.preventDefault(); 
     e.stopPropagation();
     
     // Capture pointer to ensure move/up work even if mouse leaves the element
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch (err) {
+      console.warn('Pointer capture failed', err);
+    }
     
     setActiveField(fieldId);
     
+    // For specialized corners, we'll treat them as 'resize' for now in the simple logic
+    // but we can expand if needed. For now, let's keep it simple.
+    if (action.startsWith('resize')) setIsResizing(true);
     if (action === 'move') setIsDragging(true);
-    if (action === 'resize') setIsResizing(true);
     
     setDragStartPos({ x: e.clientX, y: e.clientY });
     setInitialFieldPos({
@@ -529,10 +535,17 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       boxSizing: 'border-box'
                                     }}
                                     className={cn(
-                                       "transition-colors overflow-visible group touch-none pointer-events-auto",
-                                       !isPreview && "hover:border-gray-300 hover:border-dashed cursor-move"
+                                       "transition-colors overflow-visible group touch-none pointer-events-auto z-50",
+                                       !isPreview && "hover:ring-1 hover:ring-brand-pink/50 cursor-move"
                                     )}
                                   >
+                                    {/* DRAG HANDLE OVERLAY (invisible but catches events) */}
+                                    {!isPreview && (
+                                      <div 
+                                        className="absolute inset-0 z-0"
+                                        onPointerDown={(e) => handleStart(e, field.id, 'move')}
+                                      />
+                                    )}
                                     {field.type === 'image' ? (
                                        formData[field.id]?.text ? (
                                           <img src={formData[field.id].text} alt={field.label} className="w-full h-full object-contain pointer-events-none" />
@@ -551,15 +564,35 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       </span>
                                     )}
 
-                                    {/* Resize Handle scaled with CQI */}
+                                    {/* Resize Handles (Corners) */}
                                     {!isPreview && activeField === field.id && (
-                                       <div 
-                                         onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                         style={{ width: '2cqi', height: '4cqi', maxWidth: '12px', maxHeight: '24px', minWidth: '6px', minHeight: '12px' }}
-                                         className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-brand-pink rounded-full cursor-ew-resize opacity-100 transition-opacity flex items-center justify-center shadow-md z-20"
-                                       >
-                                          <div className="w-0.5 h-1/2 bg-white/80 rounded-full" />
-                                       </div>
+                                       <>
+                                          {/* Bottom Right (Standard) */}
+                                          <div 
+                                            onPointerDown={(e) => handleStart(e, field.id, 'resize')}
+                                            className="absolute -right-1 -bottom-1 w-4 h-4 bg-brand-pink rounded-full border-2 border-white shadow-md z-20 cursor-se-resize flex items-center justify-center"
+                                          >
+                                             <div className="w-1.5 h-1.5 bg-white/50 rounded-full" />
+                                          </div>
+                                          
+                                          {/* Bottom Left */}
+                                          <div 
+                                            onPointerDown={(e) => handleStart(e, field.id, 'resize')}
+                                            className="absolute -left-1 -bottom-1 w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-sm z-20 cursor-sw-resize"
+                                          />
+
+                                          {/* Top Right */}
+                                          <div 
+                                            onPointerDown={(e) => handleStart(e, field.id, 'resize')}
+                                            className="absolute -right-1 -top-1 w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-sm z-20 cursor-ne-resize"
+                                          />
+
+                                          {/* Top Left */}
+                                          <div 
+                                            onPointerDown={(e) => handleStart(e, field.id, 'resize')}
+                                            className="absolute -left-1 -top-1 w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-sm z-20 cursor-nw-resize"
+                                          />
+                                       </>
                                     )}
 
                                     {/* Floating Formatting Toolbar */}
