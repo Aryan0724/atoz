@@ -149,32 +149,35 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       };
   }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos]);
 
-  const handleStart = (e: React.PointerEvent, fieldId: string, action: 'move' | 'resize' | 'resize-tl' | 'resize-tr' | 'resize-bl' | 'resize-br') => {
+  const handleStart = (e: React.PointerEvent, fieldId: string, action: 'move' | 'resize') => {
     if (isPreview) return;
+    
+    // Crucial for drag-and-drop to work correctly on all browsers
     e.preventDefault(); 
     e.stopPropagation();
     
-    // Capture pointer to ensure move/up work even if mouse leaves the element
-    try {
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    } catch (err) {
-      console.warn('Pointer capture failed', err);
-    }
-    
     setActiveField(fieldId);
     
-    // For specialized corners, we'll treat them as 'resize' for now in the simple logic
-    // but we can expand if needed. For now, let's keep it simple.
-    if (action.startsWith('resize')) setIsResizing(true);
+    if (action === 'resize') setIsResizing(true);
     if (action === 'move') setIsDragging(true);
     
     setDragStartPos({ x: e.clientX, y: e.clientY });
+    
+    // Ensure we have current values for the drag start
+    const currentMapping = localMappings[fieldId] || {};
     setInitialFieldPos({
-       x: localMappings[fieldId]?.x || 0,
-       y: localMappings[fieldId]?.y || 0,
-       w: localMappings[fieldId]?.w || 30,
-       h: localMappings[fieldId]?.h || 10
+       x: currentMapping.x || 0,
+       y: currentMapping.y || 0,
+       w: currentMapping.w || 30,
+       h: currentMapping.h || 10
     });
+
+    // Capture pointer to track movement even outside the element
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch (err) {
+      console.warn('Pointer capture not supported or failed', err);
+    }
   };
 
   const handleAddCustomField = (type: 'text' | 'image', initialValue?: string) => {
@@ -501,111 +504,93 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                const baseFontSize = mapping.fontSize || 14;
                                const cqiSize = (baseFontSize / 500) * 100;
 
-                               return (
-                                  <div
-                                    key={field.id}
-                                    onPointerDown={(e) => handleStart(e, field.id, 'move')}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveField(field.id);
-                                    }}
-                                    style={{
-                                      position: 'absolute',
-                                      left,
-                                      top,
-                                      width: hasWidth ? `${mapping.w}%` : 'auto',
-                                      height: mapping.h ? `${mapping.h}%` : 'auto',
-                                      transform,
-                                      fontSize: `${cqiSize}cqi`,
-                                      fontWeight: mapping.fontWeight || 'normal',
-                                      fontFamily: mapping.fontFamily || 'inherit',
-                                      fontStyle: mapping.italic ? 'italic' : 'normal',
-                                      textAlign: mapping.align || 'left',
-                                      color: formData[field.id]?.color || mapping.color || '#FFD700',
-                                      opacity: mapping.opacity !== undefined ? mapping.opacity : 1,
-                                      display: 'flex',
-                                      flexDirection: 'column',
-                                      alignItems: mapping.align === 'center' ? 'center' : mapping.align === 'right' ? 'flex-end' : 'flex-start',
-                                      justifyContent: 'center',
-                                      lineHeight: '1.2',
-                                      maxWidth: mapping.maxWidth ? `${mapping.maxWidth}%` : `${autoMaxWidth}%`,
-                                      cursor: isPreview ? 'default' : 'move',
-                                      border: (activeField === field.id && !isPreview) ? '2px dashed rgba(233, 30, 99, 0.5)' : '2px solid transparent',
-                                      padding: (activeField === field.id && !isPreview) ? '0.5cqi' : '0.5cqi',
-                                      boxSizing: 'border-box'
-                                    }}
-                                    className={cn(
-                                       "transition-colors overflow-visible group touch-none pointer-events-auto z-50",
-                                       !isPreview && "hover:ring-1 hover:ring-brand-pink/50 cursor-move"
-                                    )}
-                                  >
-                                    {/* Content Container */}
-                                    <div className="relative z-10 pointer-events-none w-full h-full flex flex-col justify-center">
-                                      {field.type === 'image' ? (
-                                         formData[field.id]?.text ? (
-                                            <img src={formData[field.id].text} alt={field.label} className="w-full h-full object-contain pointer-events-none" />
-                                         ) : (
-                                            <div className={cn("w-full h-full border border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50/50 pointer-events-none p-1", isPreview && "opacity-0")}>
-                                               <Upload style={{ width: '3cqi', height: '3cqi' }} className="text-gray-400 mb-0.5" />
-                                               <span style={{ fontSize: '1.5cqi' }} className="font-black uppercase text-gray-400 text-center">Image</span>
-                                            </div>
-                                         )
-                                      ) : (
-                                        <span className={cn(
-                                          "whitespace-pre-line pointer-events-none",
-                                          mapping.italic && "italic"
-                                        )}>
-                                          {formData[field.id]?.text || field.placeholder?.replace('e.g. ', '') || field.label}
-                                        </span>
+                                                           <div
+                                      key={field.id}
+                                      style={{
+                                        position: 'absolute',
+                                        left,
+                                        top,
+                                        width: hasWidth ? `${mapping.w}%` : 'auto',
+                                        height: mapping.h ? `${mapping.h}%` : 'auto',
+                                        transform,
+                                        fontSize: `${cqiSize}cqi`,
+                                        fontWeight: mapping.fontWeight || 'normal',
+                                        fontFamily: mapping.fontFamily || 'inherit',
+                                        fontStyle: mapping.italic ? 'italic' : 'normal',
+                                        textAlign: mapping.align || 'left',
+                                        color: formData[field.id]?.color || mapping.color || '#FFD700',
+                                        opacity: mapping.opacity !== undefined ? mapping.opacity : 1,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: mapping.align === 'center' ? 'center' : mapping.align === 'right' ? 'flex-end' : 'flex-start',
+                                        justifyContent: 'center',
+                                        lineHeight: '1.2',
+                                        maxWidth: mapping.maxWidth ? `${mapping.maxWidth}%` : `${autoMaxWidth}%`,
+                                        zIndex: activeField === field.id ? 100 : 50,
+                                        boxSizing: 'border-box',
+                                        pointerEvents: 'none' // Let events pass to the Hit Area child
+                                      }}
+                                      className="transition-all overflow-visible group select-none"
+                                    >
+                                      {/* HIT AREA & DRAG HANDLE (This is what you touch) */}
+                                      {!isPreview && (
+                                        <div 
+                                          className={cn(
+                                            "absolute inset-0 pointer-events-auto cursor-move",
+                                            activeField === field.id ? "ring-2 ring-brand-pink ring-dashed ring-offset-2" : "hover:ring-1 hover:ring-gray-300"
+                                          )}
+                                          onPointerDown={(e) => handleStart(e, field.id, 'move')}
+                                        />
                                       )}
-                                    </div>
 
-                                    {/* Resize Handles (Corners) - LARGER for better touch hit */}
-                                    {!isPreview && activeField === field.id && (
-                                       <>
-                                          {/* Bottom Right */}
-                                          <div 
-                                            onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                            className="absolute -right-3 -bottom-3 w-8 h-8 flex items-center justify-center z-50 cursor-se-resize"
-                                          >
-                                             <div className="w-5 h-5 bg-brand-pink rounded-full border-2 border-white shadow-xl flex items-center justify-center">
-                                                <div className="w-1.5 h-1.5 bg-white/50 rounded-full" />
-                                             </div>
-                                          </div>
-                                          
-                                          {/* Bottom Left */}
-                                          <div 
-                                            onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                            className="absolute -left-3 -bottom-3 w-8 h-8 flex items-center justify-center z-50 cursor-sw-resize"
-                                          >
-                                             <div className="w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-md" />
-                                          </div>
+                                      {/* CONTENT DISPLAY */}
+                                      <div className="relative pointer-events-none w-full h-full flex flex-col justify-center select-none">
+                                        {field.type === 'image' ? (
+                                           formData[field.id]?.text ? (
+                                              <img src={formData[field.id].text} alt={field.label} className="w-full h-full object-contain" />
+                                           ) : (
+                                              <div className={cn("w-full h-full border border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50/50 p-1", isPreview && "opacity-0")}>
+                                                 <Upload style={{ width: '3cqi', height: '3cqi' }} className="text-gray-400 mb-0.5" />
+                                                 <span style={{ fontSize: '1.5cqi' }} className="font-black uppercase text-gray-400 text-center">Image</span>
+                                              </div>
+                                           )
+                                        ) : (
+                                          <span className="whitespace-pre-line leading-tight">
+                                            {formData[field.id]?.text || field.placeholder?.replace('e.g. ', '') || field.label}
+                                          </span>
+                                        )}
+                                      </div>
 
-                                          {/* Top Right */}
-                                          <div 
-                                            onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                            className="absolute -right-3 -top-3 w-8 h-8 flex items-center justify-center z-50 cursor-ne-resize"
-                                          >
-                                             <div className="w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-md" />
-                                          </div>
+                                      {/* RESIZE HANDLES (Higher Z-index than Hit Area) */}
+                                      {!isPreview && activeField === field.id && (
+                                         <div className="absolute inset-0 pointer-events-none">
+                                            {/* Bottom Right Handle */}
+                                            <div 
+                                              onPointerDown={(e) => handleStart(e, field.id, 'resize')}
+                                              className="absolute -right-3 -bottom-3 w-8 h-8 flex items-center justify-center pointer-events-auto cursor-se-resize z-[110]"
+                                            >
+                                               <div className="w-5 h-5 bg-brand-pink rounded-full border-2 border-white shadow-xl flex items-center justify-center">
+                                                  <div className="w-1.5 h-1.5 bg-white/50 rounded-full" />
+                                               </div>
+                                            </div>
+                                            
+                                            {/* Top Left Handle */}
+                                            <div 
+                                              onPointerDown={(e) => handleStart(e, field.id, 'resize')}
+                                              className="absolute -left-3 -top-3 w-8 h-8 flex items-center justify-center pointer-events-auto cursor-nw-resize z-[110]"
+                                            >
+                                               <div className="w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-md" />
+                                            </div>
+                                         </div>
+                                      )}
 
-                                          {/* Top Left */}
-                                          <div 
-                                            onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                            className="absolute -left-3 -top-3 w-8 h-8 flex items-center justify-center z-50 cursor-nw-resize"
-                                          >
-                                             <div className="w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-md" />
-                                          </div>
-                                       </>
-                                    )}
-
-                                    {/* Floating Formatting Toolbar */}
-                                    {!isPreview && activeField === field.id && (
-                                      <div 
-                                        onPointerDown={(e) => e.stopPropagation()}
-                                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-lg shadow-xl border border-gray-100 flex items-center gap-2 p-1.5 z-50 cursor-default pointer-events-auto"
-                                        style={{ fontSize: '12px', width: 'max-content' }}
-                                      >
+                                      {/* Formatting Toolbar */}
+                                      {!isPreview && activeField === field.id && (
+                                        <div 
+                                          onPointerDown={(e) => e.stopPropagation()}
+                                          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-white rounded-xl shadow-2xl border border-gray-100 flex items-center gap-2 p-2 z-[120] pointer-events-auto cursor-default"
+                                          style={{ fontSize: '12px', width: 'max-content' }}
+                                        >                >
                                          <div className="flex gap-1 border-r border-gray-100 pr-2">
                                            {['#FFD700', '#FFFFFF', '#000000', '#FF1493', '#800000', '#1A4D2E'].map(c => (
                                              <button 
