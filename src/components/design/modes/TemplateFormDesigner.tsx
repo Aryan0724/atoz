@@ -153,7 +153,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   const handleStart = (e: React.MouseEvent | React.TouchEvent, fieldId: string, action: 'move' | 'resize') => {
     if (isPreview) return;
-    // e.preventDefault(); // Might block scroll, be careful
+    e.preventDefault(); 
     e.stopPropagation();
     setActiveField(fieldId);
     
