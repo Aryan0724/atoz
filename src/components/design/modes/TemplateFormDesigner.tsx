@@ -474,10 +474,11 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                      className="absolute inset-0 w-full h-full object-contain pointer-events-none"
                    />
                    
-                   {/* DYNAMIC TEXT OVERLAY - Split into background and elements */}
-                   <div className="absolute inset-0 z-0 pointer-events-auto" onClick={() => setActiveField(null)} />
+                   {/* Background click to deselect */}
+                   <div className="absolute inset-0 z-0" onClick={() => setActiveField(null)} />
                    
-                   <div className="absolute inset-0 z-10 pointer-events-none">
+                   {/* Elements layer - pointer-events-auto so children can receive events */}
+                   <div className="absolute inset-0" style={{ zIndex: 10 }}>
                       {(() => {
                          if (localMappings && Object.keys(localMappings).length > 0) {
                             return allFields.map((field: any) => {
@@ -569,27 +570,41 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                         )}
                                       </div>
 
-                                      {/* RESIZE HANDLES (Higher Z-index than Hit Area) */}
+                                      {/* RESIZE HANDLES - directly in element, no pointer-events-none wrapper */}
                                       {!isPreview && activeField === field.id && (
-                                         <div className="absolute inset-0 pointer-events-none">
+                                         <>
                                             {/* Bottom Right Handle */}
                                             <div 
-                                              onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                              className="absolute -right-3 -bottom-3 w-8 h-8 flex items-center justify-center pointer-events-auto cursor-se-resize z-[110]"
+                                              onPointerDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
+                                              style={{ position: 'absolute', right: '-14px', bottom: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'se-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
-                                               <div className="w-5 h-5 bg-brand-pink rounded-full border-2 border-white shadow-xl flex items-center justify-center">
-                                                  <div className="w-1.5 h-1.5 bg-white/50 rounded-full" />
-                                               </div>
+                                               <div style={{ width: '18px', height: '18px', background: '#e91e63', borderRadius: '50%', border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }} />
                                             </div>
                                             
                                             {/* Top Left Handle */}
                                             <div 
-                                              onPointerDown={(e) => handleStart(e, field.id, 'resize')}
-                                              className="absolute -left-3 -top-3 w-8 h-8 flex items-center justify-center pointer-events-auto cursor-nw-resize z-[110]"
+                                              onPointerDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
+                                              style={{ position: 'absolute', left: '-14px', top: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'nw-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
-                                               <div className="w-4 h-4 bg-white rounded-full border-2 border-brand-pink shadow-md" />
+                                               <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
                                             </div>
-                                         </div>
+
+                                            {/* Bottom Left Handle */}
+                                            <div 
+                                              onPointerDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
+                                              style={{ position: 'absolute', left: '-14px', bottom: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'sw-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            >
+                                               <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                                            </div>
+
+                                            {/* Top Right Handle */}
+                                            <div 
+                                              onPointerDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
+                                              style={{ position: 'absolute', right: '-14px', top: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'ne-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            >
+                                               <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                                            </div>
+                                         </>
                                       )}
 
                                       {/* Formatting Toolbar */}
