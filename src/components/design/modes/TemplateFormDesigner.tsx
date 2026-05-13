@@ -353,7 +353,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       if (!ctx) return currentPreview;
 
       // Draw base image
-      const baseImg = new Image();
+      const baseImg = new window.Image();
       baseImg.crossOrigin = "anonymous";
       baseImg.src = currentPreview;
       
@@ -376,7 +376,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         const y = (mapping.y / 100) * canvas.height;
 
         if (field.type === 'image' && value) {
-           const itemImg = new Image();
+           const itemImg = new window.Image();
            itemImg.crossOrigin = "anonymous";
            itemImg.src = value;
            await new Promise((res) => { itemImg.onload = res; itemImg.onerror = res; });
