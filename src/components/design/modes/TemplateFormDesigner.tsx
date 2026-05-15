@@ -18,11 +18,24 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  LayoutGrid
+  LayoutGrid,
+  Globe,
+  Zap,
+  Smile,
+  Instagram,
+  Facebook,
+  Twitter,
+  Linkedin,
+  MessageCircle,
+  X,
+  Grid,
+  Trash2,
+  Heart,
+  Star,
+  Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { X, Grid, Trash2 } from 'lucide-react';
 
 
 const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>((props, ref) => {
@@ -41,6 +54,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const [localMappings, setLocalMappings] = useState<Record<string, any>>({});
   const [customFields, setCustomFields] = useState<any[]>([]);
   const [activeField, setActiveField] = useState<string | null>(null);
+  const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
   
   // Dragging / Resizing Math
   const [isDragging, setIsDragging] = useState(false);
@@ -68,14 +82,27 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const allFields = React.useMemo(() => {
     const templateFields = designConfig?.templates?.[selectedDesignIndex]?.fields || product.template_fields;
     const globalFields = (designConfig?.fields && designConfig.fields.length > 0) ? designConfig.fields : null;
-    
-    const baseFields = templateFields || globalFields || [
+
+    let baseFields = templateFields || globalFields || [
       { id: 'name', label: 'Full Name', type: 'text', icon: 'User', placeholder: 'e.g. John Doe' },
       { id: 'title', label: 'Job Title', type: 'text', icon: 'Briefcase', placeholder: 'e.g. Creative Director' },
       { id: 'phone', label: 'Phone Number', type: 'text', icon: 'Phone', placeholder: '+91 98765 43210' },
       { id: 'email', label: 'Email Address', type: 'email', icon: 'Mail', placeholder: 'john@example.com' },
       { id: 'address', label: 'Address', type: 'textarea', icon: 'MapPin', placeholder: 'Enter address...' },
     ];
+
+    // Ensure our new icons are always available if not present
+    const essentialIcons = [
+      { id: 'phone_icon', label: 'Phone Icon', type: 'icon', icon: 'Phone', defaultValue: 'Phone' },
+      { id: 'email_icon', label: 'Email Icon', type: 'icon', icon: 'Mail', defaultValue: 'Mail' },
+      { id: 'address_icon', label: 'Address Icon', type: 'icon', icon: 'MapPin', defaultValue: 'MapPin' },
+    ];
+
+    essentialIcons.forEach(icon => {
+      if (!baseFields.find((f: any) => f.id === icon.id)) {
+        baseFields = [...baseFields, icon];
+      }
+    });
     
     return [...baseFields, ...customFields];
   }, [designConfig, selectedDesignIndex, product.template_fields, customFields]);
@@ -88,13 +115,27 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     // Merge existing custom mappings if any exist for this view
     setLocalMappings(prev => {
        const merged = { ...initialMappings };
+       
+       // Add default positions for essential icons if missing
+       const defaultIconPositions: Record<string, any> = {
+         phone_icon: { x: 5, y: 70, w: 4, h: 4, color: '#000000' },
+         email_icon: { x: 5, y: 75, w: 4, h: 4, color: '#000000' },
+         address_icon: { x: 5, y: 80, w: 4, h: 4, color: '#000000' },
+       };
+
+       Object.entries(defaultIconPositions).forEach(([id, pos]) => {
+         if (!merged[id]) {
+           merged[id] = pos;
+         }
+       });
+
        // Keep custom fields that might have been added
        customFields.forEach(f => {
           if (prev[f.id]) merged[f.id] = prev[f.id];
        });
        return merged;
     });
-  }, [selectedDesignIndex, selectedSideIndex, designConfig]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedDesignIndex, selectedSideIndex, designConfig, customFields]);
 
   // Handle Dragging & Resizing
   React.useEffect(() => {
@@ -214,6 +255,33 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
        }
     }));
     setActiveField(newId);
+  };
+
+  const handleAddIcon = (iconName: string) => {
+    const newId = `icon_${Date.now()}`;
+    const newField = {
+      id: newId,
+      label: `${iconName} Icon`,
+      type: 'icon',
+      defaultValue: iconName,
+      isCustom: true
+    };
+    
+    setCustomFields(prev => [...prev, newField]);
+    setFormData(prev => ({ ...prev, [newId]: { text: iconName } }));
+
+    setLocalMappings(prev => ({
+       ...prev,
+       [newId]: {
+          x: 40,
+          y: 40,
+          w: 5,
+          h: 5,
+          color: '#000000',
+       }
+    }));
+    setActiveField(newId);
+    setIsIconPickerOpen(false);
   };
 
   const updateFontStyle = (fieldId: string, style: 'bold' | 'italic') => {
@@ -414,25 +482,45 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   // Fields are now handled by allFields derived from baseFields + customFields
 
-  const getIcon = (iconName: string) => {
+  const getIcon = (iconName: string, props: any = {}) => {
     const icons: Record<string, any> = {
-      User: <User className="h-4 w-4" />,
-      Briefcase: <Briefcase className="h-4 w-4" />,
-      Phone: <Phone className="h-4 w-4" />,
-      Mail: <Mail className="h-4 w-4" />,
-      MapPin: <MapPin className="h-4 w-4" />,
-      Calendar: <Calendar className="h-4 w-4" />,
-      Type: <Type className="h-4 w-4" />,
-      Layout: <Layout className="h-4 w-4" />,
-      Info: <Info className="h-4 w-4" />,
-      Flower: <div className="text-lg">🌸</div>,
-      Sparkles: <div className="text-lg">✨</div>,
-      Heart: <div className="text-lg">❤️</div>,
-      Star: <div className="text-lg">⭐</div>,
-      Sun: <div className="text-lg">☀️</div>,
-      Om: <div className="text-lg font-bold">ॐ</div>
+      User: User,
+      Briefcase: Briefcase,
+      Phone: Phone,
+      Mail: Mail,
+      MapPin: MapPin,
+      Calendar: Calendar,
+      Type: Type,
+      Layout: Layout,
+      Info: Info,
+      Globe: Globe,
+      Zap: Zap,
+      Heart: Heart,
+      Star: Star,
+      Smile: Smile,
+      Instagram: Instagram,
+      Facebook: Facebook,
+      Twitter: Twitter,
+      Linkedin: Linkedin,
+      MessageCircle: MessageCircle,
     };
-    return icons[iconName] || <Info className="h-4 w-4" />;
+    
+    const IconComponent = icons[iconName];
+    if (IconComponent) return <IconComponent {...props} />;
+    
+    // Fallback for special characters
+    const emojis: Record<string, string> = {
+      Flower: "🌸",
+      Sparkles: "✨",
+      Heart: "❤️",
+      Star: "⭐",
+      Sun: "☀️",
+      Om: "ॐ"
+    };
+    
+    if (emojis[iconName]) return <div className={cn("flex items-center justify-center", props.className)} style={props.style}>{emojis[iconName]}</div>;
+    
+    return <Info {...props} />;
   };
 
   const handleFieldChange = (id: string, value: any) => {
@@ -636,6 +724,13 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                                  <span style={{ fontSize: '1.5cqi' }} className="font-black uppercase text-gray-400 text-center">Image</span>
                                               </div>
                                            )
+                                        ) : field.type === 'icon' ? (
+                                           <div className="w-full h-full flex items-center justify-center">
+                                              {getIcon(formData[field.id]?.text || field.defaultValue || 'Phone', { 
+                                                 className: "w-full h-full",
+                                                 style: { color: formData[field.id]?.color || mapping.color || '#000000' }
+                                              })}
+                                           </div>
                                         ) : (
                                           <span className="whitespace-pre-line leading-tight">
                                             {formData[field.id]?.text || field.placeholder?.replace('e.g. ', '') || field.label}
@@ -818,8 +913,43 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                   >
                     <Upload className="w-3 h-3" /> Image
                   </button>
+                  <button 
+                    onClick={() => setIsIconPickerOpen(true)}
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-md transition-all text-[10px] font-black uppercase tracking-widest text-brand-pink"
+                  >
+                    <Smile className="w-3 h-3" /> Icon
+                  </button>
               </div>
             </div>
+            
+            {/* Icon Picker Overlay */}
+            <AnimatePresence>
+               {isIconPickerOpen && (
+                  <motion.div 
+                     initial={{ opacity: 0, scale: 0.95 }}
+                     animate={{ opacity: 1, scale: 1 }}
+                     exit={{ opacity: 0, scale: 0.95 }}
+                     className="p-4 bg-white border border-gray-100 rounded-2xl shadow-xl space-y-4"
+                  >
+                     <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Select Icon</span>
+                        <button onClick={() => setIsIconPickerOpen(false)} className="text-gray-400 hover:text-brand-dark"><X className="w-4 h-4" /></button>
+                     </div>
+                     <div className="grid grid-cols-5 gap-2">
+                        {['Phone', 'Mail', 'MapPin', 'Briefcase', 'Globe', 'Zap', 'Heart', 'Star', 'Smile', 'Instagram', 'Facebook', 'Twitter', 'Linkedin', 'MessageCircle'].map(iconName => (
+                           <button 
+                              key={iconName}
+                              onClick={() => handleAddIcon(iconName)}
+                              className="aspect-square flex items-center justify-center bg-gray-50 hover:bg-brand-pink/10 hover:text-brand-pink rounded-lg transition-all"
+                              title={iconName}
+                           >
+                              {getIcon(iconName, { className: "w-5 h-5" })}
+                           </button>
+                        ))}
+                     </div>
+                  </motion.div>
+               )}
+            </AnimatePresence>
             
             <div className="space-y-4">
               {allFields.map((field: any) => (
@@ -851,6 +981,29 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                        placeholder={field.placeholder}
                        className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm resize-none"
                     />
+                  ) : field.type === 'icon' ? (
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-white border border-gray-200 rounded-xl flex items-center justify-center shrink-0">
+                          {getIcon(formData[field.id]?.text || field.defaultValue || 'Phone', { className: "w-5 h-5" })}
+                       </div>
+                       <div className="flex-1">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Position on canvas to display</p>
+                          <div className="flex gap-1 overflow-x-auto no-scrollbar pb-1">
+                             {['Phone', 'Mail', 'MapPin', 'Briefcase', 'Globe', 'Zap', 'Heart', 'Star'].map(i => (
+                                <button 
+                                   key={i}
+                                   onClick={() => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: i } }))}
+                                   className={cn(
+                                      "px-2 py-1 rounded-md text-[9px] font-bold transition-all shrink-0",
+                                      (formData[field.id]?.text || field.defaultValue) === i ? "bg-brand-pink text-white" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                                   )}
+                                >
+                                   {i}
+                                </button>
+                             ))}
+                          </div>
+                       </div>
+                    </div>
                   ) : field.type === 'image' ? (
                     <label className="flex items-center gap-3 p-2 border border-dashed border-gray-300 bg-white rounded-xl hover:border-brand-pink/50 transition-all cursor-pointer">
                        <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden shrink-0">

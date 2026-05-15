@@ -439,23 +439,50 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       const left = (config.x / 100) * BASE_WIDTH;
       const top = (config.y / 100) * BASE_HEIGHT;
       
-      const text = new fabric.IText(fieldName.toUpperCase(), {
-        left,
-        top,
-        fontSize: config.fontSize || 24,
-        fontWeight: config.fontWeight || 'normal',
-        fontFamily: config.fontFamily || 'Inter',
-        fill: config.color || '#000000',
-        originX: config.align === 'center' ? 'center' : (config.align === 'right' ? 'right' : 'left'),
-        originY: 'center',
-        textAlign: config.align || 'left',
-        //@ts-ignore
-        id: `mapping_${fieldName}`,
-        _isMapping: true,
-        name: fieldName
-      });
+      if (config.type === 'icon') {
+        const iconName = config.defaultValue || fieldName.replace('_icon', '');
+        const pathData = iconLibrary[iconName.toLowerCase()] || iconLibrary['phone'];
+        const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${config.color || '#000000'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${pathData}"/></svg>`;
+        
+        fabric.loadSVGFromString(svgString, (objects, options) => {
+          const obj = fabric.util.groupSVGElements(objects, options);
+          obj.set({
+            left,
+            top,
+            originX: 'center',
+            originY: 'center',
+            //@ts-ignore
+            id: `mapping_${fieldName}`,
+            _isMapping: true,
+            name: fieldName
+          });
+          
+          const targetSize = (config.w || 5) / 100 * BASE_WIDTH;
+          const scale = targetSize / Math.max(obj.width || 1, obj.height || 1);
+          obj.scale(scale);
+          
+          canvas.add(obj);
+          canvas.renderAll();
+        });
+      } else {
+        const text = new fabric.IText(fieldName.toUpperCase(), {
+          left,
+          top,
+          fontSize: config.fontSize || 24,
+          fontWeight: config.fontWeight || 'normal',
+          fontFamily: config.fontFamily || 'Inter',
+          fill: config.color || '#000000',
+          originX: config.align === 'center' ? 'center' : (config.align === 'right' ? 'right' : 'left'),
+          originY: 'center',
+          textAlign: config.align || 'left',
+          //@ts-ignore
+          id: `mapping_${fieldName}`,
+          _isMapping: true,
+          name: fieldName
+        });
 
-      canvas.add(text);
+        canvas.add(text);
+      }
     });
 
     canvas.renderAll();
