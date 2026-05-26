@@ -260,14 +260,14 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     setLayers([...freshLayers]);
   };
 
-  const handleViewChange = (newView: 'front' | 'back' | 'left' | 'right' | '3d') => {
+  const handleViewChange = async (newView: 'front' | 'back' | 'left' | 'right' | '3d') => {
     if (newView === activeView) return;
     
     if (activeView !== '3d') {
       const currentJson = canvasRef.current?.getJson();
       setViewData(prev => ({ ...prev, [activeView]: currentJson }));
       
-      const currentDesign = canvasRef.current?.getDesignDataUrl() || '';
+      const currentDesign = (await canvasRef.current?.getDesignDataUrl()) || '';
       if (activeView === 'front' || activeView === 'back') {
         setDesignPreviews(prev => ({ ...prev, [activeView]: currentDesign }));
       }
@@ -283,7 +283,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
          handleObjectsUpdated();
       }, 50);
     } else {
-      const currentDesign = canvasRef.current?.getDesignDataUrl() || '';
+      const currentDesign = (await canvasRef.current?.getDesignDataUrl()) || '';
       if (activeView === 'front' || activeView === 'back') {
         setDesignPreviews(prev => ({ ...prev, [activeView]: currentDesign }));
       }
@@ -309,7 +309,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     try {
       const finalDesignJson = canvasRef.current?.getJson();
       const finalViewData = { ...viewData, [activeView === '3d' ? 'front' : activeView]: finalDesignJson };
-      const dataUrl = canvasRef.current?.getDesignDataUrl() || '';
+      const dataUrl = (await canvasRef.current?.getDesignDataUrl()) || '';
       
       // OPTIMISTIC ADD: Add to cart with dataUrl placeholder first
       const tempId = `${product.id}-custom-${Date.now()}`;

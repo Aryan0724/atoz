@@ -7,6 +7,7 @@ import { Toaster } from 'sonner';
 import AuthProvider from "@/components/providers/AuthProvider";
 import dynamic from 'next/dynamic';
 import MetaPixel from "@/components/analytics/MetaPixel";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import { Suspense } from 'react';
 import SmoothScroll from "@/components/common/SmoothScroll";
 import CustomCursor from "@/components/common/CustomCursor";
@@ -74,6 +75,9 @@ export const metadata: Metadata = {
     creator: "@atozprints",
   },
   manifest: "/site.webmanifest",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "",
+  },
 };
 
 export default function RootLayout({
@@ -86,6 +90,7 @@ export default function RootLayout({
       <body className={`${playfair.variable} ${manrope.variable} font-sans antialiased`}>
         <Suspense fallback={null}>
           <MetaPixel />
+          <GoogleAnalytics />
         </Suspense>
         <AuthProvider>
           <SmoothScroll>

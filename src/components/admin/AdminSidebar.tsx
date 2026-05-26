@@ -18,7 +18,9 @@ import {
   Clock,
   FileText,
   PenTool,
-  Tag
+  Tag,
+  TrendingUp,
+  Terminal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
@@ -39,6 +41,7 @@ export default function AdminSidebar() {
 
   const menuItems = [
     { name: 'Overview', href: '/admin', icon: <BarChart3 className="h-5 w-5" /> },
+    { name: 'Analytics', href: '/admin/analytics', icon: <TrendingUp className="h-5 w-5" /> },
     { name: 'Products', href: '/admin/products', icon: <Package className="h-5 w-5" /> },
     { name: 'Categories', href: '/admin/categories', icon: <Layout className="h-5 w-5" /> },
     { name: 'Orders', href: '/admin/orders', icon: <ShoppingBag className="h-5 w-5" /> },
@@ -49,6 +52,7 @@ export default function AdminSidebar() {
     { name: 'Website Content', href: '/admin/cms', icon: <FileText className="h-5 w-5" /> },
     { name: 'Home Content', href: '/admin/about', icon: <Layout className="h-5 w-5" /> },
     { name: 'Custom Pages', href: '/admin/blogs', icon: <Zap className="h-5 w-5" /> },
+    { name: 'System Console', href: '/admin/console', icon: <Terminal className="h-5 w-5" /> },
   ];
 
   return (

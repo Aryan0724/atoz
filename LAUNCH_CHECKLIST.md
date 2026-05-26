@@ -12,6 +12,7 @@ Before pointing real DNS traffic to `https://atozprints.in`, run through this de
 - [ ] Sync the `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 - [ ] Populate `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` with **Live Mode** keys (not testing keys).
 - [ ] Inject `REMOVE_BG_API_KEY` with your subscription token. *Background removal will throw internal 500s otherwise.*
+- [ ] Add Google Integrations: Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` (for GA4 tracking) and `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (for Google Search Console verification).
 
 ## 3. SEO & Aesthetics
 - [ ] **Favicon & OG Preview:** Add `og-image.png` and a custom `favicon.ico` / `site.webmanifest` inside the `public/` directory so iMessage links preview beautifully!

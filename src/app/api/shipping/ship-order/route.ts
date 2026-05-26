@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import { createShiprocketOrder } from '@/lib/shipping/shiprocket';
 
 export async function POST(req: Request) {
@@ -10,10 +10,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
     }
 
-    // 1. Fetch order details from Supabase
-    // Note: We use the anon client here, so RLS must allow this or we need service role
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
+    // 1. Fetch order details from Supabase using Server Client (respects Admin Auth/Cookies)
+    const supabase = createClient();
+    const { data: order, error: orderError } = await (supabase
+      .from('orders') as any)
       .select(`
         *,
         order_items (
@@ -29,23 +29,38 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    // 2. Prepare Shiprocket order payload
-    const shippingAddress = order.shipping_address as any;
-    const items = order.order_items || [];
+    // 2. Calculate dynamic parcel dimensions and weight from products in order_items
+    const shippingAddress = (order as any).shipping_address as any;
+    const items = (order as any).order_items || [];
+
+    let totalWeight = 0;
+    let maxLength = 10;
+    let maxWidth = 10;
+    let totalHeight = 0;
+
+    items.forEach((item: any) => {
+      const p = item.product || {};
+      totalWeight += (Number(p.weight) || 0.5) * item.quantity;
+      maxLength = Math.max(maxLength, Number(p.length) || 10);
+      maxWidth = Math.max(maxWidth, Number(p.width) || 10);
+      totalHeight += (Number(p.height) || 5) * item.quantity;
+    });
+
+    if (totalHeight === 0) totalHeight = 10;
 
     const shiprocketPayload = {
-      order_id: order.id,
-      order_date: new Date(order.created_at).toISOString().split('T')[0],
+      order_id: (order as any).id,
+      order_date: new Date((order as any).created_at).toISOString().split('T')[0],
       pickup_location: "Primary", // Should be configurable
       billing_customer_name: shippingAddress.fullName?.split(' ')[0] || 'Customer',
       billing_last_name: shippingAddress.fullName?.split(' ').slice(1).join(' ') || '',
-      billing_address: shippingAddress.address,
-      billing_city: shippingAddress.city,
-      billing_pincode: shippingAddress.pincode,
-      billing_state: shippingAddress.state,
+      billing_address: shippingAddress.address || shippingAddress.line1 || 'Address N/A',
+      billing_city: shippingAddress.city || 'City N/A',
+      billing_pincode: shippingAddress.pincode || shippingAddress.postal_code || '400001',
+      billing_state: shippingAddress.state || 'State N/A',
       billing_country: "India",
       billing_email: shippingAddress.email || "customer@example.com",
-      billing_phone: shippingAddress.phone,
+      billing_phone: shippingAddress.phone || '9999999999',
       shipping_is_billing: true,
       order_items: items.map((item: any) => ({
         name: item.product?.name || 'Custom Print Item',
@@ -56,22 +71,23 @@ export async function POST(req: Request) {
         tax: 0,
         hsn: ""
       })),
-      payment_method: order.payment_method === 'COD' ? 'COD' : 'Prepaid',
-      sub_total: order.total_price,
-      length: 10, // Default cm
-      width: 10,  // Default cm
-      height: 10, // Default cm
-      weight: 0.5 // Default kg
+      payment_method: (order as any).payment_method === 'COD' ? 'COD' : 'Prepaid',
+      sub_total: (order as any).total_price,
+      length: Math.round(maxLength),
+      width: Math.round(maxWidth),
+      height: Math.round(totalHeight),
+      weight: Number(totalWeight.toFixed(2))
     };
 
     // 3. Create order in Shiprocket
     const shiprocketResponse = await createShiprocketOrder(shiprocketPayload);
 
     // 4. Update order in Supabase with Shiprocket details
-    const { error: updateError } = await supabase
-      .from('orders')
+    // Note: We set status to 'dispatched' to satisfy the strict orders_status_check database constraint
+    const { error: updateError } = await (supabase
+      .from('orders') as any)
       .update({
-        status: 'shipped', // or 'processing' based on workflow
+        status: 'dispatched',
         tracking_number: shiprocketResponse.shipment_id?.toString(), // This is actually shipment_id, tracking comes later
         courier_name: 'Shiprocket',
         tracking_url: `https://shiprocket.co/tracking/${shiprocketResponse.shipment_id}`
