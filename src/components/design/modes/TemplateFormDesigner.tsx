@@ -591,7 +591,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
              ].filter(view => currentDesign?.wireframe_images?.[view.idx]).map((view) => (
                 <button 
                    key={view.idx}
-                   onPointerDown={(e) => e.stopPropagation()}
                    onClick={() => setSelectedSideIndex(view.idx)}
                    className={cn(
                      "px-5 md:px-6 py-1.5 md:py-2 rounded-full text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden shrink-0",
