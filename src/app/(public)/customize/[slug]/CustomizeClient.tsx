@@ -611,7 +611,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             )}
 
             {!isTemplateForm && (
-              <div className="absolute bottom-16 md:bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40 overflow-x-auto max-w-full px-4 justify-start md:justify-center no-scrollbar pb-2">
+              <div className="absolute bottom-36 md:bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40 overflow-x-auto max-w-full px-4 justify-start md:justify-center no-scrollbar pb-2">
                 <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md p-1.5 rounded-full border border-white/50 shadow-sm">
                   {[
                     { id: 'front', label: 'Front' },
