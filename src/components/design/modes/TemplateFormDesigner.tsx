@@ -580,38 +580,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
         }}
       >
         
-        {/* Side Controls (Front/Back) - BOTTOM on mobile, TOP on desktop */}
-        <div className="absolute bottom-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-max max-w-[95%] pointer-events-auto">
-          <div className="flex items-center justify-center gap-2 bg-white/90 backdrop-blur-md rounded-full p-1 border border-gray-200 shadow-md overflow-x-auto no-scrollbar">
-             {[
-               { idx: 0, label: 'Front' },
-               { idx: 1, label: 'Back' },
-               { idx: 2, label: 'Left' },
-               { idx: 3, label: 'Right' }
-             ].filter(view => currentDesign?.wireframe_images?.[view.idx]).map((view) => (
-                <button 
-                   key={view.idx}
-                   onClick={() => setSelectedSideIndex(view.idx)}
-                   className={cn(
-                     "px-5 md:px-6 py-1.5 md:py-2 rounded-full text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden shrink-0",
-                     selectedSideIndex === view.idx 
-                       ? "text-white shadow-md" 
-                       : "text-gray-500 hover:text-brand-dark hover:bg-gray-50"
-                   )}
-                >
-                   {selectedSideIndex === view.idx && (
-                     <motion.div 
-                       layoutId="activeSide"
-                       className="absolute inset-0 bg-brand-dark z-0"
-                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                     />
-                   )}
-                   <span className="relative z-10 italic">{view.label}</span>
-                </button>
-             ))}
-          </div>
-        </div>
-
         {/* The Actual Preview Canvas */}
         <div className="flex-1 w-full p-2 md:p-12 flex items-center justify-center overflow-hidden">
            <AnimatePresence mode="wait">
@@ -858,6 +826,38 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
              )}
             </motion.div>
            </AnimatePresence>
+        </div>
+
+        {/* Side Controls (Front/Back) - BOTTOM on mobile, TOP on desktop */}
+        <div className="absolute bottom-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-max max-w-[95%] pointer-events-auto">
+          <div className="flex items-center justify-center gap-2 bg-white/90 backdrop-blur-md rounded-full p-1 border border-gray-200 shadow-md overflow-x-auto no-scrollbar">
+             {[
+               { idx: 0, label: 'Front' },
+               { idx: 1, label: 'Back' },
+               { idx: 2, label: 'Left' },
+               { idx: 3, label: 'Right' }
+             ].filter(view => currentDesign?.wireframe_images?.[view.idx]).map((view) => (
+                <button 
+                   key={view.idx}
+                   onClick={() => setSelectedSideIndex(view.idx)}
+                   className={cn(
+                     "px-5 md:px-6 py-1.5 md:py-2 rounded-full text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden shrink-0",
+                     selectedSideIndex === view.idx 
+                       ? "text-white shadow-md" 
+                       : "text-gray-500 hover:text-brand-dark hover:bg-gray-50"
+                   )}
+                >
+                   {selectedSideIndex === view.idx && (
+                     <motion.div 
+                       layoutId="activeSide"
+                       className="absolute inset-0 bg-brand-dark z-0"
+                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                     />
+                   )}
+                   <span className="relative z-10 italic">{view.label}</span>
+                </button>
+             ))}
+          </div>
         </div>
       </div>
 
