@@ -64,6 +64,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   const isPreview = props.activeView === '3d';
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const dragStartPosRef = React.useRef({ x: 0, y: 0 });
 
   // 1. STATE & CALCULATIONS
   const designs = React.useMemo(() => {
@@ -640,10 +641,10 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       key={field.id}
                                       onPointerDown={(e) => {
                                         if (!isPreview) {
-                                          e.preventDefault();
                                           e.stopPropagation();
                                           setActiveField(field.id);
                                           setIsDragging(true);
+                                          dragStartPosRef.current = { x: e.clientX, y: e.clientY };
                                           setDragStartPos({ x: e.clientX, y: e.clientY });
                                           const cur = localMappings[field.id] || {};
                                           setInitialFieldPos({ x: cur.x || 0, y: cur.y || 0, w: cur.w || 30, h: cur.h || 10 });
@@ -652,8 +653,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       }}
                                       onPointerUp={(e) => {
                                         if (!isPreview) {
-                                          const dx = e.clientX - dragStartPos.x;
-                                          const dy = e.clientY - dragStartPos.y;
+                                          const dx = e.clientX - dragStartPosRef.current.x;
+                                          const dy = e.clientY - dragStartPosRef.current.y;
                                           const distance = Math.sqrt(dx * dx + dy * dy);
                                           
                                           if (distance < 5 && field.type === 'image') {
