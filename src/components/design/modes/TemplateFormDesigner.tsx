@@ -650,24 +650,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                           try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch {}
                                         }
                                       }}
-                                      onPointerUp={(e) => {
-                                        if (!isPreview) {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          
-                                          const dx = e.clientX - dragStartPos.x;
-                                          const dy = e.clientY - dragStartPos.y;
-                                          const distance = Math.sqrt(dx * dx + dy * dy);
-                                          
-                                          if (distance < 5 && field.type === 'image') {
-                                            const fileInput = document.getElementById(`file-input-${field.id}`);
-                                            if (fileInput) {
-                                              (fileInput as HTMLInputElement).click();
-                                            }
-                                          }
-                                          try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
-                                        }
-                                      }}
                                       style={{
                                         position: 'absolute',
                                         left,
@@ -917,7 +899,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
           {/* Form Details */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-brand-dark tracking-tight">Add coustom details</h2>
+              <h2 className="text-lg font-bold text-brand-dark tracking-tight">add custom details</h2>
               <div className="flex gap-1.5">
                   <button 
                     onClick={() => handleAddCustomField('text')}
@@ -1032,10 +1014,9 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                           )}
                        </div>
                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-gray-700">{formData[field.id]?.text ? 'Image Selected' : 'uploade image'}</p>
+                          <p className="text-xs font-bold text-gray-700">{formData[field.id]?.text ? 'Logo Selected' : 'Upload Logo'}</p>
                        </div>
                        <input 
-                          id={`file-input-${field.id}`}
                           type="file" 
                           className="hidden" 
                           onChange={(e) => {
