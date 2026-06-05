@@ -179,7 +179,21 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       });
     };
 
-    const handleEnd = () => {
+    const handleEnd = (e: PointerEvent) => {
+      const dx = e.clientX - dragStartPos.x;
+      const dy = e.clientY - dragStartPos.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (isDragging && distance < 4 && activeField) {
+        const field = allFields.find(f => f.id === activeField);
+        if (field && field.type === 'image') {
+          const fileInput = document.getElementById(`file-input-${activeField}`);
+          if (fileInput) {
+            (fileInput as HTMLInputElement).click();
+          }
+        }
+      }
+
       setIsDragging(false);
       setIsResizing(false);
       onObjectsUpdated?.();
@@ -194,7 +208,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       window.removeEventListener('pointerup', handleEnd);
       window.removeEventListener('pointercancel', handleEnd);
     };
-  }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos, onObjectsUpdated]);
+  }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos, allFields, onObjectsUpdated]);
 
   const handleStart = (e: React.PointerEvent, fieldId: string, action: 'move' | 'resize') => {
     if (isPreview) return;
@@ -1017,6 +1031,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                           <p className="text-xs font-bold text-gray-700">{formData[field.id]?.text ? 'Image Selected' : 'uploade image'}</p>
                        </div>
                        <input 
+                          id={`file-input-${field.id}`}
                           type="file" 
                           className="hidden" 
                           onChange={(e) => {
