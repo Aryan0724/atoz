@@ -650,6 +650,21 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                           try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch {}
                                         }
                                       }}
+                                      onPointerUp={(e) => {
+                                        if (!isPreview) {
+                                          const dx = e.clientX - dragStartPos.x;
+                                          const dy = e.clientY - dragStartPos.y;
+                                          const distance = Math.sqrt(dx * dx + dy * dy);
+                                          
+                                          if (distance < 5 && field.type === 'image') {
+                                            const fileInput = document.getElementById(`file-input-${field.id}`);
+                                            if (fileInput) {
+                                              (fileInput as HTMLInputElement).click();
+                                            }
+                                          }
+                                          try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+                                        }
+                                      }}
                                       style={{
                                         position: 'absolute',
                                         left,
@@ -1017,6 +1032,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                           <p className="text-xs font-bold text-gray-700">{formData[field.id]?.text ? 'Logo Selected' : 'Upload Logo'}</p>
                        </div>
                        <input 
+                          id={`file-input-${field.id}`}
                           type="file" 
                           className="hidden" 
                           onChange={(e) => {
