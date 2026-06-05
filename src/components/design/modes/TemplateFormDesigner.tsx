@@ -899,7 +899,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
           {/* Form Details */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-brand-dark tracking-tight">Customization Details</h2>
+              <h2 className="text-lg font-bold text-brand-dark tracking-tight">add couston details</h2>
               <div className="flex gap-1.5">
                   <button 
                     onClick={() => handleAddCustomField('text')}
@@ -1014,7 +1014,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                           )}
                        </div>
                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-gray-700">{formData[field.id]?.text ? 'Logo Selected' : 'Upload Logo'}</p>
+                          <p className="text-xs font-bold text-gray-700">{formData[field.id]?.text ? 'Image Selected' : 'uploade image'}</p>
                        </div>
                        <input 
                           type="file" 
