@@ -913,7 +913,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
           {/* Form Details */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-brand-dark tracking-tight">add couston details</h2>
+              <h2 className="text-lg font-bold text-brand-dark tracking-tight">Add coustom details</h2>
               <div className="flex gap-1.5">
                   <button 
                     onClick={() => handleAddCustomField('text')}
