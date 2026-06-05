@@ -179,21 +179,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       });
     };
 
-    const handleEnd = (e: PointerEvent) => {
-      const dx = e.clientX - dragStartPos.x;
-      const dy = e.clientY - dragStartPos.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (isDragging && distance < 4 && activeField) {
-        const field = allFields.find(f => f.id === activeField);
-        if (field && field.type === 'image') {
-          const fileInput = document.getElementById(`file-input-${activeField}`);
-          if (fileInput) {
-            (fileInput as HTMLInputElement).click();
-          }
-        }
-      }
-
+    const handleEnd = () => {
       setIsDragging(false);
       setIsResizing(false);
       onObjectsUpdated?.();
@@ -208,7 +194,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       window.removeEventListener('pointerup', handleEnd);
       window.removeEventListener('pointercancel', handleEnd);
     };
-  }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos, allFields, onObjectsUpdated]);
+  }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos, onObjectsUpdated]);
 
   const handleStart = (e: React.PointerEvent, fieldId: string, action: 'move' | 'resize') => {
     if (isPreview) return;
@@ -662,6 +648,24 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                           const cur = localMappings[field.id] || {};
                                           setInitialFieldPos({ x: cur.x || 0, y: cur.y || 0, w: cur.w || 30, h: cur.h || 10 });
                                           try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch {}
+                                        }
+                                      }}
+                                      onPointerUp={(e) => {
+                                        if (!isPreview) {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          
+                                          const dx = e.clientX - dragStartPos.x;
+                                          const dy = e.clientY - dragStartPos.y;
+                                          const distance = Math.sqrt(dx * dx + dy * dy);
+                                          
+                                          if (distance < 5 && field.type === 'image') {
+                                            const fileInput = document.getElementById(`file-input-${field.id}`);
+                                            if (fileInput) {
+                                              (fileInput as HTMLInputElement).click();
+                                            }
+                                          }
+                                          try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
                                         }
                                       }}
                                       style={{
