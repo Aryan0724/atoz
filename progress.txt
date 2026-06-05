@@ -10,3 +10,5 @@
 [2026-04-01 22:30] Task 2 Resumed: Implementing Real Supabase Auth Integration.
 
 [2026-04-02 23:45] Task 19-21 Completed: Phase 4 Polish, SEO injected, Mobile Layout tuned, and LAUNCH_CHECKLIST created! System finished.
+[2026-06-05 15:10] Task 15 Completed: Added Razorpay API credentials and implemented secure server-side signature verification at /api/razorpay/verify before order persistence.
+ralph-done-8v4k2

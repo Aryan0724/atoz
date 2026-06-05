@@ -1,0 +1,459 @@
+
+<h2 class="sr-only">Integral Labs complete gym outreach system — 5 sequential stages from lead generation to message sending with checklists, scoring, and message builder</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.sys{padding:1rem 0;font-family:var(--font-sans);color:var(--color-text-primary)}
+.stage-nav{display:flex;gap:6px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px}
+.sn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 14px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);cursor:pointer;background:var(--color-background-primary);min-width:80px;transition:all 0.15s}
+.sn.active{background:var(--color-background-secondary);border-color:var(--color-border-secondary)}
+.sn-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;background:var(--color-border-tertiary);color:var(--color-text-secondary)}
+.sn.active .sn-num{background:#B5D4F4;color:#0C447C}
+.sn-label{font-size:11px;color:var(--color-text-secondary);text-align:center;line-height:1.3}
+.sn.active .sn-label{color:var(--color-text-primary)}
+.panel{display:none}.panel.active{display:block}
+.stage-head{margin-bottom:16px}
+.stage-title{font-size:16px;font-weight:500;margin-bottom:4px}
+.stage-sub{font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:12px}
+.card-title{font-size:14px;font-weight:500;margin-bottom:2px}
+.card-sub{font-size:12px;color:var(--color-text-secondary);margin-bottom:10px}
+.sec{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin:12px 0 8px;padding-bottom:4px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.item:last-of-type{border:none}
+.chk{width:18px;height:18px;border:1.5px solid var(--color-border-secondary);border-radius:4px;flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.chk.done{background:#EAF3DE;border-color:#639922}
+.chk.done::after{content:'✓';font-size:11px;color:#3B6D11;font-weight:500}
+.it{flex:1}
+.im{font-size:13px;line-height:1.5}
+.in{font-size:11px;color:var(--color-text-secondary);margin-top:3px;line-height:1.4}
+.in b{font-weight:500;color:var(--color-text-primary)}
+.tag{display:inline-block;font-size:10px;font-weight:500;padding:2px 6px;border-radius:var(--border-radius-md);margin-left:6px}
+.t-skip{background:#F7C1C1;color:#791F1F}
+.t-deep{background:#CECBF6;color:#3C3489}
+.t-quick{background:#FAC775;color:#633806}
+.t-score{background:#B5D4F4;color:#0C447C}
+.t-msg{background:#C0DD97;color:#27500A}
+.pbar{height:4px;background:var(--color-border-tertiary);border-radius:2px;margin-top:10px;overflow:hidden}
+.pfill{height:100%;border-radius:2px;transition:width 0.2s}
+.ptext{font-size:11px;color:var(--color-text-tertiary);margin-top:4px}
+.info-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;margin-top:10px;font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+.info-box b{font-weight:500;color:var(--color-text-primary)}
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.score-item{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.score-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:6px}
+.score-pts{display:flex;align-items:center;justify-content:space-between}
+.score-name{font-size:13px;color:var(--color-text-primary)}
+.score-val{font-size:13px;font-weight:500;color:#185FA5}
+.total-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px;margin-top:10px}
+.total-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px}
+.total-row:last-child{border:none}
+.total-label{color:var(--color-text-secondary)}
+.total-val{font-weight:500}
+.score-display{font-size:28px;font-weight:500;text-align:center;margin:10px 0;color:var(--color-text-primary)}
+.score-band{text-align:center;font-size:13px;padding:6px 14px;border-radius:var(--border-radius-md);display:inline-block;margin:0 auto}
+.band-wrap{text-align:center;margin:6px 0 12px}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.type-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px;cursor:pointer;transition:all 0.15s}
+.type-card.selected{border-color:#378ADD;background:#E6F1FB}
+.type-card-num{font-size:11px;font-weight:500;color:var(--color-text-tertiary);margin-bottom:4px}
+.type-card-title{font-size:13px;font-weight:500;margin-bottom:4px}
+.type-card-sub{font-size:12px;color:var(--color-text-secondary)}
+.fv-box{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:8px}
+.fv-title{font-size:13px;font-weight:500;margin-bottom:4px}
+.fv-steps{font-size:12px;color:var(--color-text-secondary);line-height:1.8}
+.fv-steps b{font-weight:500;color:var(--color-text-primary)}
+.msg-part{border-left:2px solid;padding:10px 12px;margin-bottom:8px;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;background:var(--color-background-secondary)}
+.mp-hook{border-color:#378ADD}
+.mp-pain{border-color:#E24B4A}
+.mp-proof{border-color:#639922}
+.mp-cta{border-color:#7F77DD}
+.mp-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-tertiary);margin-bottom:4px}
+.mp-text{font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.inp-group{display:flex;flex-direction:column;gap:4px}
+.inp-label{font-size:11px;color:var(--color-text-secondary)}
+.msg-output{margin-top:12px;padding:14px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:13px;line-height:1.8;white-space:pre-wrap;display:none}
+.btn{padding:8px 16px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-primary);transition:all 0.15s}
+.btn:hover{background:var(--color-background-primary)}
+.btn-primary{background:#E6F1FB;border-color:#B5D4F4;color:#0C447C}
+.btn-primary:hover{background:#B5D4F4}
+.nav-row{display:flex;justify-content:space-between;margin-top:16px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500}
+.b-500{background:#CECBF6;color:#3C3489}
+.b-3500{background:#FAC775;color:#633806}
+.skip-list{background:#FCEBEB;border-radius:var(--border-radius-md);padding:12px 14px}
+.skip-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:13px;color:#791F1F;border-bottom:0.5px solid #F7C1C1}
+.skip-item:last-child{border:none}
+.skip-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.source-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.source-row:last-child{border:none}
+.source-icon{width:32px;height:32px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.source-name{font-size:13px;font-weight:500}
+.source-how{font-size:12px;color:var(--color-text-secondary)}
+</style>
+
+<div class="sys">
+
+<div class="stage-nav">
+  <div class="sn active" onclick="go(0)"><div class="sn-num">1</div><div class="sn-label">Find leads</div></div>
+  <div class="sn" onclick="go(1)"><div class="sn-num">2</div><div class="sn-label">Qualify & filter</div></div>
+  <div class="sn" onclick="go(2)"><div class="sn-num">3</div><div class="sn-label">Score & assign</div></div>
+  <div class="sn" onclick="go(3)"><div class="sn-num">4</div><div class="sn-label">Research</div></div>
+  <div class="sn" onclick="go(4)"><div class="sn-num">5</div><div class="sn-label">Message</div></div>
+</div>
+
+<!-- STAGE 1 -->
+<div class="panel active" id="p0">
+  <div class="stage-head">
+    <div class="stage-title"><i class="ti ti-map-search" aria-hidden="true"></i> Stage 1 — find leads</div>
+    <div class="stage-sub">Your team starts here every day. Use all 3 sources. Target gyms, personal trainers, yoga studios, fitness coaches across Tier 2 cities.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Source 1 — Google Maps</div>
+    <div class="card-sub">Fastest source. Hundreds of gyms in any city.</div>
+    <div class="source-row"><div class="source-icon"><i class="ti ti-map-pin" aria-hidden="true"></i></div><div><div class="source-name">Search query to use</div><div class="source-how">"gym in [city name]" → click each result → check website link</div></div></div>
+    <div class="source-row"><div class="source-icon"><i class="ti ti-building" aria-hidden="true"></i></div><div><div class="source-name">Cities to cover</div><div class="source-how">Meerut, Lucknow, Agra, Kanpur, Dehradun, Bareilly, Jaipur, Kanpur, Varanasi, Allahabad</div></div></div>
+    <div class="source-row"><div class="source-icon"><i class="ti ti-target" aria-hidden="true"></i></div><div><div class="source-name">What to collect</div><div class="source-how">Gym name, city, Google reviews count, website yes/no, phone number</div></div></div>
+    <div class="item" style="border:none;padding-top:10px"><div class="chk" onclick="tick(this,'s1')"></div><div class="it"><div class="im">Done 20 Google Maps leads today</div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Source 2 — Instagram search</div>
+    <div class="card-sub">Best for personal trainers and yoga/fitness coaches.</div>
+    <div class="source-row"><div class="source-icon"><i class="ti ti-hash" aria-hidden="true"></i></div><div><div class="source-name">Hashtags to search</div><div class="source-how">#meeretkagym #lucknowfitness #personaltrainerdelhi #gymagra #fitnessindia #gymkanpur</div></div></div>
+    <div class="source-row"><div class="source-icon"><i class="ti ti-eye" aria-hidden="true"></i></div><div><div class="source-name">What to check on their profile</div><div class="source-how">Bio for website link, follower count, last post date, contact button</div></div></div>
+    <div class="item" style="border:none;padding-top:10px"><div class="chk" onclick="tick(this,'s1')"></div><div class="it"><div class="im">Done 20 Instagram leads today</div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Source 3 — JustDial / Sulekha</div>
+    <div class="card-sub">Gold mine for phone numbers. Most listings have WhatsApp.</div>
+    <div class="source-row"><div class="source-icon"><i class="ti ti-phone" aria-hidden="true"></i></div><div><div class="source-name">Search</div><div class="source-how">justdial.com → "gym" → any city → collect name + phone number directly</div></div></div>
+    <div class="source-row"><div class="source-icon"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></div><div><div class="source-name">Why this works</div><div class="source-how">WhatsApp outreach has 3-4x higher open rate than Instagram DM in India</div></div></div>
+    <div class="item" style="border:none;padding-top:10px"><div class="chk" onclick="tick(this,'s1')"></div><div class="it"><div class="im">Done 10 JustDial leads today</div></div></div>
+  </div>
+
+  <div class="info-box"><b>Daily target:</b> Find 50 new leads per day. Log everything in your sheet — name, city, source, contact channel. Never message a lead before logging them.</div>
+  <div class="nav-row"><div></div><button class="btn btn-primary" onclick="go(1)">Next: Qualify & filter <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+</div>
+
+<!-- STAGE 2 -->
+<div class="panel" id="p1">
+  <div class="stage-head">
+    <div class="stage-title"><i class="ti ti-filter" aria-hidden="true"></i> Stage 2 — qualify & filter</div>
+    <div class="stage-sub">First, remove the leads you should NEVER message. Then classify the rest into 4 types. This stage takes 2–3 mins per lead.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Step 1 — disqualify immediately <span class="badge" style="background:#FCEBEB;color:#791F1F">skip these</span></div>
+    <div class="card-sub">If ANY of these are true, remove the lead from your list right now.</div>
+    <div class="skip-list">
+      <div class="skip-item"><div class="skip-icon"><i class="ti ti-x" aria-hidden="true"></i></div><div>Large chain gym — Gold's Gym, Anytime Fitness, Cult.fit, etc.</div></div>
+      <div class="skip-item"><div class="skip-icon"><i class="ti ti-x" aria-hidden="true"></i></div><div>Last Instagram post older than 1 month — they're inactive</div></div>
+      <div class="skip-item"><div class="skip-icon"><i class="ti ti-x" aria-hidden="true"></i></div><div>Already has excellent website with booking form, good speed, 150+ reviews</div></div>
+      <div class="skip-item"><div class="skip-icon"><i class="ti ti-x" aria-hidden="true"></i></div><div>No contact channel found anywhere — can't reach them</div></div>
+      <div class="skip-item"><div class="skip-icon"><i class="ti ti-x" aria-hidden="true"></i></div><div>Profile is private and no other contact info exists</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Step 2 — classify the lead into 1 of 4 types</div>
+    <div class="card-sub">Tick all checks for each type. Whichever type matches = that's their classification.</div>
+
+    <div class="sec">Type 1 — no website + high competition</div>
+    <div class="item"><div class="chk" onclick="tick(this,'t1')"></div><div class="it"><div class="im">No website link anywhere in bio or Google listing</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'t1')"></div><div class="it"><div class="im">3 or more competitor gyms exist within 3 km of them</div><div class="in">Search "gym in [their locality]" on Maps and count</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'t1')"></div><div class="it"><div class="im">At least one competitor ranks above them or they don't appear at all</div></div></div>
+
+    <div class="sec">Type 2 — bad website + running ads</div>
+    <div class="item"><div class="chk" onclick="tick(this,'t2')"></div><div class="it"><div class="im">They have a website but it loads slowly or looks broken on mobile</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'t2')"></div><div class="it"><div class="im">Running Facebook or Instagram ads (check Meta Ad Library)</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'t2')"></div><div class="it"><div class="im">No clear booking button or lead form on their website</div></div></div>
+
+    <div class="sec">Type 3 — no website + low/no competition</div>
+    <div class="item"><div class="chk" onclick="tick(this,'t3')"></div><div class="it"><div class="im">No website link anywhere</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'t3')"></div><div class="it"><div class="im">Fewer than 2 competitors in their area</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'t3')"></div><div class="it"><div class="im">Located in a smaller town, colony, or outer area</div></div></div>
+
+    <div class="sec">Type 4 — active Instagram + no website (personal trainers)</div>
+    <div class="item"><div class="chk" onclick="tick(this,'t4')"></div><div class="it"><div class="im">500+ followers, posts regularly (within 2 weeks)</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'t4')"></div><div class="it"><div class="im">No website or proper booking link in bio</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'t4')"></div><div class="it"><div class="im">People asking about price or bookings in their comments</div></div></div>
+
+    <div class="pbar"><div class="pfill" id="pf-t" style="background:#378ADD;width:0%"></div></div>
+    <div class="ptext" id="pt-t">0 / 12 checked</div>
+  </div>
+
+  <div class="info-box"><b>After this step:</b> Every lead has a type assigned (1, 2, 3, or 4). Log the type in your sheet. Move to Stage 3 to score them and decide who gets deep research.</div>
+  <div class="nav-row"><button class="btn" onclick="go(0)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><button class="btn btn-primary" onclick="go(2)">Next: Score & assign <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+</div>
+
+<!-- STAGE 3 -->
+<div class="panel" id="p2">
+  <div class="stage-head">
+    <div class="stage-title"><i class="ti ti-podium" aria-hidden="true"></i> Stage 3 — score & assign</div>
+    <div class="stage-sub">Tick every signal that applies to this lead. The score decides if they go into the 500 deep list or the 3500 general list.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Tick every signal that applies to this lead</div>
+    <div class="card-sub">Each signal has a point value. Add them up at the bottom.</div>
+
+    <div class="sec">Budget signals — highest weight</div>
+    <div class="item"><div class="chk" onclick="score(this,3,'sc')"></div><div class="it"><div class="im">Running Facebook or Instagram paid ads<span class="tag t-score">+3 pts</span></div><div class="in">They already spend on marketing = they have budget</div></div></div>
+    <div class="item"><div class="chk" onclick="score(this,2,'sc')"></div><div class="it"><div class="im">Professional photos or video content on their Instagram<span class="tag t-score">+2 pts</span></div><div class="in">Hired a photographer/videographer = spending on business</div></div></div>
+    <div class="item"><div class="chk" onclick="score(this,2,'sc')"></div><div class="it"><div class="im">Multiple locations or publicly expanding<span class="tag t-score">+2 pts</span></div></div></div>
+
+    <div class="sec">Reachability signals</div>
+    <div class="item"><div class="chk" onclick="score(this,2,'sc')"></div><div class="it"><div class="im">Owner name identified<span class="tag t-score">+2 pts</span></div><div class="in">Can address message to a real person, not a generic account</div></div></div>
+    <div class="item"><div class="chk" onclick="score(this,2,'sc')"></div><div class="it"><div class="im">WhatsApp number found directly<span class="tag t-score">+2 pts</span></div><div class="in">WhatsApp = fastest path to a response in India</div></div></div>
+    <div class="item"><div class="chk" onclick="score(this,1,'sc')"></div><div class="it"><div class="im">Email address found on site or listing<span class="tag t-score">+1 pt</span></div></div></div>
+
+    <div class="sec">Opportunity signals</div>
+    <div class="item"><div class="chk" onclick="score(this,2,'sc')"></div><div class="it"><div class="im">High competition area — 3+ competitors around them<span class="tag t-score">+2 pts</span></div><div class="in">Competitor angle is very strong for this lead</div></div></div>
+    <div class="item"><div class="chk" onclick="score(this,2,'sc')"></div><div class="it"><div class="im">Active Instagram with enquiries in comments<span class="tag t-score">+2 pts</span></div></div></div>
+    <div class="item"><div class="chk" onclick="score(this,1,'sc')"></div><div class="it"><div class="im">Posted within last 7 days<span class="tag t-score">+1 pt</span></div></div></div>
+    <div class="item"><div class="chk" onclick="score(this,1,'sc')"></div><div class="it"><div class="im">Listed on JustDial / IndiaMart (paid directories)<span class="tag t-score">+1 pt</span></div></div></div>
+
+    <div style="margin-top:14px;text-align:center">
+      <div class="score-display" id="total-score">0</div>
+      <div class="band-wrap"><span class="score-band" id="score-band" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">Score your lead above</span></div>
+    </div>
+
+    <div class="total-box">
+      <div class="total-row"><span class="total-label">Score 8 or more</span><span class="total-val"><span class="badge b-500">Deep research + free value</span> → 500 list</span></div>
+      <div class="total-row"><span class="total-label">Score 4 to 7</span><span class="total-val"><span class="badge b-3500">Semi-personalised message</span> → 3500 list</span></div>
+      <div class="total-row"><span class="total-label">Score 3 or below</span><span class="total-val" style="color:var(--color-text-tertiary)">Skip or lowest priority template</span></div>
+    </div>
+  </div>
+
+  <div class="info-box"><b>Log in your sheet:</b> Lead name → Type (1/2/3/4) → Score → Assigned to 500 or 3500 list. This is how your team knows what to do next without asking you.</div>
+  <div class="nav-row"><button class="btn" onclick="go(1)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><button class="btn btn-primary" onclick="go(3)">Next: Research <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+</div>
+
+<!-- STAGE 4 -->
+<div class="panel" id="p3">
+  <div class="stage-head">
+    <div class="stage-title"><i class="ti ti-microscope" aria-hidden="true"></i> Stage 4 — research</div>
+    <div class="stage-sub">Two tracks. Your team follows only the track matching the list the lead was assigned to.</div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button class="btn btn-primary" id="rt-deep" onclick="showResearch('deep')" style="flex:1">Deep research — 500 list</button>
+    <button class="btn" id="rt-quick" onclick="showResearch('quick')" style="flex:1">Quick research — 3500 list</button>
+  </div>
+
+  <div id="r-deep">
+    <div class="card">
+      <div class="card-title">Zone 1 — identity <span class="badge b-500">10 mins total for all 5 zones</span></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd1')"></div><div class="it"><div class="im">Find owner name from Instagram bio, Google reviews, or Facebook page</div><div class="in">Owner signs their name in review replies — check "owner response" section</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd1')"></div><div class="it"><div class="im">Find WhatsApp number from JustDial or Google listing</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd1')"></div><div class="it"><div class="im">Find one specific thing to compliment — a post, achievement, or content piece</div><div class="in"><b>Must be genuine.</b> Fake compliments are obvious and kill the message immediately.</div></div></div>
+      <div class="pbar"><div class="pfill" id="pf-rd1" style="background:#7F77DD"></div></div>
+      <div class="ptext" id="pt-rd1">0 / 3 done</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Zone 2 — digital audit</div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd2')"></div><div class="it"><div class="im">Open their website on mobile — start a timer, note exact load time in seconds</div><div class="in"><b>Under 3s</b> = fine. <b>3–6s</b> = problem. <b>6s+</b> = serious — most users have already left</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd2')"></div><div class="it"><div class="im">Is there a visible booking/call/enquiry button without scrolling?</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd2')"></div><div class="it"><div class="im">Is there a lead capture form (name + phone + submit)?</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd2')"></div><div class="it"><div class="im">Search their gym name on Google — do they appear on page 1?</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd2')"></div><div class="it"><div class="im">Write down exactly 2–3 specific problems found. Word for word into the message.</div><div class="in">Specific = credible. "No booking button" beats "bad website" every time.</div></div></div>
+      <div class="pbar"><div class="pfill" id="pf-rd2" style="background:#7F77DD"></div></div>
+      <div class="ptext" id="pt-rd2">0 / 5 done</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Zone 3 — Instagram signals</div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd3')"></div><div class="it"><div class="im">Check last 9 posts — are people asking about price or bookings in comments?</div><div class="in">This proves demand exists. Mention it in the message: "people are asking but you have no system"</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd3')"></div><div class="it"><div class="im">Did they recently post about new equipment, expansion, or new batch?</div><div class="in"><b>Hook opportunity:</b> "Saw your new equipment post — perfect time for a website update"</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd3')"></div><div class="it"><div class="im">Do they offer online coaching? (bigger website need = larger project)</div></div></div>
+      <div class="pbar"><div class="pfill" id="pf-rd3" style="background:#7F77DD"></div></div>
+      <div class="ptext" id="pt-rd3">0 / 3 done</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Zone 4 — competitor intelligence (the Ramu angle)</div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd4')"></div><div class="it"><div class="im">Find exact name of #1 ranked competitor in their locality on Google</div><div class="in">Use their real name in the message — makes it feel deeply researched</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd4')"></div><div class="it"><div class="im">Note competitor's exact Google review count vs your lead's review count</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd4')"></div><div class="it"><div class="im">Does competitor have a website with a booking form?</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rd4')"></div><div class="it"><div class="im">Calculate estimated members lost per month + revenue lost per year</div><div class="in">Use the money loss calculator from Stage 3 checklist. <b>Put this number in the message.</b></div></div></div>
+      <div class="pbar"><div class="pfill" id="pf-rd4" style="background:#7F77DD"></div></div>
+      <div class="ptext" id="pt-rd4">0 / 4 done</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Zone 5 — free value to create</div>
+      <div class="card-sub">Based on lead type, create one of these before messaging. This is what separates 500-list outreach from everyone else.</div>
+
+      <div class="fv-box">
+        <div class="fv-title"><i class="ti ti-chart-bar" style="color:#185FA5" aria-hidden="true"></i> Type 1 → Competitor report</div>
+        <div class="fv-steps">Open Canva → Use comparison table template → Fill: <b>their gym vs competitor</b> across reviews, website, Google ranking, booking system → Export as image → Attach to message</div>
+      </div>
+      <div class="fv-box">
+        <div class="fv-title"><i class="ti ti-clipboard-check" style="color:#3B6D11" aria-hidden="true"></i> Type 2 → Annotated website audit</div>
+        <div class="fv-steps">Screenshot their homepage on mobile → Open in Markup.io (free) → Draw arrows on 3–5 problems → Label each one → Export → Attach to message</div>
+      </div>
+      <div class="fv-box">
+        <div class="fv-title"><i class="ti ti-device-desktop" style="color:#534AB7" aria-hidden="true"></i> Type 3 → Homepage mockup</div>
+        <div class="fv-steps">Open Canva → Pick gym website template → Swap in <b>their gym name, logo, colors</b> → Add clear headline + booking button → Export → Attach to message</div>
+      </div>
+      <div class="fv-box">
+        <div class="fv-title"><i class="ti ti-brand-instagram" style="color:#854F0B" aria-hidden="true"></i> Type 4 → Homepage mockup or 3 IG post designs</div>
+        <div class="fv-steps">Open Canva → Use their brand colors → Create 3 ready-to-post fitness content templates with their name → Export → Attach to message as a gift</div>
+      </div>
+
+      <div class="item" style="border:none;padding-top:10px"><div class="chk" onclick="tick(this,'rd5')"></div><div class="it"><div class="im">Free value asset created and ready to attach</div></div></div>
+      <div class="pbar"><div class="pfill" id="pf-rd5" style="background:#7F77DD"></div></div>
+      <div class="ptext" id="pt-rd5">0 / 1 done</div>
+    </div>
+  </div>
+
+  <div id="r-quick" style="display:none">
+    <div class="card">
+      <div class="card-title">Quick checklist — 3500 list <span class="badge b-3500">2–3 mins per lead</span></div>
+      <div class="card-sub">Enough to send a sharp semi-personalised message. Don't over-research these leads.</div>
+      <div class="sec">Must collect before messaging</div>
+      <div class="item"><div class="chk" onclick="tick(this,'rq1')"></div><div class="it"><div class="im">Gym name and city noted</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rq1')"></div><div class="it"><div class="im">Lead type confirmed (1 / 2 / 3 / 4)</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rq1')"></div><div class="it"><div class="im">One specific problem found and written down</div><div class="in">No website / slow site / no booking button / not on Google page 1</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rq1')"></div><div class="it"><div class="im">Competitor name found (if Type 1)</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rq1')"></div><div class="it"><div class="im">Follower count and last post date noted</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rq1')"></div><div class="it"><div class="im">Best contact channel confirmed (IG DM / WhatsApp / Email)</div></div></div>
+      <div class="item"><div class="chk" onclick="tick(this,'rq1')"></div><div class="it"><div class="im">One genuine thing noted to use as opener</div></div></div>
+      <div class="pbar"><div class="pfill" id="pf-rq1" style="background:#BA7517"></div></div>
+      <div class="ptext" id="pt-rq1">0 / 7 done</div>
+      <div class="info-box" style="margin-top:10px"><b>After this:</b> Go straight to Stage 5 message builder. Use the semi-personalised template. Swap in their name, city, competitor, and one specific problem. Send.</div>
+    </div>
+  </div>
+
+  <div class="nav-row"><button class="btn" onclick="go(2)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><button class="btn btn-primary" onclick="go(4)">Next: Write message <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+</div>
+
+<!-- STAGE 5 -->
+<div class="panel" id="p4">
+  <div class="stage-head">
+    <div class="stage-title"><i class="ti ti-message-bolt" aria-hidden="true"></i> Stage 5 — write the message</div>
+    <div class="stage-sub">Every message has 4 parts. Never skip a part. Fill the fields below and your message builds automatically.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">The 4-part message structure</div>
+    <div class="msg-part mp-hook"><div class="mp-label">Part 1 — hook</div><div class="mp-text">One specific thing you noticed about THEM. Shows you looked. Not generic.</div></div>
+    <div class="msg-part mp-pain"><div class="mp-label">Part 2 — pain + competitor</div><div class="mp-text">What problem you found. What the competitor is doing instead. The money they're losing.</div></div>
+    <div class="msg-part mp-proof"><div class="mp-label">Part 3 — proof</div><div class="mp-text">One result you got for another client. Short. No long story. Just the number.</div></div>
+    <div class="msg-part mp-cta"><div class="mp-label">Part 4 — soft ask</div><div class="mp-text">A 10-min call. Not "buy from us." Low pressure. Easy to say yes to.</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Message builder — fill these from your research notes</div>
+    <div class="inp-row">
+      <div class="inp-group"><span class="inp-label">Owner name</span><input id="b-name" placeholder="Rahul" oninput="build()"></div>
+      <div class="inp-group"><span class="inp-label">Your opener (something specific you liked)</span><input id="b-hook" placeholder="your transformation posts" oninput="build()"></div>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group"><span class="inp-label">Competitor gym name</span><input id="b-comp" placeholder="PowerFit Gym" oninput="build()"></div>
+      <div class="inp-group"><span class="inp-label">Competitor review count</span><input id="b-crev" placeholder="184" oninput="build()"></div>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group"><span class="inp-label">Their review count</span><input id="b-lrev" placeholder="31" oninput="build()"></div>
+      <div class="inp-group"><span class="inp-label">Specific problem you found</span><input id="b-prob" placeholder="no booking button on mobile" oninput="build()"></div>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group"><span class="inp-label">Members lost per month</span><input id="b-lost" placeholder="6" oninput="build()"></div>
+      <div class="inp-group"><span class="inp-label">Revenue lost per month (₹)</span><input id="b-rev" placeholder="54,000" oninput="build()"></div>
+    </div>
+    <button class="btn btn-primary" onclick="build()" style="width:100%;margin-top:4px"><i class="ti ti-sparkles" aria-hidden="true"></i> Generate message</button>
+    <div class="msg-output" id="msg-out"></div>
+    <div style="display:flex;gap:8px;margin-top:8px" id="msg-actions" style="display:none">
+      <button class="btn" onclick="copyMsg()" id="copy-btn" style="display:none"><i class="ti ti-copy" aria-hidden="true"></i> Copy</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Follow-up schedule — after sending</div>
+    <div class="card-sub">80% of closes come from follow-up, not the first message. Never skip this.</div>
+    <div class="item"><div class="chk" onclick="tick(this,'fu')"></div><div class="it"><div class="im">Day 1 — first message sent. Log date in sheet.</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'fu')"></div><div class="it"><div class="im">Day 3 — follow up #1: "Hey just checking if you saw my message!"</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'fu')"></div><div class="it"><div class="im">Day 7 — follow up #2: Share the free value asset if not sent yet. "Made this for you."</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'fu')"></div><div class="it"><div class="im">Day 12 — follow up #3 (last): "Last message — if you ever want to fix this, we're here. All the best 🙏"</div></div></div>
+    <div class="item"><div class="chk" onclick="tick(this,'fu')"></div><div class="it"><div class="im">No reply after Day 12 — mark as "no response" in sheet and move on</div></div></div>
+    <div class="pbar"><div class="pfill" id="pf-fu" style="background:#1D9E75"></div></div>
+    <div class="ptext" id="pt-fu">0 / 5 done</div>
+  </div>
+
+  <div class="nav-row"><button class="btn" onclick="go(3)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button></div>
+</div>
+
+</div>
+
+<script>
+var cur=0;
+function go(n){
+  document.querySelectorAll('.panel').forEach(function(el,i){el.classList.toggle('active',i===n)});
+  document.querySelectorAll('.sn').forEach(function(el,i){el.classList.toggle('active',i===n)});
+  cur=n;
+}
+function tick(el,id){
+  el.classList.toggle('done');
+  var group='[onclick*="tick"][onclick*="\''+id+'\'"]';
+  var all=document.querySelectorAll(group);
+  var done=document.querySelectorAll(group+'.done');
+  var pct=all.length?Math.round(done.length/all.length*100):0;
+  var fill=document.getElementById('pf-'+id);
+  var prog=document.getElementById('pt-'+id);
+  if(fill)fill.style.width=pct+'%';
+  if(prog)prog.textContent=done.length+' / '+all.length+' done';
+  var tAll=document.querySelectorAll('[onclick*="tick"][onclick*="\'t"]');
+  var tDone=document.querySelectorAll('[onclick*="tick"][onclick*="\'t"].done');
+  var tFill=document.getElementById('pf-t');
+  var tProg=document.getElementById('pt-t');
+  if(tFill&&(id.startsWith('t')))tFill.style.width=Math.round(tDone.length/tAll.length*100)+'%';
+  if(tProg&&(id.startsWith('t')))tProg.textContent=tDone.length+' / '+tAll.length+' checked';
+}
+var sc=0;
+function score(el,pts,id){
+  el.classList.toggle('done');
+  sc+=el.classList.contains('done')?pts:-pts;
+  if(sc<0)sc=0;
+  var disp=document.getElementById('total-score');
+  var band=document.getElementById('score-band');
+  if(disp)disp.textContent=sc;
+  if(band){
+    if(sc>=8){band.textContent='500 list — deep research + free value';band.style.background='#CECBF6';band.style.color='#3C3489';}
+    else if(sc>=4){band.textContent='3500 list — semi-personalised message';band.style.background='#FAEEDA';band.style.color='#633806';}
+    else if(sc>0){band.textContent='Low priority — generic template only';band.style.background='#FCEBEB';band.style.color='#791F1F';}
+    else{band.textContent='Score your lead above';band.style.background='var(--color-background-secondary)';band.style.color='var(--color-text-secondary)';}
+  }
+}
+function showResearch(t){
+  document.getElementById('r-deep').style.display=t==='deep'?'block':'none';
+  document.getElementById('r-quick').style.display=t==='quick'?'block':'none';
+  document.getElementById('rt-deep').className=t==='deep'?'btn btn-primary':'btn';
+  document.getElementById('rt-quick').className=t==='quick'?'btn btn-primary':'btn';
+}
+function build(){
+  var name=document.getElementById('b-name').value||'there';
+  var hook=document.getElementById('b-hook').value||'your gym content';
+  var comp=document.getElementById('b-comp').value||'a competitor nearby';
+  var crev=document.getElementById('b-crev').value||'100+';
+  var lrev=document.getElementById('b-lrev').value||'a few';
+  var prob=document.getElementById('b-prob').value||'no clear booking button';
+  var lost=document.getElementById('b-lost').value||'5–8';
+  var rev=document.getElementById('b-rev').value||'40,000+';
+  var msg="Hey "+name+" 👋\n\nJust came across your gym — noticed "+hook+". Really solid work.\n\nDid a quick search for gyms in your area — "+comp+" is showing up first on Google with "+crev+" reviews. Your listing shows "+lrev+". People searching 'gym near me' right now are clicking them first, not you.\n\nAlso looked at your online presence and found "+prob+". Small things like this quietly push people away before they even call.\n\nGyms in competitive areas lose around "+lost+" potential members every month just from weak online presence — roughly ₹"+rev+" going to competitors who are easier to find.\n\nWe fix exactly this. Recently helped a gym get 14 new enquiries in their first 3 weeks.\n\nWorth a 10-min call this week? No pitch — just want to show you what's possible. 🙏";
+  var out=document.getElementById('msg-out');
+  var btn=document.getElementById('copy-btn');
+  out.textContent=msg;out.style.display='block';
+  if(btn)btn.style.display='inline-block';
+}
+function copyMsg(){
+  var t=document.getElementById('msg-out').textContent;
+  navigator.clipboard.writeText(t).then(function(){
+    var b=document.getElementById('copy-btn');
+    if(b){b.innerHTML='<i class="ti ti-check"></i> Copied!';setTimeout(function(){b.innerHTML='<i class="ti ti-copy"></i> Copy';},2000);}
+  });
+}
+</script>

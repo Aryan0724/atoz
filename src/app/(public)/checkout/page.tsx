@@ -233,6 +233,25 @@ export default function CheckoutPage() {
         order_id: orderData.mock ? undefined : orderData.id,
         handler: async function (response: any) {
           try {
+            // Verify payment signature on the server if not a mock order
+            if (!orderData.mock) {
+              const verifyRes = await fetch('/api/razorpay/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature
+                })
+              });
+
+              if (!verifyRes.ok) {
+                const errData = await verifyRes.json();
+                toast.error(errData.error || "Payment verification failed. Please contact support.");
+                return;
+              }
+            }
+
             if (attemptIds.length > 0) {
               await supabase
                 .from('checkout_attempts')
@@ -246,8 +265,8 @@ export default function CheckoutPage() {
               shipping_address: formData as any,
               payment_method: 'Online',
               payment_status: 'paid',
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id || (orderData.mock ? orderData.id : null),
+              razorpay_payment_id: response.razorpay_payment_id || (orderData.mock ? 'mock_pay_id' : null),
             }, items.map(item => ({
               product_id: item.product.id,
               quantity: item.quantity,
