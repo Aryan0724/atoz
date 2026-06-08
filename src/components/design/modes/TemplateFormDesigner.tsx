@@ -142,7 +142,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   React.useEffect(() => {
     if (!isDragging && !isResizing) return;
 
-    const handleMove = (e: PointerEvent) => {
+    const handleMove = (e: MouseEvent) => {
       const container = containerRef.current;
       if (!container) return;
       const rect = container.getBoundingClientRect();
@@ -186,18 +186,18 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       onObjectsUpdated?.();
     };
 
-    window.addEventListener('pointermove', handleMove, { passive: true });
-    window.addEventListener('pointerup', handleEnd);
-    window.addEventListener('pointercancel', handleEnd);
+    window.addEventListener('mousemove', handleMove, { passive: true });
+    window.addEventListener('mouseup', handleEnd);
+    window.addEventListener('mouseleave', handleEnd);
 
     return () => {
-      window.removeEventListener('pointermove', handleMove);
-      window.removeEventListener('pointerup', handleEnd);
-      window.removeEventListener('pointercancel', handleEnd);
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleEnd);
+      window.removeEventListener('mouseleave', handleEnd);
     };
   }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos, onObjectsUpdated]);
 
-  const handleStart = (e: React.PointerEvent, fieldId: string, action: 'move' | 'resize') => {
+  const handleStart = (e: React.MouseEvent, fieldId: string, action: 'move' | 'resize') => {
     if (isPreview) return;
     
     // Crucial for drag-and-drop to work correctly on all browsers
@@ -214,18 +214,11 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     // Ensure we have current values for the drag start
     const currentMapping = localMappings[fieldId] || {};
     setInitialFieldPos({
-       x: currentMapping.x || 0,
-       y: currentMapping.y || 0,
-       w: currentMapping.w || 30,
-       h: currentMapping.h || 10
+       x: Number(currentMapping.x) || 0,
+       y: Number(currentMapping.y) || 0,
+       w: Number(currentMapping.w) || 30,
+       h: Number(currentMapping.h) || 10
     });
-
-    // Capture pointer to track movement even outside the element
-    try {
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    } catch (err) {
-      console.warn('Pointer capture not supported or failed', err);
-    }
   };
 
   const handleAddCustomField = (type: 'text' | 'image', initialValue?: string) => {
@@ -639,7 +632,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                return (
                                   <div
                                       key={field.id}
-                                      onPointerDown={(e) => {
+                                      onMouseDown={(e) => {
                                         if (!isPreview) {
                                           e.stopPropagation();
                                           setActiveField(field.id);
@@ -647,11 +640,16 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                           dragStartPosRef.current = { x: e.clientX, y: e.clientY };
                                           setDragStartPos({ x: e.clientX, y: e.clientY });
                                           const cur = localMappings[field.id] || {};
-                                          setInitialFieldPos({ x: cur.x || 0, y: cur.y || 0, w: cur.w || 30, h: cur.h || 10 });
-                                          try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch {}
+                                          setInitialFieldPos({ 
+                                            x: Number(cur.x) || 0, 
+                                            y: Number(cur.y) || 0, 
+                                            w: Number(cur.w) || 30, 
+                                            h: Number(cur.h) || 10 
+                                          });
+                                          
                                         }
                                       }}
-                                      onPointerUp={(e) => {
+                                      onMouseUp={(e) => {
                                         if (!isPreview) {
                                           const dx = e.clientX - dragStartPosRef.current.x;
                                           const dy = e.clientY - dragStartPosRef.current.y;
@@ -663,7 +661,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                               (fileInput as HTMLInputElement).click();
                                             }
                                           }
-                                          try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+                                          
                                         }
                                       }}
                                       style={{
@@ -672,6 +670,8 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                         top,
                                         width: hasWidth ? `${mapping.w}%` : 'auto',
                                         height: mapping.h ? `${mapping.h}%` : 'auto',
+                                        minWidth: '20px',
+                                        minHeight: '20px',
                                         transform,
                                         fontSize: `${cqiSize}cqi`,
                                         fontWeight: mapping.fontWeight || 'normal',
@@ -697,8 +697,11 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       )}
                                     >
 
+                                      {/* CLICK CATCHER OVERLAY - Ensures the entire bounding box is draggable even without a background */}
+                                      {!isPreview && <div className="absolute inset-0 cursor-move" />}
+
                                       {/* CONTENT DISPLAY */}
-                                      <div className="relative pointer-events-none w-full h-full flex flex-col justify-center select-none">
+                                      <div className="relative w-full h-full flex flex-col justify-center select-none">
                                         {field.type === 'image' ? (
                                            formData[field.id]?.text ? (
                                               <img src={formData[field.id].text} alt={field.label} className="w-full h-full object-contain" />
@@ -727,7 +730,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                          <>
                                             {/* Bottom Right Handle */}
                                             <div 
-                                              onPointerDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
+                                              onMouseDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
                                               style={{ position: 'absolute', right: '-14px', bottom: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'se-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
                                                <div style={{ width: '18px', height: '18px', background: '#e91e63', borderRadius: '50%', border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }} />
@@ -735,7 +738,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                             
                                             {/* Top Left Handle */}
                                             <div 
-                                              onPointerDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
+                                              onMouseDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
                                               style={{ position: 'absolute', left: '-14px', top: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'nw-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
                                                <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
@@ -743,7 +746,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
                                             {/* Bottom Left Handle */}
                                             <div 
-                                              onPointerDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
+                                              onMouseDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
                                               style={{ position: 'absolute', left: '-14px', bottom: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'sw-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
                                                <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
@@ -751,7 +754,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
                                             {/* Top Right Handle */}
                                             <div 
-                                              onPointerDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
+                                              onMouseDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
                                               style={{ position: 'absolute', right: '-14px', top: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'ne-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
                                                <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
@@ -762,7 +765,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       {/* Formatting Toolbar */}
                                       {!isPreview && activeField === field.id && (
                                          <div 
-                                           onPointerDown={(e) => e.stopPropagation()}
+                                           onMouseDown={(e) => e.stopPropagation()}
                                            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-white/95 backdrop-blur-sm rounded-lg shadow-xl border border-gray-200 flex items-center gap-1.5 p-1 z-[120] pointer-events-auto cursor-default scale-90 md:scale-100"
                                          >
                                           <div className="flex gap-1 border-r border-gray-100 pr-1.5">
