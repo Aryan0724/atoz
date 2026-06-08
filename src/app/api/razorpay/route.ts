@@ -9,12 +9,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Amount is required' }, { status: 400 });
     }
 
-    // Initialize Razorpay
-    const razorpay = new Razorpay({
-      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '', // Fallback for dev without keys
-      key_secret: process.env.RAZORPAY_KEY_SECRET || '',
-    });
-
     if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       // In development mode without actual keys, return a mock order
       console.warn("Razorpay Keys missing. Returning mock order. Please add NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env.local");
@@ -25,6 +19,12 @@ export async function POST(req: Request) {
         mock: true
       });
     }
+
+    // Initialize Razorpay
+    const razorpay = new Razorpay({
+      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
 
     const order = await razorpay.orders.create({
       amount: Math.round(amount * 100), // Amount in smallest currency unit (paise)
