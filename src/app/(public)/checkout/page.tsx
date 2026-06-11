@@ -49,6 +49,7 @@ export default function CheckoutPage() {
   const [isPromoValid, setIsPromoValid] = useState<boolean | null>(null);
   const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>('standard');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'Online' | 'COD'>('Online');
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
 
   const { user } = useAuth();
 
@@ -127,7 +128,7 @@ export default function CheckoutPage() {
 
   if (!mounted) return null;
 
-  if (items.length === 0) {
+  if (items.length === 0 && !isOrderPlaced) {
     router.push('/products');
     return null;
   }
@@ -259,12 +260,31 @@ export default function CheckoutPage() {
                 .in('id', attemptIds);
             }
 
-            await createCompleteOrder({
+            const { data: serviceArea } = await supabase
+              .from('serviceable_areas')
+              .select('*')
+              .eq('pincode', formData.pincode)
+              .eq('is_active', true)
+              .single();
+
+            let status = 'pending_approval';
+            let estimated_delivery = null;
+
+            if (serviceArea) {
+              status = 'pending';
+              const deliveryDate = new Date();
+              deliveryDate.setDate(deliveryDate.getDate() + serviceArea.estimated_days);
+              estimated_delivery = deliveryDate.toISOString();
+            }
+
+            const createdOrder = await createCompleteOrder({
               user_id: user?.id || null,
               total_price: total,
               shipping_address: formData as any,
               payment_method: 'Online',
               payment_status: 'paid',
+              status,
+              estimated_delivery,
               razorpay_order_id: response.razorpay_order_id || (orderData.mock ? orderData.id : null),
               razorpay_payment_id: response.razorpay_payment_id || (orderData.mock ? 'mock_pay_id' : null),
             }, items.map(item => ({
@@ -273,12 +293,13 @@ export default function CheckoutPage() {
               quality_level: item.quality_level,
               design_data: item.design_data,
               design_preview_url: item.design_preview_url,
-              unitPrice: item.unitPrice
+              unit_price: item.unitPrice || item.product.base_price || 0
             })));
             
             trackPurchase(response.razorpay_order_id || 'manual', total, items);
+            setIsOrderPlaced(true);
             clearCart();
-            router.push('/checkout/success');
+            router.push('/checkout/success?order_id=' + createdOrder.id);
           } catch (err) {
             console.error('Failed to record order to DB:', err);
             toast.error("Payment succeeded, but failed to save order to Database.");
@@ -312,24 +333,53 @@ export default function CheckoutPage() {
   const handlePlaceCODOrder = async () => {
     setIsProcessing(true);
     try {
-      await createCompleteOrder({
+      const { data: serviceArea } = await supabase
+        .from('serviceable_areas')
+        .select('*')
+        .eq('pincode', formData.pincode)
+        .eq('is_active', true)
+        .single();
+
+      let status = 'pending_approval';
+      let estimated_delivery = null;
+
+      if (serviceArea) {
+        status = 'pending';
+        const deliveryDate = new Date();
+        deliveryDate.setDate(deliveryDate.getDate() + serviceArea.estimated_days);
+        estimated_delivery = deliveryDate.toISOString();
+      }
+
+      const createdOrder = await createCompleteOrder({
         user_id: user?.id || null,
         total_price: total,
         shipping_address: formData as any,
         payment_method: 'COD',
         payment_status: 'pending_cod',
+        status,
+        estimated_delivery,
       }, items.map(item => ({
         product_id: item.product.id,
         quantity: item.quantity,
         quality_level: item.quality_level,
         design_data: item.design_data,
         design_preview_url: item.design_preview_url,
-        unitPrice: item.unitPrice
+        unit_price: item.unitPrice || item.product.base_price || 0
       })));
+
+      if (attemptIds.length > 0) {
+        await supabase
+          .from('checkout_attempts')
+          .update({ status: 'successful' })
+          .in('id', attemptIds);
+      }
+
+      setIsOrderPlaced(true);
       clearCart();
-      router.push('/checkout/success');
-    } catch (err) {
-      toast.error('Failed to place COD order. Please try again.');
+      router.push('/checkout/success?order_id=' + createdOrder.id);
+    } catch (err: any) {
+      console.error('COD Error Detail:', err);
+      toast.error(`Failed to place COD order. ${err?.message || 'Please try again.'}`);
     } finally {
       setIsProcessing(false);
     }
@@ -531,7 +581,14 @@ export default function CheckoutPage() {
                     </div>
 
                     <button 
-                      onClick={() => setStep('review')}
+                      onClick={() => {
+                        if (!user) {
+                          toast.error('Please log in to continue checkout.');
+                          router.push('/login?next=/checkout');
+                          return;
+                        }
+                        setStep('review');
+                      }}
                       disabled={!formData.email || !formData.fullName || !formData.address || !formData.city || !formData.state || !formData.pincode}
                       className="w-full py-5 bg-brand-dark text-white font-black rounded-2xl text-base uppercase tracking-[0.2em] hover:bg-brand-pink shadow-xl shadow-brand-dark/10 transition-all flex items-center justify-center gap-4 disabled:opacity-30 disabled:grayscale italic group"
                     >
@@ -631,6 +688,7 @@ export default function CheckoutPage() {
                     <div className="space-y-4">
                        {/* Razorpay Option */}
                        <button
+                         type="button"
                          onClick={() => setSelectedPaymentMethod('Online')}
                          className={cn(
                            "w-full p-8 rounded-[32px] border-2 transition-all text-left relative overflow-hidden group",
@@ -658,6 +716,7 @@ export default function CheckoutPage() {
 
                        {/* Cash on Delivery Option */}
                        <button
+                         type="button"
                          onClick={() => setSelectedPaymentMethod('COD')}
                          className={cn(
                            "w-full p-8 rounded-[32px] border-2 transition-all text-left relative overflow-hidden group",
@@ -685,12 +744,14 @@ export default function CheckoutPage() {
 
                     <div className="flex flex-col sm:flex-row gap-4">
                        <button 
+                         type="button"
                          onClick={() => setStep('review')}
                          className="px-8 py-4 border-2 border-gray-100 text-brand-dark font-black rounded-2xl hover:bg-gray-50 transition-all uppercase tracking-[0.2em] text-[10px]"
                        >
                          Review Items
                        </button>
                        <button 
+                         type="button"
                          onClick={selectedPaymentMethod === 'COD' ? handlePlaceCODOrder : handlePlaceOrder}
                          disabled={isProcessing}
                          className={cn(

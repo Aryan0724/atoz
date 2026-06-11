@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase/client';
 import { ArrowLeft, Chrome, Loader2, AlertCircle, Sparkles, ShieldCheck, Zap } from 'lucide-react';
@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get('next');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,9 +38,18 @@ export default function RegisterPage() {
 
       if (authError) throw authError;
 
+      // Because the database trigger auto-confirms the email instantly,
+      // we can immediately log the user in if the session wasn't returned.
+      if (!authData.session) {
+        const { error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (loginError) throw loginError;
+      }
 
-      toast.success('Account created! Please check your email for verification.');
-      router.push('/login');
+      toast.success('Account created successfully!');
+      router.push(nextUrl ? nextUrl : '/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
     } finally {
@@ -57,7 +68,8 @@ export default function RegisterPage() {
         return url;
       };
 
-      const redirectTo = `${getURL()}auth/callback`;
+      const baseRedirectTo = `${getURL()}auth/callback`;
+      const redirectTo = nextUrl ? `${baseRedirectTo}?next=${encodeURIComponent(nextUrl)}` : baseRedirectTo;
       console.log('[DEBUG] OAuth Redirect URL:', redirectTo);
 
       const { error } = await supabase.auth.signInWithOAuth({
@@ -215,7 +227,7 @@ export default function RegisterPage() {
           </div>
           
           <p className="mt-12 text-center text-sm font-bold text-gray-400">
-            Already a member? <Link href="/login" className="text-brand-pink hover:underline uppercase tracking-widest ml-1">Sign In</Link>
+            Already a member? <Link href={nextUrl ? `/login?next=${encodeURIComponent(nextUrl)}` : "/login"} className="text-brand-pink hover:underline uppercase tracking-widest ml-1">Sign In</Link>
           </p>
         </motion.div>
       </div>

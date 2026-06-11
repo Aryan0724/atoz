@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase/client';
 import { ArrowLeft, Chrome, Loader2, AlertCircle, Fingerprint, Lock, ShieldCheck } from 'lucide-react';
@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get('next');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'customer' | 'admin'>('customer');
@@ -52,7 +54,7 @@ export default function LoginPage() {
         }
 
         // Successful login with correct role
-        router.push(role === 'admin' ? '/admin' : '/dashboard');
+        router.push(role === 'admin' ? '/admin' : (nextUrl || '/dashboard'));
       }
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
@@ -72,7 +74,8 @@ export default function LoginPage() {
         return url;
       };
 
-      const redirectTo = `${getURL()}auth/callback`;
+      const baseRedirectTo = `${getURL()}auth/callback`;
+      const redirectTo = nextUrl ? `${baseRedirectTo}?next=${encodeURIComponent(nextUrl)}` : baseRedirectTo;
       console.log('[DEBUG] OAuth Redirect URL:', redirectTo);
 
       const { error } = await supabase.auth.signInWithOAuth({
@@ -260,7 +263,7 @@ export default function LoginPage() {
           </div>
           
           <p className="mt-12 text-center text-sm font-bold text-gray-400">
-            New to the platform? <Link href="/register" className="text-brand-pink hover:underline uppercase tracking-widest ml-1 italic">Join Now</Link>
+            New to the platform? <Link href={nextUrl ? `/register?next=${encodeURIComponent(nextUrl)}` : "/register"} className="text-brand-pink hover:underline uppercase tracking-widest ml-1 italic">Join Now</Link>
           </p>
         </motion.div>
       </div>

@@ -1,5 +1,6 @@
 import { supabase } from './client';
 import { Json } from './types';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface OrderInput {
   user_id?: string | null;
@@ -68,11 +69,14 @@ export async function createOrder(orderData: any) {
  * Creates a complete order with multiple items in a single logical flow.
  */
 export async function createCompleteOrder(orderData: any, items: any[]) {
+  const orderId = uuidv4();
+
   // 1. Create the order header
-  const { data: order, error: orderError } = await supabase
+  const { error: orderError } = await supabase
     .from('orders')
     .insert([
       {
+        id: orderId,
         user_id: orderData.user_id,
         total_price: orderData.total_price,
         shipping_address: orderData.shipping_address,
@@ -80,11 +84,10 @@ export async function createCompleteOrder(orderData: any, items: any[]) {
         payment_status: orderData.payment_status || 'unpaid',
         razorpay_order_id: orderData.razorpay_order_id,
         razorpay_payment_id: orderData.razorpay_payment_id,
-        status: 'pending'
+        status: orderData.status || 'pending',
+        estimated_delivery: orderData.estimated_delivery || null
       }
-    ])
-    .select()
-    .single();
+    ]);
 
   if (orderError) throw orderError;
 
@@ -93,10 +96,11 @@ export async function createCompleteOrder(orderData: any, items: any[]) {
     .from('order_items')
     .insert(
       items.map(item => ({
-        order_id: order.id,
+        id: uuidv4(),
+        order_id: orderId,
         product_id: item.product_id,
         quantity: item.quantity,
-        unit_price: item.unitPrice || item.unit_price,
+        unit_price: item.unit_price ?? item.unitPrice ?? 0,
         quality_level: item.quality_level,
         design_data: item.design_data,
         design_preview_url: item.design_preview_url
@@ -105,7 +109,7 @@ export async function createCompleteOrder(orderData: any, items: any[]) {
 
   if (itemsError) throw itemsError;
 
-  return order;
+  return { id: orderId, ...orderData };
 }
 
 export async function getUserOrders(userId: string) {

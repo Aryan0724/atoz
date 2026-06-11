@@ -308,20 +308,31 @@ export default function DashboardPage() {
 
         {/* Quick Access Rails */}
         <div className="flex flex-wrap gap-4 mb-20">
-           {[
+            {[
              { label: 'Bulk Orders', icon: <Package className="h-4 w-4" />, href: '/products?moq_min=100' },
              { label: 'Brand Assets', icon: <Save className="h-4 w-4" />, href: '#' },
-             { label: 'Track Order', icon: <Truck className="h-4 w-4" />, href: '/track-order' },
+             { label: 'Track Order', icon: <Truck className="h-4 w-4" />, onClick: () => setActiveTab('orders') },
              { label: 'Help Desk', icon: <Mail className="h-4 w-4" />, href: '/contact' },
            ].map((action, i) => (
-             <Link 
-               key={i}
-               href={action.href}
-               className="flex items-center gap-3 px-6 py-4 bg-[#f8f8f2] hover:bg-white border border-gray-100 hover:border-brand-pink/20 hover:shadow-lg transition-all rounded-2xl group"
-             >
-                <div className="text-gray-400 group-hover:text-brand-pink transition-colors">{action.icon}</div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-brand-dark group-hover:translate-x-0.5 transition-transform">{action.label}</span>
-             </Link>
+             action.href ? (
+               <Link 
+                 key={i}
+                 href={action.href}
+                 className="flex items-center gap-3 px-6 py-4 bg-[#f8f8f2] hover:bg-white border border-gray-100 hover:border-brand-pink/20 hover:shadow-lg transition-all rounded-2xl group"
+               >
+                  <div className="text-gray-400 group-hover:text-brand-pink transition-colors">{action.icon}</div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-brand-dark group-hover:translate-x-0.5 transition-transform">{action.label}</span>
+               </Link>
+             ) : (
+               <button 
+                 key={i}
+                 onClick={action.onClick}
+                 className="flex items-center gap-3 px-6 py-4 bg-[#f8f8f2] hover:bg-white border border-gray-100 hover:border-brand-pink/20 hover:shadow-lg transition-all rounded-2xl group"
+               >
+                  <div className="text-gray-400 group-hover:text-brand-pink transition-colors">{action.icon}</div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-brand-dark group-hover:translate-x-0.5 transition-transform">{action.label}</span>
+               </button>
+             )
            ))}
         </div>
 
@@ -427,10 +438,23 @@ export default function DashboardPage() {
                                  <span className="flex items-center gap-2 text-brand-dark underline decoration-brand-cyan/30 underline-offset-4">{order.quantity} Units</span>
                               </div>
 
+                              {/* Delivery Information */}
+                              {order.estimated_delivery ? (
+                                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-brand-cyan/10 text-brand-cyan rounded-full text-[10px] font-black uppercase tracking-widest">
+                                  <Calendar className="w-3.5 h-3.5" />
+                                  Est. Delivery: {new Date(order.estimated_delivery).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </div>
+                              ) : order.status === 'pending_approval' ? (
+                                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                  <AlertCircle className="w-3.5 h-3.5" />
+                                  Awaiting Location Approval
+                                </div>
+                              ) : null}
+
                               {/* Order Tracking Timeline Stepper */}
                               {order.status !== 'cancelled' && (
-                                <div className="mt-8 mb-4 flex items-center w-full md:max-w-md">
-                                  {['pending', 'processing', 'shipped', 'delivered'].map((step, i, arr) => {
+                                <div className="mt-6 mb-4 flex items-center w-full md:max-w-md">
+                                  {(order.status === 'pending_approval' ? ['pending_approval', 'pending', 'processing', 'shipped', 'delivered'] : ['pending', 'processing', 'shipped', 'delivered']).map((step, i, arr) => {
                                     const currentIdx = arr.indexOf(order.status || 'pending');
                                     const isCompleted = i <= currentIdx;
                                     const isStepCurrent = i === currentIdx;
@@ -447,7 +471,7 @@ export default function DashboardPage() {
                                             "absolute top-10 text-[8px] font-black uppercase tracking-[0.2em] whitespace-nowrap",
                                             isStepCurrent ? "text-brand-pink" : "text-gray-300"
                                           )}>
-                                            {step}
+                                            {step.replace('_', ' ')}
                                           </span>
                                         </div>
                                         {i < arr.length - 1 && (

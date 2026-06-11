@@ -45,6 +45,7 @@ export default function AdminSidebar() {
     { name: 'Products', href: '/admin/products', icon: <Package className="h-5 w-5" /> },
     { name: 'Categories', href: '/admin/categories', icon: <Layout className="h-5 w-5" /> },
     { name: 'Orders', href: '/admin/orders', icon: <ShoppingBag className="h-5 w-5" /> },
+    { name: 'Delivery Areas', href: '/admin/delivery', icon: <Package className="h-5 w-5" /> },
     { name: 'Inquiries', href: '/admin/inquiries', icon: <Zap className="h-5 w-5" /> },
     { name: 'Customers', href: '/admin/customers', icon: <Users className="h-5 w-5" /> },
     { name: 'Coupons', href: '/admin/coupons', icon: <Tag className="h-5 w-5" /> },

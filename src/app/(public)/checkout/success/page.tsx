@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { Check, ArrowRight, Package, Box, MapPin, Calendar } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Check, ArrowRight, Package, Calendar, Clock } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { supabase } from '@/lib/supabase/client';
 
-export default function OrderSuccessPage() {
+function SuccessContent() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('order_id');
+  const [order, setOrder] = useState<any>(null);
+
   useEffect(() => {
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
@@ -26,6 +32,20 @@ export default function OrderSuccessPage() {
     }, 250);
   }, []);
 
+  useEffect(() => {
+    if (orderId) {
+      supabase.from('orders').select('*').eq('id', orderId).single()
+        .then(({ data }) => setOrder(data));
+    }
+  }, [orderId]);
+
+  const isPendingApproval = order?.status === 'pending_approval';
+  const deliveryDisplay = isPendingApproval 
+    ? "Awaiting Approval" 
+    : order?.estimated_delivery 
+      ? new Date(order.estimated_delivery).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) 
+      : "Standard Time";
+
   return (
     <div className="bg-white min-h-screen flex items-center justify-center px-4 py-20 overflow-hidden relative">
       <div className="absolute top-0 left-0 w-full h-1.5 bg-brand-pink"></div>
@@ -43,18 +63,24 @@ export default function OrderSuccessPage() {
            Order <span className="text-brand-pink">Received!</span>
         </h1>
         
-        <p className="text-xl text-gray-500 mb-12 max-w-lg mx-auto font-medium leading-relaxed">
-          Thank you for choosing AtoZ Prints. Your custom designs are now being reviewed by our art team.
-        </p>
+        {isPendingApproval ? (
+          <p className="text-xl text-brand-pink mb-12 max-w-lg mx-auto font-bold leading-relaxed">
+            Your location is outside our standard zones. Waiting for the business to accept your order based on delivery availability!
+          </p>
+        ) : (
+          <p className="text-xl text-gray-500 mb-12 max-w-lg mx-auto font-medium leading-relaxed">
+            Thank you for choosing AtoZ Prints. Your custom designs are now being reviewed by our art team.
+          </p>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16">
            <div className="p-8 bg-gray-50 rounded-[32px] border border-gray-100 flex flex-col items-center gap-4 group hover:bg-white hover:shadow-2xl transition-all duration-300">
               <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm group-hover:bg-brand-pink group-hover:text-white transition-colors">
-                <Calendar className="h-6 w-6" />
+                {isPendingApproval ? <Clock className="h-6 w-6" /> : <Calendar className="h-6 w-6" />}
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 text-center">Estimated Arrival</p>
-                <p className="text-lg font-bold text-brand-dark">Mar 22 - Mar 25</p>
+                <p className="text-lg font-bold text-brand-dark">{deliveryDisplay}</p>
               </div>
            </div>
            <div className="p-8 bg-gray-50 rounded-[32px] border border-gray-100 flex flex-col items-center gap-4 group hover:bg-white hover:shadow-2xl transition-all duration-300">
@@ -62,8 +88,8 @@ export default function OrderSuccessPage() {
                 <Package className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 text-center">What&apos;s Next?</p>
-                <p className="text-lg font-bold text-brand-dark">Quality Assurance</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 text-center">What's Next?</p>
+                <p className="text-lg font-bold text-brand-dark">{isPendingApproval ? 'Business Review' : 'Quality Assurance'}</p>
               </div>
            </div>
         </div>
@@ -100,5 +126,13 @@ export default function OrderSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <SuccessContent />
+    </Suspense>
   );
 }

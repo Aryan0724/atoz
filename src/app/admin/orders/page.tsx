@@ -67,14 +67,29 @@ export default function AdminOrdersPage() {
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    let extraUpdates: any = {};
+    if (newStatus === 'pending') {
+      const order = orders.find(o => o.id === orderId);
+      if (order?.status === 'pending_approval') {
+        const days = prompt("Enter estimated delivery days for this approved order:", "7");
+        if (days === null) {
+          // Cancelled prompt, revert select by not proceeding
+          return;
+        }
+        const deliveryDate = new Date();
+        deliveryDate.setDate(deliveryDate.getDate() + (parseInt(days) || 7));
+        extraUpdates.estimated_delivery = deliveryDate.toISOString();
+      }
+    }
+
     // OPTIMISTIC UPDATE: Update UI first for responsiveness
     const oldOrders = [...orders];
-    setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus, ...extraUpdates } : o));
 
     try {
       const updatePromise = supabase
         .from('orders')
-        .update({ status: newStatus })
+        .update({ status: newStatus, ...extraUpdates })
         .eq('id', orderId);
 
       const timeoutPromise = new Promise((_, reject) => 
@@ -94,6 +109,7 @@ export default function AdminOrdersPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
+      case 'pending_approval': return <ShieldAlert className="h-4 w-4" />;
       case 'pending':          return <Clock className="h-4 w-4" />;
       case 'confirmed':        return <CheckCircle2 className="h-4 w-4" />;
       case 'in_production':   return <Factory className="h-4 w-4" />;
@@ -107,6 +123,7 @@ export default function AdminOrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
+      case 'pending_approval': return 'text-purple-600 bg-purple-50 border-purple-100';
       case 'pending':          return 'text-amber-600 bg-amber-50 border-amber-100';
       case 'confirmed':       return 'text-sky-600 bg-sky-50 border-sky-100';
       case 'in_production':   return 'text-blue-600 bg-blue-50 border-blue-100';
@@ -156,6 +173,7 @@ export default function AdminOrdersPage() {
             className="px-6 py-4 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-500 focus:outline-none focus:bg-white focus:border-brand-pink/20 transition-all appearance-none cursor-pointer pr-12 min-w-[160px]"
           >
             <option value="all">All Statuses</option>
+            <option value="pending_approval">Pending Approval</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
             <option value="in_production">In Production</option>
@@ -248,16 +266,35 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-10 py-8 text-right">
                        <div className="flex items-center justify-end gap-3">
-                          <select 
-                            value={order.status}
-                            onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                            className="bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-[10px] font-bold text-gray-500 focus:outline-none focus:border-brand-pink/30 hover:border-gray-300 transition-colors outline-none cursor-pointer"
-                          >
-                             <option value="pending">Pending</option>
-                             <option value="processing">Processing</option>
-                             <option value="shipped">Shipped</option>
-                             <option value="delivered">Delivered</option>
-                          </select>
+                          {order.status === 'pending_approval' ? (
+                            <div className="flex items-center gap-2">
+                              <button 
+                                onClick={() => updateOrderStatus(order.id, 'pending')} 
+                                className="px-4 py-2 bg-green-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-colors"
+                              >
+                                Accept
+                              </button>
+                              <button 
+                                onClick={() => updateOrderStatus(order.id, 'cancelled')} 
+                                className="px-4 py-2 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          ) : (
+                            <select 
+                              value={order.status}
+                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                              className="bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-[10px] font-bold text-gray-500 focus:outline-none focus:border-brand-pink/30 hover:border-gray-300 transition-colors outline-none cursor-pointer"
+                            >
+                               <option value="pending_approval">Pending Approval</option>
+                               <option value="pending">Pending</option>
+                               <option value="processing">Processing</option>
+                               <option value="shipped">Shipped</option>
+                               <option value="delivered">Delivered</option>
+                               <option value="cancelled">Cancelled</option>
+                            </select>
+                          )}
                           <Link 
                             href={`/admin/orders/${order.id}`}
                             className="p-3 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-brand-pink hover:border-brand-pink/20 transition-all shadow-sm block"
