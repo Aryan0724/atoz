@@ -23,7 +23,10 @@ import {
   Save,
   Plus as PlusIcon,
   RotateCcw,
-  Mail
+  Mail,
+  X,
+  Calendar,
+  AlertCircle
 } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { supabase } from '@/lib/supabase/client';

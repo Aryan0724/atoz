@@ -88,7 +88,7 @@ function SuccessContent() {
                 <Package className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 text-center">What's Next?</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 text-center">What&apos;s Next?</p>
                 <p className="text-lg font-bold text-brand-dark">{isPendingApproval ? 'Business Review' : 'Quality Assurance'}</p>
               </div>
            </div>
