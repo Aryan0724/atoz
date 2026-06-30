@@ -56,6 +56,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const [selectedQuality, setSelectedQuality] = useState('Standard Matte');
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'fields' | 'preview'>('fields');
   
   // --- DRAG & DROP AND CUSTOM ELEMENTS STATE ---
   const [localMappings, setLocalMappings] = useState<Record<string, any>>({});
@@ -234,7 +235,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   React.useEffect(() => {
     if (!isDragging && !isResizing) return;
 
-    const handleMove = (e: MouseEvent) => {
+    const handleMove = (e: { clientX: number, clientY: number }) => {
       const container = containerRef.current;
       if (!container) return;
       const rect = container.getBoundingClientRect();
@@ -284,30 +285,39 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       }
     };
 
-    window.addEventListener('mousemove', handleMove, { passive: true });
+    const onMouseMove = (e: MouseEvent) => handleMove(e);
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches[0]) {
+        handleMove(e.touches[0]);
+      }
+    };
+
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
     window.addEventListener('mouseup', handleEnd);
+    window.addEventListener('touchend', handleEnd);
+    window.addEventListener('touchcancel', handleEnd);
     window.addEventListener('mouseleave', handleEnd);
 
     return () => {
-      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('mouseup', handleEnd);
+      window.removeEventListener('touchend', handleEnd);
+      window.removeEventListener('touchcancel', handleEnd);
       window.removeEventListener('mouseleave', handleEnd);
     };
   }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos, onObjectsUpdated, commitHistory]);
 
-  const handleStart = (e: React.MouseEvent, fieldId: string, action: 'move' | 'resize') => {
+  const handleStart = (clientX: number, clientY: number, fieldId: string, action: 'move' | 'resize') => {
     if (isPreview) return;
-    
-    // Crucial for drag-and-drop to work correctly on all browsers
-    e.preventDefault(); 
-    e.stopPropagation();
     
     setActiveField(fieldId);
     
     if (action === 'resize') setIsResizing(true);
     if (action === 'move') setIsDragging(true);
     
-    setDragStartPos({ x: e.clientX, y: e.clientY });
+    setDragStartPos({ x: clientX, y: clientY });
     
     // Ensure we have current values for the drag start
     const currentMapping = localMappings[fieldId] || {};
@@ -654,10 +664,35 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   return (
     <div className="w-full h-[calc(100dvh-60px)] md:h-[calc(100vh-60px)] flex flex-col md:flex-row bg-[#fbfbf9] overflow-hidden">
       
+      {/* Mobile Tab Switcher */}
+      <div className="flex md:hidden w-full bg-white border-b border-gray-150 p-2.5 shrink-0 z-30 shadow-sm">
+        <div className="flex w-full bg-gray-50 rounded-xl p-1">
+          <button 
+            onClick={() => setMobileTab('fields')}
+            className={cn(
+              "flex-1 py-2 text-center rounded-lg text-xs font-black uppercase tracking-wider transition-all",
+              mobileTab === 'fields' ? "bg-white text-brand-dark shadow-sm" : "text-gray-400"
+            )}
+          >
+            1. Edit Fields
+          </button>
+          <button 
+            onClick={() => setMobileTab('preview')}
+            className={cn(
+              "flex-1 py-2 text-center rounded-lg text-xs font-black uppercase tracking-wider transition-all",
+              mobileTab === 'preview' ? "bg-white text-brand-dark shadow-sm" : "text-gray-400"
+            )}
+          >
+            2. Position & Preview
+          </button>
+        </div>
+      </div>
+      
       {/* RIGHT PANEL: Live Preview Area (TOP on mobile, RIGHT on desktop) */}
       <div 
         className={cn(
-          "w-full md:flex-1 h-[45dvh] md:h-full relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0 border-b border-gray-100 md:border-b-0 order-1 md:order-2 transition-all",
+          "w-full md:flex-1 relative flex flex-col bg-gray-50 no-custom-cursor flex-shrink-0 border-b border-gray-100 md:border-b-0 order-1 md:order-2 transition-all",
+          mobileTab === 'preview' ? "flex h-[calc(100dvh-120px)]" : "hidden md:flex h-full",
           isDragOver && "ring-4 ring-brand-pink ring-inset bg-brand-pink/5"
         )}
         onDragOver={(e) => {
@@ -760,38 +795,47 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                   <div
                                       key={field.id}
                                        onMouseDown={(e) => {
-                                         if (!isPreview) {
+                                          if (!isPreview) {
+                                             e.preventDefault();
+                                             e.stopPropagation();
+                                            handleStart(e.clientX, e.clientY, field.id, 'move');
+                                          }
+                                        }}
+                                        onTouchStart={(e) => {
+                                          if (!isPreview && e.touches[0]) {
                                             e.preventDefault();
                                             e.stopPropagation();
-                                           setActiveField(field.id);
-                                          setIsDragging(true);
-                                          dragStartPosRef.current = { x: e.clientX, y: e.clientY };
-                                          setDragStartPos({ x: e.clientX, y: e.clientY });
-                                          const cur = localMappings[field.id] || {};
-                                          setInitialFieldPos({ 
-                                            x: Number(cur.x) || 0, 
-                                            y: Number(cur.y) || 0, 
-                                            w: Number(cur.w) || 30, 
-                                            h: Number(cur.h) || 10 
-                                          });
-                                          
-                                        }
-                                      }}
-                                      onMouseUp={(e) => {
-                                        if (!isPreview) {
-                                          const dx = e.clientX - dragStartPosRef.current.x;
-                                          const dy = e.clientY - dragStartPosRef.current.y;
-                                          const distance = Math.sqrt(dx * dx + dy * dy);
-                                          
-                                          if (distance < 5 && field.type === 'image') {
-                                            const fileInput = document.getElementById(`file-input-${field.id}`);
-                                            if (fileInput) {
-                                              (fileInput as HTMLInputElement).click();
+                                            handleStart(e.touches[0].clientX, e.touches[0].clientY, field.id, 'move');
+                                          }
+                                        }}
+                                        onMouseUp={(e) => {
+                                          if (!isPreview) {
+                                            const dx = e.clientX - dragStartPosRef.current.x;
+                                            const dy = e.clientY - dragStartPosRef.current.y;
+                                            const distance = Math.sqrt(dx * dx + dy * dy);
+                                            
+                                            if (distance < 5 && field.type === 'image') {
+                                              const fileInput = document.getElementById(`file-input-${field.id}`);
+                                              if (fileInput) {
+                                                (fileInput as HTMLInputElement).click();
+                                              }
                                             }
                                           }
-                                          
-                                        }
-                                      }}
+                                        }}
+                                        onTouchEnd={(e) => {
+                                          if (!isPreview && e.changedTouches[0]) {
+                                            const dx = e.changedTouches[0].clientX - dragStartPosRef.current.x;
+                                            const dy = e.changedTouches[0].clientY - dragStartPosRef.current.y;
+                                            const distance = Math.sqrt(dx * dx + dy * dy);
+                                            
+                                            if (distance < 5 && field.type === 'image') {
+                                              const fileInput = document.getElementById(`file-input-${field.id}`);
+                                              if (fileInput) {
+                                                (fileInput as HTMLInputElement).click();
+                                              }
+                                            }
+                                          }
+                                        }}
                                       style={{
                                         position: 'absolute',
                                         left,
@@ -857,41 +901,45 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       </div>
 
                                       {/* RESIZE HANDLES - directly in element, no pointer-events-none wrapper */}
-                                      {!isPreview && activeField === field.id && (
-                                         <>
-                                            {/* Bottom Right Handle */}
-                                            <div 
-                                              onMouseDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
-                                              style={{ position: 'absolute', right: '-14px', bottom: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'se-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                            >
-                                               <div style={{ width: '18px', height: '18px', background: '#e91e63', borderRadius: '50%', border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }} />
-                                            </div>
-                                            
-                                            {/* Top Left Handle */}
-                                            <div 
-                                              onMouseDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
-                                              style={{ position: 'absolute', left: '-14px', top: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'nw-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                            >
-                                               <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
-                                            </div>
+                                       {!isPreview && activeField === field.id && (
+                                          <>
+                                             {/* Bottom Right Handle */}
+                                             <div 
+                                               onMouseDown={(e) => { e.stopPropagation(); handleStart(e.clientX, e.clientY, field.id, 'resize'); }}
+                                               onTouchStart={(e) => { if (e.touches[0]) { e.stopPropagation(); handleStart(e.touches[0].clientX, e.touches[0].clientY, field.id, 'resize'); } }}
+                                               style={{ position: 'absolute', right: '-14px', bottom: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'se-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                             >
+                                                <div style={{ width: '18px', height: '18px', background: '#e91e63', borderRadius: '50%', border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }} />
+                                             </div>
+                                             
+                                             {/* Top Left Handle */}
+                                             <div 
+                                               onMouseDown={(e) => { e.stopPropagation(); handleStart(e.clientX, e.clientY, field.id, 'resize'); }}
+                                               onTouchStart={(e) => { if (e.touches[0]) { e.stopPropagation(); handleStart(e.touches[0].clientX, e.touches[0].clientY, field.id, 'resize'); } }}
+                                               style={{ position: 'absolute', left: '-14px', top: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'nw-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                             >
+                                                <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                                             </div>
 
-                                            {/* Bottom Left Handle */}
-                                            <div 
-                                              onMouseDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
-                                              style={{ position: 'absolute', left: '-14px', bottom: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'sw-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                            >
-                                               <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
-                                            </div>
+                                             {/* Bottom Left Handle */}
+                                             <div 
+                                               onMouseDown={(e) => { e.stopPropagation(); handleStart(e.clientX, e.clientY, field.id, 'resize'); }}
+                                               onTouchStart={(e) => { if (e.touches[0]) { e.stopPropagation(); handleStart(e.touches[0].clientX, e.touches[0].clientY, field.id, 'resize'); } }}
+                                               style={{ position: 'absolute', left: '-14px', bottom: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'sw-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                             >
+                                                <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                                             </div>
 
-                                            {/* Top Right Handle */}
-                                            <div 
-                                              onMouseDown={(e) => { e.stopPropagation(); handleStart(e, field.id, 'resize'); }}
-                                              style={{ position: 'absolute', right: '-14px', top: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'ne-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                            >
-                                               <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
-                                            </div>
-                                         </>
-                                      )}
+                                             {/* Top Right Handle */}
+                                             <div 
+                                               onMouseDown={(e) => { e.stopPropagation(); handleStart(e.clientX, e.clientY, field.id, 'resize'); }}
+                                               onTouchStart={(e) => { if (e.touches[0]) { e.stopPropagation(); handleStart(e.touches[0].clientX, e.touches[0].clientY, field.id, 'resize'); } }}
+                                               style={{ position: 'absolute', right: '-14px', top: '-14px', width: '28px', height: '28px', zIndex: 200, cursor: 'ne-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                             >
+                                                <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', border: '2px solid #e91e63', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                                             </div>
+                                          </>
+                                       )}
 
                                       {/* Formatting Toolbar */}
                                       {!isPreview && activeField === field.id && (
@@ -1064,7 +1112,12 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       </div>
 
       {/* LEFT PANEL: Form and Config (BOTTOM on mobile) */}
-      <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 flex-1 md:h-full overflow-y-auto border-r border-gray-100 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 custom-scrollbar order-2 md:order-1">
+      <div 
+        className={cn(
+          "w-full md:w-[450px] lg:w-[500px] shrink-0 md:h-full overflow-y-auto border-r border-gray-100 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 custom-scrollbar order-2 md:order-1",
+          mobileTab === 'fields' ? "block flex-1" : "hidden md:block"
+        )}
+      >
         <div className="p-4 md:p-8 space-y-6 md:space-y-10">
           
           {/* Template Selection */}
