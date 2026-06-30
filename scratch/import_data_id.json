@@ -1,0 +1,3132 @@
+{
+  "variants": [
+    {
+      "name": "Elite Design 01",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/01/front.png",
+        "/templates/id/01/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 02",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/02/front.png",
+        "/templates/id/02/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 03",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/03/front.png",
+        "/templates/id/03/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 04",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/04/front.png",
+        "/templates/id/04/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 05",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/05/front.png",
+        "/templates/id/05/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 06",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/06/front.png",
+        "/templates/id/06/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 07",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/07/front.png",
+        "/templates/id/07/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 08",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/08/front.png",
+        "/templates/id/08/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 09",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/09/front.png",
+        "/templates/id/09/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 10",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/10/front.png",
+        "/templates/id/10/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 11",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/11/front.png",
+        "/templates/id/11/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 12",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/12/front.png",
+        "/templates/id/12/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 13",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/13/front.png",
+        "/templates/id/13/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 14",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/14/front.png",
+        "/templates/id/14/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 15",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/15/front.png",
+        "/templates/id/15/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 16",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/16/front.png",
+        "/templates/id/16/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 17",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/17/front.png",
+        "/templates/id/17/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 18",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/18/front.png",
+        "/templates/id/18/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 19",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/19/front.png",
+        "/templates/id/19/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 20",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/20/front.png",
+        "/templates/id/20/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 21",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/21/front.png",
+        "/templates/id/21/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 22",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/22/front.png",
+        "/templates/id/22/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 23",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/23/front.png",
+        "/templates/id/23/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 24",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/24/front.png",
+        "/templates/id/24/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 25",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/25/front.png",
+        "/templates/id/25/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 26",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/26/front.png",
+        "/templates/id/26/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 27",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/27/front.png",
+        "/templates/id/27/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 28",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/28/front.png",
+        "/templates/id/28/back.png"
+      ]
+    },
+    {
+      "name": "Elite Design 29",
+      "hex": "#1A1A1A",
+      "wireframe_images": [
+        "/templates/id/29/front.png",
+        "/templates/id/29/back.png"
+      ]
+    }
+  ],
+  "mappings": {
+    "0_0": {
+      "phone": {
+        "x": 33.6,
+        "y": 64.8,
+        "w": 32.5,
+        "h": 3.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "email": {
+        "x": 18.5,
+        "y": 68.4,
+        "w": 62.7,
+        "h": 3.7,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "website": {
+        "x": 21.1,
+        "y": 72.1,
+        "w": 59.4,
+        "h": 4.0,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 46.0,
+        "y": 12.6,
+        "w": 14.8,
+        "h": 2.4,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "name": {
+        "x": 17.9,
+        "y": 52.6,
+        "w": 64.4,
+        "h": 3.8,
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "designation": {
+        "x": 25.4,
+        "y": 57.3,
+        "w": 49.2,
+        "h": 2.9,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "photo": {
+        "x": 27.5,
+        "y": 21.2,
+        "w": 44.2,
+        "h": 26.8,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 37.9,
+        "y": 11.3,
+        "w": 3.6,
+        "h": 4.8,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "0_1": {
+      "company_name": {
+        "x": 48.2,
+        "y": 15.6,
+        "w": 15.0,
+        "h": 2.4,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "logo": {
+        "x": 40.3,
+        "y": 14.2,
+        "w": 3.7,
+        "h": 4.8,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "1_0": {
+      "email": {
+        "x": 33.4,
+        "y": 67.8,
+        "w": 54.1,
+        "h": 3.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "phone": {
+        "x": 33.6,
+        "y": 72.1,
+        "w": 32.0,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 39.0,
+        "y": 17.1,
+        "w": 22.0,
+        "h": 2.2,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "name": {
+        "x": 23.5,
+        "y": 53.5,
+        "w": 52.4,
+        "h": 7.4,
+        "fontSize": 20.4,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#24252F"
+      },
+      "designation": {
+        "x": 20.1,
+        "y": 61.7,
+        "w": 58.2,
+        "h": 3.1,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "address": {
+        "x": 51.2,
+        "y": 76.0,
+        "w": 33.2,
+        "h": 3.7,
+        "fontSize": 7,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "photo": {
+        "x": 24.5,
+        "y": 22.2,
+        "w": 51.0,
+        "h": 30.0,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 87.4,
+        "y": 10.2,
+        "w": 12.6,
+        "h": 2.5,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "1_1": {
+      "phone": {
+        "x": 34.4,
+        "y": 74.5,
+        "w": 31.2,
+        "h": 3.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#24252F"
+      },
+      "logo": {
+        "x": 43.0,
+        "y": 5.0,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "2_0": {
+      "phone": {
+        "x": 40.0,
+        "y": 80.4,
+        "w": 26.0,
+        "h": 2.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#004AAD"
+      },
+      "company_name": {
+        "x": 41.9,
+        "y": 13.9,
+        "w": 15.6,
+        "h": 2.4,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#004AAD"
+      },
+      "name": {
+        "x": 10.5,
+        "y": 58.2,
+        "w": 79.2,
+        "h": 5.4,
+        "fontSize": 15.0,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#004AAD"
+      },
+      "designation": {
+        "x": 31.6,
+        "y": 64.9,
+        "w": 37.0,
+        "h": 2.8,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#004AAD"
+      },
+      "photo": {
+        "x": 19.7,
+        "y": 20.3,
+        "w": 60.7,
+        "h": 35.7,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 79.3,
+        "y": 2.7,
+        "w": 20.7,
+        "h": 8.1,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "2_1": {
+      "phone": {
+        "x": 40.5,
+        "y": 75.0,
+        "w": 29.2,
+        "h": 2.4,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#004AAD"
+      },
+      "logo": {
+        "x": 39.9,
+        "y": 15.3,
+        "w": 20.2,
+        "h": 11.9,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "3_0": {
+      "phone": {
+        "x": 25.8,
+        "y": 77.9,
+        "w": 27.0,
+        "h": 2.4,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 28.2,
+        "y": 4.8,
+        "w": 27.9,
+        "h": 5.7,
+        "fontSize": 12.7,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#D82C2C"
+      },
+      "name": {
+        "x": 83.2,
+        "y": 51.2,
+        "w": 11.0,
+        "h": 34.7,
+        "fontSize": 22,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "designation": {
+        "x": 8.8,
+        "y": 57.8,
+        "w": 43.2,
+        "h": 5.3,
+        "fontSize": 9.3,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#D82C2C"
+      },
+      "photo": {
+        "x": 10.0,
+        "y": 17.8,
+        "w": 53.9,
+        "h": 37.1,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 13.9,
+        "y": 4.5,
+        "w": 6.1,
+        "h": 3.6,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "3_1": {
+      "phone": {
+        "x": 22.9,
+        "y": 71.5,
+        "w": 45.8,
+        "h": 2.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 48.4,
+        "y": 12.7,
+        "w": 25.4,
+        "h": 4.2,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#D82C2C"
+      },
+      "logo": {
+        "x": 84.6,
+        "y": 0.0,
+        "w": 10.9,
+        "h": 9.1,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "4_0": {
+      "phone": {
+        "x": 30.9,
+        "y": 70.4,
+        "w": 31.2,
+        "h": 2.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#414560"
+      },
+      "email": {
+        "x": 30.8,
+        "y": 74.3,
+        "w": 58.2,
+        "h": 3.7,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#414560"
+      },
+      "name": {
+        "x": 14.5,
+        "y": 53.4,
+        "w": 71.8,
+        "h": 8.8,
+        "fontSize": 22,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#414560"
+      },
+      "designation": {
+        "x": 18.6,
+        "y": 45.2,
+        "w": 19.1,
+        "h": 3.7,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#414560"
+      },
+      "photo": {
+        "x": 9.4,
+        "y": 5.1,
+        "w": 81.2,
+        "h": 46.3,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 43.0,
+        "y": 5.0,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "4_1": {
+      "phone": {
+        "x": 27.3,
+        "y": 87.9,
+        "w": 45.5,
+        "h": 2.4,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#E2E3EA"
+      },
+      "company_name": {
+        "x": 37.2,
+        "y": 6.0,
+        "w": 34.1,
+        "h": 3.2,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "logo": {
+        "x": 30.3,
+        "y": 5.9,
+        "w": 5.3,
+        "h": 3.1,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "5_0": {
+      "email": {
+        "x": 33.2,
+        "y": 70.0,
+        "w": 54.2,
+        "h": 4.0,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#143626"
+      },
+      "phone": {
+        "x": 33.6,
+        "y": 74.3,
+        "w": 32.0,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#143626"
+      },
+      "name": {
+        "x": 23.5,
+        "y": 55.7,
+        "w": 52.5,
+        "h": 7.6,
+        "fontSize": 20.8,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#143626"
+      },
+      "designation": {
+        "x": 20.1,
+        "y": 63.9,
+        "w": 30.0,
+        "h": 3.1,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#143626"
+      },
+      "address": {
+        "x": 51.2,
+        "y": 78.4,
+        "w": 15.6,
+        "h": 3.2,
+        "fontSize": 7,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#143626"
+      },
+      "photo": {
+        "x": 24.9,
+        "y": 15.3,
+        "w": 50.3,
+        "h": 29.7,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 66.8,
+        "y": 18.5,
+        "w": 6.7,
+        "h": 5.1,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "5_1": {
+      "phone": {
+        "x": 34.1,
+        "y": 85.1,
+        "w": 31.8,
+        "h": 3.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "logo": {
+        "x": 43.0,
+        "y": 5.0,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "6_0": {
+      "phone": {
+        "x": 29.4,
+        "y": 65.4,
+        "w": 34.0,
+        "h": 3.2,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#12223A"
+      },
+      "email": {
+        "x": 29.5,
+        "y": 69.7,
+        "w": 62.5,
+        "h": 3.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#12223A"
+      },
+      "company_name": {
+        "x": 44.4,
+        "y": 4.3,
+        "w": 21.4,
+        "h": 4.0,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "name": {
+        "x": 10.5,
+        "y": 49.6,
+        "w": 79.0,
+        "h": 7.3,
+        "fontSize": 20.0,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#12223A"
+      },
+      "designation": {
+        "x": 31.1,
+        "y": 56.8,
+        "w": 37.4,
+        "h": 3.9,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#57AD5F"
+      },
+      "photo": {
+        "x": 29.6,
+        "y": 17.1,
+        "w": 39.9,
+        "h": 27.4,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 35.1,
+        "y": 4.3,
+        "w": 4.5,
+        "h": 2.6,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "6_1": {
+      "phone": {
+        "x": 22.9,
+        "y": 86.4,
+        "w": 54.2,
+        "h": 2.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#57AD5F"
+      },
+      "company_name": {
+        "x": 70.4,
+        "y": 6.0,
+        "w": 23.4,
+        "h": 3.8,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "logo": {
+        "x": 61.8,
+        "y": 3.1,
+        "w": 4.1,
+        "h": 2.4,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "7_0": {
+      "phone": {
+        "x": 31.1,
+        "y": 83.1,
+        "w": 37.9,
+        "h": 3.0,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 42.2,
+        "y": 8.2,
+        "w": 18.2,
+        "h": 3.5,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "name": {
+        "x": 12.4,
+        "y": 60.8,
+        "w": 74.8,
+        "h": 4.6,
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "designation": {
+        "x": 33.8,
+        "y": 66.8,
+        "w": 31.2,
+        "h": 3.2,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "photo": {
+        "x": 20.7,
+        "y": 20.8,
+        "w": 57.2,
+        "h": 33.7,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 24.2,
+        "y": 7.0,
+        "w": 13.8,
+        "h": 8.5,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "7_1": {
+      "phone": {
+        "x": 29.4,
+        "y": 43.5,
+        "w": 33.8,
+        "h": 3.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "email": {
+        "x": 28.9,
+        "y": 52.4,
+        "w": 57.4,
+        "h": 4.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "logo": {
+        "x": 43.0,
+        "y": 5.0,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "8_0": {
+      "phone": {
+        "x": 30.6,
+        "y": 75.7,
+        "w": 38.8,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#222656"
+      },
+      "email": {
+        "x": 28.1,
+        "y": 83.8,
+        "w": 57.4,
+        "h": 4.0,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#222656"
+      },
+      "company_name": {
+        "x": 32.2,
+        "y": 12.8,
+        "w": 35.5,
+        "h": 3.7,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#222656"
+      },
+      "name": {
+        "x": 18.5,
+        "y": 51.8,
+        "w": 63.1,
+        "h": 5.1,
+        "fontSize": 14.0,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#222656"
+      },
+      "designation": {
+        "x": 36.5,
+        "y": 57.2,
+        "w": 27.4,
+        "h": 4.4,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#222656"
+      },
+      "photo": {
+        "x": 26.6,
+        "y": 20.3,
+        "w": 48.6,
+        "h": 28.7,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 45.6,
+        "y": 6.8,
+        "w": 6.8,
+        "h": 4.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "8_1": {
+      "website": {
+        "x": 23.4,
+        "y": 77.6,
+        "w": 53.4,
+        "h": 4.0,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#222656"
+      },
+      "company_name": {
+        "x": 32.2,
+        "y": 12.8,
+        "w": 35.5,
+        "h": 3.7,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#222656"
+      },
+      "logo": {
+        "x": 45.6,
+        "y": 6.8,
+        "w": 6.8,
+        "h": 4.0,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "9_0": {
+      "phone": {
+        "x": 41.8,
+        "y": 72.4,
+        "w": 17.8,
+        "h": 2.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 20.1,
+        "y": 6.8,
+        "w": 31.8,
+        "h": 3.1,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "name": {
+        "x": 24.5,
+        "y": 59.9,
+        "w": 27.0,
+        "h": 3.5,
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#1E1D65"
+      },
+      "designation": {
+        "x": 53.2,
+        "y": 59.9,
+        "w": 22.2,
+        "h": 3.5,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#3E1F5D"
+      },
+      "photo": {
+        "x": 30.3,
+        "y": 33.5,
+        "w": 38.2,
+        "h": 23.1,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 12.4,
+        "y": 6.4,
+        "w": 4.4,
+        "h": 2.5,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "9_1": {
+      "website": {
+        "x": 25.2,
+        "y": 48.2,
+        "w": 12.0,
+        "h": 2.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "logo": {
+        "x": 46.0,
+        "y": 11.5,
+        "w": 7.4,
+        "h": 4.3,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "10_0": {
+      "phone": {
+        "x": 33.9,
+        "y": 62.6,
+        "w": 27.5,
+        "h": 2.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#12223A"
+      },
+      "email": {
+        "x": 33.9,
+        "y": 66.7,
+        "w": 50.5,
+        "h": 3.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#12223A"
+      },
+      "company_name": {
+        "x": 67.2,
+        "y": 18.2,
+        "w": 19.1,
+        "h": 3.2,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#07417D"
+      },
+      "name": {
+        "x": 14.8,
+        "y": 46.8,
+        "w": 50.0,
+        "h": 5.6,
+        "fontSize": 15.4,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#07417D"
+      },
+      "designation": {
+        "x": 17.5,
+        "y": 54.7,
+        "w": 35.8,
+        "h": 3.8,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#1866B7"
+      },
+      "photo": {
+        "x": 16.2,
+        "y": 9.3,
+        "w": 40.9,
+        "h": 29.0,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 79.3,
+        "y": 9.2,
+        "w": 4.1,
+        "h": 2.4,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "10_1": {
+      "phone": {
+        "x": 24.9,
+        "y": 85.1,
+        "w": 50.2,
+        "h": 2.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#1866B7"
+      },
+      "company_name": {
+        "x": 46.6,
+        "y": 11.7,
+        "w": 22.1,
+        "h": 3.8,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#07417D"
+      },
+      "logo": {
+        "x": 71.5,
+        "y": 0.0,
+        "w": 3.5,
+        "h": 2.4,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "11_0": {
+      "phone": {
+        "x": 61.8,
+        "y": 91.9,
+        "w": 28.7,
+        "h": 1.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "company_name": {
+        "x": 9.4,
+        "y": 6.8,
+        "w": 20.8,
+        "h": 2.6,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "name": {
+        "x": 9.6,
+        "y": 75.6,
+        "w": 70.1,
+        "h": 6.5,
+        "fontSize": 18.0,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "designation": {
+        "x": 10.6,
+        "y": 81.8,
+        "w": 47.4,
+        "h": 3.5,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "photo": {
+        "x": 10.0,
+        "y": 17.9,
+        "w": 80.1,
+        "h": 53.9,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": -6.6,
+        "y": 6.8,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "11_1": {
+      "phone": {
+        "x": 44.9,
+        "y": 54.3,
+        "w": 10.5,
+        "h": 0.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFDECA"
+      },
+      "company_name": {
+        "x": 9.4,
+        "y": 6.8,
+        "w": 20.8,
+        "h": 2.6,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "logo": {
+        "x": -6.6,
+        "y": 6.8,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "12_0": {
+      "phone": {
+        "x": 61.6,
+        "y": 93.5,
+        "w": 28.7,
+        "h": 2.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 52.9,
+        "y": 6.0,
+        "w": 39.0,
+        "h": 7.9,
+        "fontSize": 16,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "name": {
+        "x": 11.4,
+        "y": 74.8,
+        "w": 49.8,
+        "h": 10.3,
+        "fontSize": 22,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#515151"
+      },
+      "designation": {
+        "x": 12.6,
+        "y": 84.8,
+        "w": 32.2,
+        "h": 5.0,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "photo": {
+        "x": 32.1,
+        "y": 21.6,
+        "w": 65.2,
+        "h": 48.6,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 9.6,
+        "y": 3.3,
+        "w": 10.6,
+        "h": 5.4,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "12_1": {
+      "phone": {
+        "x": 61.6,
+        "y": 93.5,
+        "w": 28.7,
+        "h": 2.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "logo": {
+        "x": 9.6,
+        "y": 3.3,
+        "w": 10.6,
+        "h": 5.4,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "13_0": {
+      "phone": {
+        "x": 27.4,
+        "y": 66.4,
+        "w": 32.8,
+        "h": 2.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#343434"
+      },
+      "email": {
+        "x": 27.0,
+        "y": 74.3,
+        "w": 57.2,
+        "h": 3.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#343434"
+      },
+      "name": {
+        "x": 14.0,
+        "y": 48.6,
+        "w": 71.4,
+        "h": 6.7,
+        "fontSize": 18.4,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#343434"
+      },
+      "designation": {
+        "x": 29.4,
+        "y": 56.0,
+        "w": 41.2,
+        "h": 3.2,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#343434"
+      },
+      "address": {
+        "x": 26.8,
+        "y": 81.9,
+        "w": 38.0,
+        "h": 3.6,
+        "fontSize": 7,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#343434"
+      },
+      "photo": {
+        "x": 26.9,
+        "y": 13.7,
+        "w": 46.2,
+        "h": 31.6,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 43.0,
+        "y": 5.0,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "13_1": {
+      "company_name": {
+        "x": 35.2,
+        "y": 18.1,
+        "w": 29.5,
+        "h": 4.1,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "address": {
+        "x": 22.2,
+        "y": 67.2,
+        "w": 61.6,
+        "h": 4.6,
+        "fontSize": 7,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#343434"
+      },
+      "logo": {
+        "x": 39.7,
+        "y": 5.9,
+        "w": 20.7,
+        "h": 10.3,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "14_0": {
+      "phone": {
+        "x": 24.4,
+        "y": 87.5,
+        "w": 51.2,
+        "h": 3.0,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "company_name": {
+        "x": 44.5,
+        "y": 6.9,
+        "w": 18.5,
+        "h": 2.4,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "name": {
+        "x": 10.6,
+        "y": 67.6,
+        "w": 80.8,
+        "h": 7.9,
+        "fontSize": 21.8,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#222859"
+      },
+      "designation": {
+        "x": 17.5,
+        "y": 59.6,
+        "w": 65.0,
+        "h": 7.6,
+        "fontSize": 13,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#222859"
+      },
+      "photo": {
+        "x": 22.8,
+        "y": 20.8,
+        "w": 55.2,
+        "h": 33.9,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 86.7,
+        "y": 5.0,
+        "w": 5.0,
+        "h": 2.7,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "14_1": {
+      "phone": {
+        "x": 35.4,
+        "y": 78.0,
+        "w": 32.8,
+        "h": 2.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "website": {
+        "x": 36.9,
+        "y": 90.4,
+        "w": 53.4,
+        "h": 4.0,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "company_name": {
+        "x": 44.5,
+        "y": 8.5,
+        "w": 18.5,
+        "h": 2.4,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "logo": {
+        "x": 78.1,
+        "y": 4.9,
+        "w": 21.9,
+        "h": 11.8,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "15_0": {
+      "phone": {
+        "x": 21.0,
+        "y": 93.5,
+        "w": 18.5,
+        "h": 1.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#151415"
+      },
+      "name": {
+        "x": 6.0,
+        "y": 72.1,
+        "w": 35.1,
+        "h": 5.3,
+        "fontSize": 14.6,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#151415"
+      },
+      "designation": {
+        "x": 6.5,
+        "y": 77.3,
+        "w": 42.4,
+        "h": 5.3,
+        "fontSize": 9.3,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#151415"
+      },
+      "photo": {
+        "x": 36.0,
+        "y": 22.0,
+        "w": 28.0,
+        "h": 24.0,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 43.0,
+        "y": 5.0,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "15_1": {
+      "phone": {
+        "x": 21.0,
+        "y": 50.0,
+        "w": 18.5,
+        "h": 1.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#151415"
+      },
+      "logo": {
+        "x": 43.0,
+        "y": 5.0,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "16_0": {
+      "company_name": {
+        "x": 34.8,
+        "y": 16.5,
+        "w": 30.9,
+        "h": 4.9,
+        "fontSize": 11.1,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "name": {
+        "x": 38.1,
+        "y": 73.6,
+        "w": 23.4,
+        "h": 4.1,
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#102C3D"
+      },
+      "designation": {
+        "x": 19.8,
+        "y": 68.9,
+        "w": 60.8,
+        "h": 4.0,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#102C3D"
+      },
+      "photo": {
+        "x": 26.0,
+        "y": 37.6,
+        "w": 47.1,
+        "h": 27.8,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 43.7,
+        "y": 4.9,
+        "w": 11.1,
+        "h": 3.3,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "16_1": {
+      "phone": {
+        "x": 36.2,
+        "y": 81.6,
+        "w": 27.9,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#102C3D"
+      },
+      "website": {
+        "x": 27.9,
+        "y": 88.6,
+        "w": 44.5,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#102C3D"
+      },
+      "company_name": {
+        "x": 34.8,
+        "y": 16.5,
+        "w": 30.9,
+        "h": 4.9,
+        "fontSize": 11.1,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "logo": {
+        "x": 44.5,
+        "y": 4.9,
+        "w": 11.1,
+        "h": 3.3,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "17_0": {
+      "phone": {
+        "x": 31.6,
+        "y": 71.2,
+        "w": 31.2,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#7F9258"
+      },
+      "email": {
+        "x": 31.5,
+        "y": 75.1,
+        "w": 58.1,
+        "h": 3.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#7F9258"
+      },
+      "company_name": {
+        "x": 74.2,
+        "y": 13.4,
+        "w": 18.1,
+        "h": 2.9,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "name": {
+        "x": 19.9,
+        "y": 56.4,
+        "w": 60.5,
+        "h": 6.6,
+        "fontSize": 18.2,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#4D5934"
+      },
+      "designation": {
+        "x": 28.6,
+        "y": 63.5,
+        "w": 43.0,
+        "h": 4.4,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#EBEEE4"
+      },
+      "photo": {
+        "x": 22.3,
+        "y": 19.1,
+        "w": 57.5,
+        "h": 34.1,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 76.6,
+        "y": 4.1,
+        "w": 13.2,
+        "h": 6.7,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "17_1": {
+      "phone": {
+        "x": 16.9,
+        "y": 75.7,
+        "w": 50.0,
+        "h": 2.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#EBEEE4"
+      },
+      "website": {
+        "x": 28.7,
+        "y": 84.4,
+        "w": 42.8,
+        "h": 2.4,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#4D5934"
+      },
+      "company_name": {
+        "x": 74.2,
+        "y": 15.9,
+        "w": 18.1,
+        "h": 2.9,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "logo": {
+        "x": 76.6,
+        "y": 6.6,
+        "w": 13.2,
+        "h": 6.7,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "18_0": {
+      "phone": {
+        "x": 32.6,
+        "y": 70.4,
+        "w": 28.5,
+        "h": 2.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#5325AF"
+      },
+      "email": {
+        "x": 32.8,
+        "y": 73.8,
+        "w": 53.0,
+        "h": 3.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#5325AF"
+      },
+      "company_name": {
+        "x": -5.8,
+        "y": 7.7,
+        "w": 38.2,
+        "h": 11.7,
+        "fontSize": 16,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#701CF5"
+      },
+      "name": {
+        "x": 14.2,
+        "y": 53.8,
+        "w": 72.4,
+        "h": 7.6,
+        "fontSize": 20.8,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#5325AF"
+      },
+      "designation": {
+        "x": 29.2,
+        "y": 62.1,
+        "w": 41.8,
+        "h": 4.0,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#701CF5"
+      },
+      "photo": {
+        "x": 22.0,
+        "y": 14.8,
+        "w": 55.7,
+        "h": 32.8,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 79.5,
+        "y": 4.5,
+        "w": 2.5,
+        "h": 2.1,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "18_1": {
+      "phone": {
+        "x": 27.3,
+        "y": 76.8,
+        "w": 45.5,
+        "h": 2.4,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "company_name": {
+        "x": 37.5,
+        "y": 7.7,
+        "w": 24.8,
+        "h": 4.2,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#5325AF"
+      },
+      "logo": {
+        "x": 53.7,
+        "y": 5.6,
+        "w": 2.8,
+        "h": 2.1,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "19_0": {
+      "phone": {
+        "x": 30.6,
+        "y": 64.6,
+        "w": 32.0,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "email": {
+        "x": 30.4,
+        "y": 68.5,
+        "w": 59.4,
+        "h": 4.0,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "company_name": {
+        "x": 43.9,
+        "y": 8.0,
+        "w": 24.6,
+        "h": 4.0,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#1F1F1E"
+      },
+      "name": {
+        "x": 12.9,
+        "y": 49.8,
+        "w": 74.1,
+        "h": 5.8,
+        "fontSize": 16.0,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "designation": {
+        "x": 30.1,
+        "y": 57.6,
+        "w": 39.8,
+        "h": 3.2,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#D9762D"
+      },
+      "photo": {
+        "x": 24.4,
+        "y": 15.7,
+        "w": 51.1,
+        "h": 30.1,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 34.2,
+        "y": 5.0,
+        "w": 4.6,
+        "h": 2.7,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "19_1": {
+      "phone": {
+        "x": 23.1,
+        "y": 88.3,
+        "w": 53.8,
+        "h": 2.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#D9762D"
+      },
+      "company_name": {
+        "x": 44.6,
+        "y": 7.6,
+        "w": 22.1,
+        "h": 3.8,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "logo": {
+        "x": 36.2,
+        "y": 5.0,
+        "w": 4.1,
+        "h": 2.4,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "20_0": {
+      "phone": {
+        "x": 33.0,
+        "y": 75.8,
+        "w": 24.6,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#545454"
+      },
+      "email": {
+        "x": 33.0,
+        "y": 78.8,
+        "w": 49.8,
+        "h": 3.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#545454"
+      },
+      "company_name": {
+        "x": 33.6,
+        "y": 8.7,
+        "w": 30.8,
+        "h": 4.0,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#0C0B0B"
+      },
+      "name": {
+        "x": 15.2,
+        "y": 59.8,
+        "w": 70.1,
+        "h": 4.6,
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "designation": {
+        "x": 21.9,
+        "y": 65.5,
+        "w": 56.5,
+        "h": 2.9,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "photo": {
+        "x": 26.1,
+        "y": 20.4,
+        "w": 47.9,
+        "h": 28.2,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 17.2,
+        "y": 8.4,
+        "w": 12.0,
+        "h": 6.7,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "20_1": {
+      "website": {
+        "x": 22.2,
+        "y": 79.8,
+        "w": 55.1,
+        "h": 4.4,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 26.5,
+        "y": 9.3,
+        "w": 30.8,
+        "h": 4.0,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#0C0B0B"
+      },
+      "logo": {
+        "x": 10.0,
+        "y": 9.2,
+        "w": 11.9,
+        "h": 6.7,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "21_0": {
+      "phone": {
+        "x": 15.2,
+        "y": 67.2,
+        "w": 21.0,
+        "h": 1.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#0A0A0D"
+      },
+      "email": {
+        "x": 51.4,
+        "y": 67.1,
+        "w": 39.0,
+        "h": 2.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#0A0A0D"
+      },
+      "company_name": {
+        "x": 11.0,
+        "y": 9.7,
+        "w": 78.0,
+        "h": 10.7,
+        "fontSize": 16,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#0A0A0D"
+      },
+      "name": {
+        "x": 20.6,
+        "y": 62.5,
+        "w": 32.0,
+        "h": 3.5,
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#0A0A0D"
+      },
+      "designation": {
+        "x": 20.9,
+        "y": 59.5,
+        "w": 20.5,
+        "h": 3.2,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#0A0A0D"
+      },
+      "photo": {
+        "x": 36.0,
+        "y": 22.4,
+        "w": 28.0,
+        "h": 24.0,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": -5.0,
+        "y": 9.7,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "21_1": {
+      "phone": {
+        "x": 13.6,
+        "y": 60.0,
+        "w": 67.5,
+        "h": 3.2,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "website": {
+        "x": 30.8,
+        "y": 92.4,
+        "w": 38.5,
+        "h": 2.4,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      "logo": {
+        "x": 49.5,
+        "y": 11.4,
+        "w": 9.6,
+        "h": 5.6,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "22_0": {
+      "phone": {
+        "x": 47.4,
+        "y": 71.4,
+        "w": 29.5,
+        "h": 2.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "email": {
+        "x": 25.0,
+        "y": 78.7,
+        "w": 52.2,
+        "h": 3.5,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 61.6,
+        "y": 6.5,
+        "w": 13.5,
+        "h": 2.6,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "name": {
+        "x": 23.4,
+        "y": 45.3,
+        "w": 53.4,
+        "h": 5.6,
+        "fontSize": 15.4,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "designation": {
+        "x": 22.2,
+        "y": 52.1,
+        "w": 55.8,
+        "h": 5.3,
+        "fontSize": 9.3,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "photo": {
+        "x": 30.6,
+        "y": 18.3,
+        "w": 38.9,
+        "h": 22.9,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 75.6,
+        "y": 5.9,
+        "w": 14.3,
+        "h": 5.8,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "22_1": {
+      "website": {
+        "x": 27.1,
+        "y": 86.7,
+        "w": 46.0,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#292929"
+      },
+      "company_name": {
+        "x": 45.0,
+        "y": 19.6,
+        "w": 13.2,
+        "h": 1.9,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "logo": {
+        "x": 44.4,
+        "y": 12.2,
+        "w": 14.3,
+        "h": 5.8,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "23_0": {
+      "phone": {
+        "x": 34.6,
+        "y": 65.0,
+        "w": 22.0,
+        "h": 2.2,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#0D0D0D"
+      },
+      "email": {
+        "x": 34.6,
+        "y": 70.8,
+        "w": 48.5,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#0D0D0D"
+      },
+      "website": {
+        "x": 24.4,
+        "y": 88.0,
+        "w": 51.5,
+        "h": 3.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 42.1,
+        "y": 9.9,
+        "w": 24.0,
+        "h": 3.2,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "name": {
+        "x": 22.6,
+        "y": 51.0,
+        "w": 56.0,
+        "h": 4.9,
+        "fontSize": 13.3,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "designation": {
+        "x": 37.1,
+        "y": 56.0,
+        "w": 25.9,
+        "h": 4.1,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "photo": {
+        "x": 27.1,
+        "y": 21.6,
+        "w": 45.8,
+        "h": 26.9,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 26.1,
+        "y": 9.9,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "23_1": {
+      "phone": {
+        "x": 33.9,
+        "y": 86.4,
+        "w": 34.8,
+        "h": 2.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 42.0,
+        "y": 9.7,
+        "w": 24.2,
+        "h": 3.5,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "logo": {
+        "x": 26.0,
+        "y": 9.7,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "24_0": {
+      "phone": {
+        "x": 33.5,
+        "y": 64.7,
+        "w": 24.0,
+        "h": 2.4,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#0D0D0D"
+      },
+      "email": {
+        "x": 33.6,
+        "y": 71.0,
+        "w": 52.8,
+        "h": 3.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#0D0D0D"
+      },
+      "website": {
+        "x": 25.1,
+        "y": 88.0,
+        "w": 50.0,
+        "h": 3.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 38.1,
+        "y": 13.2,
+        "w": 24.0,
+        "h": 3.2,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "name": {
+        "x": 21.9,
+        "y": 51.5,
+        "w": 57.5,
+        "h": 4.9,
+        "fontSize": 13.3,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "designation": {
+        "x": 36.6,
+        "y": 56.0,
+        "w": 26.9,
+        "h": 4.7,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "photo": {
+        "x": 26.6,
+        "y": 22.1,
+        "w": 46.9,
+        "h": 27.9,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 4.7,
+        "y": 6.2,
+        "w": 6.6,
+        "h": 6.6,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "24_1": {
+      "website": {
+        "x": 25.1,
+        "y": 88.0,
+        "w": 50.0,
+        "h": 3.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 38.1,
+        "y": 13.2,
+        "w": 24.0,
+        "h": 3.2,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#000000"
+      },
+      "logo": {
+        "x": 4.7,
+        "y": 6.2,
+        "w": 6.6,
+        "h": 6.6,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 87.7,
+        "y": 83.4,
+        "w": 11.4,
+        "h": 11.6,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "25_0": {
+      "email": {
+        "x": 33.2,
+        "y": 67.8,
+        "w": 54.2,
+        "h": 3.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "phone": {
+        "x": 33.6,
+        "y": 72.1,
+        "w": 32.0,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "company_name": {
+        "x": 9.2,
+        "y": 5.1,
+        "w": 12.6,
+        "h": 15.4,
+        "fontSize": 16,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#331D05"
+      },
+      "name": {
+        "x": 23.5,
+        "y": 53.5,
+        "w": 52.5,
+        "h": 7.6,
+        "fontSize": 20.8,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#24252F"
+      },
+      "designation": {
+        "x": 20.1,
+        "y": 61.7,
+        "w": 58.2,
+        "h": 3.1,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "address": {
+        "x": 51.4,
+        "y": 76.3,
+        "w": 15.2,
+        "h": 2.9,
+        "fontSize": 7,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#000000"
+      },
+      "photo": {
+        "x": 25.6,
+        "y": 18.5,
+        "w": 48.7,
+        "h": 29.6,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": -6.8,
+        "y": 5.1,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "25_1": {
+      "phone": {
+        "x": 34.4,
+        "y": 80.3,
+        "w": 31.1,
+        "h": 3.1,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#24252F"
+      },
+      "company_name": {
+        "x": 78.5,
+        "y": 5.1,
+        "w": 12.8,
+        "h": 15.4,
+        "fontSize": 16,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#553009"
+      },
+      "logo": {
+        "x": 10.0,
+        "y": 9.1,
+        "w": 2.5,
+        "h": 3.1,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 68.0,
+        "y": 74.1,
+        "w": 11.1,
+        "h": 22.2,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "26_0": {
+      "company_name": {
+        "x": 35.6,
+        "y": 15.7,
+        "w": 28.5,
+        "h": 3.1,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#0066CA"
+      },
+      "name": {
+        "x": 14.4,
+        "y": 61.4,
+        "w": 71.9,
+        "h": 5.0,
+        "fontSize": 13.8,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#0066CA"
+      },
+      "designation": {
+        "x": 25.9,
+        "y": 70.1,
+        "w": 48.2,
+        "h": 3.1,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#0066CA"
+      },
+      "photo": {
+        "x": 20.1,
+        "y": 22.2,
+        "w": 59.8,
+        "h": 35.2,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 38.1,
+        "y": 1.4,
+        "w": 3.5,
+        "h": 2.2,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "26_1": {
+      "company_name": {
+        "x": 26.9,
+        "y": 0.0,
+        "w": 16.8,
+        "h": 7.3,
+        "fontSize": 16,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#B8ADCB"
+      },
+      "logo": {
+        "x": 45.6,
+        "y": 16.2,
+        "w": 8.1,
+        "h": 4.7,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 36.0,
+        "y": 50.9,
+        "w": 33.2,
+        "h": 19.2,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "27_0": {
+      "phone": {
+        "x": 34.4,
+        "y": 82.8,
+        "w": 31.1,
+        "h": 2.8,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#203751"
+      },
+      "company_name": {
+        "x": 30.5,
+        "y": 13.7,
+        "w": 39.8,
+        "h": 3.7,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#203751"
+      },
+      "name": {
+        "x": 22.8,
+        "y": 64.7,
+        "w": 55.2,
+        "h": 4.1,
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#203751"
+      },
+      "designation": {
+        "x": 34.9,
+        "y": 69.2,
+        "w": 30.8,
+        "h": 2.9,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#203751"
+      },
+      "photo": {
+        "x": 24.0,
+        "y": 19.3,
+        "w": 51.9,
+        "h": 45.2,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 14.5,
+        "y": 13.7,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "27_1": {
+      "phone": {
+        "x": 34.4,
+        "y": 66.1,
+        "w": 31.2,
+        "h": 2.6,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#203751"
+      },
+      "website": {
+        "x": 27.4,
+        "y": 86.1,
+        "w": 45.5,
+        "h": 2.9,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#F3F3F3"
+      },
+      "logo": {
+        "x": 43.0,
+        "y": 5.0,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "28_0": {
+      "phone": {
+        "x": 9.5,
+        "y": 5.9,
+        "w": 25.5,
+        "h": 2.4,
+        "fontSize": 8,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#3A2A64"
+      },
+      "company_name": {
+        "x": 60.9,
+        "y": 5.8,
+        "w": 29.8,
+        "h": 2.9,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#3A2A64"
+      },
+      "name": {
+        "x": 9.2,
+        "y": 87.4,
+        "w": 35.2,
+        "h": 7.1,
+        "fontSize": 19.4,
+        "fontWeight": "bold",
+        "align": "center",
+        "color": "#3A2A64"
+      },
+      "designation": {
+        "x": 9.1,
+        "y": 66.7,
+        "w": 54.2,
+        "h": 5.0,
+        "fontSize": 9,
+        "fontWeight": "normal",
+        "align": "center",
+        "color": "#3A2A64"
+      },
+      "photo": {
+        "x": 26.0,
+        "y": 21.1,
+        "w": 56.1,
+        "h": 33.0,
+        "type": "image",
+        "align": "center"
+      },
+      "logo": {
+        "x": 44.9,
+        "y": 5.8,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      }
+    },
+    "28_1": {
+      "logo": {
+        "x": 43.0,
+        "y": 5.0,
+        "w": 14.0,
+        "h": 9.0,
+        "type": "image",
+        "align": "center"
+      },
+      "qr_code": {
+        "x": 37.5,
+        "y": 75.0,
+        "w": 25.0,
+        "h": 16.0,
+        "type": "image",
+        "align": "center"
+      }
+    }
+  }
+}

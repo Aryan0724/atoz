@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   const mockProduct = mockProducts.find(p => p.slug === cleanSlug || (cleanSlug === 'id-card-custom' && p.slug === 'id-card') || (cleanSlug === 'business-card-custom' && p.slug === 'business-card') || (cleanSlug === 'wedding-card-custom' && p.slug === 'wedding-card') || (cleanSlug === 'letter-head-custom' && p.slug === 'letter-head'));
   
-  const product = mockProduct ? { ...(productData as any), ...(mockProduct as any) } : productData;
+  const product = mockProduct ? { ...(mockProduct as any), ...(productData as any) } : productData;
 
   if (!product) return {};
 
@@ -54,7 +54,7 @@ export default async function CustomizePage({ params }: { params: { slug: string
 
   const mockProduct = mockProducts.find(p => p.slug === cleanSlug || (cleanSlug === 'id-card-custom' && p.slug === 'id-card') || (cleanSlug === 'business-card-custom' && p.slug === 'business-card') || (cleanSlug === 'wedding-card-custom' && p.slug === 'wedding-card') || (cleanSlug === 'letter-head-custom' && p.slug === 'letter-head'));
   
-  const product = mockProduct ? { ...(productData as any), ...(mockProduct as any) } : productData;
+  const product = mockProduct ? { ...(mockProduct as any), ...(productData as any) } : productData;
 
   if (error && !mockProduct) {
     if (error) console.error('Supabase Product Fetch Error:', error);

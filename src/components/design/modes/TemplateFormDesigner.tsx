@@ -32,7 +32,9 @@ import {
   Trash2,
   Heart,
   Star,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Undo,
+  Redo
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -44,6 +46,11 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   const [formData, setFormData] = useState<Record<string, { text: string, color?: string }>>({});
   const [selectedDesignIndex, setSelectedDesignIndex] = useState(initialTemplateIndex || 0);
+  React.useEffect(() => {
+    if (initialTemplateIndex !== undefined) {
+      setSelectedDesignIndex(initialTemplateIndex);
+    }
+  }, [initialTemplateIndex]);
   const [selectedSideIndex, setSelectedSideIndex] = useState(0); // 0=Front, 1=Back
   const [selectedColor, setSelectedColor] = useState('#FFD700');
   const [selectedQuality, setSelectedQuality] = useState('Standard Matte');
@@ -65,6 +72,101 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const isPreview = props.activeView === '3d';
   const containerRef = React.useRef<HTMLDivElement>(null);
   const dragStartPosRef = React.useRef({ x: 0, y: 0 });
+
+  // --- HISTORY STATE & CONTROLS ---
+  const historyRef = React.useRef<{
+    formData: any;
+    localMappings: any;
+    customFields: any[];
+  }[]>([]);
+  const historyIndexRef = React.useRef<number>(-1);
+  const isRestoringHistoryRef = React.useRef(false);
+
+  const localMappingsRef = React.useRef(localMappings);
+  React.useEffect(() => {
+    localMappingsRef.current = localMappings;
+  }, [localMappings]);
+
+  const formDataRef = React.useRef(formData);
+  React.useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
+
+  const customFieldsRef = React.useRef(customFields);
+  React.useEffect(() => {
+    customFieldsRef.current = customFields;
+  }, [customFields]);
+
+  const commitHistory = React.useCallback((nextMappings?: any, nextFormData?: any, nextCustomFields?: any[]) => {
+    if (isRestoringHistoryRef.current) return;
+
+    const fData = nextFormData ?? formDataRef.current;
+    const lMaps = nextMappings ?? localMappingsRef.current;
+    const cFields = nextCustomFields ?? customFieldsRef.current;
+
+    const entry = {
+      formData: JSON.parse(JSON.stringify(fData)),
+      localMappings: JSON.parse(JSON.stringify(lMaps)),
+      customFields: JSON.parse(JSON.stringify(cFields)),
+    };
+
+    if (historyIndexRef.current >= 0) {
+      const currentEntry = historyRef.current[historyIndexRef.current];
+      if (JSON.stringify(currentEntry) === JSON.stringify(entry)) {
+        return;
+      }
+    }
+
+    historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1);
+    historyRef.current.push(entry);
+    historyIndexRef.current = historyRef.current.length - 1;
+  }, []);
+
+  const undo = React.useCallback(() => {
+    if (historyIndexRef.current > 0) {
+      historyIndexRef.current -= 1;
+      const entry = historyRef.current[historyIndexRef.current];
+      isRestoringHistoryRef.current = true;
+      setFormData(entry.formData);
+      setLocalMappings(entry.localMappings);
+      setCustomFields(entry.customFields);
+      setTimeout(() => {
+        isRestoringHistoryRef.current = false;
+      }, 50);
+    }
+  }, []);
+
+  const redo = React.useCallback(() => {
+    if (historyIndexRef.current < historyRef.current.length - 1) {
+      historyIndexRef.current += 1;
+      const entry = historyRef.current[historyIndexRef.current];
+      isRestoringHistoryRef.current = true;
+      setFormData(entry.formData);
+      setLocalMappings(entry.localMappings);
+      setCustomFields(entry.customFields);
+      setTimeout(() => {
+        isRestoringHistoryRef.current = false;
+      }, 50);
+    }
+  }, []);
+
+  // Initialize history when mappings load
+  React.useEffect(() => {
+    if (Object.keys(localMappings).length > 0 && historyRef.current.length === 0) {
+      historyRef.current = [{
+        formData: JSON.parse(JSON.stringify(formData)),
+        localMappings: JSON.parse(JSON.stringify(localMappings)),
+        customFields: JSON.parse(JSON.stringify(customFields))
+      }];
+      historyIndexRef.current = 0;
+    }
+  }, [localMappings]);
+
+  // Reset history stack on template/side switch
+  React.useEffect(() => {
+    historyRef.current = [];
+    historyIndexRef.current = -1;
+  }, [selectedDesignIndex, selectedSideIndex]);
 
   // 1. STATE & CALCULATIONS
   const designs = React.useMemo(() => {
@@ -92,21 +194,24 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       { id: 'address', label: 'Address', type: 'textarea', icon: 'MapPin', placeholder: 'Enter address...' },
     ];
 
-    // Ensure our new icons are always available if not present
-    const essentialIcons = [
-      { id: 'phone_icon', label: 'Phone Icon', type: 'icon', icon: 'Phone', defaultValue: 'Phone' },
-      { id: 'email_icon', label: 'Email Icon', type: 'icon', icon: 'Mail', defaultValue: 'Mail' },
-      { id: 'address_icon', label: 'Address Icon', type: 'icon', icon: 'MapPin', defaultValue: 'MapPin' },
-    ];
-
-    essentialIcons.forEach(icon => {
-      if (!baseFields.find((f: any) => f.id === icon.id)) {
-        baseFields = [...baseFields, icon];
-      }
-    });
-    
     return [...baseFields, ...customFields];
   }, [designConfig, selectedDesignIndex, product.template_fields, customFields]);
+
+  const sidebarFields = React.useMemo(() => {
+    const activeFieldIds = new Set<string>();
+    const keys = Object.keys(designConfig?.mappings || {});
+    keys.forEach(k => {
+      if (k.startsWith(`${selectedDesignIndex}_`)) {
+        const m = designConfig.mappings[k] || {};
+        Object.keys(m).forEach(id => activeFieldIds.add(id));
+      }
+    });
+
+    return allFields.filter((field: any) => {
+      if (field.isCustom) return true;
+      return activeFieldIds.has(field.id);
+    });
+  }, [allFields, designConfig, selectedDesignIndex]);
 
   // Initialize mappings when template or side changes
   React.useEffect(() => {
@@ -117,19 +222,6 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     setLocalMappings(prev => {
        const merged = { ...initialMappings };
        
-       // Add default positions for essential icons if missing
-       const defaultIconPositions: Record<string, any> = {
-         phone_icon: { x: 5, y: 70, w: 4, h: 4, color: '#000000' },
-         email_icon: { x: 5, y: 75, w: 4, h: 4, color: '#000000' },
-         address_icon: { x: 5, y: 80, w: 4, h: 4, color: '#000000' },
-       };
-
-       Object.entries(defaultIconPositions).forEach(([id, pos]) => {
-         if (!merged[id]) {
-           merged[id] = pos;
-         }
-       });
-
        // Keep custom fields that might have been added
        customFields.forEach(f => {
           if (prev[f.id]) merged[f.id] = prev[f.id];
@@ -181,9 +273,15 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     };
 
     const handleEnd = () => {
-      setIsDragging(false);
-      setIsResizing(false);
-      onObjectsUpdated?.();
+      if (isDragging || isResizing) {
+        setIsDragging(false);
+        setIsResizing(false);
+        onObjectsUpdated?.();
+        commitHistory();
+      } else {
+        setIsDragging(false);
+        setIsResizing(false);
+      }
     };
 
     window.addEventListener('mousemove', handleMove, { passive: true });
@@ -195,7 +293,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       window.removeEventListener('mouseup', handleEnd);
       window.removeEventListener('mouseleave', handleEnd);
     };
-  }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos, onObjectsUpdated]);
+  }, [isDragging, isResizing, dragStartPos, activeField, initialFieldPos, onObjectsUpdated, commitHistory]);
 
   const handleStart = (e: React.MouseEvent, fieldId: string, action: 'move' | 'resize') => {
     if (isPreview) return;
@@ -231,13 +329,10 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       isCustom: true
     };
     
-    setCustomFields(prev => [...prev, newField]);
-    if (initialValue) {
-       setFormData(prev => ({ ...prev, [newId]: { text: initialValue } }));
-    }
-
-    setLocalMappings(prev => ({
-       ...prev,
+    const nextFields = [...customFields, newField];
+    const nextFormData = initialValue ? { ...formData, [newId]: { text: initialValue } } : { ...formData };
+    const nextMappings = {
+       ...localMappings,
        [newId]: {
           x: 10,
           y: 10,
@@ -247,8 +342,14 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
           color: '#FFD700',
           align: 'left'
        }
-    }));
+    };
+
+    setCustomFields(nextFields);
+    setFormData(nextFormData);
+    setLocalMappings(nextMappings);
     setActiveField(newId);
+
+    commitHistory(nextMappings, nextFormData, nextFields);
   };
 
   const handleAddIcon = (iconName: string) => {
@@ -261,11 +362,10 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       isCustom: true
     };
     
-    setCustomFields(prev => [...prev, newField]);
-    setFormData(prev => ({ ...prev, [newId]: { text: iconName } }));
-
-    setLocalMappings(prev => ({
-       ...prev,
+    const nextFields = [...customFields, newField];
+    const nextFormData = { ...formData, [newId]: { text: iconName } };
+    const nextMappings = {
+       ...localMappings,
        [newId]: {
           x: 40,
           y: 40,
@@ -273,19 +373,29 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
           h: 5,
           color: '#000000',
        }
-    }));
+    };
+
+    setCustomFields(nextFields);
+    setFormData(nextFormData);
+    setLocalMappings(nextMappings);
     setActiveField(newId);
     setIsIconPickerOpen(false);
+
+    commitHistory(nextMappings, nextFormData, nextFields);
   };
 
   const updateFontStyle = (fieldId: string, style: 'bold' | 'italic') => {
     setLocalMappings(prev => {
       const f = prev[fieldId];
       if (!f) return prev;
+      const next = { ...prev };
       if (style === 'bold') {
-        return { ...prev, [fieldId]: { ...f, fontWeight: f.fontWeight === 'bold' ? 'normal' : 'bold' } };
+        next[fieldId] = { ...f, fontWeight: f.fontWeight === 'bold' ? 'normal' : 'bold' };
+      } else {
+        next[fieldId] = { ...f, italic: !f.italic };
       }
-      return { ...prev, [fieldId]: { ...f, italic: !f.italic } };
+      commitHistory(next);
+      return next;
     });
   };
 
@@ -293,7 +403,9 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     setLocalMappings(prev => {
       const f = prev[fieldId];
       if (!f) return prev;
-      return { ...prev, [fieldId]: { ...f, fontFamily: family } };
+      const next = { ...prev, [fieldId]: { ...f, fontFamily: family } };
+      commitHistory(next);
+      return next;
     });
   };
 
@@ -301,13 +413,15 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     setLocalMappings(prev => {
       const f = prev[fieldId];
       if (!f) return prev;
-      return {
+      const next = {
         ...prev,
         [fieldId]: {
           ...f,
           fontSize: Math.max(6, (f.fontSize || 14) + delta)
         }
       };
+      commitHistory(next);
+      return next;
     });
   };
 
@@ -315,29 +429,31 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
     setLocalMappings(prev => {
       const f = prev[fieldId];
       if (!f) return prev;
-      return {
+      const next = {
         ...prev,
         [fieldId]: {
           ...f,
           lineHeight: Math.max(0.8, Math.min(3, (f.lineHeight || 1.2) + delta))
         }
       };
+      commitHistory(next);
+      return next;
     });
   };
 
   const removeCustomField = (fieldId: string) => {
-    setCustomFields(prev => prev.filter(f => f.id !== fieldId));
-    setLocalMappings(prev => {
-      const next = { ...prev };
-      delete next[fieldId];
-      return next;
-    });
+    const nextFields = customFields.filter(f => f.id !== fieldId);
+    const nextMappings = { ...localMappings };
+    delete nextMappings[fieldId];
+    const nextFormData = { ...formData };
+    delete nextFormData[fieldId];
+
+    setCustomFields(nextFields);
+    setLocalMappings(nextMappings);
+    setFormData(nextFormData);
     if (activeField === fieldId) setActiveField(null);
-    setFormData(prev => {
-      const next = { ...prev };
-      delete next[fieldId];
-      return next;
-    });
+
+    commitHistory(nextMappings, nextFormData, nextFields);
   };
 
 
@@ -345,13 +461,13 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
 
   // Expose methods to maintain compatibility with the DesignerCanvas interface
   useImperativeHandle(ref, () => ({
-    addText: () => {},
-    addImage: () => {},
+    addText: () => handleAddCustomField('text', 'Custom Text'),
+    addImage: () => handleAddCustomField('image'),
     addShape: () => {},
-    addIcon: () => {},
+    addIcon: () => setIsIconPickerOpen(true),
     addSvgGraphic: () => {},
-    undo: () => {},
-    redo: () => {},
+    undo: () => undo(),
+    redo: () => redo(),
     saveHistory: () => {},
     deleteActiveObject: () => {},
     duplicateActiveObject: () => {},
@@ -454,17 +570,24 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
            const textContent = typeof value === 'string' ? value : (value as any).text || '';
            if (!textContent) continue;
 
-           const fontSize = (mapping.fontSize || 14) / 500 * canvas.width;
-           ctx.font = `${mapping.italic ? 'italic ' : ''}${mapping.fontWeight || 'normal'} ${fontSize}px ${mapping.fontFamily || 'Inter'}`;
-           ctx.fillStyle = typeof value === 'object' ? (value as any).color || mapping.color || '#FFD700' : mapping.color || '#FFD700';
-           ctx.textAlign = 'left';
-           ctx.textBaseline = 'top';
-           
-           const lines = String(textContent).split('\n');
-           const lineHeight = (mapping.lineHeight || 1.2) * fontSize;
-           lines.forEach((line, i) => {
-             ctx.fillText(line, x, y + (i * lineHeight));
-           });
+            const fontSize = (mapping.fontSize || 14) / 500 * canvas.width;
+            ctx.font = `${mapping.italic ? 'italic ' : ''}${mapping.fontWeight || 'normal'} ${fontSize}px ${mapping.fontFamily || 'Inter'}`;
+            ctx.fillStyle = typeof value === 'object' ? (value as any).color || mapping.color || '#FFD700' : mapping.color || '#FFD700';
+            ctx.textAlign = mapping.align || 'center';
+            ctx.textBaseline = 'top';
+            
+            const lines = String(textContent).split('\n');
+            const lineHeight = (mapping.lineHeight || 1.2) * fontSize;
+            lines.forEach((line, i) => {
+              let drawX = x;
+              const boxWidth = (mapping.w || 20) / 100 * canvas.width;
+              if (mapping.align === 'center' || !mapping.align) {
+                drawX = x + boxWidth / 2;
+              } else if (mapping.align === 'right') {
+                drawX = x + boxWidth;
+              }
+              ctx.fillText(line, drawX, y + (i * lineHeight));
+            });
         }
       }
 
@@ -586,11 +709,24 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                 "relative bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden",
                 // Remove fixed min/max heights, let the flexbox and aspect ratio control it
                 "h-full max-h-full max-w-full flex items-center justify-center",
-                product.slug?.includes('id-card') ? "aspect-[2/3]" : 
-                product.slug?.includes('wedding') ? "aspect-[2/3]" :
-                product.slug?.includes('letter-head') ? "aspect-[1/1.41]" : 
-                "aspect-[3.5/2]"
-              )}
+                 product.slug?.includes('id-card') ? "aspect-[2/3]" : 
+                 product.slug?.includes('wedding') ? (
+                   (currentPreview && (
+                     currentPreview.includes('/wc/01/') ||
+                     currentPreview.includes('/wc/02/') ||
+                     currentPreview.includes('/wc/03/') ||
+                     currentPreview.includes('/wc/04/') ||
+                     currentPreview.includes('/wc/05/') ||
+                     currentPreview.includes('/wc/06/') ||
+                     currentPreview.includes('/wc/07/') ||
+                     currentPreview.includes('/wc/08/') ||
+                     currentPreview.includes('/wc/09/') ||
+                     currentPreview.includes('/wc/10/')
+                   )) ? "aspect-[7/4]" : "aspect-[2/3]"
+                 ) :
+                 product.slug?.includes('letter-head') ? "aspect-[1/1.41]" : 
+                 "aspect-[3.5/2]"
+               )}
             >
                {currentPreview ? (
                  <div 
@@ -606,11 +742,15 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                      className="absolute inset-0 w-full h-full object-contain pointer-events-none"
                    />
                    
-                   {/* Background click to deselect */}
-                   <div className="absolute inset-0 z-0" onClick={() => setActiveField(null)} />
-                   
-                   {/* Elements layer - z-index 50 to be above overlays, pointer-events-auto so children can receive events */}
-                   <div className="absolute inset-0" style={{ zIndex: 50 }}>
+                   {/* Elements layer - z-index 50 to be above overlays, handles background clicks for deselection */}
+                   <div 
+                      className="absolute inset-0" 
+                      style={{ zIndex: 50 }}
+                      onMouseDown={(e) => {
+                        // Click on parent empty space deselects the active field
+                        setActiveField(null);
+                      }}
+                    >
                       {(() => {
                          if (localMappings && Object.keys(localMappings).length > 0) {
                             return allFields.map((field: any) => {
@@ -632,9 +772,9 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                return (
                                   <div
                                       key={field.id}
-                                      onMouseDown={(e) => {
-                                        if (!isPreview) {
-                                          e.stopPropagation();
+                                       onMouseDown={(e) => {
+                                         if (!isPreview) {
+                                           e.stopPropagation();
                                           setActiveField(field.id);
                                           setIsDragging(true);
                                           dragStartPosRef.current = { x: e.clientX, y: e.clientY };
@@ -670,19 +810,19 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                         top,
                                         width: hasWidth ? `${mapping.w}%` : 'auto',
                                         height: mapping.h ? `${mapping.h}%` : 'auto',
-                                        minWidth: '20px',
-                                        minHeight: '20px',
+                                        minWidth: '1px',
+                                        minHeight: '1px',
                                         transform,
                                         fontSize: `${cqiSize}cqi`,
                                         fontWeight: mapping.fontWeight || 'normal',
                                         fontFamily: mapping.fontFamily || 'inherit',
                                         fontStyle: mapping.italic ? 'italic' : 'normal',
-                                        textAlign: 'left',
+                                        textAlign: mapping.align || 'center',
                                         color: formData[field.id]?.color || mapping.color || '#FFD700',
                                         opacity: mapping.opacity !== undefined ? mapping.opacity : 1,
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        alignItems: 'flex-start',
+                                        alignItems: (mapping.align === 'left') ? 'flex-start' : (mapping.align === 'right') ? 'flex-end' : 'center',
                                         justifyContent: 'center',
                                         lineHeight: mapping.lineHeight || '1.2',
                                         maxWidth: mapping.maxWidth ? `${mapping.maxWidth}%` : `${autoMaxWidth}%`,
@@ -701,7 +841,10 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       {!isPreview && <div className="absolute inset-0 cursor-move" />}
 
                                       {/* CONTENT DISPLAY */}
-                                      <div className="relative w-full h-full flex flex-col justify-center select-none">
+                                      <div className={cn(
+                                        "relative w-full h-full flex flex-col justify-center select-none",
+                                        (mapping.align === 'left') ? "items-start text-left" : (mapping.align === 'right') ? "items-end text-right" : "items-center text-center"
+                                      )}>
                                         {field.type === 'image' ? (
                                            formData[field.id]?.text ? (
                                               <img src={formData[field.id].text} alt={field.label} className="w-full h-full object-contain" />
@@ -807,6 +950,38 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                                  >I</button>
                                                </div>
                                                <div className="flex gap-0.5 border-r border-gray-100 pr-1.5">
+                                                  <button 
+                                                    onClick={() => {
+                                                      setLocalMappings(prev => {
+                                                        const f = prev[field.id];
+                                                        return f ? { ...prev, [field.id]: { ...f, align: 'left' } } : prev;
+                                                      });
+                                                    }} 
+                                                    className={cn("w-5 h-5 rounded text-[9px] flex items-center justify-center font-black", mapping.align === 'left' ? "bg-brand-pink text-white" : "hover:bg-gray-100 text-gray-500")}
+                                                    title="Align Left"
+                                                  >L</button>
+                                                  <button 
+                                                    onClick={() => {
+                                                      setLocalMappings(prev => {
+                                                        const f = prev[field.id];
+                                                        return f ? { ...prev, [field.id]: { ...f, align: 'center' } } : prev;
+                                                      });
+                                                    }} 
+                                                    className={cn("w-5 h-5 rounded text-[9px] flex items-center justify-center font-black", (!mapping.align || mapping.align === 'center') ? "bg-brand-pink text-white" : "hover:bg-gray-100 text-gray-500")}
+                                                    title="Align Center"
+                                                  >C</button>
+                                                  <button 
+                                                    onClick={() => {
+                                                      setLocalMappings(prev => {
+                                                        const f = prev[field.id];
+                                                        return f ? { ...prev, [field.id]: { ...f, align: 'right' } } : prev;
+                                                      });
+                                                    }} 
+                                                    className={cn("w-5 h-5 rounded text-[9px] flex items-center justify-center font-black", mapping.align === 'right' ? "bg-brand-pink text-white" : "hover:bg-gray-100 text-gray-500")}
+                                                    title="Align Right"
+                                                  >R</button>
+                                                </div>
+                                                <div className="flex gap-0.5 border-r border-gray-100 pr-1.5">
                                                  <select 
                                                    value={mapping.fontFamily || 'Inter'} 
                                                    onChange={(e) => updateFontFamily(field.id, e.target.value)}
@@ -845,10 +1020,30 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
              )}
             </motion.div>
            </AnimatePresence>
+
+           {/* FLOATING UNDO/REDO CONTROLS */}
+           <div className="absolute bottom-6 right-6 flex gap-2 z-50 pointer-events-auto">
+              <button 
+                 onClick={undo}
+                 disabled={historyIndexRef.current <= 0}
+                 className="w-10 h-10 rounded-xl bg-white border border-gray-100 shadow-lg flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                 title="Undo"
+              >
+                 <Undo className="w-4 h-4" />
+              </button>
+              <button 
+                 onClick={redo}
+                 disabled={historyIndexRef.current >= historyRef.current.length - 1}
+                 className="w-10 h-10 rounded-xl bg-white border border-gray-100 shadow-lg flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                 title="Redo"
+              >
+                 <Redo className="w-4 h-4" />
+              </button>
+           </div>
         </div>
 
         {/* Side Controls (Front/Back) - BOTTOM on mobile, TOP on desktop */}
-        <div className="absolute bottom-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-max max-w-[95%] pointer-events-auto">
+        <div className="absolute bottom-4 md:top-6 md:bottom-auto left-1/2 -translate-x-1/2 z-50 w-max max-w-[95%] pointer-events-auto">
           <div className="flex items-center justify-center gap-2 bg-white/90 backdrop-blur-md rounded-full p-1 border border-gray-200 shadow-md overflow-x-auto no-scrollbar">
              {[
                { idx: 0, label: 'Front' },
@@ -971,7 +1166,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
             </AnimatePresence>
             
             <div className="space-y-4">
-              {allFields.map((field: any) => (
+              {sidebarFields.map((field: any) => (
                 <div key={field.id} className="p-4 bg-gray-50/50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:border-gray-200">
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">{field.label}</label>
@@ -980,7 +1175,13 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                         {['#FFD700', '#FFFFFF', '#000000', '#FF1493', '#800000', '#1A4D2E'].map(c => (
                           <button 
                             key={c}
-                            onClick={() => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), color: c } }))}
+                            onClick={() => {
+                              setFormData(prev => {
+                                const next = { ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), color: c } };
+                                commitHistory(null, next);
+                                return next;
+                              });
+                            }}
                             className={cn(
                               "w-3.5 h-3.5 rounded-full border border-gray-200 transition-transform hover:scale-110",
                               (formData[field.id]?.color || '#FFD700') === c ? "ring-2 ring-brand-pink ring-offset-1 border-white" : ""
@@ -997,6 +1198,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                        rows={2}
                        value={formData[field.id]?.text || ''}
                        onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: e.target.value } }))}
+                       onBlur={() => commitHistory()}
                        placeholder={field.placeholder}
                        className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm resize-none"
                     />
@@ -1043,7 +1245,13 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                              const file = e.target.files?.[0];
                              if (file) {
                                 const reader = new FileReader();
-                                reader.onloadend = () => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: reader.result as string } }));
+                                reader.onloadend = () => {
+                                   setFormData(prev => {
+                                      const next = { ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: reader.result as string } };
+                                      commitHistory(null, next);
+                                      return next;
+                                   });
+                                };
                                 reader.readAsDataURL(file);
                              }
                           }} 
@@ -1054,6 +1262,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                        type="text"
                        value={formData[field.id]?.text || ''}
                        onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: { ...(prev[field.id] || { text: '' }), text: e.target.value } }))}
+                       onBlur={() => commitHistory()}
                        placeholder={field.placeholder}
                        className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/10 transition-all outline-none text-sm"
                     />
