@@ -536,52 +536,6 @@ export default function HomePageClient({ config: initialConfig, products = [], b
         </div>
       </section>
 
-      {/* 7. PREMIUM CONFIGURATOR (ESTIMATOR) */}
-      <section id="calculator" className="py-40 px-6 md:px-12 bg-[#0F1014] text-white relative border-t border-white/5">
-        <div className="max-w-[1800px] mx-auto">
-          <div className="flex flex-col items-center mb-24 text-center">
-            <span className="text-brand-gold text-xs font-sans font-bold uppercase tracking-[0.4em] mb-6">Project Estimator</span>
-            <h2 className="text-5xl md:text-7xl font-serif reveal-title">Tailor Your <span className="italic text-white/50">Experience.</span></h2>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-            <div className="space-y-16 p-10 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-sm reveal-item">
-              <div>
-                <label className="block text-xs font-sans font-bold uppercase tracking-widest text-slate-400 mb-6">Select Item</label>
-                <div className="flex flex-wrap gap-4">
-                  {['Business Card', 'Diary', 'Welcome Kit', 'Calendar', 'Gift Box'].map((item) => (
-                    <button key={item} className="px-6 py-3 rounded-full border border-white/20 hover:border-brand-gold hover:text-brand-gold transition-all text-sm font-sans">
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between mb-4">
-                  <label className="text-xs font-sans font-bold uppercase tracking-widest text-slate-400">Quantity</label>
-                  <span className="text-2xl font-serif text-brand-gold">500</span>
-                </div>
-                <input type="range" min="50" max="5000" step="50" defaultValue="500" className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-gold" />
-              </div>
-            </div>
-
-            <div className="flex flex-col justify-center reveal-item">
-               <div className="p-12 rounded-[2.5rem] bg-brand-gold text-brand-darkBlue shadow-2xl">
-                  <h4 className="text-xl font-sans font-bold uppercase tracking-widest mb-8">Estimated Investment</h4>
-                  <div className="flex items-baseline gap-2 mb-10">
-                    <span className="text-7xl md:text-9xl font-serif">₹1,500</span>
-                    <span className="text-xl font-sans font-medium">approx.</span>
-                  </div>
-                  <Link href="/products" className="w-full py-6 bg-brand-darkBlue text-white font-sans font-bold uppercase tracking-widest rounded-full flex items-center justify-center gap-4 hover:bg-white hover:text-brand-darkBlue transition-all">
-                    Start Your Project <ArrowRight className="w-5 h-5" />
-                  </Link>
-               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* 7. THE COLLECTIVE (DYNAMIC TEAM) */}
       {config?.about?.team?.length > 0 && (
         <section className="py-40 px-6 md:px-12 bg-white">
