@@ -761,8 +761,9 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       key={field.id}
                                        onMouseDown={(e) => {
                                          if (!isPreview) {
-                                           e.stopPropagation();
-                                          setActiveField(field.id);
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                           setActiveField(field.id);
                                           setIsDragging(true);
                                           dragStartPosRef.current = { x: e.clientX, y: e.clientY };
                                           setDragStartPos({ x: e.clientX, y: e.clientY });
@@ -834,7 +835,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                                       )}>
                                         {field.type === 'image' ? (
                                            formData[field.id]?.text ? (
-                                              <img src={formData[field.id].text} alt={field.label} className="w-full h-full object-contain" />
+                                              <img src={formData[field.id].text} alt={field.label} className="w-full h-full object-contain" draggable={false} />
                                            ) : (
                                               <div className={cn("w-full h-full border border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50/50 p-1", isPreview && "opacity-0")}>
                                                  <Upload style={{ width: '3cqi', height: '3cqi' }} className="text-gray-400 mb-0.5" />
