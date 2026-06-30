@@ -710,20 +710,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                 // Remove fixed min/max heights, let the flexbox and aspect ratio control it
                 "h-full max-h-full max-w-full flex items-center justify-center",
                  product.slug?.includes('id-card') ? "aspect-[2/3]" : 
-                 product.slug?.includes('wedding') ? (
-                   (currentPreview && (
-                     currentPreview.includes('/wc/01/') ||
-                     currentPreview.includes('/wc/02/') ||
-                     currentPreview.includes('/wc/03/') ||
-                     currentPreview.includes('/wc/04/') ||
-                     currentPreview.includes('/wc/05/') ||
-                     currentPreview.includes('/wc/06/') ||
-                     currentPreview.includes('/wc/07/') ||
-                     currentPreview.includes('/wc/08/') ||
-                     currentPreview.includes('/wc/09/') ||
-                     currentPreview.includes('/wc/10/')
-                   )) ? "aspect-[7/4]" : "aspect-[2/3]"
-                 ) :
+                 product.slug?.includes('wedding') ? "aspect-[2/3]" :
                  product.slug?.includes('letter-head') ? "aspect-[1/1.41]" : 
                  "aspect-[3.5/2]"
                )}
