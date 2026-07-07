@@ -11,8 +11,6 @@ import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import { Suspense } from 'react';
 import SmoothScroll from "@/components/common/SmoothScroll";
 import CustomCursor from "@/components/common/CustomCursor";
-import Preloader from "@/components/common/Preloader";
-
 const CartDrawer = dynamic(() => import("@/components/layout/CartDrawer"), { ssr: false });
 const SupportWidget = dynamic(() => import("@/components/layout/SupportWidget"), { ssr: false });
 const DevAdminBypass = dynamic(() => import("@/components/common/DevAdminBypass"), { ssr: false });
@@ -94,7 +92,6 @@ export default function RootLayout({
         </Suspense>
         <AuthProvider>
           <SmoothScroll>
-            <Preloader />
             <CustomCursor />
             <Navbar />
             <main className="min-h-screen">

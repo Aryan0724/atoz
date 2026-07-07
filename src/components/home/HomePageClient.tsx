@@ -178,7 +178,7 @@ export default function HomePageClient({ config: initialConfig, products = [], b
             </div>
             
             <h1 
-              className="text-huge font-serif font-bold text-brand-darkBlue mb-12 leading-super-tight flex flex-col"
+              className="text-huge font-serif font-bold text-brand-darkBlue mb-12 leading-super-tight"
               dangerouslySetInnerHTML={{ __html: (config?.hero?.title && config.hero.title !== "Your Design. Our Impression.") ? config.hero.title : "Printing <span class='italic text-brand-gold font-medium'>Redefined</span> <br/> For Leaders." }}
             >
             </h1>
