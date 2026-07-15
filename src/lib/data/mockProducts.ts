@@ -9342,7 +9342,7 @@ export const mockProducts: Product[] = [
     "moq": 50,
     "delivery_days": "7–10 Working Days",
     "images": [
-      "https://images.unsplash.com/photo-1602143407151-7111542de6e8?q=80&w=800&auto=format&fit=crop"
+      "/images/products/bottle.png"
     ],
     "template_images": [],
     "quality_levels": [
