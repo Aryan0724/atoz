@@ -4277,7 +4277,7 @@ export const mockProducts: Product[] = [
     "moq": 50,
     "delivery_days": "7–10 Working Days",
     "images": [
-      "https://images.unsplash.com/photo-1542435503-956c469947f6?q=80&w=800&auto=format&fit=crop"
+      "/images/products/employee-joining-kit.jpeg"
     ],
     "template_images": [],
     "quality_levels": [
@@ -4385,7 +4385,8 @@ export const mockProducts: Product[] = [
     "moq": 50,
     "delivery_days": "7–10 Working Days",
     "images": [
-      "https://plus.unsplash.com/premium_photo-1661605370217-094362dca972?q=80&w=800&auto=format&fit=crop"
+      "/images/products/id-card-front.jpeg",
+      "/images/products/id-card-back.jpeg"
     ],
     "template_images": [],
     "quality_levels": [
@@ -9609,8 +9610,9 @@ export const mockProducts: Product[] = [
     "moq": 50,
     "delivery_days": "7–10 Working Days",
     "images": [
-      "https://fgtxaeyrsrtktazithwl.supabase.co/storage/v1/object/public/products/1776885285782-Gemini_Generated_Image_ntvy1dntvy1dntvy.png",
-      "https://fgtxaeyrsrtktazithwl.supabase.co/storage/v1/object/public/products/1776885280061-Gemini_Generated_Image_sj415zsj415zsj41.png"
+      "/images/products/business-card-front.jpeg",
+      "/images/products/business-card-back.jpeg",
+      "/images/products/business-card-showcase.jpeg"
     ],
     "template_images": [],
     "quality_levels": [

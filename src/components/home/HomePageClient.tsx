@@ -356,7 +356,7 @@ export default function HomePageClient({ config: initialConfig, products = [], b
                     <p className="text-sm font-sans text-slate-600">End-to-end kitting & dropshipping.</p>
                   </div>
                </div>
-               <Image src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=2070&auto=format&fit=crop" alt="Logistics" fill className="object-cover opacity-10" />
+               <Image src="/images/delivery-banner.jpeg" alt="Logistics" fill className="object-cover opacity-10" />
             </div>
 
             <div className="md:col-span-4 group relative rounded-[2rem] overflow-hidden bg-white shadow-xl border border-brand-blue/5 reveal-item p-12">
