@@ -239,7 +239,7 @@ export const mockProducts: Product[] = [
     "moq": 50,
     "delivery_days": "7–10 Working Days",
     "images": [
-      "https://images.unsplash.com/photo-1510076857177-7470076d4098?q=80&w=800&auto=format&fit=crop"
+      "/images/products/wedding-card.png"
     ],
     "template_images": [],
     "quality_levels": [
@@ -4277,7 +4277,7 @@ export const mockProducts: Product[] = [
     "moq": 50,
     "delivery_days": "7–10 Working Days",
     "images": [
-      "/images/products/employee-joining-kit.jpeg"
+      "/images/products/employee-joining-kit.png"
     ],
     "template_images": [],
     "quality_levels": [
@@ -4385,7 +4385,7 @@ export const mockProducts: Product[] = [
     "moq": 50,
     "delivery_days": "7–10 Working Days",
     "images": [
-      "/images/products/id-card-front.jpeg",
+      "/images/products/id-card-front.png",
       "/images/products/id-card-back.jpeg"
     ],
     "template_images": [],
@@ -7530,7 +7530,7 @@ export const mockProducts: Product[] = [
     "moq": 50,
     "delivery_days": "7–10 Working Days",
     "images": [
-      "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?q=80&w=800&auto=format&fit=crop"
+      "/images/products/letterhead.png"
     ],
     "template_images": [],
     "quality_levels": [
@@ -9610,7 +9610,7 @@ export const mockProducts: Product[] = [
     "moq": 50,
     "delivery_days": "7–10 Working Days",
     "images": [
-      "/images/products/business-card-front.jpeg",
+      "/images/products/business-card-front.png",
       "/images/products/business-card-back.jpeg",
       "/images/products/business-card-showcase.jpeg"
     ],
