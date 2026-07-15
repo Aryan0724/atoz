@@ -55,7 +55,7 @@ const Footer = () => {
             </div>
           </div>
           
-          <div className="md:col-span-4 flex flex-col justify-end space-y-10">
+          <div className="md:col-span-4 flex flex-col justify-end">
             <div>
               <span className="block text-[10px] font-sans font-bold uppercase tracking-widest text-slate-500 mb-6">Follow Us</span>
               <ul className="text-base font-sans text-slate-300 space-y-4">
@@ -63,18 +63,6 @@ const Footer = () => {
                 <li><a href="#" className="hover:text-brand-gold transition-colors magnetic-target inline-block">LinkedIn</a></li>
                 <li><a href="#" className="hover:text-brand-gold transition-colors magnetic-target inline-block">Behance</a></li>
               </ul>
-            </div>
-
-            <div>
-              <span className="block text-[10px] font-sans font-bold uppercase tracking-widest text-slate-500 mb-4">Scan to Connect</span>
-              <div className="relative w-28 h-28 bg-white p-1 rounded-xl shadow-lg border border-white/5 overflow-hidden">
-                <Image 
-                  src="/images/instagram-qr.jpg" 
-                  alt="Instagram QR Code"
-                  fill
-                  className="object-contain p-0.5"
-                />
-              </div>
             </div>
           </div>
         </div>
