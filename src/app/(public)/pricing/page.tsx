@@ -18,7 +18,7 @@ async function getPricingData() {
   // Parallel fetch config, products, and active coupons
   const [configRes, productsRes, couponsRes] = await Promise.all([
     supabase.from('site_settings').select('config').eq('id', 'global').single(),
-    supabase.from('products').select('*, categories(*)').order('created_at', { ascending: false }),
+    supabase.from('products').select('*').order('created_at', { ascending: false }),
     supabase.from('coupons').select('*').eq('is_active', true).order('created_at', { ascending: false })
   ]);
 
@@ -30,19 +30,27 @@ async function getPricingData() {
   const categoriesMap: Record<string, any> = {};
   
   products.forEach((p: any) => {
-    const catName = p.categories?.name || 'Uncategorized';
+    let catName = p.category || 'Uncategorized';
+    // Standardize category name to match main navigation categories
+    if (catName.toLowerCase() === 'stationary') {
+      catName = 'Stationery';
+    } else if (catName.toLowerCase() === 'corporate') {
+      catName = 'Corporate Gifting';
+    }
+    
     const catId = catName.toLowerCase().replace(/\s+/g, '-');
     if (!categoriesMap[catName]) {
       categoriesMap[catName] = {
         id: catId,
         name: catName,
         icon: catId,
-        headers: config.pricing?.tiers?.map((t: any) => `${t.min}+`) || ['1+', '20+', '50+', '100+'],
+        headers: config.pricing?.tiers?.map((t: any) => `${t.min}+`) || ['1+', '50+', '100+'],
         items: []
       };
     }
 
-    const defaultTiers = [p.base_price, Math.round(p.base_price * 0.95), Math.round(p.base_price * 0.9), Math.round(p.base_price * 0.8)];
+    // Map database prices or default tiers
+    const defaultTiers = [p.base_price, Math.round(p.base_price * 0.9), Math.round(p.base_price * 0.8)];
     const dynamicTiers = config.pricing?.tiers?.map((tier: any) => {
       const discounted = p.base_price * (1 - (tier.discount / 100));
       return Math.round(discounted);

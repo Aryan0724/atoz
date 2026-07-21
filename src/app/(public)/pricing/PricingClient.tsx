@@ -150,6 +150,96 @@ export default function PricingClient({
           </motion.div>
         )}
 
+        {/* ATOZPRINTS.in Website Pricing Recommendation Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.15 }}
+          className="mt-16 bg-white rounded-[48px] p-8 md:p-12 shadow-xl border border-gray-100 relative overflow-hidden"
+        >
+          {/* Subtle decoration */}
+          <div className="absolute top-0 left-0 w-96 h-96 bg-brand-cyan/5 rounded-full blur-3xl -ml-24 -mt-24 pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-brand-pink/5 rounded-full blur-3xl -mr-24 -mb-24 pointer-events-none" />
+
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+              <div>
+                <div className="inline-flex items-center gap-2 py-1.5 px-4 bg-brand-cyan/10 text-brand-cyan font-black text-[10px] tracking-[0.3em] uppercase rounded-full mb-4 border border-brand-cyan/20">
+                  <Sparkles className="w-3.5 h-3.5 fill-current" />
+                  Official Price Index
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-brand-dark uppercase italic tracking-tighter leading-none">
+                  Website Pricing <span className="text-brand-pink">Recommendations</span>
+                </h2>
+                <p className="text-sm text-gray-500 font-medium mt-3 leading-relaxed">
+                  Based on shared quotations. Suggested selling prices include calculated production and logistics margins.
+                </p>
+              </div>
+            </div>
+
+            {/* Table Container */}
+            <div className="overflow-x-auto rounded-3xl border border-gray-100 shadow-soft bg-gray-50/50 backdrop-blur-md">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-brand-dark text-white border-b border-gray-200">
+                    <th className="py-6 px-8 text-xs font-black uppercase tracking-[0.2em]">Product (Package Size)</th>
+                    <th className="py-6 px-6 text-xs font-black uppercase tracking-[0.2em]">Quotation Cost</th>
+                    <th className="py-6 px-6 text-xs font-black uppercase tracking-[0.2em]">AtoZPrints Price</th>
+                    <th className="py-6 px-6 text-xs font-black uppercase tracking-[0.2em] hidden sm:table-cell">Net Margin</th>
+                    <th className="py-6 px-8 text-right text-xs font-black uppercase tracking-[0.2em]">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100/80 bg-white">
+                  {[
+                    { name: 'Visiting Card Matt', qty: 200, quote: 600, price: 899, slug: 'business-card-matt-200' },
+                    { name: 'Visiting Card UV', qty: 200, quote: 800, price: 1199, slug: 'business-card-uv-200' },
+                    { name: 'Letterhead', qty: 100, quote: 1000, price: 1499, slug: 'letter-head-100' },
+                    { name: 'PVC Sticker', qty: 1000, quote: 4000, price: 5499, slug: 'pvc-sticker-1000' },
+                    { name: 'Paper Sticker', qty: 1000, quote: 3000, price: 4299, slug: 'paper-sticker-1000' },
+                    { name: 'Flyers A4', qty: 1000, quote: 6000, price: 7999, slug: 'flyers-a4-1000' },
+                    { name: 'Brochure A4', qty: 200, quote: 10000, price: 12999, slug: 'brochure-a4-200' },
+                    { name: 'Diary', qty: 50, quote: 5000, price: 6999, slug: 'diary-with-logo-50' },
+                    { name: 'T-Shirt', qty: 50, quote: 15000, price: 18999, slug: 't-shirt-50' },
+                    { name: 'Printed Pen', qty: 50, quote: 3500, price: 4999, slug: 'custom-pen-50' },
+                  ].map((rec, idx) => {
+                    const marginVal = rec.price - rec.quote;
+                    const marginPct = Math.round((marginVal / rec.quote) * 100);
+                    return (
+                      <tr key={idx} className="hover:bg-gray-50/70 transition-colors group">
+                        <td className="py-5 px-8 font-black text-brand-dark group-hover:text-brand-pink transition-colors">
+                          <div className="flex flex-col">
+                            <span className="text-base tracking-tight">{rec.name}</span>
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Pack of {rec.qty} units</span>
+                          </div>
+                        </td>
+                        <td className="py-5 px-6 font-bold text-gray-400 text-sm italic">
+                          ₹{rec.quote.toLocaleString()}
+                        </td>
+                        <td className="py-5 px-6 font-black text-lg text-brand-dark">
+                          ₹{rec.price.toLocaleString()}
+                        </td>
+                        <td className="py-5 px-6 hidden sm:table-cell">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-600 border border-green-100 rounded-full text-xs font-bold">
+                            +{marginPct}% (+₹{marginVal})
+                          </span>
+                        </td>
+                        <td className="py-5 px-8 text-right">
+                          <Link 
+                            href={`/products/${rec.slug}`}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-50 text-brand-dark border border-gray-100 hover:bg-brand-dark hover:text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 shadow-sm active:scale-95"
+                          >
+                            Customize <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Dynamic Controls Bar */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

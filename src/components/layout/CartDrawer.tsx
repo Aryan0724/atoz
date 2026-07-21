@@ -275,7 +275,7 @@ const CartDrawer = () => {
                             </div>
                             <div className="text-right">
                                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Total</div>
-                               <span className="text-xl font-black text-brand-dark tracking-tighter italic">₹{(item.product.base_price || 0) * item.quantity}</span>
+                               <span className="text-xl font-black text-brand-dark tracking-tighter italic">₹{((item.unitPrice ?? item.product.base_price ?? 0) * item.quantity).toLocaleString()}</span>
                             </div>
                           </div>
                           {item.quantity < item.product.moq && (
