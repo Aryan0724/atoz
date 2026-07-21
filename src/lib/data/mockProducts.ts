@@ -9529,7 +9529,7 @@ export const mockProducts: Product[] = [
     "moq": 1,
     "delivery_days": "3-5 Days",
     "images": [
-      "https://fgtxaeyrsrtktazithwl.supabase.co/storage/v1/object/public/products/1776262711210-1000015361792-Beige-BEIGE-1000015361792_01-2100.jpg"
+      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=2000&auto=format&fit=crop"
     ],
     "template_images": [],
     "quality_levels": [
@@ -12097,8 +12097,8 @@ export const mockProducts: Product[] = [
       "moq": 1,
       "delivery_days": "7-10 Days",
       "images": [
-          "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1000&auto=format"
-      ],
+      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=2000&auto=format&fit=crop"
+    ],
       "template_images": [],
       "quality_levels": [
           "Premium Cotton"

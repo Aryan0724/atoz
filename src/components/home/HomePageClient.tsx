@@ -199,7 +199,7 @@ export default function HomePageClient({ config: initialConfig, products = [], b
           <div className="lg:col-span-5 relative h-[70vh] flex items-center justify-center mt-10 lg:mt-0">
             <div className="w-full h-full relative image-reveal-wrapper rounded-2xl overflow-hidden shadow-[0_40px_80px_-20px_rgba(11,17,32,0.3)]">
               <Image 
-                src={(Array.isArray(config?.hero?.image) ? config.hero.image[0] : config?.hero?.image) || "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=2070&auto=format&fit=crop"} 
+                src={(Array.isArray(config?.hero?.image) ? config.hero.image[0] : config?.hero?.image) || "https://images.unsplash.com/photo-1616628188506-4bd8d62c908d?q=80&w=2070&auto=format&fit=crop"} 
                 alt="Premium Stationery"
                 fill
                 className="object-cover hero-img scale-125"
