@@ -9529,7 +9529,8 @@ export const mockProducts: Product[] = [
     "moq": 1,
     "delivery_days": "3-5 Days",
     "images": [
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=2000&auto=format&fit=crop"
+          "https://fgtxaeyrsrtktazithwl.supabase.co/storage/v1/object/public/products/1776262582550-Gemini_Generated_Image_q63cfzq63cfzq63c__1_-removebg-preview.png",
+          "https://fgtxaeyrsrtktazithwl.supabase.co/storage/v1/object/public/products/1776262603579-Gemini_Generated_Image_q63cfzq63cfzq63c%20(1).png"
     ],
     "template_images": [],
     "quality_levels": [
@@ -11673,8 +11674,10 @@ export const mockProducts: Product[] = [
       "moq": 1,
       "delivery_days": "5-7 Days",
       "images": [
-          "https://images.unsplash.com/photo-1589254065878-42c9da997008?q=80&w=1000&auto=format"
-      ],
+          "/images/products/business-card-front.png",
+          "/images/products/business-card-back.jpeg",
+          "/images/products/business-card-showcase.jpeg"
+    ],
       "template_images": [],
       "quality_levels": [
           "Matte"
@@ -11727,8 +11730,10 @@ export const mockProducts: Product[] = [
       "moq": 1,
       "delivery_days": "5-7 Days",
       "images": [
-          "https://images.unsplash.com/photo-1589254065878-42c9da997008?q=80&w=1000&auto=format"
-      ],
+          "/images/products/business-card-front.png",
+          "/images/products/business-card-back.jpeg",
+          "/images/products/business-card-showcase.jpeg"
+    ],
       "template_images": [],
       "quality_levels": [
           "Spot UV"
@@ -11781,8 +11786,8 @@ export const mockProducts: Product[] = [
       "moq": 1,
       "delivery_days": "5-7 Days",
       "images": [
-          "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?q=80&w=1000&auto=format"
-      ],
+          "/images/products/letterhead.png"
+    ],
       "template_images": [],
       "quality_levels": [
           "Premium Bond"
@@ -11834,8 +11839,8 @@ export const mockProducts: Product[] = [
       "moq": 1,
       "delivery_days": "6-8 Days",
       "images": [
-          "https://images.unsplash.com/photo-1572375995501-4b0894dbe0d7?q=80&w=1000&auto=format"
-      ],
+          "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?q=80&w=1000&auto=format"
+    ],
       "template_images": [],
       "quality_levels": [
           "Waterproof PVC"
@@ -11886,8 +11891,8 @@ export const mockProducts: Product[] = [
       "moq": 1,
       "delivery_days": "5-7 Days",
       "images": [
-          "https://images.unsplash.com/photo-1572375995501-4b0894dbe0d7?q=80&w=1000&auto=format"
-      ],
+          "https://images.unsplash.com/photo-1595079676339-1534801ad6cf?q=80&w=1000&auto=format"
+    ],
       "template_images": [],
       "quality_levels": [
           "Glossy Paper"
@@ -11939,7 +11944,7 @@ export const mockProducts: Product[] = [
       "delivery_days": "5-7 Days",
       "images": [
           "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?q=80&w=1000&auto=format"
-      ],
+    ],
       "template_images": [],
       "quality_levels": [
           "130GSM Glossy"
@@ -11992,7 +11997,7 @@ export const mockProducts: Product[] = [
       "delivery_days": "6-8 Days",
       "images": [
           "https://images.unsplash.com/photo-1562564055-71e051d33c19?q=80&w=1000&auto=format"
-      ],
+    ],
       "template_images": [],
       "quality_levels": [
           "250GSM Matte Laminated"
@@ -12044,8 +12049,8 @@ export const mockProducts: Product[] = [
       "moq": 1,
       "delivery_days": "7-10 Days",
       "images": [
-          "https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=1000&auto=format"
-      ],
+          "/images/products/notebook.png"
+    ],
       "template_images": [],
       "quality_levels": [
           "Premium Leatherette"
@@ -12097,8 +12102,9 @@ export const mockProducts: Product[] = [
       "moq": 1,
       "delivery_days": "7-10 Days",
       "images": [
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=2000&auto=format&fit=crop"
-    ],
+            "https://fgtxaeyrsrtktazithwl.supabase.co/storage/v1/object/public/products/1776262582550-Gemini_Generated_Image_q63cfzq63cfzq63c__1_-removebg-preview.png",
+            "https://fgtxaeyrsrtktazithwl.supabase.co/storage/v1/object/public/products/1776262603579-Gemini_Generated_Image_q63cfzq63cfzq63c%20(1).png"
+      ],
       "template_images": [],
       "quality_levels": [
           "Premium Cotton"
@@ -12152,7 +12158,7 @@ export const mockProducts: Product[] = [
       "delivery_days": "5-7 Days",
       "images": [
           "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?q=80&w=1000&auto=format"
-      ],
+    ],
       "template_images": [],
       "quality_levels": [
           "Engraved Metal"
