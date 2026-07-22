@@ -38,6 +38,40 @@ export default function HomePageClient({ config: initialConfig, products = [], b
   const [config, setConfig] = useState(initialConfig);
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const heroImages = React.useMemo(() => {
+    const images = Array.isArray(config?.hero?.image) 
+      ? config.hero.image 
+      : (config?.hero?.image ? [config.hero.image] : []);
+    
+    // Replace the broken Unsplash image if it exists
+    const cleaned = images.map((img: string) => 
+      img.includes('photo-1616628188506-4bd8d62c908d') ? "/images/hero/hero_showcase.png" : img
+    );
+
+    // If empty or only containing the default, append the local t-shirt image as the second slide!
+    if (cleaned.length === 0) {
+      return ["/images/hero/hero_showcase.png", "/images/hero/hero-tshirt.png"];
+    }
+    if (cleaned.length === 1 && cleaned[0] === "/images/hero/hero_showcase.png") {
+      return ["/images/hero/hero_showcase.png", "/images/hero/hero-tshirt.png"];
+    }
+    
+    if (!cleaned.includes("/images/hero/hero-tshirt.png")) {
+      cleaned.push("/images/hero/hero-tshirt.png");
+    }
+
+    return cleaned;
+  }, [config]);
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
 
   useEffect(() => {
     // Refresh config from client side if needed, or just use initial
@@ -198,25 +232,44 @@ export default function HomePageClient({ config: initialConfig, products = [], b
 
           <div className="lg:col-span-5 relative h-[70vh] flex items-center justify-center mt-10 lg:mt-0">
             <div className="w-full h-full relative image-reveal-wrapper rounded-2xl overflow-hidden shadow-[0_40px_80px_-20px_rgba(11,17,32,0.3)]">
-              <Image 
-                src={(() => {
-                  const img = (Array.isArray(config?.hero?.image) ? config.hero.image[0] : config?.hero?.image);
-                  if (!img || img.includes('photo-1616628188506-4bd8d62c908d')) {
-                    return "/images/hero/hero_showcase.png";
-                  }
-                  return img;
-                })()} 
-                alt="Premium Stationery"
-                fill
-                className="object-cover hero-img scale-125"
-                priority
-              />
+              {heroImages.map((src: string, idx: number) => (
+                <div 
+                  key={src}
+                  className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                >
+                  <Image 
+                    src={src} 
+                    alt={idx === 0 ? "Premium Stationery" : "Print On Demand T-shirt"}
+                    fill
+                    className="object-cover hero-img scale-125"
+                    priority={idx === 0}
+                  />
+                </div>
+              ))}
               
-              <div className="absolute bottom-10 left-10 right-10 p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white opacity-0 hero-badge transform translate-y-10 transition-all duration-1000">
+              {/* Pagination Dots */}
+              {heroImages.length > 1 && (
+                <div className="absolute top-6 right-6 z-20 flex gap-2">
+                  {heroImages.map((_: string, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`w-3.5 h-3.5 rounded-full border border-white/40 transition-all duration-300 ${idx === currentImageIndex ? 'bg-brand-gold border-brand-gold scale-125' : 'bg-white/20 hover:bg-white/60'}`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+              
+              <div className="absolute bottom-10 left-10 right-10 p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white z-20 opacity-0 hero-badge transform translate-y-10 transition-all duration-1000">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="font-serif italic text-2xl">Premium Excellence</h4>
-                    <p className="text-xs font-sans uppercase tracking-widest text-white/70 mt-1">Industrial Grade Quality</p>
+                    <h4 className="font-serif italic text-2xl">
+                      {currentImageIndex === 0 ? "Premium Stationery" : "Print On Demand"}
+                    </h4>
+                    <p className="text-xs font-sans uppercase tracking-widest text-white/70 mt-1">
+                      {currentImageIndex === 0 ? "Industrial Grade Quality" : "Sleek Custom Streetwear"}
+                    </p>
                   </div>
                   <div className="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center">
                     <ArrowRight className="w-5 h-5" />
