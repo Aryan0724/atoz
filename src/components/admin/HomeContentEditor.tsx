@@ -192,7 +192,18 @@ export default function HomeContentEditor() {
             <div className="relative aspect-[4/5] rounded-[40px] bg-gray-100 border-2 border-dashed border-gray-200 overflow-hidden group">
               {config.hero?.image ? (
                 <>
-                  <Image src={config.hero.image} alt="Hero" fill className="object-cover" />
+                  <Image 
+                    src={(() => {
+                      const img = Array.isArray(config.hero.image) ? config.hero.image[0] : config.hero.image;
+                      if (!img || img.includes('photo-1616628188506-4bd8d62c908d')) {
+                        return "/images/hero/hero_showcase.png";
+                      }
+                      return img;
+                    })()} 
+                    alt="Hero" 
+                    fill 
+                    className="object-cover" 
+                  />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button onClick={() => setConfig({ ...config, hero: { ...config.hero, image: '' } })} className="p-4 bg-white rounded-full text-red-500 shadow-2xl"><X className="w-6 h-6" /></button>
                   </div>
