@@ -88,10 +88,10 @@ export async function POST(req: Request) {
       }],
       payment_method: order.payment_method === 'COD' ? 'COD' : 'Prepaid',
       sub_total: order.total_price,
-      length: Math.round(maxLength),
-      width: Math.round(maxWidth),
-      height: Math.round(totalHeight),
-      weight: Number(totalWeight.toFixed(2))
+      length: Math.max(1, Math.round(maxLength)),
+      breadth: Math.max(1, Math.round(maxWidth)),
+      height: Math.max(1, Math.round(totalHeight)),
+      weight: Math.max(0.1, Number(totalWeight.toFixed(2)))
     };
 
     // 3. Create order in Shiprocket
