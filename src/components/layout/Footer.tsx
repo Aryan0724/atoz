@@ -1,11 +1,53 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Instagram, Linkedin, Phone, User, MapPin, Mail } from 'lucide-react';
+import { supabase } from '@/lib/supabase/client';
 
 const Footer = () => {
+  const [contactData, setContactData] = useState<any>(null);
+
+  useEffect(() => {
+    async function fetchContact() {
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('config')
+          .eq('id', 'cms_pages')
+          .single();
+        if (data?.config?.contact) {
+          setContactData(data.config.contact);
+        }
+      } catch (err) {
+        console.error('Error fetching contact footer info:', err);
+      }
+    }
+    fetchContact();
+  }, []);
+
+  const email = contactData?.info?.email || "printsatoz2@gmail.com";
+  const phone = contactData?.info?.phone || "8279427956";
+  const whatsapp = contactData?.info?.whatsapp || "918279427956";
+  const address = contactData?.info?.address || "501 spectrum square appartment judge colony malekpet hyderabad 500036";
+  
+  const instagram = contactData?.socials?.instagram || "https://www.instagram.com/atoz_ptints/";
+  const linkedin = contactData?.socials?.linkedin || "#";
+  const twitter = contactData?.socials?.twitter || "#";
+
+  const getWhatsappLink = (num: string) => {
+    const cleanNum = num.replace(/[^0-9]/g, '');
+    if (cleanNum.length === 10) {
+      return `https://wa.me/91${cleanNum}`;
+    }
+    return `https://wa.me/${cleanNum}`;
+  };
+
+  const getTelLink = (num: string) => {
+    return `tel:${num.replace(/\s+/g, '')}`;
+  };
+
   return (
     <div className="bg-brand-darkBlue text-white footer-reveal-container">
       <footer className="min-h-screen flex flex-col justify-between pt-32 pb-12 px-6 md:px-12 relative overflow-hidden" id="contact">
@@ -25,32 +67,32 @@ const Footer = () => {
             <h2 className="text-display leading-[0.8] mb-12 text-white/90 font-serif font-bold">
               Let&apos;s Make <br /> <span className="italic text-brand-gold">History.</span>
             </h2>
-            <a href="mailto:printsatoz2@gmail.com" className="text-2xl md:text-4xl border-b border-white/20 pb-4 hover:text-brand-gold hover:border-brand-gold transition-all font-sans font-light magnetic-target inline-block">
-              printsatoz2@gmail.com
+            <a href={`mailto:${email}`} className="text-2xl md:text-4xl border-b border-white/20 pb-4 hover:text-brand-gold hover:border-brand-gold transition-all font-sans font-light magnetic-target inline-block animate-fadeIn">
+              {email}
             </a>
 
             <div className="mt-12 space-y-6 text-slate-300 font-sans text-base">
               <div className="flex items-center gap-4">
                 <Phone className="w-5 h-5 text-brand-gold shrink-0" />
-                <a href="tel:8279427956" className="hover:text-brand-gold transition-colors">8279427956</a>
+                <a href={getTelLink(phone)} className="hover:text-brand-gold transition-colors">{phone}</a>
               </div>
               <div className="flex items-center gap-4">
                 <User className="w-5 h-5 text-brand-gold shrink-0" />
-                <a href="https://www.instagram.com/atoz_ptints/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold transition-colors">@atoz_ptints</a>
+                <a href={instagram} target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold transition-colors">@atoz_ptints</a>
               </div>
               <div className="flex items-start gap-4">
                 <MapPin className="w-5 h-5 text-brand-gold shrink-0 mt-1" />
-                <span className="leading-relaxed">501 spectrum square appartment judge colony malekpet hyderabad 500036</span>
+                <span className="leading-relaxed" dangerouslySetInnerHTML={{ __html: address.replace(/\n/g, '<br />') }} />
               </div>
               <div className="flex items-center gap-4">
                 <Mail className="w-5 h-5 text-brand-gold shrink-0" />
-                <a href="mailto:printsatoz2@gmail.com" className="hover:text-brand-gold transition-colors">printsatoz2@gmail.com</a>
+                <a href={`mailto:${email}`} className="hover:text-brand-gold transition-colors">{email}</a>
               </div>
               <div className="flex items-center gap-4">
                 <svg className="w-5 h-5 fill-brand-gold shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.455 5.706 1.457h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
-                <a href="https://wa.me/918279427956" target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold transition-colors">8279427956</a>
+                <a href={getWhatsappLink(whatsapp)} target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold transition-colors">{whatsapp}</a>
               </div>
             </div>
           </div>
@@ -59,9 +101,9 @@ const Footer = () => {
             <div>
               <span className="block text-[10px] font-sans font-bold uppercase tracking-widest text-slate-500 mb-6">Follow Us</span>
               <ul className="text-base font-sans text-slate-300 space-y-4">
-                <li><a href="https://www.instagram.com/atoz_ptints/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold transition-colors magnetic-target inline-block">Instagram</a></li>
-                <li><a href="#" className="hover:text-brand-gold transition-colors magnetic-target inline-block">LinkedIn</a></li>
-                <li><a href="#" className="hover:text-brand-gold transition-colors magnetic-target inline-block">Behance</a></li>
+                <li><a href={instagram} target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold transition-colors magnetic-target inline-block">Instagram</a></li>
+                <li><a href={linkedin} className="hover:text-brand-gold transition-colors magnetic-target inline-block">LinkedIn</a></li>
+                <li><a href={twitter} className="hover:text-brand-gold transition-colors magnetic-target inline-block">Twitter</a></li>
               </ul>
             </div>
           </div>

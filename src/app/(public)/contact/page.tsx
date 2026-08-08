@@ -94,9 +94,19 @@ export default function ContactPage() {
     info: { 
       email: "hello@atozprints.in", 
       phone: "+91 98765 43210", 
+      whatsapp: "918279427956",
       address: "12, Okhla Industrial Estate, Phase III, New Delhi, India 110020" 
     },
     socials: { instagram: "#", linkedin: "#", twitter: "#" }
+  };
+
+  const whatsapp = data.info?.whatsapp || "918279427956";
+  const getWhatsappLink = (num: string) => {
+    const cleanNum = num.replace(/[^0-9]/g, '');
+    if (cleanNum.length === 10) {
+      return `https://wa.me/91${cleanNum}`;
+    }
+    return `https://wa.me/${cleanNum}`;
   };
 
   return (
@@ -225,14 +235,19 @@ export default function ContactPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* WhatsApp */}
-            <div className="channel-card p-10 rounded-3xl bg-white text-center group cursor-pointer border border-brand-darkBlue/10 transition-all hover:bg-brand-darkBlue hover:text-white">
+            <a 
+              href={getWhatsappLink(whatsapp)}
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="channel-card p-10 rounded-3xl bg-white text-center group cursor-pointer border border-brand-darkBlue/10 transition-all hover:bg-brand-darkBlue hover:text-white"
+            >
               <div className="w-16 h-16 bg-brand-base rounded-full flex items-center justify-center mx-auto mb-6 text-brand-darkBlue group-hover:bg-brand-gold group-hover:text-brand-darkBlue transition-colors">
                 <MessageCircle className="w-6 h-6" />
               </div>
               <h3 className="text-2xl font-serif mb-2">WhatsApp Priority</h3>
               <p className="text-sm font-sans text-slate-400 mb-6 group-hover:text-slate-300">Instant quotes & support</p>
-              <a href="#" className="inline-block border-b border-current pb-1 text-xs font-bold uppercase tracking-widest">Chat Now</a>
-            </div>
+              <span className="inline-block border-b border-current pb-1 text-xs font-bold uppercase tracking-widest">Chat Now</span>
+            </a>
             
             {/* Schedule */}
             <div className="channel-card p-10 rounded-3xl bg-white text-center group cursor-pointer border border-brand-darkBlue/10 transition-all hover:bg-brand-darkBlue hover:text-white">
@@ -245,14 +260,17 @@ export default function ContactPage() {
             </div>
 
             {/* Email */}
-            <div className="channel-card p-10 rounded-3xl bg-white text-center group cursor-pointer border border-brand-darkBlue/10 transition-all hover:bg-brand-darkBlue hover:text-white">
+            <a 
+              href={`mailto:${data.info.email}`}
+              className="channel-card p-10 rounded-3xl bg-white text-center group cursor-pointer border border-brand-darkBlue/10 transition-all hover:bg-brand-darkBlue hover:text-white"
+            >
               <div className="w-16 h-16 bg-brand-base rounded-full flex items-center justify-center mx-auto mb-6 text-brand-darkBlue group-hover:bg-brand-gold group-hover:text-brand-darkBlue transition-colors">
                 <Mail className="w-6 h-6" />
               </div>
               <h3 className="text-2xl font-serif mb-2">Bulk Inquiries</h3>
               <p className="text-sm font-sans text-slate-400 mb-6 group-hover:text-slate-300">For orders &gt;500 units</p>
-              <a href="mailto:bulk@atozprint.in" className="inline-block border-b border-current pb-1 text-xs font-bold uppercase tracking-widest">Email Team</a>
-            </div>
+              <span className="inline-block border-b border-current pb-1 text-xs font-bold uppercase tracking-widest">Email Team</span>
+            </a>
           </div>
         </div>
       </section>

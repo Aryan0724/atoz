@@ -8,7 +8,7 @@ import {
   ArrowLeft, Package, User, MapPin, Calendar, CreditCard, Clock,
   CheckCircle2, AlertCircle, Truck, Box, ChevronRight, ExternalLink,
   Printer, Download, DollarSign, ShieldAlert, ShieldCheck, Banknote,
-  MessageSquare, ChevronDown, ArrowRight
+  MessageSquare, ChevronDown, ArrowRight, Mail, Eye, RefreshCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -20,6 +20,7 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<any>(null);
   const [updating, setUpdating] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const [adminNotes, setAdminNotes] = useState('');
   const [trackingInfo, setTrackingInfo] = useState({
     tracking_number: '',
@@ -53,7 +54,7 @@ export default function OrderDetailPage() {
       setOrder({ ...order, ...trackingInfo });
     } catch (error: any) {
       console.warn('[Demo Mode] Tracking update skipped.', error.message);
-      toast.info('Demo Mode: Tracking updated locally');
+      toast.info('Tracking updated locally');
       setOrder({ ...order, ...trackingInfo });
     } finally {
       setUpdating(false);
@@ -72,8 +73,7 @@ export default function OrderDetailPage() {
       if (!res.ok) throw new Error(data.error || 'Failed to ship order');
       
       toast.success('Order pushed to Shiprocket successfully!');
-      // Refresh order data
-      window.location.reload();
+      fetchOrder();
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -81,59 +81,109 @@ export default function OrderDetailPage() {
     }
   };
 
-  useEffect(() => {
-    async function fetchOrder() {
-      try {
-        const fetchPromise = supabase
-          .from('orders')
-          .select('*, profiles(*), products(*)')
-          .eq('id', id)
-          .single();
-
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), 3500)
-        );
-
-        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
-
-        if (error || !data) throw new Error('not found');
-        setOrder(data);
-      } catch {
-        // Mock fallback for demo mode
-        const mockOrders: Record<string, any> = {
-          '11111111-1111-4111-a111-111111111111': {
-            id: '11111111-1111-4111-a111-111111111111', status: 'processing', payment_status: 'paid',
-            total_price: 15600, quantity: 50, quality_level: 'Premium',
-            created_at: new Date().toISOString(),
-            design_data: { color: '#FFFFFF', print_method: 'DTG' },
-            design_preview_url: null,
-            shipping_address: { line1: '12 MG Road', city: 'Bangalore', state: 'Karnataka', postal_code: '560001' },
-            razorpay_payment_id: 'pay_demo_001',
-            profiles: { full_name: 'Aditya Raj', email: 'aditya@example.com', company_name: 'Raj Enterprises', gst_number: '29AABCT1332L1ZB', created_at: new Date().toISOString() },
-            products: { name: 'Custom Premium T-Shirt', slug: 'custom-premium-tshirt', category: 'Apparel', base_price: 299, delivery_days: '5–7 business days', images: ['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400'] },
-          },
-          '22222222-2222-4222-a222-222222222222': {
-            id: '22222222-2222-4222-a222-222222222222', status: 'shipped', payment_status: 'paid',
-            total_price: 8400, quantity: 30, quality_level: 'Standard',
-            created_at: new Date(Date.now() - 86400000).toISOString(),
-            design_data: { color: '#000000', print_method: 'Screen Print' },
-            design_preview_url: null,
-            shipping_address: { line1: '45 Linking Road', city: 'Mumbai', state: 'Maharashtra', postal_code: '400050' },
-            razorpay_payment_id: 'pay_demo_002',
-            profiles: { full_name: 'Priya Sharma', email: 'priya@example.com', company_name: null, gst_number: null, created_at: new Date().toISOString() },
-            products: { name: 'Branded Ceramic Mug', slug: 'branded-ceramic-mug', category: 'Drinkware', base_price: 249, delivery_days: '3–5 business days', images: ['https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400'] },
-          }
-        };
-
-        const mockOrder = mockOrders[id as string];
-        if (mockOrder) {
-          setOrder(mockOrder);
-        }
-      } finally {
-        setLoading(false);
-      }
+  const handleResendEmail = async () => {
+    setSendingEmail(true);
+    try {
+      const res = await fetch('/api/orders/send-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send confirmation email');
+      
+      toast.success('Order confirmation email sent successfully!');
+    } catch (err: any) {
+      toast.error(err.message || 'Could not send confirmation email');
+    } finally {
+      setSendingEmail(false);
     }
+  };
 
+  async function fetchOrder() {
+    try {
+      setLoading(true);
+      // Fetch order with profiles
+      const { data: orderData, error: orderErr } = await supabase
+        .from('orders')
+        .select('*, profiles(*)')
+        .eq('id', id)
+        .single();
+
+      if (orderErr || !orderData) {
+        throw new Error('Order not found in database');
+      }
+
+      // Fetch order items with products
+      const { data: itemsData, error: itemsErr } = await supabase
+        .from('order_items')
+        .select('*, product:products(*)')
+        .eq('order_id', id);
+
+      if (itemsErr) {
+        console.warn('[OrderDetail] Order items query error:', itemsErr);
+      }
+
+      setOrder({
+        ...orderData,
+        order_items: itemsData || []
+      });
+    } catch (fetchErr: any) {
+      console.warn('[OrderDetail] Fetch failed, checking mock orders:', fetchErr.message);
+
+      const mockOrders: Record<string, any> = {
+        '11111111-1111-4111-a111-111111111111': {
+          id: '11111111-1111-4111-a111-111111111111', status: 'processing', payment_status: 'paid',
+          total_price: 15600, payment_method: 'Online',
+          created_at: new Date().toISOString(),
+          shipping_address: { fullName: 'Aditya Raj', email: 'aditya@example.com', phone: '9876543210', address: '12 MG Road', city: 'Bangalore', state: 'Karnataka', pincode: '560001' },
+          razorpay_payment_id: 'pay_demo_001',
+          profiles: { full_name: 'Aditya Raj', email: 'aditya@example.com', company_name: 'Raj Enterprises', gst_number: '29AABCT1332L1ZB' },
+          order_items: [
+            {
+              id: 'item-1',
+              quantity: 50,
+              quality_level: 'Premium',
+              unit_price: 299,
+              design_preview_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
+              design_data: { color: '#FFFFFF', print_method: 'DTG' },
+              product: { name: 'Custom Premium T-Shirt', slug: 'custom-premium-tshirt', category: 'Apparel', base_price: 299, images: ['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400'] }
+            }
+          ]
+        },
+        '22222222-2222-4222-a222-222222222222': {
+          id: '22222222-2222-4222-a222-222222222222', status: 'shipped', payment_status: 'paid',
+          total_price: 8400, payment_method: 'Online',
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          shipping_address: { fullName: 'Priya Sharma', email: 'priya@example.com', phone: '9876543211', address: '45 Linking Road', city: 'Mumbai', state: 'Maharashtra', pincode: '400050' },
+          razorpay_payment_id: 'pay_demo_002',
+          profiles: { full_name: 'Priya Sharma', email: 'priya@example.com' },
+          order_items: [
+            {
+              id: 'item-2',
+              quantity: 30,
+              quality_level: 'Standard',
+              unit_price: 249,
+              design_preview_url: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400',
+              design_data: { color: '#000000', print_method: 'Screen Print' },
+              product: { name: 'Branded Ceramic Mug', slug: 'branded-ceramic-mug', category: 'Drinkware', base_price: 249, images: ['https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400'] }
+            }
+          ]
+        }
+      };
+
+      const mockOrder = mockOrders[id as string];
+      if (mockOrder) {
+        setOrder(mockOrder);
+      } else {
+        setOrder(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     if (id) fetchOrder();
   }, [id]);
 
@@ -145,7 +195,7 @@ export default function OrderDetailPage() {
       if (error) throw error;
       toast.success('Order updated!');
     } catch (err: any) {
-      toast.info('Demo Mode: Updated locally');
+      toast.info('Updated locally');
     } finally {
       setUpdating(false);
     }
@@ -160,15 +210,22 @@ export default function OrderDetailPage() {
   );
 
   if (!order) return (
-    <div className="text-center py-20 px-4">
+    <div className="text-center py-20 px-4 max-w-md mx-auto">
       <AlertCircle className="h-16 w-16 text-gray-300 mx-auto mb-6" />
-      <h1 className="text-2xl font-bold text-brand-dark mb-4">Order Not Found</h1>
-      <button onClick={() => router.back()} className="text-brand-pink font-bold hover:underline">Go Back</button>
+      <h1 className="text-2xl font-bold text-brand-dark mb-2">Order Not Found</h1>
+      <p className="text-sm text-gray-500 mb-6">Could not find order ID: <span className="font-mono text-xs">{id}</span></p>
+      <div className="flex gap-4 justify-center">
+        <button onClick={() => router.push('/admin/orders')} className="px-6 py-3 bg-brand-dark text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">All Orders</button>
+        <button onClick={() => fetchOrder()} className="px-6 py-3 bg-gray-100 text-brand-dark rounded-2xl text-xs font-bold hover:bg-gray-200 transition-all flex items-center gap-2">
+          <RefreshCw className="h-4 w-4" /> Retry
+        </button>
+      </div>
     </div>
   );
 
   const statusColors: any = {
     pending: 'bg-yellow-50 text-yellow-600 border-yellow-100',
+    pending_approval: 'bg-orange-50 text-orange-600 border-orange-100',
     confirmed: 'bg-sky-50 text-sky-600 border-sky-100',
     in_production: 'bg-blue-50 text-blue-600 border-blue-100',
     dispatched: 'bg-violet-50 text-violet-600 border-violet-100',
@@ -179,10 +236,10 @@ export default function OrderDetailPage() {
 
   const isCOD = order.payment_method === 'COD';
 
-  // Derive the next logical action for this order
   const lifecycleActions: Record<string, { label: string; next: string; color: string }[]> = {
+    pending_approval: [{ label: 'Approve Order', next: 'pending', color: 'bg-emerald-600' }],
     pending: isCOD
-      ? [{ label: 'Confirm Order', next: 'confirmed', color: 'bg-sky-500' }]
+      ? [{ label: 'Confirm COD Order', next: 'confirmed', color: 'bg-sky-500' }]
       : [{ label: 'Start Production', next: 'in_production', color: 'bg-blue-500' }],
     confirmed: [{ label: 'Start Production', next: 'in_production', color: 'bg-blue-500' }],
     in_production: [{ label: 'Mark Dispatched', next: 'dispatched', color: 'bg-violet-500' }],
@@ -193,8 +250,26 @@ export default function OrderDetailPage() {
   };
   const nextActions = lifecycleActions[order.status] || [];
 
+  const items = order.order_items && order.order_items.length > 0
+    ? order.order_items
+    : [
+        {
+          id: 'primary-item',
+          quantity: order.quantity || 1,
+          quality_level: order.quality_level || 'Standard',
+          unit_price: order.total_price || 0,
+          design_preview_url: order.design_preview_url,
+          design_data: order.design_data,
+          product: order.products || { name: 'Custom Print Item', slug: '', category: 'Custom', images: [] }
+        }
+      ];
+
+  const customerName = order.profiles?.full_name || order.shipping_address?.fullName || 'Guest Customer';
+  const customerEmail = order.profiles?.email || order.shipping_address?.email || 'N/A';
+  const customerPhone = order.profiles?.phone || order.shipping_address?.phone || 'N/A';
+
   return (
-    <div className="max-w-6xl mx-auto space-y-10">
+    <div className="max-w-6xl mx-auto space-y-10 pb-20">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
@@ -208,23 +283,37 @@ export default function OrderDetailPage() {
               <span className="text-xs font-bold text-gray-400 font-mono tracking-tight">{order.id}</span>
               <span className={cn(
                 "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
-                statusColors[order.status]
+                statusColors[order.status] || 'bg-gray-50 text-gray-500'
               )}>
-                {order.status}
+                {order.status?.replace(/_/g, ' ')}
               </span>
            </div>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-           <button className="flex items-center gap-2 px-5 py-3 border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:bg-gray-50 transition-colors">
-              <Printer className="h-4 w-4" /> Invoice
+           <button 
+             onClick={handleResendEmail}
+             disabled={sendingEmail}
+             className="flex items-center gap-2 px-5 py-3 border border-brand-pink/20 bg-brand-pink/5 hover:bg-brand-pink hover:text-white rounded-2xl text-xs font-black uppercase tracking-widest text-brand-pink transition-all disabled:opacity-50"
+             title="Send or resend order confirmation email to customer"
+           >
+              <Mail className="h-4 w-4" />
+              {sendingEmail ? 'Sending Email...' : 'Send Confirmation Email'}
            </button>
+
+           <button 
+             onClick={() => window.print()}
+             className="flex items-center gap-2 px-5 py-3 border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:bg-gray-50 transition-colors"
+           >
+              <Printer className="h-4 w-4" /> Print / Invoice
+           </button>
+
            {nextActions.map(action => (
              <button
                key={action.next}
                disabled={updating}
                onClick={() => updateStatus(action.next)}
-               className={cn("flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white transition-all hover:opacity-90 disabled:opacity-50", action.color)}
+               className={cn("flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white transition-all hover:opacity-90 disabled:opacity-50 shadow-lg", action.color)}
              >
                {action.label} <ArrowRight className="h-3.5 w-3.5" />
              </button>
@@ -233,194 +322,196 @@ export default function OrderDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Left: Product & Design */}
+        {/* Left: Ordered Items & Final Design Previews */}
         <div className="lg:col-span-2 space-y-10">
-          <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
-             <div className="p-8 border-b border-gray-50 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                   <Package className="h-5 w-5 text-brand-pink" />
-                   <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Product Information</h2>
-                </div>
-                <Link href={`/admin/products/edit/${order.products.slug}`} className="text-xs font-bold text-brand-pink flex items-center gap-1 hover:underline">
-                  View Product <ExternalLink className="h-3 w-3" />
-                </Link>
-             </div>
-             
-             <div className="p-10 flex flex-col md:flex-row gap-10">
-                <div className="w-full md:w-48 aspect-square bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 shrink-0">
-                   <img src={order.products.images[0]} alt={order.products.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 space-y-6">
-                   <div>
-                      <h3 className="text-2xl font-black text-brand-dark mb-1">{order.products.name}</h3>
-                      <p className="text-sm text-gray-400 font-medium">Category: {order.products.category}</p>
-                   </div>
-                   
-                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                      <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Quantity</p>
-                         <p className="text-lg font-black text-brand-dark">{order.quantity} Units</p>
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-brand-dark uppercase tracking-tight flex items-center gap-3">
+              <Package className="h-6 w-6 text-brand-pink" />
+              Ordered Items & Custom Designs ({items.length})
+            </h2>
+
+            {items.map((item: any, idx: number) => {
+              const product = item.product || {};
+              const designImg = item.design_preview_url || product.images?.[0];
+              const designData = item.design_data || {};
+
+              return (
+                <div key={item.id || idx} className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden space-y-6">
+                  {/* Product Header */}
+                  <div className="p-8 border-b border-gray-50 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-brand-pink block mb-1">Item #{idx + 1}</span>
+                      <h3 className="text-2xl font-black text-brand-dark">{product.name || 'Custom Print Product'}</h3>
+                      {product.category && <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{product.category}</p>}
+                    </div>
+                    {product.slug && (
+                      <Link href={`/admin/products/edit/${product.slug}`} className="text-xs font-bold text-brand-pink flex items-center gap-1 hover:underline">
+                        Edit Product <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* Product Details Grid */}
+                  <div className="px-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Quantity</p>
+                      <p className="text-lg font-black text-brand-dark">{item.quantity} Units</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Quality Level</p>
+                      <p className="text-lg font-black text-brand-dark">{item.quality_level || 'Standard'}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Unit Price</p>
+                      <p className="text-lg font-black text-brand-dark">₹{item.unit_price}</p>
+                    </div>
+                    <div className="p-4 bg-brand-pink/5 rounded-2xl border border-brand-pink/20">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-brand-pink mb-1">Subtotal</p>
+                      <p className="text-lg font-black text-brand-pink">₹{(item.unit_price * item.quantity).toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  {/* Final Custom Design Preview Card */}
+                  <div className="p-8 bg-brand-dark text-white rounded-[32px] mx-8 mb-8">
+                    <div className="flex items-center justify-between pb-6 border-b border-white/10 mb-6">
+                      <div className="flex items-center gap-3">
+                        <Box className="h-5 w-5 text-brand-pink" />
+                        <h4 className="text-sm font-black uppercase tracking-widest text-white">Client Custom Design</h4>
                       </div>
-                      <div className="p-4 bg-brand-lightGray rounded-2xl border border-gray-100">
-                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Quality</p>
-                         <p className="text-lg font-black text-brand-dark">{order.quality_level}</p>
-                      </div>
-                      <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Base Price</p>
-                         <p className="text-lg font-black text-brand-dark">₹{order.products.base_price}</p>
-                      </div>
-                      <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total</p>
-                         <p className="text-lg font-black text-brand-pink text-nowrap">₹{order.total_price}</p>
-                      </div>
-                   </div>
-                </div>
-             </div>
-          </section>
-
-          <section className="bg-brand-dark rounded-[40px] text-white overflow-hidden shadow-2xl relative">
-             <div className="p-8 border-b border-white/5 flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-3">
-                   <Box className="h-5 w-5 text-brand-pink" />
-                   <h2 className="text-lg font-black uppercase tracking-tight">Design & Customization</h2>
-                </div>
-                {order.design_preview_url && (
-                  <a href={order.design_preview_url} target="_blank" className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 transition-all rounded-full text-[10px] font-black uppercase tracking-widest">
-                    <Download className="h-3 w-3" />
-                     Download Logo
-                  </a>
-                )}
-             </div>
-
-             <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
-                <div className="aspect-square bg-white/5 rounded-[40px] border border-white/10 flex items-center justify-center p-12 overflow-hidden group">
-                   {order.design_preview_url ? (
-                     <img src={order.design_preview_url} alt="Design Preview" className="w-full h-full object-contain drop-shadow-2xl transition-transform group-hover:scale-110 duration-500" />
-                   ) : (
-                     <div className="text-center">
-                        <Package className="h-12 w-12 text-white/20 mx-auto mb-4" />
-                        <p className="text-xs font-bold text-white/40 uppercase tracking-widest">No Logo Uploaded</p>
-                     </div>
-                   )}
-                </div>
-
-                <div className="space-y-8">
-                   <div>
-                       <label className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3 block">Custom Selection Data</label>
-                       <div className="space-y-3">
-                          {Object.entries(order.design_data || {}).map(([key, value]: [string, any]) => {
-                             if (!value) return null;
-
-                             if (key === 'vdpData') {
-                               return (
-                                 <div key={key} className="flex flex-col gap-2 p-4 bg-brand-cyan/10 rounded-2xl border border-brand-cyan/20">
-                                   <div className="flex justify-between items-center">
-                                      <span className="text-[10px] font-black uppercase tracking-widest text-brand-cyan">VDP Data Source</span>
-                                      <span className="text-xs font-black text-white">{value.rows?.length || 0} Records</span>
-                                   </div>
-                                   <button 
-                                     onClick={() => {
-                                       const csvContent = "data:text/csv;charset=utf-8," 
-                                          + value.headers.join(",") + "\n" 
-                                          + value.rows.map((r: any) => value.headers.map((h: any) => `"${r[h] || ''}"`).join(",")).join("\n");
-                                       const encodedUri = encodeURI(csvContent);
-                                       const link = document.createElement("a");
-                                       link.setAttribute("href", encodedUri);
-                                       link.setAttribute("download", `vdp_order_${order.id.slice(0,8)}.csv`);
-                                       document.body.appendChild(link);
-                                       link.click();
-                                     }}
-                                     className="w-full py-2 bg-brand-cyan text-brand-dark text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white transition-colors mt-2"
-                                   >
-                                     Download CSV List
-                                   </button>
-                                 </div>
-                               );
-                             }
-
-                             if (key === 'pageData') {
-                               return (
-                                 <div key={key} className="flex justify-between items-center p-4 bg-brand-pink/10 rounded-2xl border border-brand-pink/20">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-brand-pink">Multipage Package</span>
-                                    <button 
-                                      onClick={() => {
-                                        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(value));
-                                        const link = document.createElement("a");
-                                        link.setAttribute("href", dataStr);
-                                        link.setAttribute("download", `multipage_${order.id.slice(0,8)}.json`);
-                                        document.body.appendChild(link);
-                                        link.click();
-                                      }}
-                                      className="px-4 py-2 bg-brand-pink text-brand-dark text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white transition-colors"
-                                    >
-                                      Export Pages
-                                    </button>
-                                 </div>
-                               );
-                             }
-
-                             if (key === 'canvasState') {
-                               return (
-                                 <div key={key} className="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/10">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Canvas Engine Data</span>
-                                    <span className="text-xs font-black text-white/40 italic">Attached</span>
-                                 </div>
-                               );
-                             }
-
-                             if (typeof value === 'object') return null;
-
-                             return (
-                               <div key={key} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
-                                  <span className="text-[10px] font-black uppercase tracking-widest text-white/60">{key.replace('_', ' ')}</span>
-                                  <span className="text-xs font-black">{value}</span>
-                               </div>
-                             );
-                          })}
-                       </div>
+                      {designImg && (
+                        <a 
+                          href={designImg} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          download={`order_${order.id.slice(0,8)}_item_${idx+1}.png`}
+                          className="flex items-center gap-2 px-4 py-2 bg-brand-pink text-white hover:bg-white hover:text-brand-dark transition-all rounded-full text-[10px] font-black uppercase tracking-widest"
+                        >
+                          <Download className="h-3.5 w-3.5" /> Download Design
+                        </a>
+                      )}
                     </div>
 
-                   <div className="p-6 bg-brand-pink/10 rounded-3xl border border-brand-pink/20">
-                      <p className="text-[10px] font-black text-brand-pink uppercase tracking-widest mb-2">Production Note</p>
-                      <p className="text-xs text-white/70 leading-relaxed font-medium">Verify transparency of logo files and color matching with the selected quality tier before starting the print run.</p>
-                   </div>
-                </div>
-             </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                      {/* Image Viewer */}
+                      <div className="aspect-square bg-white/5 rounded-3xl border border-white/10 flex items-center justify-center p-6 overflow-hidden relative group">
+                        {designImg ? (
+                          <img 
+                            src={designImg} 
+                            alt={`Design for ${product.name}`} 
+                            className="w-full h-full object-contain drop-shadow-2xl transition-transform group-hover:scale-105 duration-300"
+                          />
+                        ) : (
+                          <div className="text-center p-6">
+                            <Package className="h-12 w-12 text-white/20 mx-auto mb-3" />
+                            <p className="text-xs font-bold text-white/40 uppercase tracking-widest">No custom preview available</p>
+                          </div>
+                        )}
+                      </div>
 
-             <div className="absolute top-0 right-0 w-96 h-96 bg-brand-pink/5 rounded-full blur-[120px] -mr-48 -mt-48"></div>
-          </section>
+                      {/* Design Metadata / Canvas Data */}
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-white/40 block">Design Parameters</label>
+                        
+                        {designData.color && (
+                          <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
+                            <span className="text-xs font-bold text-white/70">Selected Base Color</span>
+                            <div className="flex items-center gap-2">
+                              <span className="w-4 h-4 rounded-full border border-white/30 inline-block" style={{ backgroundColor: designData.color }}></span>
+                              <span className="text-xs font-mono font-bold text-white">{designData.color}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {designData.vdpData && (
+                          <div className="p-4 bg-brand-cyan/10 rounded-2xl border border-brand-cyan/20 space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-brand-cyan">VDP Data Source</span>
+                              <span className="text-xs font-black text-white">{designData.vdpData.rows?.length || 0} Records</span>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                const v = designData.vdpData;
+                                const csvContent = "data:text/csv;charset=utf-8," + v.headers.join(",") + "\n" + v.rows.map((r: any) => v.headers.map((h: any) => `"${r[h] || ''}"`).join(",")).join("\n");
+                                const link = document.createElement("a");
+                                link.setAttribute("href", encodeURI(csvContent));
+                                link.setAttribute("download", `vdp_data_${order.id.slice(0,8)}.csv`);
+                                link.click();
+                              }}
+                              className="w-full py-2 bg-brand-cyan text-brand-dark text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white transition-colors"
+                            >
+                              Download VDP CSV
+                            </button>
+                          </div>
+                        )}
+
+                        {designData.canvasState && (
+                          <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between">
+                            <div>
+                              <span className="text-[10px] font-black uppercase tracking-widest text-white/60 block">Canvas State Layers</span>
+                              <span className="text-xs font-bold text-white/40">Fabric.js Vector Objects</span>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(designData.canvasState, null, 2));
+                                const link = document.createElement("a");
+                                link.setAttribute("href", dataStr);
+                                link.setAttribute("download", `canvas_data_${order.id.slice(0,8)}.json`);
+                                link.click();
+                              }}
+                              className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5"
+                            >
+                              <Download className="h-3 w-3" /> Export JSON
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="p-4 bg-brand-pink/10 rounded-2xl border border-brand-pink/20">
+                          <p className="text-[10px] font-black text-brand-pink uppercase tracking-widest mb-1">Production Quality Check</p>
+                          <p className="text-xs text-white/70 leading-relaxed">Ensure high resolution (300 DPI) rendering before initiating printing on this garment/item.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Right: Customer & Logistics */}
-        <div className="space-y-10 text-nowrap">
+        {/* Right Column: Customer Details, Logistics, Payment */}
+        <div className="space-y-8">
+          {/* Customer Details */}
           <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
              <div className="p-8 border-b border-gray-50 flex items-center gap-3">
                 <User className="h-5 w-5 text-brand-pink" />
-                <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Customer</h2>
+                <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Customer Information</h2>
              </div>
              <div className="p-8 space-y-6">
                 <div>
-                   <h3 className="text-xl font-black text-brand-dark mb-1">{order.profiles.full_name}</h3>
-                   <p className="text-sm text-gray-400 font-medium">{order.profiles.company_name || 'Individual Customer'}</p>
+                   <h3 className="text-xl font-black text-brand-dark mb-1">{customerName}</h3>
+                   <p className="text-sm text-gray-400 font-medium">{order.profiles?.company_name || 'Direct Retail Buyer'}</p>
                 </div>
                 
-                <div className="space-y-4">
-                   <div className="flex items-center gap-3 text-sm font-medium text-gray-500">
-                      <Clock className="h-4 w-4 text-gray-300" />
-                      {order.profiles.gst_number || 'No GST Registered'}
+                <div className="space-y-3 pt-2 border-t border-gray-50">
+                   <div className="flex items-center gap-3 text-sm text-gray-600">
+                      <Mail className="h-4 w-4 text-gray-400 shrink-0" />
+                      <span className="font-semibold select-all">{customerEmail}</span>
                    </div>
-                   <div className="flex items-center gap-3 text-sm font-medium text-gray-500">
-                      <Calendar className="h-4 w-4 text-gray-300" />
-                      Customer since {new Date(order.profiles.created_at).toLocaleDateString()}
+                   <div className="flex items-center gap-3 text-sm text-gray-600">
+                      <CreditCard className="h-4 w-4 text-gray-400 shrink-0" />
+                      <span className="font-semibold">{customerPhone}</span>
                    </div>
+                   {order.profiles?.gst_number && (
+                     <div className="flex items-center gap-3 text-sm text-gray-600">
+                        <Clock className="h-4 w-4 text-gray-400 shrink-0" />
+                        <span>GST: <strong className="font-mono">{order.profiles.gst_number}</strong></span>
+                     </div>
+                   )}
                 </div>
-                
-                <button className="w-full py-4 bg-gray-50 hover:bg-brand-pink hover:text-white transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500">
-                   View Profile History
-                </button>
              </div>
           </section>
 
+          {/* Shipment & Logistics */}
           <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
              <div className="p-8 border-b border-gray-50 flex items-center gap-3">
                 <Truck className="h-5 w-5 text-brand-pink" />
@@ -429,17 +520,17 @@ export default function OrderDetailPage() {
              <div className="p-8 space-y-5">
                 <div className="space-y-4">
                    <div>
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Courier Name</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Courier Partner</label>
                       <input 
                         type="text" 
                         value={trackingInfo.courier_name}
                         onChange={(e) => setTrackingInfo({...trackingInfo, courier_name: e.target.value})}
-                        placeholder="e.g. BlueDart, Delhivery"
+                        placeholder="e.g. Shiprocket, BlueDart, Delhivery"
                         className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-brand-pink/20 outline-none text-xs font-bold transition-all"
                       />
                    </div>
                    <div>
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Tracking ID</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Tracking Number / AWB</label>
                       <input 
                         type="text" 
                         value={trackingInfo.tracking_number}
@@ -449,7 +540,7 @@ export default function OrderDetailPage() {
                       />
                    </div>
                    <div>
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Est. Delivery Date</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Estimated Delivery</label>
                       <input 
                         type="date" 
                         value={trackingInfo.estimated_delivery}
@@ -459,175 +550,73 @@ export default function OrderDetailPage() {
                    </div>
                 </div>
                 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 pt-2">
                   <button 
                     onClick={updateTrackingInfo}
                     disabled={updating}
-                    className="w-full py-4 bg-brand-dark text-white hover:bg-brand-pink transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                    className="w-full py-4 bg-brand-dark text-white hover:bg-gray-800 transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 shadow-md"
                   >
-                     {updating ? 'Updating...' : 'Update Tracking Info'}
+                     {updating ? 'Saving...' : 'Update Tracking Info'}
                   </button>
 
                   <button 
                     onClick={shipWithShiprocket}
-                    disabled={updating || order.status === 'shipped' || order.status === 'delivered'}
-                    className="w-full py-4 bg-brand-pink text-white hover:bg-brand-dark transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-2"
+                    disabled={updating || order.status === 'delivered' || order.status === 'cancelled'}
+                    className="w-full py-4 bg-brand-pink text-white hover:bg-pink-600 transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-2 shadow-md shadow-pink-200"
                   >
                      <Box className="h-4 w-4" />
-                     {updating ? 'Processing...' : 'Ship with Shiprocket'}
+                     {updating ? 'Processing...' : 'Push to Shiprocket'}
                   </button>
                 </div>
              </div>
           </section>
 
-          {/* --- DELIVERY VERIFICATION STATUS --- */}
-          <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
-            <div className="p-8 border-b border-gray-50 flex items-center gap-3">
-              <ShieldCheck className="h-5 w-5 text-brand-pink" />
-              <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Delivery Verification</h2>
-            </div>
-            <div className="p-8 space-y-5">
-              {order.delivery_disputed && (
-                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3">
-                  <ShieldAlert className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-black text-red-600 uppercase tracking-widest mb-1">Delivery Disputed!</p>
-                    <p className="text-xs font-medium text-red-500">{order.delivery_dispute_note || 'Customer reported non-receipt.'}</p>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Customer Confirmed</span>
-                <span className={cn("px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                  order.delivery_confirmed_by_customer
-                    ? 'bg-green-50 text-green-600 border-green-100'
-                    : 'bg-gray-50 text-gray-400 border-gray-100'
-                )}>
-                  {order.delivery_confirmed_by_customer
-                    ? `Yes — ${order.delivery_confirmed_at ? new Date(order.delivery_confirmed_at).toLocaleDateString() : ''}`
-                    : 'Awaiting'}
-                </span>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block">Admin Notes</label>
-                <textarea
-                  rows={3}
-                  value={adminNotes}
-                  onChange={e => setAdminNotes(e.target.value)}
-                  placeholder="Internal notes about this order..."
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-brand-pink/20 outline-none text-xs font-medium resize-none transition-all"
-                />
-                <button
-                  onClick={() => updateOrderField({ admin_notes: adminNotes })}
-                  disabled={updating}
-                  className="w-full py-3 bg-gray-900 text-white hover:bg-brand-pink transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
-                >
-                  Save Notes
-                </button>
-              </div>
-            </div>
-          </section>
-
-          {/* --- COD PAYMENT RECONCILIATION --- */}
-          {isCOD && (
-            <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-8 border-b border-gray-50 flex items-center gap-3">
-                <Banknote className="h-5 w-5 text-brand-pink" />
-                <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">COD Reconciliation</h2>
-              </div>
-              <div className="p-8 space-y-5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Cash Status</span>
-                  <span className={cn("px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                    order.cod_collection_status === 'collected' ? 'bg-sky-50 text-sky-600 border-sky-100' :
-                    order.cod_collection_status === 'cod_remitted' ? 'bg-green-50 text-green-600 border-green-100' :
-                    order.cod_collection_status === 'failed' ? 'bg-red-50 text-red-600 border-red-100' :
-                    'bg-yellow-50 text-yellow-600 border-yellow-100'
-                  )}>
-                    {order.cod_collection_status?.replace(/_/g, ' ') || 'Pending'}
-                  </span>
-                </div>
-                <div className="text-center py-2">
-                  <p className="text-2xl font-black text-brand-dark">₹{order.total_price?.toLocaleString()}</p>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cash to be collected</p>
-                </div>
-                <div className="grid grid-cols-1 gap-3">
-                  {order.cod_collection_status !== 'collected' && order.cod_collection_status !== 'cod_remitted' && (
-                    <button
-                      onClick={() => updateOrderField({ cod_collection_status: 'collected', cod_collected_at: new Date().toISOString(), payment_status: 'cod_collected' })}
-                      disabled={updating || order.status !== 'delivered'}
-                      className="w-full py-4 bg-sky-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-sky-600 transition-all disabled:opacity-40"
-                    >
-                      ✓ Mark Cash Collected
-                    </button>
-                  )}
-                  {order.cod_collection_status === 'collected' && (
-                    <button
-                      onClick={() => updateOrderField({ cod_remitted_at: new Date().toISOString(), payment_status: 'cod_remitted' })}
-                      disabled={updating}
-                      className="w-full py-4 bg-green-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-all disabled:opacity-40"
-                    >
-                      ✓ Mark Cash Remitted
-                    </button>
-                  )}
-                  {order.cod_collection_status !== 'failed' && order.cod_collection_status !== 'cod_remitted' && (
-                    <button
-                      onClick={() => updateOrderField({ cod_collection_status: 'failed', payment_status: 'failed' })}
-                      disabled={updating}
-                      className="w-full py-3 bg-red-50 text-red-500 border border-red-100 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all disabled:opacity-40"
-                    >
-                      ✗ Collection Failed
-                    </button>
-                  )}
-                </div>
-                {order.cod_collected_at && (
-                  <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center">
-                    Collected: {new Date(order.cod_collected_at).toLocaleString()}
-                  </p>
-                )}
-              </div>
-            </section>
-          )}
-
+          {/* Delivery Address */}
           <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
              <div className="p-8 border-b border-gray-50 flex items-center gap-3">
                 <MapPin className="h-5 w-5 text-brand-pink" />
                 <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Delivery Address</h2>
              </div>
-             <div className="p-8 space-y-6">
-                <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                   <p className="text-sm font-bold text-brand-dark leading-relaxed">
-                      {order.shipping_address?.line1}<br />
-                      {order.shipping_address?.city}, {order.shipping_address?.state}<br />
-                      {order.shipping_address?.postal_code}, India
-                   </p>
+             <div className="p-8 space-y-4">
+                <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 text-sm font-semibold text-brand-dark leading-relaxed">
+                   <p className="font-bold text-base mb-1">{order.shipping_address?.fullName || customerName}</p>
+                   <p>{order.shipping_address?.address || order.shipping_address?.line1 || 'No street address provided'}</p>
+                   <p>{order.shipping_address?.city}, {order.shipping_address?.state} - {order.shipping_address?.pincode || order.shipping_address?.postal_code}</p>
+                   <p className="text-gray-500 font-normal mt-2">Phone: {order.shipping_address?.phone || customerPhone}</p>
                 </div>
              </div>
           </section>
 
+          {/* Payment Details */}
           <section className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
              <div className="p-8 border-b border-gray-50 flex items-center gap-3">
                 <CreditCard className="h-5 w-5 text-brand-pink" />
-                <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Payment</h2>
+                <h2 className="text-lg font-black text-brand-dark uppercase tracking-tight">Payment Summary</h2>
              </div>
              <div className="p-8 space-y-4">
                 <div className="flex items-center justify-between">
-                   <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Status</span>
+                   <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Amount</span>
+                   <span className="text-xl font-black text-brand-pink">₹{order.total_price?.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                   <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Payment Status</span>
                    <span className={cn(
                      "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                     order.payment_status === 'paid' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-red-50 text-red-600 border-red-100'
+                     order.payment_status === 'paid' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-orange-50 text-orange-600 border-orange-100'
                    )}>
                      {order.payment_status}
                    </span>
                 </div>
                 <div className="flex items-center justify-between">
-                   <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Gateway</span>
-                   <span className="text-sm font-black text-brand-dark">{order.payment_method === 'COD' ? 'Cash on Delivery' : 'Razorpay'}</span>
+                   <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Method</span>
+                   <span className="text-sm font-black text-brand-dark">{order.payment_method === 'COD' ? 'Cash on Delivery (COD)' : 'Razorpay Online'}</span>
                 </div>
-                <div className="pt-4 border-t border-gray-50">
-                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Transaction ID</p>
-                   <p className="text-xs font-bold text-brand-dark font-mono truncate">{order.razorpay_payment_id || 'N/A'}</p>
-                </div>
+                {order.razorpay_payment_id && (
+                  <div className="pt-4 border-t border-gray-50">
+                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Payment ID</p>
+                     <p className="text-xs font-bold text-brand-dark font-mono truncate">{order.razorpay_payment_id}</p>
+                  </div>
+                )}
              </div>
           </section>
         </div>

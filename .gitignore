@@ -35,3 +35,4 @@ next-env.d.ts
 # sensitive secrets and binaries
 a to z pass google auth.json
 *.exe
+scratch/

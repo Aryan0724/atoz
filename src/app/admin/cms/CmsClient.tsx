@@ -96,10 +96,12 @@ export default function ContentManagerClient({
       title: "Let's Engineer Your Legacy.",
       subtitle: "Get in Touch"
     });
-    const [contactInfo, setContactInfo] = useState(initialCmsConfig?.contact?.info || {
+    const [contactInfo, setContactInfo] = useState({
       email: "hello@atozprints.in",
       phone: "+91 98765 43210",
-      address: "12, Okhla Industrial Estate, Phase III, New Delhi, India 110020"
+      whatsapp: "918279427956",
+      address: "12, Okhla Industrial Estate, Phase III, New Delhi, India 110020",
+      ...initialCmsConfig?.contact?.info
     });
     const [contactSocials, setContactSocials] = useState(initialCmsConfig?.contact?.socials || {
       instagram: "#",
@@ -452,6 +454,10 @@ export default function ContentManagerClient({
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Phone</label>
                   <input type="text" value={contactInfo.phone} onChange={e => setContactInfo({...contactInfo, phone: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-bold text-brand-dark" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">WhatsApp Number (e.g. 918279427956)</label>
+                  <input type="text" value={contactInfo.whatsapp || ''} onChange={e => setContactInfo({...contactInfo, whatsapp: e.target.value})} className="w-full px-6 py-4 rounded-2xl bg-white border-transparent shadow-sm outline-none font-bold text-brand-dark" />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Address</label>

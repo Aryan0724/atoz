@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { supabase } from '@/lib/supabase/client';
 import TrackOrderClient from './TrackOrderClient';
 
 interface TrackOrderPageProps {
@@ -10,17 +10,33 @@ interface TrackOrderPageProps {
 }
 
 export default async function TrackOrderPage({ params }: TrackOrderPageProps) {
-  const supabase = createClient();
-  
-  const { data: order, error } = await supabase
+  // Fetch order from database
+  const { data: orderData, error: orderError } = await supabase
     .from('orders')
-    .select('*, products(*)')
+    .select('*')
     .eq('id', params.id)
     .single();
 
-  if (error || !order) {
-    // We can't really notFound() if it's a demo, but for production it's correct
-    // Let's at least check if it's a valid UUID format to avoid errors
+  let order = orderData;
+
+  if (order) {
+    // Fetch order items with products
+    const { data: items } = await supabase
+      .from('order_items')
+      .select('*, product:products(*)')
+      .eq('order_id', params.id);
+
+    order = {
+      ...order,
+      order_items: items || [],
+      // For backwards compatibility with single product view
+      products: items?.[0]?.product || null,
+      design_preview_url: items?.[0]?.design_preview_url || null,
+    };
+  }
+
+  if (!order) {
+    // Check if it's a valid UUID format before 404
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(params.id)) {
       notFound();

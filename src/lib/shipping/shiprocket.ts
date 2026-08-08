@@ -1,29 +1,54 @@
-import { supabase } from '../supabase/client';
-
 const SHIPROCKET_API_BASE = 'https://apiv2.shiprocket.in/v1/external';
 
-export async function getShiprocketToken() {
-  const email = process.env.SHIPROCKET_EMAIL;
-  const password = process.env.SHIPROCKET_PASSWORD;
+let cachedToken: string | null = null;
+let tokenExpiresAt: number = 0;
 
-  if (!email || !password) {
-    throw new Error('Shiprocket credentials not configured');
+export async function getShiprocketToken(): Promise<string> {
+  // Return cached token if valid (Shiprocket tokens typically valid for 10 days)
+  if (cachedToken && Date.now() < tokenExpiresAt) {
+    return cachedToken;
   }
 
-  const response = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  });
+  const rawEmail = process.env.SHIPROCKET_EMAIL;
+  let rawPassword = process.env.SHIPROCKET_PASSWORD;
 
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Failed to authenticate with Shiprocket');
+  if (!rawEmail || !rawPassword) {
+    throw new Error('Shiprocket credentials are missing. Please set SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD in your .env.local file.');
   }
 
-  return data.token;
+  const email = rawEmail.trim();
+  // Strip enclosing quotes if present in env
+  let password = rawPassword.trim();
+  if ((password.startsWith('"') && password.endsWith('"')) || (password.startsWith("'") && password.endsWith("'"))) {
+    password = password.slice(1, -1);
+  }
+  // Replace escaped \$ if present from shell
+  password = password.replace(/\\\$/g, '$');
+
+  try {
+    const response = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.token) {
+      const errorMsg = data.message || (typeof data.errors === 'string' ? data.errors : JSON.stringify(data.errors || data));
+      throw new Error(`Shiprocket Auth Failed (${response.status}): ${errorMsg}. Please verify your Shiprocket API User credentials.`);
+    }
+
+    const token: string = data.token;
+    cachedToken = token;
+    // Cache for 24 hours
+    tokenExpiresAt = Date.now() + 24 * 60 * 60 * 1000;
+    return token;
+  } catch (err: any) {
+    console.error('[Shiprocket Auth Error]:', err.message);
+    throw err;
+  }
 }
 
 export async function createShiprocketOrder(orderDetails: any) {
@@ -40,8 +65,9 @@ export async function createShiprocketOrder(orderDetails: any) {
 
   const data = await response.json();
   if (!response.ok) {
-    console.error('Shiprocket Order Creation Error:', data);
-    throw new Error(data.message || 'Failed to create Shiprocket order');
+    console.error('[Shiprocket Order Creation Error]:', data);
+    const errorMsg = data.message || (typeof data.errors === 'string' ? data.errors : JSON.stringify(data.errors || data));
+    throw new Error(`Shiprocket Order Error: ${errorMsg}`);
   }
 
   return data;
@@ -59,7 +85,7 @@ export async function getShiprocketTracking(shipmentId: string) {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.message || 'Failed to fetch tracking info');
+    throw new Error(data.message || 'Failed to fetch tracking information from Shiprocket');
   }
 
   return data;
