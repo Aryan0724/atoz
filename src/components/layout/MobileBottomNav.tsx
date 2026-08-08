@@ -18,7 +18,7 @@ export default function MobileBottomNav() {
     setMounted(true);
   }, []);
 
-  if (pathname.startsWith('/customize')) {
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/customize')) {
     return null;
   }
 

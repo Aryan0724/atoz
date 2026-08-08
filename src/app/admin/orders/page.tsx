@@ -169,7 +169,7 @@ export default function AdminOrdersPage() {
   });
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-10 pb-20 p-6 md:p-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>

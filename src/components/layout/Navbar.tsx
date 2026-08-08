@@ -60,9 +60,11 @@ const Navbar = () => {
   // Close menu on route change
   useEffect(() => {
     setIsMenuOpen(false);
-  }, [pathname]);
-
   const cartCount = mounted ? getItemCount() : 0;
+
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/customize')) {
+    return null;
+  }
 
   return (
     <nav 

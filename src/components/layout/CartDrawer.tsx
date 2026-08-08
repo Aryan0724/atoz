@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, Trash2, ArrowRight, Minus, Plus, Zap, Pencil, Upload, Package, ChevronRight } from 'lucide-react';
 import { useCart } from '@/lib/store/useCart';
@@ -96,12 +96,13 @@ const CartDrawer = () => {
   const [mounted, setMounted] = useState(false);
   const [showDesignModal, setShowDesignModal] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted || pathname?.startsWith('/admin')) return null;
 
   const handleCheckoutClick = () => {
     setOpen(false);

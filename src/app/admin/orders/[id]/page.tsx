@@ -269,7 +269,7 @@ export default function OrderDetailPage() {
   const customerPhone = order.profiles?.phone || order.shipping_address?.phone || 'N/A';
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10 pb-20">
+    <div className="max-w-6xl mx-auto space-y-10 pb-20 p-6 md:p-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>

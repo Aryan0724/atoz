@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Instagram, Linkedin, Phone, User, MapPin, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 const Footer = () => {
+  const pathname = usePathname();
   const [contactData, setContactData] = useState<any>(null);
 
   useEffect(() => {
@@ -47,6 +49,10 @@ const Footer = () => {
   const getTelLink = (num: string) => {
     return `tel:${num.replace(/\s+/g, '')}`;
   };
+
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/customize')) {
+    return null;
+  }
 
   return (
     <div className="bg-brand-darkBlue text-white footer-reveal-container">

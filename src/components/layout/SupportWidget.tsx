@@ -28,7 +28,7 @@ export default function SupportWidget() {
     fetchContact();
   }, []);
 
-  if (pathname.startsWith('/customize')) {
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/customize')) {
     return null;
   }
 
