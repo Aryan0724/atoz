@@ -4,7 +4,7 @@ import { createShiprocketOrder } from '@/lib/shipping/shiprocket';
 
 export async function POST(req: Request) {
   try {
-    const { orderId } = await req.json();
+    const { orderId, credentials } = await req.json();
 
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
     };
 
     // 3. Create order in Shiprocket
-    const shiprocketResponse = await createShiprocketOrder(shiprocketPayload);
+    const shiprocketResponse = await createShiprocketOrder(shiprocketPayload, credentials);
 
     // 4. Update order in Supabase with tracking details
     const shipmentId = shiprocketResponse.shipment_id;

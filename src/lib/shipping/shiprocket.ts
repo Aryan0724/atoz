@@ -3,7 +3,21 @@ const SHIPROCKET_API_BASE = 'https://apiv2.shiprocket.in/v1/external';
 let cachedToken: string | null = null;
 let tokenExpiresAt: number = 0;
 
-export async function getShiprocketToken(): Promise<string> {
+export async function getShiprocketToken(customCreds?: { email?: string; password?: string }): Promise<string> {
+  if (customCreds?.email && customCreds?.password) {
+    const response = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: customCreds.email.trim(), password: customCreds.password.trim() }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.token) {
+      const errorMsg = data.message || (typeof data.errors === 'string' ? data.errors : JSON.stringify(data.errors || data));
+      throw new Error(`Shiprocket Auth Failed (${response.status}): ${errorMsg}. Please verify your Shiprocket API User credentials.`);
+    }
+    return data.token;
+  }
+
   // Return cached token if valid (Shiprocket tokens typically valid for 10 days)
   if (cachedToken && Date.now() < tokenExpiresAt) {
     return cachedToken;
@@ -49,8 +63,8 @@ export async function getShiprocketToken(): Promise<string> {
   }
 }
 
-export async function createShiprocketOrder(orderDetails: any) {
-  const token = await getShiprocketToken();
+export async function createShiprocketOrder(orderDetails: any, customCreds?: { email?: string; password?: string }) {
+  const token = await getShiprocketToken(customCreds);
 
   const response = await fetch(`${SHIPROCKET_API_BASE}/orders/create/adhoc`, {
     method: 'POST',

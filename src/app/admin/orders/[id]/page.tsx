@@ -61,24 +61,34 @@ export default function OrderDetailPage() {
     }
   };
 
-  const shipWithShiprocket = async () => {
+  const [customCreds, setCustomCreds] = useState({ email: '', password: '' });
+  const [showCredsModal, setShowCredsModal] = useState(false);
+
+  const shipWithShiprocket = async (overrideCreds?: { email?: string; password?: string }) => {
     setUpdating(true);
     try {
       const res = await fetch('/api/shipping/ship-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: id })
+        body: JSON.stringify({ 
+          orderId: id,
+          credentials: overrideCreds || (customCreds.email && customCreds.password ? customCreds : undefined)
+        })
       });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Failed to ship order');
       }
       
+      setShowCredsModal(false);
       toast.success(`Pushed to Shiprocket! Shipment ID: ${data.shipment_id || 'Created'}`);
       fetchOrder();
     } catch (error: any) {
       console.error('[Ship With Shiprocket Error]:', error);
       toast.error(error.message || 'Shiprocket Error');
+      if (error.message?.toLowerCase().includes('auth') || error.message?.toLowerCase().includes('403') || error.message?.toLowerCase().includes('invalid')) {
+        setShowCredsModal(true);
+      }
     } finally {
       setUpdating(false);
     }
@@ -636,6 +646,75 @@ export default function OrderDetailPage() {
           </section>
         </div>
       </div>
+
+      {/* Shiprocket Custom Credentials Modal */}
+      {showCredsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[32px] max-w-md w-full p-8 shadow-2xl border border-gray-100 space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-pink-50 text-brand-pink flex items-center justify-center">
+                  <Box className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-brand-dark">Shiprocket Login</h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Connect your API User</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowCredsModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-xs font-bold px-2 py-1 rounded-lg hover:bg-gray-100"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-500 leading-relaxed">
+              If Shiprocket returns an auth error, enter your active <strong>Shiprocket API User</strong> credentials below to dispatch this order directly:
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">API User Email</label>
+                <input 
+                  type="email" 
+                  value={customCreds.email}
+                  onChange={(e) => setCustomCreds({ ...customCreds, email: e.target.value })}
+                  placeholder="e.g. Printatoz954@gmail.com"
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-brand-pink outline-none text-xs font-bold transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">API User Password</label>
+                <input 
+                  type="password" 
+                  value={customCreds.password}
+                  onChange={(e) => setCustomCreds({ ...customCreds, password: e.target.value })}
+                  placeholder="Enter API User Password"
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-brand-pink outline-none text-xs font-bold transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button 
+                onClick={() => setShowCredsModal(false)}
+                className="flex-1 py-3.5 bg-gray-100 text-brand-dark hover:bg-gray-200 rounded-2xl text-xs font-bold transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => shipWithShiprocket(customCreds)}
+                disabled={updating || !customCreds.email || !customCreds.password}
+                className="flex-1 py-3.5 bg-brand-pink text-white hover:bg-pink-600 rounded-2xl text-xs font-bold transition-all shadow-md shadow-pink-200 disabled:opacity-50"
+              >
+                {updating ? 'Authenticating...' : 'Ship with These'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
