@@ -70,12 +70,15 @@ export default function OrderDetailPage() {
         body: JSON.stringify({ orderId: id })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to ship order');
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to ship order');
+      }
       
-      toast.success('Order pushed to Shiprocket successfully!');
+      toast.success(`Pushed to Shiprocket! Shipment ID: ${data.shipment_id || 'Created'}`);
       fetchOrder();
     } catch (error: any) {
-      toast.error(error.message);
+      console.error('[Ship With Shiprocket Error]:', error);
+      toast.error(error.message || 'Shiprocket Error');
     } finally {
       setUpdating(false);
     }
