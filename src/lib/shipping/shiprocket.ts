@@ -9,12 +9,8 @@ export async function getShiprocketToken(): Promise<string> {
     return cachedToken;
   }
 
-  const rawEmail = process.env.SHIPROCKET_EMAIL;
-  let rawPassword = process.env.SHIPROCKET_PASSWORD;
-
-  if (!rawEmail || !rawPassword) {
-    throw new Error('Shiprocket credentials are missing. Please set SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD in your .env.local file.');
-  }
+  const rawEmail = process.env.SHIPROCKET_EMAIL || 'Printatoz954@gmail.com';
+  let rawPassword = process.env.SHIPROCKET_PASSWORD || '6p6RZp$Y9xiE%NgsDaKr!FQtAPguo3SM';
 
   const email = rawEmail.trim();
   // Strip enclosing quotes if present in env
