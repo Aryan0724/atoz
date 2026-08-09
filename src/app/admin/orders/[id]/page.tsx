@@ -565,8 +565,20 @@ export default function OrderDetailPage() {
                     className="w-full py-4 bg-brand-pink text-white hover:bg-pink-600 transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-2 shadow-md shadow-pink-200"
                   >
                      <Box className="h-4 w-4" />
-                     {updating ? 'Processing...' : 'Push to Shiprocket'}
+                     {updating ? 'Processing...' : (order.tracking_number ? 'Re-push to Shiprocket' : 'Push to Shiprocket')}
                   </button>
+
+                  {order.tracking_url && (
+                    <a 
+                      href={order.tracking_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-full py-3 bg-gray-100 text-brand-dark hover:bg-gray-200 transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      View Live Shiprocket Tracking
+                    </a>
+                  )}
                 </div>
              </div>
           </section>

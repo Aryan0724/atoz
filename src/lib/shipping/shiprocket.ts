@@ -46,6 +46,8 @@ export async function getShiprocketToken(): Promise<string> {
     tokenExpiresAt = Date.now() + 24 * 60 * 60 * 1000;
     return token;
   } catch (err: any) {
+    cachedToken = null;
+    tokenExpiresAt = 0;
     console.error('[Shiprocket Auth Error]:', err.message);
     throw err;
   }
