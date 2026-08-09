@@ -573,7 +573,7 @@ export default function OrderDetailPage() {
                   </button>
 
                   <button 
-                    onClick={shipWithShiprocket}
+                    onClick={() => shipWithShiprocket()}
                     disabled={updating || order.status === 'delivered' || order.status === 'cancelled'}
                     className="w-full py-4 bg-brand-pink text-white hover:bg-pink-600 transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-2 shadow-md shadow-pink-200"
                   >
