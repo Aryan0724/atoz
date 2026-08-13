@@ -42,23 +42,7 @@ export default function OrderDetailPage() {
   }, [order]);
 
   const updateTrackingInfo = async () => {
-    setUpdating(true);
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update(trackingInfo)
-        .eq('id', id);
-
-      if (error) throw error;
-      toast.success('Tracking information updated');
-      setOrder({ ...order, ...trackingInfo });
-    } catch (error: any) {
-      console.warn('[Demo Mode] Tracking update skipped.', error.message);
-      toast.info('Tracking updated locally');
-      setOrder({ ...order, ...trackingInfo });
-    } finally {
-      setUpdating(false);
-    }
+    await updateOrderField(trackingInfo);
   };
 
   const [customCreds, setCustomCreds] = useState({ email: '', password: '' });
@@ -204,10 +188,21 @@ export default function OrderDetailPage() {
     setUpdating(true);
     setOrder({ ...order, ...fields });
     try {
-      const { error } = await supabase.from('orders').update(fields).eq('id', id);
-      if (error) throw error;
+      const res = await fetch('/api/orders/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: id, fields }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update order');
+      }
       toast.success('Order updated!');
+      if (data.order) {
+        setOrder((prev: any) => prev ? { ...prev, ...data.order } : null);
+      }
     } catch (err: any) {
+      console.warn('[Update Order API Failed]', err.message);
       toast.info('Updated locally');
     } finally {
       setUpdating(false);

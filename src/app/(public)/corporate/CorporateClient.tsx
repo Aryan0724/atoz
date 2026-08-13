@@ -27,14 +27,43 @@ const SOLUTIONS = [
 
 export default function CorporateClient() {
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    companyName: '',
+    email: '',
+    scale: '100 - 500 Units',
+    requirements: ''
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res = await fetch('/api/corporate/inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to submit inquiry');
+
       toast.success("Inquiry Protocol Initiated. An account strategist will contact you shortly.");
-    }, 1500);
+      setFormData({
+        companyName: '',
+        email: '',
+        scale: '100 - 500 Units',
+        requirements: ''
+      });
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to submit inquiry. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -88,24 +117,24 @@ export default function CorporateClient() {
                    <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                          <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Entity Name</label>
-                         <input type="text" placeholder="Company Name" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-brand-pink/20 outline-none transition-all" required />
+                         <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} placeholder="Company Name" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-brand-pink/20 outline-none transition-all" required />
                       </div>
                       <div className="space-y-2">
                          <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Work Email</label>
-                         <input type="email" placeholder="corporate@entity.com" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-brand-pink/20 outline-none transition-all" required />
+                         <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="corporate@entity.com" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-brand-pink/20 outline-none transition-all" required />
                       </div>
                    </div>
                    <div className="space-y-2">
                       <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Project Scale</label>
-                      <select className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-brand-pink/20 outline-none appearance-none cursor-pointer transition-all">
-                         <option className="bg-brand-dark">100 - 500 Units</option>
-                         <option className="bg-brand-dark">500 - 2,500 Units</option>
-                         <option className="bg-brand-dark">2,500 - 10,000+ Units</option>
+                      <select name="scale" value={formData.scale} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-brand-pink/20 outline-none appearance-none cursor-pointer transition-all">
+                         <option className="bg-brand-dark" value="100 - 500 Units">100 - 500 Units</option>
+                         <option className="bg-brand-dark" value="500 - 2,500 Units">500 - 2,500 Units</option>
+                         <option className="bg-brand-dark" value="2,500 - 10,000+ Units">2,500 - 10,000+ Units</option>
                       </select>
                    </div>
                    <div className="space-y-2">
                       <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Mission Requirements</label>
-                      <textarea rows={4} placeholder="Describe your branding objectives..." className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-brand-pink/20 outline-none transition-all resize-none"></textarea>
+                      <textarea name="requirements" value={formData.requirements} onChange={handleChange} rows={4} placeholder="Describe your branding objectives..." className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-brand-pink/20 outline-none transition-all resize-none" required></textarea>
                    </div>
                    <button 
                      type="submit" 

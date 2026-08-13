@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import SplitType from 'split-type';
 import { supabase } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,6 +24,57 @@ export default function ContactPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [cmsData, setCmsData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+  const [interests, setInterests] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleInterestChange = (interest: string) => {
+    setInterests(prev => 
+      prev.includes(interest) 
+        ? prev.filter(item => item !== interest) 
+        : [...prev, interest]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, interests }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send inquiry');
+      
+      toast.success('Your message has been sent successfully!');
+      setFormData({
+        name: '',
+        company: '',
+        email: '',
+        phone: '',
+        message: ''
+      });
+      setInterests([]);
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -174,25 +226,25 @@ export default function ContactPage() {
                 
                 <h3 className="text-4xl font-serif text-brand-darkBlue mb-16">Start a Project</h3>
                 
-                <form className="space-y-8">
+                <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div className="form-group relative mb-12">
-                      <input type="text" id="name" className="form-input w-full bg-transparent border-b border-brand-darkBlue/20 py-4 font-sans text-xl text-brand-darkBlue focus:outline-none focus:border-brand-gold transition-all peer" required />
+                      <input type="text" id="name" value={formData.name} onChange={handleChange} className="form-input w-full bg-transparent border-b border-brand-darkBlue/20 py-4 font-sans text-xl text-brand-darkBlue focus:outline-none focus:border-brand-gold transition-all peer" required />
                       <label htmlFor="name" className="form-label absolute left-0 top-4 text-xl text-slate-400 font-serif italic pointer-events-none transition-all peer-focus:-top-6 peer-focus:text-xs peer-focus:font-sans peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-widest peer-focus:text-brand-gold peer-focus:not-italic peer-valid:-top-6 peer-valid:text-xs peer-valid:font-sans peer-valid:font-bold peer-valid:uppercase peer-valid:tracking-widest peer-valid:text-brand-gold peer-valid:not-italic">Your Name</label>
                     </div>
                     <div className="form-group relative mb-12">
-                      <input type="text" id="company" className="form-input w-full bg-transparent border-b border-brand-darkBlue/20 py-4 font-sans text-xl text-brand-darkBlue focus:outline-none focus:border-brand-gold transition-all peer" required />
+                      <input type="text" id="company" value={formData.company} onChange={handleChange} className="form-input w-full bg-transparent border-b border-brand-darkBlue/20 py-4 font-sans text-xl text-brand-darkBlue focus:outline-none focus:border-brand-gold transition-all peer" />
                       <label htmlFor="company" className="form-label absolute left-0 top-4 text-xl text-slate-400 font-serif italic pointer-events-none transition-all peer-focus:-top-6 peer-focus:text-xs peer-focus:font-sans peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-widest peer-focus:text-brand-gold peer-focus:not-italic peer-valid:-top-6 peer-valid:text-xs peer-valid:font-sans peer-valid:font-bold peer-valid:uppercase peer-valid:tracking-widest peer-valid:text-brand-gold peer-valid:not-italic">Company Name</label>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div className="form-group relative mb-12">
-                      <input type="email" id="email" className="form-input w-full bg-transparent border-b border-brand-darkBlue/20 py-4 font-sans text-xl text-brand-darkBlue focus:outline-none focus:border-brand-gold transition-all peer" required />
+                      <input type="email" id="email" value={formData.email} onChange={handleChange} className="form-input w-full bg-transparent border-b border-brand-darkBlue/20 py-4 font-sans text-xl text-brand-darkBlue focus:outline-none focus:border-brand-gold transition-all peer" required />
                       <label htmlFor="email" className="form-label absolute left-0 top-4 text-xl text-slate-400 font-serif italic pointer-events-none transition-all peer-focus:-top-6 peer-focus:text-xs peer-focus:font-sans peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-widest peer-focus:text-brand-gold peer-focus:not-italic peer-valid:-top-6 peer-valid:text-xs peer-valid:font-sans peer-valid:font-bold peer-valid:uppercase peer-valid:tracking-widest peer-valid:text-brand-gold peer-valid:not-italic">Email Address</label>
                     </div>
                     <div className="form-group relative mb-12">
-                      <input type="tel" id="phone" className="form-input w-full bg-transparent border-b border-brand-darkBlue/20 py-4 font-sans text-xl text-brand-darkBlue focus:outline-none focus:border-brand-gold transition-all peer" required />
+                      <input type="tel" id="phone" value={formData.phone} onChange={handleChange} className="form-input w-full bg-transparent border-b border-brand-darkBlue/20 py-4 font-sans text-xl text-brand-darkBlue focus:outline-none focus:border-brand-gold transition-all peer" required />
                       <label htmlFor="phone" className="form-label absolute left-0 top-4 text-xl text-slate-400 font-serif italic pointer-events-none transition-all peer-focus:-top-6 peer-focus:text-xs peer-focus:font-sans peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-widest peer-focus:text-brand-gold peer-focus:not-italic peer-valid:-top-6 peer-valid:text-xs peer-valid:font-sans peer-valid:font-bold peer-valid:uppercase peer-valid:tracking-widest peer-valid:text-brand-gold peer-valid:not-italic">Phone Number</label>
                     </div>
                   </div>
@@ -202,7 +254,7 @@ export default function ContactPage() {
                     <div className="flex flex-wrap gap-4">
                       {['Corporate Gifting', 'Packaging', 'Stationery', 'Logistics'].map((interest) => (
                         <label key={interest} className="cursor-pointer">
-                          <input type="checkbox" className="peer sr-only" />
+                          <input type="checkbox" checked={interests.includes(interest)} onChange={() => handleInterestChange(interest)} className="peer sr-only" />
                           <div className="px-6 py-3 rounded-full border border-brand-darkBlue/20 text-brand-darkBlue peer-checked:bg-brand-darkBlue peer-checked:text-white peer-checked:border-brand-darkBlue transition-all font-sans text-sm hover:border-brand-gold">
                             {interest}
                           </div>
@@ -212,13 +264,13 @@ export default function ContactPage() {
                   </div>
 
                   <div className="form-group relative mb-12">
-                    <input type="text" id="message" className="form-input w-full bg-transparent border-b border-brand-darkBlue/20 py-4 font-sans text-xl text-brand-darkBlue focus:outline-none focus:border-brand-gold transition-all peer" required />
+                    <input type="text" id="message" value={formData.message} onChange={handleChange} className="form-input w-full bg-transparent border-b border-brand-darkBlue/20 py-4 font-sans text-xl text-brand-darkBlue focus:outline-none focus:border-brand-gold transition-all peer" required />
                     <label htmlFor="message" className="form-label absolute left-0 top-4 text-xl text-slate-400 font-serif italic pointer-events-none transition-all peer-focus:-top-6 peer-focus:text-xs peer-focus:font-sans peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-widest peer-focus:text-brand-gold peer-focus:not-italic peer-valid:-top-6 peer-valid:text-xs peer-valid:font-sans peer-valid:font-bold peer-valid:uppercase peer-valid:tracking-widest peer-valid:text-brand-gold peer-valid:not-italic">Tell us about your project</label>
                   </div>
 
                   <div className="pt-8">
-                    <button type="submit" className="w-full py-6 bg-brand-darkBlue text-white font-sans font-bold uppercase tracking-[0.2em] rounded-full hover:bg-brand-gold transition-all duration-500 magnetic-target shadow-lg">
-                      Submit Request
+                    <button type="submit" disabled={submitting} className="w-full py-6 bg-brand-darkBlue text-white font-sans font-bold uppercase tracking-[0.2em] rounded-full hover:bg-brand-gold transition-all duration-500 magnetic-target shadow-lg disabled:opacity-50">
+                      {submitting ? 'Transmitting Request...' : 'Submit Request'}
                     </button>
                   </div>
                 </form>
