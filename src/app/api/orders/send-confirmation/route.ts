@@ -50,6 +50,10 @@ export async function POST(req: Request) {
       items: emailItems,
     });
 
+    if (result.simulated) {
+      return NextResponse.json({ error: 'SMTP credentials are not configured on Vercel. Email was simulated in console.' }, { status: 500 });
+    }
+
     if (!result.success) {
       return NextResponse.json({ error: result.error || result.reason || 'Failed to send email' }, { status: 500 });
     }
