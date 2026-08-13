@@ -50,6 +50,10 @@ export async function POST(req: Request) {
       items: emailItems,
     });
 
+    if (!result.success) {
+      return NextResponse.json({ error: result.error || result.reason || 'Failed to send email' }, { status: 500 });
+    }
+
     return NextResponse.json({ success: true, result });
   } catch (error: any) {
     console.error('[Send Confirmation] Error:', error);
