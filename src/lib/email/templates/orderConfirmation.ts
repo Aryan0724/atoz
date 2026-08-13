@@ -38,6 +38,7 @@ export function generateOrderConfirmationHtml(order: OrderEmailData): string {
     month: 'short',
     year: 'numeric'
   });
+  const customerName = order.profiles?.full_name || order.shipping_address?.fullName || 'Valued Customer';
 
   const itemsHtml = (order.items || []).map(item => {
     const itemImg = item.design_preview_url || item.product_image || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400';
@@ -103,7 +104,7 @@ export function generateOrderConfirmationHtml(order: OrderEmailData): string {
                 ✓ Order Successfully Received
               </div>
               <h2 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">
-                Thank you for your order, ${addr.fullName || 'Valued Customer'}!
+                Thank you for your order, ${customerName}!
               </h2>
               <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;">
                 We have received your custom print order and our production team is preparing your designs for high-precision printing.

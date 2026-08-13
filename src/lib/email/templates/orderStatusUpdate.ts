@@ -43,6 +43,7 @@ export function generateOrderStatusUpdateHtml(order: OrderStatusEmailData): stri
     month: 'short',
     year: 'numeric'
   });
+  const customerName = order.profiles?.full_name || order.shipping_address?.fullName || 'Customer';
 
   const formattedEstDelivery = order.estimated_delivery
     ? new Date(order.estimated_delivery).toLocaleDateString('en-IN', {
@@ -263,7 +264,7 @@ export function generateOrderStatusUpdateHtml(order: OrderStatusEmailData): stri
                   <tr>
                     <td style="padding-top: 6px; border-top: 1px solid #e2e8f0;">
                       <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Recipient</span>
-                      <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${addr.fullName || 'Customer'}</div>
+                      <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${customerName}</div>
                     </td>
                     <td align="right" style="padding-top: 6px; border-top: 1px solid #e2e8f0;">
                       <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Total Amount</span>
