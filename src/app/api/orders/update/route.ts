@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       .from('orders')
       .update(fields)
       .eq('id', orderId)
-      .select()
+      .select('*, profiles(*)')
       .single();
 
     if (updateErr) {
@@ -74,6 +74,7 @@ export async function POST(req: Request) {
             courier_name: updatedOrderData.courier_name,
             tracking_url: updatedOrderData.tracking_url,
             items: emailItems,
+            profiles: updatedOrderData.profiles,
           });
         } catch (emailErr) {
           console.error('[Order Update API] Email notification failed:', emailErr);

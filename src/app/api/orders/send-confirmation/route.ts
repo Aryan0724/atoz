@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     // Fetch order details
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('*')
+      .select('*, profiles(*)')
       .eq('id', orderId)
       .single();
 
@@ -48,6 +48,7 @@ export async function POST(req: Request) {
       payment_status: order.payment_status,
       shipping_address: order.shipping_address,
       items: emailItems,
+      profiles: order.profiles,
     });
 
     if (result.simulated) {

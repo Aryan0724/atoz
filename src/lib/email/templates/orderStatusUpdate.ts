@@ -27,6 +27,11 @@ export interface OrderStatusEmailData {
   tracking_number?: string | null;
   courier_name?: string | null;
   tracking_url?: string | null;
+  profiles?: {
+    email?: string;
+    full_name?: string;
+    [key: string]: any;
+  } | null;
 }
 
 export function generateOrderStatusUpdateHtml(order: OrderStatusEmailData): string {

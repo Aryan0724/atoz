@@ -23,6 +23,11 @@ export interface OrderEmailData {
     product_image?: string;
   }>;
   trackingUrl?: string;
+  profiles?: {
+    email?: string;
+    full_name?: string;
+    [key: string]: any;
+  } | null;
 }
 
 export function generateOrderConfirmationHtml(order: OrderEmailData): string {

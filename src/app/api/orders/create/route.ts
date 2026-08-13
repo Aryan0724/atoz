@@ -34,7 +34,7 @@ export async function POST(req: Request) {
           estimated_delivery: orderData.estimated_delivery || null,
         }
       ])
-      .select()
+      .select('*, profiles(*)')
       .single();
 
     if (orderError) {
@@ -90,6 +90,7 @@ export async function POST(req: Request) {
         payment_status: createdOrder.payment_status,
         shipping_address: createdOrder.shipping_address,
         items: emailItems,
+        profiles: createdOrder.profiles,
       });
     } catch (emailErr) {
       console.error('[Order API] Confirmation email trigger error:', emailErr);

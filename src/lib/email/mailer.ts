@@ -25,7 +25,7 @@ export function getEmailTransporter() {
 }
 
 export async function sendOrderConfirmationEmail(orderData: OrderEmailData) {
-  const recipientEmail = orderData.shipping_address?.email;
+  const recipientEmail = orderData.profiles?.email || orderData.shipping_address?.email;
 
   if (!recipientEmail) {
     console.warn('[Mailer] No recipient email specified in orderData:', orderData.id);
@@ -64,7 +64,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData) {
 }
 
 export async function sendOrderStatusEmail(orderData: OrderStatusEmailData) {
-  const recipientEmail = orderData.shipping_address?.email;
+  const recipientEmail = orderData.profiles?.email || orderData.shipping_address?.email;
 
   if (!recipientEmail) {
     console.warn('[Mailer] No recipient email specified in orderData:', orderData.id);
