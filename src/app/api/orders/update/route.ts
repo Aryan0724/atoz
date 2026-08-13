@@ -59,23 +59,25 @@ export async function POST(req: Request) {
           product_image: item.product?.images?.[0],
         }));
 
-        // Send status email (asynchronously)
-        sendOrderStatusEmail({
-          id: updatedOrderData.id,
-          created_at: updatedOrderData.created_at,
-          total_price: updatedOrderData.total_price,
-          payment_method: updatedOrderData.payment_method,
-          payment_status: updatedOrderData.payment_status,
-          status: updatedOrderData.status,
-          shipping_address: updatedOrderData.shipping_address,
-          estimated_delivery: updatedOrderData.estimated_delivery,
-          tracking_number: updatedOrderData.tracking_number,
-          courier_name: updatedOrderData.courier_name,
-          tracking_url: updatedOrderData.tracking_url,
-          items: emailItems,
-        }).catch(emailErr => {
+        // Send status email (awaited to prevent Vercel container termination)
+        try {
+          await sendOrderStatusEmail({
+            id: updatedOrderData.id,
+            created_at: updatedOrderData.created_at,
+            total_price: updatedOrderData.total_price,
+            payment_method: updatedOrderData.payment_method,
+            payment_status: updatedOrderData.payment_status,
+            status: updatedOrderData.status,
+            shipping_address: updatedOrderData.shipping_address,
+            estimated_delivery: updatedOrderData.estimated_delivery,
+            tracking_number: updatedOrderData.tracking_number,
+            courier_name: updatedOrderData.courier_name,
+            tracking_url: updatedOrderData.tracking_url,
+            items: emailItems,
+          });
+        } catch (emailErr) {
           console.error('[Order Update API] Email notification failed:', emailErr);
-        });
+        }
       } catch (emailFetchErr) {
         console.error('[Order Update API] Failed to fetch email details:', emailFetchErr);
       }

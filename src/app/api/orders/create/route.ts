@@ -80,18 +80,20 @@ export async function POST(req: Request) {
       product_image: item.product?.images?.[0],
     }));
 
-    // Trigger confirmation email asynchronously (does not block order response)
-    sendOrderConfirmationEmail({
-      id: orderId,
-      created_at: createdOrder.created_at || new Date().toISOString(),
-      total_price: createdOrder.total_price,
-      payment_method: createdOrder.payment_method,
-      payment_status: createdOrder.payment_status,
-      shipping_address: createdOrder.shipping_address,
-      items: emailItems,
-    }).catch(emailErr => {
+    // Trigger confirmation email (awaited to prevent Vercel container termination)
+    try {
+      await sendOrderConfirmationEmail({
+        id: orderId,
+        created_at: createdOrder.created_at || new Date().toISOString(),
+        total_price: createdOrder.total_price,
+        payment_method: createdOrder.payment_method,
+        payment_status: createdOrder.payment_status,
+        shipping_address: createdOrder.shipping_address,
+        items: emailItems,
+      });
+    } catch (emailErr) {
       console.error('[Order API] Confirmation email trigger error:', emailErr);
-    });
+    }
 
     return NextResponse.json({
       success: true,
