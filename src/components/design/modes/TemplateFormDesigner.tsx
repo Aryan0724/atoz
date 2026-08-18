@@ -1118,7 +1118,7 @@ const TemplateFormDesigner = forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
           mobileTab === 'fields' ? "block flex-1" : "hidden md:block"
         )}
       >
-        <div className="p-4 md:p-8 space-y-6 md:space-y-10">
+        <div className="p-4 md:p-8 pb-32 md:pb-40 space-y-6 md:space-y-10">
           
           {/* Template Selection */}
           {designs.length > 1 && (
