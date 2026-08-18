@@ -51,6 +51,7 @@ export interface DesignerCanvasProps {
   vdpRowIndex?: number;
   initialTemplateIndex?: number;
   activeView?: 'front' | 'back' | 'left' | 'right' | '3d';
+  onZoomChange?: (zoom: number) => void;
 }
 
 export interface DesignerCanvasRef {
@@ -73,6 +74,7 @@ export interface DesignerCanvasRef {
   zoomIn: () => void;
   zoomOut: () => void;
   resetZoom: () => void;
+  zoomLevel: number;
   duplicateActiveObject: () => void;
   toggleLock: () => void;
   undo: () => void;
@@ -84,6 +86,7 @@ export interface DesignerCanvasRef {
   clearDesign: () => void;
   addPattern: (url: string) => void;
   previewVdpData?: (index: number) => void;
+  applyAiDesign?: (elements: any[], clearFirst?: boolean) => Promise<void>;
 }
 
 export const getObjectProperties = (obj: any): CanvasObjectProperties => {

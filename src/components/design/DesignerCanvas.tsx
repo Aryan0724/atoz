@@ -31,7 +31,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   vdpData,
   vdpRowIndex = 0,
   initialTemplateIndex = 0,
-  activeView = 'front'
+  activeView = 'front',
+  onZoomChange
 }, ref) => {
   const BASE_WIDTH = designConfig?.canvas_width || 500;
   const BASE_HEIGHT = designConfig?.canvas_height || 625;
@@ -43,8 +44,13 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
   const [isDragOver, setIsDragOver] = useState(false);
 
   const { saveHistory, undo, redo } = useCanvasHistory(canvas);
-  const { zoomLevel, handleZoom, resetZoom } = useCanvasGestures(canvas, containerRef);
+  const { zoomLevel, handleZoom, resetZoom } = useCanvasGestures(canvas, containerRef, BASE_WIDTH, onZoomChange);
   const { addText, addImage, addShape, addIcon, addSvgGraphic } = useCanvasActions(canvas, onObjectsUpdated, onHistoryChange);
+
+  const zoomLevelRef = useRef(zoomLevel);
+  useEffect(() => {
+    zoomLevelRef.current = zoomLevel;
+  }, [zoomLevel]);
 
   const productColorRef = useRef(productColor);
   useEffect(() => {
@@ -333,13 +339,13 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       const scale = width / BASE_WIDTH;
       canvas.setWidth(width);
       canvas.setHeight(BASE_HEIGHT * scale);
-      canvas.setZoom(scale * zoomLevel);
+      canvas.setZoom(scale * zoomLevelRef.current);
       canvas.calcOffset();
       canvas.renderAll();
     });
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
-  }, [canvas, zoomLevel]);
+  }, [canvas]);
 
   // Sync isDrawingMode
   useEffect(() => {
@@ -746,9 +752,10 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       link.click();
       document.body.removeChild(link);
     },
-    zoomIn: () => handleZoom(canvas?.getZoom() || 1 * 1.1),
-    zoomOut: () => handleZoom(canvas?.getZoom() || 1 / 1.1),
+    zoomIn: () => handleZoom(zoomLevel * 1.1),
+    zoomOut: () => handleZoom(zoomLevel / 1.1),
     resetZoom,
+    zoomLevel,
     duplicateActiveObject: () => {
       if (!canvas) return;
       const active = canvas.getActiveObject();
@@ -859,8 +866,110 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
          canvas.renderAll();
          onObjectsUpdated?.();
       }, { crossOrigin: 'anonymous' });
+    },
+    applyAiDesign: async (elements: any[], clearFirst: boolean = true) => {
+      if (!canvas) return;
+      
+      if (clearFirst) {
+        canvas.getObjects().forEach(obj => {
+          if (!['product_base_image', 'product_color_fill', 'safe_zone_indicator'].includes((obj as any).id)) {
+            canvas.remove(obj);
+          }
+        });
+        canvas.discardActiveObject();
+      }
+
+      for (const el of elements) {
+        try {
+          if (el.type === 'text') {
+            if (el.fontFamily) {
+              await loadGoogleFont(el.fontFamily);
+            }
+            const t = new fabric.IText(el.text || 'Text', {
+              left: el.left ?? CENTER_X,
+              top: el.top ?? CENTER_Y,
+              fontFamily: el.fontFamily || 'Inter',
+              fontSize: el.fontSize || 28,
+              fill: el.fill || '#000000',
+              fontWeight: el.fontWeight || 'normal',
+              fontStyle: el.fontStyle || 'normal',
+              textAlign: el.textAlign || 'center',
+              angle: el.angle || 0,
+              originX: 'center',
+              originY: 'center',
+              //@ts-ignore
+              id: `text_ai_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`
+            });
+            canvas.add(t);
+          } else if (el.type === 'shape') {
+            const commonProps = {
+              left: el.left ?? CENTER_X,
+              top: el.top ?? CENTER_Y,
+              fill: el.fill || '#5b5b42',
+              angle: el.angle || 0,
+              scaleX: el.scaleX || 1,
+              scaleY: el.scaleY || 1,
+              originX: 'center',
+              originY: 'center',
+              //@ts-ignore
+              id: `shape_ai_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`
+            };
+            let shape: fabric.Object | undefined;
+            if (el.shapeType === 'circle') {
+              shape = new fabric.Circle({ ...commonProps, radius: el.radius || 40 });
+            } else if (el.shapeType === 'rect') {
+              shape = new fabric.Rect({ ...commonProps, width: el.width || 80, height: el.height || 80 });
+            } else if (el.shapeType === 'triangle') {
+              shape = new fabric.Triangle({ ...commonProps, width: el.width || 80, height: el.height || 80 });
+            } else if (el.shapeType === 'line') {
+              shape = new fabric.Rect({ ...commonProps, width: el.width || 100, height: el.height || 2 });
+            } else if (el.shapeType === 'heart') {
+              shape = new fabric.Path('M 272.701 51.272 C 246.408 25.592 212.714 10.897 170.141 10.897 C 116.533 10.897 73.018 54.412 73.018 108.021 C 73.018 135.021 84.018 160.021 102.018 178.021 L 272.701 348.704 L 443.384 178.021 C 461.384 160.021 472.384 135.021 472.384 108.021 C 472.384 54.412 428.869 10.897 375.261 10.897 C 332.688 10.897 298.994 25.592 272.701 51.272 Z', { ...commonProps, scaleX: (el.scaleX || 1) * 0.1, scaleY: (el.scaleY || 1) * 0.1 });
+            } else if (el.shapeType === 'star') {
+              shape = new fabric.Path('M 128 0 L 168 80 L 256 93 L 192 155 L 207 243 L 128 201 L 49 243 L 64 155 L 0 93 L 88 80 Z', { ...commonProps, scaleX: (el.scaleX || 1) * 0.3, scaleY: (el.scaleY || 1) * 0.3 });
+            }
+            if (shape) canvas.add(shape);
+          } else if (el.type === 'icon') {
+            const pathData = iconLibrary[el.iconName];
+            if (pathData) {
+              const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${pathData}"/></svg>`;
+              await new Promise<void>((resolve) => {
+                fabric.loadSVGFromString(svgString, (objects, options) => {
+                  const obj = fabric.util.groupSVGElements(objects, options);
+                  obj.set({
+                    left: el.left ?? CENTER_X,
+                    top: el.top ?? CENTER_Y,
+                    originX: 'center',
+                    originY: 'center',
+                    angle: el.angle || 0,
+                    //@ts-ignore
+                    id: `icon_ai_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`
+                  });
+                  const targetSize = 120;
+                  const scale = (targetSize / Math.max(obj.width || 1, obj.height || 1)) * (el.scaleX || 1);
+                  obj.scale(scale);
+                  if (el.fill) {
+                    obj.set({ fill: el.fill });
+                    if (obj.type === 'group') {
+                      (obj as any).getObjects().forEach((child: any) => child.set({ fill: el.fill }));
+                    }
+                  }
+                  canvas.add(obj);
+                  resolve();
+                });
+              });
+            }
+          }
+        } catch (err) {
+          console.error('[AI Designer apply error]:', err);
+        }
+      }
+      
+      canvas.renderAll();
+      onObjectsUpdated?.();
+      onHistoryChange?.();
     }
-  }), [canvas, addText, addImage, addShape, addIcon, addSvgGraphic, undo, redo, resetZoom, handleZoom, onObjectsUpdated, onHistoryChange, onObjectModified, onSelectionCleared, designArea]);
+  }), [canvas, zoomLevel, addText, addImage, addShape, addIcon, addSvgGraphic, undo, redo, resetZoom, handleZoom, onObjectsUpdated, onHistoryChange, onObjectModified, onSelectionCleared, designArea, CENTER_X, CENTER_Y]);
 
   return (
     <div 

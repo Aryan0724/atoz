@@ -156,6 +156,7 @@ interface SidebarPanelProps {
   selectedTemplateIndex?: number;
   designConfig?: any;
   activeView?: 'front' | 'back' | 'left' | 'right' | '3d';
+  onApplyAiDesign?: (elements: any[], clearFirst?: boolean) => Promise<void>;
 }
 
 const SidebarPanel = ({ 
@@ -196,7 +197,8 @@ const SidebarPanel = ({
   onTemplateChange,
   selectedTemplateIndex = 0,
   designConfig = {},
-  activeView = 'front'
+  activeView = 'front',
+  onApplyAiDesign
 }: SidebarPanelProps) => {
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -247,6 +249,91 @@ const SidebarPanel = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [aiHistory, setAiHistory] = useState<{ url: string, prompt: string }[]>([]);
+
+  // AI Layout Designer State
+  const [aiMode, setAiMode] = useState<'graphic' | 'layout'>('layout');
+  const [aiLayoutClearFirst, setAiLayoutClearFirst] = useState(true);
+  const [generationSteps, setGenerationSteps] = useState<string[]>([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(-1);
+
+  const handleAiLayoutGenerate = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error("Please enter a description for your design!");
+      return;
+    }
+    
+    setIsGenerating(true);
+    setGenerationSteps([
+      "Connecting to Gemini API...",
+      "Analyzing layout requirements...",
+      "Styling typography & choosing palette...",
+      "Composing canvas elements...",
+      "Applying elements to canvas..."
+    ]);
+    setCurrentStepIndex(0);
+
+    try {
+      // Step 0
+      await new Promise(r => setTimeout(r, 600));
+      setCurrentStepIndex(1);
+      
+      // Step 1
+      const canvasWidth = designConfig?.canvas_width || 500;
+      const canvasHeight = designConfig?.canvas_height || 625;
+      
+      const response = await fetch('/api/design/ai-generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt: aiPrompt,
+          productCategory,
+          canvasWidth,
+          canvasHeight
+        })
+      });
+
+      setCurrentStepIndex(2);
+      await new Promise(r => setTimeout(r, 600));
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error ${response.status}`);
+      }
+
+      setCurrentStepIndex(3);
+      const data = await response.json();
+      
+      if (!data.success || !data.design) {
+        throw new Error("Invalid response format from generator");
+      }
+
+      setCurrentStepIndex(4);
+      await new Promise(r => setTimeout(r, 600));
+
+      const { backgroundColor, elements } = data.design;
+      
+      // Apply background color if provided
+      if (backgroundColor && onProductColorChange) {
+        onProductColorChange(backgroundColor);
+      }
+
+      // Apply to canvas
+      if (onApplyAiDesign && elements) {
+        await onApplyAiDesign(elements, aiLayoutClearFirst);
+      }
+
+      toast.success("AI Design Layout Created!");
+    } catch (err: any) {
+      console.error("AI Layout Generation failed:", err);
+      toast.error(err.message || "Failed to generate design layout.");
+    } finally {
+      setIsGenerating(false);
+      setGenerationSteps([]);
+      setCurrentStepIndex(-1);
+    }
+  };
 
   const handleAiGenerate = async () => {
     if (!aiPrompt.trim()) {
@@ -798,57 +885,175 @@ const SidebarPanel = ({
         {/* ─── AI TAB ─────────────────────────────────────────── */}
         {activeTab === 'ai' && (
           <div className="p-4 space-y-4">
-            <div className="p-5 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border border-purple-100 rounded-[28px] shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-32 h-32 bg-purple-200/20 blur-3xl rounded-full" />
-              
-              <div className="flex items-center gap-2 mb-3 relative z-10">
-                <div className="p-2 bg-white rounded-xl shadow-sm">
-                  <Sparkles className="h-4 w-4 text-purple-600" />
-                </div>
-                <span className="text-xs font-black text-purple-900 uppercase tracking-widest italic">AI Studio</span>
-              </div>
+            {/* Mode Selector Toggle */}
+            <div className="flex bg-[#f0f0e8] p-1 rounded-2xl">
+              <button
+                onClick={() => setAiMode('layout')}
+                className={cn(
+                  "flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all",
+                  aiMode === 'layout' 
+                    ? "bg-[#5b5b42] text-white shadow-sm" 
+                    : "text-gray-500 hover:text-gray-900"
+                )}
+              >
+                AI Layout Designer
+              </button>
+              <button
+                onClick={() => setAiMode('graphic')}
+                className={cn(
+                  "flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all",
+                  aiMode === 'graphic' 
+                    ? "bg-[#5b5b42] text-white shadow-sm" 
+                    : "text-gray-500 hover:text-gray-900"
+                )}
+              >
+                AI Image Generator
+              </button>
+            </div>
 
-              <div className="relative z-10">
-                <textarea
-                  className="w-full bg-white/80 backdrop-blur-sm border border-purple-100 rounded-2xl py-3.5 px-4 text-sm resize-none h-28 focus:ring-2 focus:ring-purple-400 outline-none transition-all placeholder:text-gray-400 shadow-inner"
-                  placeholder="Describe your vision (e.g., 'A vintage cosmic jellyfish in neon colors')..."
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                />
+            {aiMode === 'layout' ? (
+              /* AI LAYOUT DESIGNER MODE */
+              <div className="p-5 bg-gradient-to-br from-olive-50 via-[#fbfbf9] to-[#f4f4ec] border border-[#e4e4d8] rounded-[28px] shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-32 h-32 bg-[#5b5b42]/10 blur-3xl rounded-full" />
                 
-                <div className="mt-4 space-y-3">
-                  <p className="text-[9px] font-black text-purple-400 uppercase tracking-widest ml-1">Select a Style</p>
-                  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                    {aiStylePills.map(style => (
+                <div className="flex items-center gap-2 mb-3 relative z-10">
+                  <div className="p-2 bg-white rounded-xl shadow-sm border border-[#e4e4d8]">
+                    <Wand2 className="h-4 w-4 text-[#5b5b42]" />
+                  </div>
+                  <span className="text-xs font-black text-[#5b5b42] uppercase tracking-widest italic">Gemini AI Layout</span>
+                </div>
+
+                <div className="relative z-10 space-y-4">
+                  <textarea
+                    className="w-full bg-white border border-[#e4e4d8] rounded-2xl py-3.5 px-4 text-sm resize-none h-28 focus:ring-2 focus:ring-[#5b5b42] outline-none transition-all placeholder:text-gray-400 shadow-sm"
+                    placeholder="Describe your layout requirements (e.g., 'A professional business card with name John Doe, title CTO, contact details at bottom, and a sleek modern target icon')..."
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                  />
+
+                  {/* Target Behaviour Selector */}
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-black text-[#5b5b42] uppercase tracking-widest ml-1">Canvas Behavior</p>
+                    <div className="flex bg-white border border-[#e4e4d8] p-1 rounded-xl">
                       <button
-                        key={style.id}
-                        onClick={() => setSelectedStyle(selectedStyle === style.id ? null : style.id)}
+                        onClick={() => setAiLayoutClearFirst(true)}
                         className={cn(
-                          "px-3 py-1.5 rounded-full text-[9px] font-black whitespace-nowrap transition-all border",
-                          selectedStyle === style.id 
-                            ? "bg-purple-600 text-white border-purple-600 shadow-md scale-105" 
-                            : "bg-white text-purple-600 border-purple-100 hover:border-purple-300"
+                          "flex-1 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all",
+                          aiLayoutClearFirst 
+                            ? "bg-[#5b5b42] text-white" 
+                            : "text-gray-500 hover:text-gray-700"
                         )}
                       >
-                        {style.label}
+                        Clear & Replace
                       </button>
-                    ))}
+                      <button
+                        onClick={() => setAiLayoutClearFirst(false)}
+                        className={cn(
+                          "flex-1 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all",
+                          !aiLayoutClearFirst 
+                            ? "bg-[#5b5b42] text-white" 
+                            : "text-gray-500 hover:text-gray-700"
+                        )}
+                      >
+                        Insert / Append
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Loading Steps Block */}
+                  {isGenerating && generationSteps.length > 0 && (
+                    <div className="p-4 bg-white border border-[#e4e4d8] rounded-2xl space-y-2.5 animate-pulse">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 text-[#5b5b42] animate-spin" />
+                        <span className="text-[10px] font-bold text-gray-700">Composing Canvas...</span>
+                      </div>
+                      <div className="space-y-1.5 pl-6">
+                        {generationSteps.map((step, idx) => {
+                          const isPast = idx < currentStepIndex;
+                          const isCurrent = idx === currentStepIndex;
+                          return (
+                            <div key={idx} className="flex items-center gap-2">
+                              <div className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                isPast ? "bg-green-500" : isCurrent ? "bg-[#5b5b42] animate-ping" : "bg-gray-300"
+                              )} />
+                              <span className={cn(
+                                "text-[9px] font-medium tracking-tight",
+                                isPast ? "text-green-600 line-through decoration-1" : isCurrent ? "text-[#5b5b42] font-black" : "text-gray-400"
+                              )}>
+                                {step}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {!isGenerating && (
+                    <button 
+                      onClick={handleAiLayoutGenerate}
+                      className="w-full mt-3 py-4 bg-[#5b5b42] hover:bg-[#4d4d38] text-white font-black text-[11px] rounded-2xl uppercase tracking-[0.2em] shadow-md transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 disabled:opacity-50 italic"
+                    >
+                      <Sparkles className="h-4 w-4" /> Create Design Layout
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* EXISTING AI IMAGE GENERATOR MODE */
+              <div className="p-5 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border border-purple-100 rounded-[28px] shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-32 h-32 bg-purple-200/20 blur-3xl rounded-full" />
+                
+                <div className="flex items-center gap-2 mb-3 relative z-10">
+                  <div className="p-2 bg-white rounded-xl shadow-sm">
+                    <Sparkles className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <span className="text-xs font-black text-purple-900 uppercase tracking-widest italic">AI Studio</span>
                 </div>
 
-                <button 
-                  onClick={handleAiGenerate}
-                  disabled={isGenerating}
-                  className="w-full mt-5 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-[11px] rounded-2xl uppercase tracking-[0.2em] shadow-lg shadow-purple-200 hover:shadow-purple-300 transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 disabled:opacity-50 italic"
-                >
-                  {isGenerating ? (
-                    <><RefreshCcw className="h-4 w-4 animate-spin" /> Weaving Magic...</>
-                  ) : (
-                    <><Wand2 className="h-4 w-4" /> Generate Masterpiece</>
-                  )}
-                </button>
+                <div className="relative z-10">
+                  <textarea
+                    className="w-full bg-white/80 backdrop-blur-sm border border-purple-100 rounded-2xl py-3.5 px-4 text-sm resize-none h-28 focus:ring-2 focus:ring-purple-400 outline-none transition-all placeholder:text-gray-400 shadow-inner"
+                    placeholder="Describe your vision (e.g., 'A vintage cosmic jellyfish in neon colors')..."
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                  />
+                  
+                  <div className="mt-4 space-y-3">
+                    <p className="text-[9px] font-black text-purple-400 uppercase tracking-widest ml-1">Select a Style</p>
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                      {aiStylePills.map(style => (
+                        <button
+                          key={style.id}
+                          onClick={() => setSelectedStyle(selectedStyle === style.id ? null : style.id)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-full text-[9px] font-black whitespace-nowrap transition-all border",
+                            selectedStyle === style.id 
+                              ? "bg-purple-600 text-white border-purple-600 shadow-md scale-105" 
+                              : "bg-white text-purple-600 border-purple-100 hover:border-purple-300"
+                          )}
+                        >
+                          {style.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={handleAiGenerate}
+                    disabled={isGenerating}
+                    className="w-full mt-5 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-[11px] rounded-2xl uppercase tracking-[0.2em] shadow-lg shadow-purple-200 hover:shadow-purple-300 transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 disabled:opacity-50 italic"
+                  >
+                    {isGenerating ? (
+                      <><RefreshCcw className="h-4 w-4 animate-spin" /> Weaving Magic...</>
+                    ) : (
+                      <><Wand2 className="h-4 w-4" /> Generate Masterpiece</>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {generatedImage && (
               <div className="group relative aspect-square rounded-[28px] overflow-hidden border-4 border-white shadow-2xl ring-1 ring-purple-100 animate-in zoom-in-95 duration-500">

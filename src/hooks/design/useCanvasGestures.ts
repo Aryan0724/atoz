@@ -3,37 +3,53 @@ import { fabric } from 'fabric';
 
 export const useCanvasGestures = (
   canvas: fabric.Canvas | null, 
-  containerRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement>,
+  baseWidth: number = 500,
+  onZoomChange?: (zoom: number) => void
 ) => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const touchStartDist = useRef<number>(0);
   const touchStartScale = useRef<number>(1);
-  const isDragging = useRef<boolean>(false);
-  const lastPosX = useRef<number>(0);
-  const lastPosY = useRef<number>(0);
+  const zoomLevelRef = useRef(zoomLevel);
 
-  const handleZoom = useCallback((newZoom: number, point?: { x: number; y: number }) => {
+  useEffect(() => {
+    zoomLevelRef.current = zoomLevel;
+  }, [zoomLevel]);
+
+  const getScale = useCallback(() => {
+    if (!containerRef.current) return 1;
+    const width = containerRef.current.getBoundingClientRect().width;
+    return width ? (width / baseWidth) : 1;
+  }, [containerRef, baseWidth]);
+
+  const handleZoom = useCallback((newRelativeZoom: number, point?: { x: number; y: number }) => {
     if (!canvas) return;
     
-    let zoom = Math.max(0.5, Math.min(5, newZoom));
+    let relZoom = Math.max(0.5, Math.min(5, newRelativeZoom));
+    const scale = getScale();
+    const absoluteZoom = scale * relZoom;
     
     if (point) {
-      canvas.zoomToPoint(point, zoom);
+      canvas.zoomToPoint(point, absoluteZoom);
     } else {
-      canvas.setZoom(zoom);
+      // Zoom relative to the center of the canvas
+      canvas.zoomToPoint(new fabric.Point(canvas.getWidth() / 2, canvas.getHeight() / 2), absoluteZoom);
     }
     
-    setZoomLevel(zoom);
+    setZoomLevel(relZoom);
+    onZoomChange?.(relZoom);
     canvas.renderAll();
-  }, [canvas]);
+  }, [canvas, getScale, onZoomChange]);
 
   const resetZoom = useCallback(() => {
     if (!canvas) return;
-    canvas.setZoom(1);
-    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    const scale = getScale();
+    canvas.setZoom(scale);
+    canvas.setViewportTransform([scale, 0, 0, scale, 0, 0]);
     setZoomLevel(1);
+    onZoomChange?.(1);
     canvas.renderAll();
-  }, [canvas]);
+  }, [canvas, getScale, onZoomChange]);
 
   useEffect(() => {
     if (!canvas || !containerRef.current) return;
@@ -47,7 +63,7 @@ export const useCanvasGestures = (
           e.touches[0].pageY - e.touches[1].pageY
         );
         touchStartDist.current = dist;
-        touchStartScale.current = canvas.getZoom();
+        touchStartScale.current = zoomLevelRef.current;
         e.preventDefault();
       }
     };
@@ -58,13 +74,13 @@ export const useCanvasGestures = (
           e.touches[0].pageX - e.touches[1].pageX,
           e.touches[0].pageY - e.touches[1].pageY
         );
-        const scale = (dist / touchStartDist.current) * touchStartScale.current;
+        const relZoom = (dist / touchStartDist.current) * touchStartScale.current;
         
         const rect = el.getBoundingClientRect();
         const midX = (e.touches[0].pageX + e.touches[1].pageX) / 2 - rect.left;
         const midY = (e.touches[0].pageY + e.touches[1].pageY) / 2 - rect.top;
         
-        handleZoom(scale, { x: midX, y: midY });
+        handleZoom(relZoom, { x: midX, y: midY });
         e.preventDefault();
       }
     };

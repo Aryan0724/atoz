@@ -41,6 +41,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
   
   const [selectedColor, setSelectedColor] = useState('#FFFFFF');
   const canvasRef = useRef<DesignerCanvasRef>(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
   const [activeObject, setActiveObject] = useState<CanvasObjectProperties | null>(null);
   const [layers, setLayers] = useState<any[]>([]);
   const [isOutOfBounds, setIsOutOfBounds] = useState(false);
@@ -451,6 +452,9 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
               onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
               onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
               onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
+              onApplyAiDesign={async (elements, clearFirst) => {
+                await canvasRef.current?.applyAiDesign?.(elements, clearFirst);
+              }}
               onTemplateChange={setSelectedTemplateIndex}
               selectedTemplateIndex={selectedTemplateIndex}
               designConfig={(product as any).design_config}
@@ -582,6 +586,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                   vdpRowIndex={vdpRowIndex}
                   activeView={activeView}
                   initialTemplateIndex={selectedTemplateIndex}
+                  onZoomChange={setZoomLevel}
                 />
               </div>
             )}
@@ -590,7 +595,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
               <div className="absolute bottom-16 left-4 md:bottom-8 md:left-8 flex items-center gap-3 z-40 bg-white/90 backdrop-blur shadow-float border border-gray-100 rounded-2xl p-1 md:p-1.5 isolate scale-90 md:scale-100">
                 <div className="flex items-center gap-0.5">
                   <button onClick={() => canvasRef.current?.zoomOut()} className="p-2 hover:bg-gray-50 rounded-lg text-gray-500 transition-colors"><ZoomOut className="h-4 w-4" /></button>
-                  <div className="px-2 min-w-[40px] md:min-w-[50px] text-center"><span className="text-[10px] md:text-[11px] font-black text-brand-dark">{(Math.round((canvasRef.current as any)?.zoomLevel * 100 || 100))}%</span></div>
+                  <div className="px-2 min-w-[40px] md:min-w-[50px] text-center"><span className="text-[10px] md:text-[11px] font-black text-brand-dark">{Math.round(zoomLevel * 100)}%</span></div>
                   <button onClick={() => canvasRef.current?.zoomIn()} className="p-2 hover:bg-gray-50 rounded-lg text-gray-500 transition-colors"><ZoomIn className="h-4 w-4" /></button>
                 </div>
                 <div className="w-px h-6 bg-gray-100" />
@@ -752,6 +757,9 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                    onAddIcon={(iconName) => canvasRef.current?.addIcon(iconName)}
                    onAddSvgGraphic={(svg, name) => canvasRef.current?.addSvgGraphic(svg, name)}
                    onLoadTemplate={(json) => canvasRef.current?.loadJson(json)}
+                   onApplyAiDesign={async (elements, clearFirst) => {
+                      await canvasRef.current?.applyAiDesign?.(elements, clearFirst);
+                    }}
                    onTemplateChange={setSelectedTemplateIndex}
                    selectedTemplateIndex={selectedTemplateIndex}
                    designConfig={(product as any).design_config}
