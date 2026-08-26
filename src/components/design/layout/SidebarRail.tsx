@@ -12,6 +12,7 @@ interface SidebarRailProps {
   activeTab: SidebarTab | null;
   onTabChange: (tab: SidebarTab) => void;
   designMode?: string;
+  creationChoice?: 'select' | 'upload' | 'diy' | 'ai';
 }
 
 const navItems: { id: SidebarTab; icon: React.ReactNode; label: string; mode?: string }[] = [
@@ -30,10 +31,11 @@ const navItems: { id: SidebarTab; icon: React.ReactNode; label: string; mode?: s
   { id: 'ai', icon: <Sparkles className="h-5 w-5 opacity-40" />, label: 'AI' },
 ] as any[];
 
-const SidebarRail = ({ activeTab, onTabChange, designMode = 'standard' }: SidebarRailProps) => {
+const SidebarRail = ({ activeTab, onTabChange, designMode = 'standard', creationChoice = 'diy' }: SidebarRailProps) => {
   if (designMode === 'intake_form') return null;
 
   const filteredItems = navItems.filter(item => {
+    if (item.id === 'ai') return creationChoice === 'ai';
     if (!item.mode) return true;
     return item.mode === designMode;
   });

@@ -71,6 +71,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
 
   const [activeTab, setActiveTab] = useState<SidebarTab | null>('product');
   const [mobilePanel, setMobilePanel] = useState<SidebarTab | null>(null);
+  const [creationChoice, setCreationChoice] = useState<'select' | 'upload' | 'diy' | 'ai'>('select');
   
   // VDP (Variable Data Printing) State
   const [vdpData, setVdpData] = useState<{ headers: string[], rows: any[] } | null>(null);
@@ -89,16 +90,19 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     const templateIdx = params.get('template');
     if (templateIdx) {
       setSelectedTemplateIndex(parseInt(templateIdx));
+      setCreationChoice('diy');
     }
     
     if (params.get('autoOpen') === 'uploads') {
       setActiveTab('uploads');
       setMobilePanel('uploads');
+      setCreationChoice('upload');
     }
 
     // NEW: If the product is a template-form product, default to the 'quick_edit' tab
     if ((product as any).design_mode === 'template_form' || (product as any).design_config?.mappings) {
       setActiveTab('quick_edit' as any);
+      setCreationChoice('diy');
     }
   }, [product]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -133,7 +137,13 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
   }, [product, selectedQuality]);
 
   useEffect(() => {
-    let base = unitPrice;
+    // Calculate base price with quality multiplier locally
+    let base = product.base_price || 0;
+    const qualityLevels = product.quality_levels || ['Standard', 'Premium', 'Luxury'];
+    const qualityIndex = qualityLevels.indexOf(selectedQuality);
+    const multipliers = [1, 1.2, 1.5, 2];
+    const multiplier = multipliers[Math.max(0, qualityIndex)] || 1;
+    base = Math.round(base * multiplier);
 
     // Design adjustments
     const hasFrontDesign = activeView === 'front' ? layers.length > 0 : (viewData.front?.objects?.length > 0);
@@ -175,23 +185,26 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     }
 
     // 3. Highest Wins Logic
+    let finalTotal = totalWithBulk;
+    let finalDiscountPercent = bulkDiscount;
+    let finalDiscountValue = 0;
+
     if (appliedCoupon && totalWithCoupon < totalWithBulk) {
-       setTotalPrice(totalWithCoupon);
-       setUnitPrice(Math.round(totalWithCoupon / quantity));
+       finalTotal = totalWithCoupon;
        if (appliedCoupon.discount_type === 'percentage') {
-          setDiscountPercent(appliedCoupon.discount_value);
-          setDiscountValue(0);
+          finalDiscountPercent = appliedCoupon.discount_value;
+          finalDiscountValue = 0;
        } else {
-          setDiscountPercent(0);
-          setDiscountValue(appliedCoupon.discount_value);
+          finalDiscountPercent = 0;
+          finalDiscountValue = appliedCoupon.discount_value;
        }
-    } else {
-       setTotalPrice(totalWithBulk);
-       setUnitPrice(Math.round(totalWithBulk / quantity));
-       setDiscountPercent(bulkDiscount);
-       setDiscountValue(0);
     }
-  }, [layers, viewData, activeView, product, selectedQuality, quantity, appliedCoupon, unitPrice]);
+
+    setTotalPrice(finalTotal);
+    setUnitPrice(Math.round(finalTotal / quantity));
+    setDiscountPercent(finalDiscountPercent);
+    setDiscountValue(finalDiscountValue);
+  }, [layers, viewData, activeView, product, selectedQuality, quantity, appliedCoupon]);
 
   // Deep link support for "Import & Edit"
   useEffect(() => {
@@ -366,6 +379,99 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
 
   const isTemplateForm = (product as any).design_mode === 'template_form';
 
+  if (creationChoice === 'select' && !isTemplateForm) {
+    return (
+      <div className="min-h-screen bg-[#fcfcf9] flex flex-col justify-between relative overflow-hidden z-[9999]">
+        {/* Header */}
+        <header className="h-[70px] shrink-0 border-b border-[#f0f0e8] bg-white flex items-center justify-between px-4 md:px-8 shadow-sm">
+          <div className="flex items-center gap-3">
+            <Link 
+              href={`/product/${product.slug}`}
+              className="w-10 h-10 rounded-xl border border-[#f0f0e8] hover:bg-[#fcfcf9] active:bg-[#f0f0e8] transition-colors flex items-center justify-center text-gray-500 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div className="flex flex-col">
+              <h1 className="text-sm font-black text-gray-900 tracking-tight leading-none mb-1 uppercase">{product.name}</h1>
+              <p className="text-[10px] font-black text-brand-pink uppercase tracking-widest leading-none">Design Studio Setup</p>
+            </div>
+          </div>
+        </header>
+
+        {/* Cards Grid */}
+        <div className="flex-1 flex flex-col justify-center items-center px-6 py-12 max-w-5xl mx-auto w-full">
+          <div className="text-center max-w-xl mb-12">
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 uppercase tracking-tight italic mb-3">
+              Choose Your <span className="text-brand-pink">Design Method</span>
+            </h2>
+            <p className="text-gray-500 text-sm font-medium">
+              Select how you would like to customize your {product.name.toLowerCase()}. You can change your method or reset at any time.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+            {/* Option 1: Upload */}
+            <button 
+              onClick={() => {
+                setCreationChoice('upload');
+                setActiveTab('uploads');
+                setMobilePanel('uploads');
+              }}
+              className="flex flex-col items-center text-center p-8 bg-white border border-[#e4e4d8] hover:border-brand-pink rounded-[32px] hover:shadow-xl hover:shadow-brand-pink/5 transition-all group active:scale-[0.98] outline-none"
+            >
+              <div className="w-16 h-16 bg-pink-50 text-brand-pink rounded-2xl flex items-center justify-center mb-6 border border-pink-100 group-hover:scale-110 transition-transform">
+                <Upload className="w-8 h-8" />
+              </div>
+              <h3 className="text-base font-black text-gray-900 uppercase tracking-wide mb-2 italic">Upload Ready Design</h3>
+              <p className="text-xs text-gray-500 font-semibold leading-relaxed">
+                Already have a complete design file? Upload your image or graphic and we will prepare it for printing.
+              </p>
+            </button>
+
+            {/* Option 2: Design It Yourself */}
+            <button 
+              onClick={() => {
+                setCreationChoice('diy');
+                setActiveTab('product');
+              }}
+              className="flex flex-col items-center text-center p-8 bg-white border border-[#e4e4d8] hover:border-brand-olive rounded-[32px] hover:shadow-xl hover:shadow-brand-olive/5 transition-all group active:scale-[0.98] outline-none"
+            >
+              <div className="w-16 h-16 bg-olive-50 text-brand-olive rounded-2xl flex items-center justify-center mb-6 border border-olive-100 group-hover:scale-110 transition-transform">
+                <Palette className="w-8 h-8" />
+              </div>
+              <h3 className="text-base font-black text-gray-900 uppercase tracking-wide mb-2 italic">Design It Yourself</h3>
+              <p className="text-xs text-gray-500 font-semibold leading-relaxed">
+                Start from scratch! Add custom texts, layouts, shapes, and design manually using our standard editor.
+              </p>
+            </button>
+
+            {/* Option 3: Chat with AI */}
+            <button 
+              onClick={() => {
+                setCreationChoice('ai');
+                setActiveTab('ai');
+              }}
+              className="flex flex-col items-center text-center p-8 bg-white border border-[#e4e4d8] hover:border-purple-500 rounded-[32px] hover:shadow-xl hover:shadow-purple-500/5 transition-all group active:scale-[0.98] outline-none"
+            >
+              <div className="w-16 h-16 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6 border border-purple-100 group-hover:scale-110 transition-transform">
+                <Sparkles className="w-8 h-8" />
+              </div>
+              <h3 className="text-base font-black text-gray-900 uppercase tracking-wide mb-2 italic">Design with AI Chat</h3>
+              <p className="text-xs text-gray-500 font-semibold leading-relaxed">
+                Explain your design requirements to our AI assistant in plain chat. It will create and align the layers for you.
+              </p>
+            </button>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className="py-6 border-t border-[#f0f0e8] bg-white text-center text-[10px] font-black text-gray-400 uppercase tracking-widest shrink-0">
+          AtoZ Prints Customizer Studio &copy; {new Date().getFullYear()}
+        </footer>
+      </div>
+    );
+  }
+
   return (
     <div className={cn(
       "z-[100] flex flex-col bg-[#fbfbf9]",
@@ -399,6 +505,21 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
             <Download className="h-3.5 w-3.5" />
             Download PNG
           </button>
+
+          {creationChoice !== 'select' && (
+            <>
+              <div className="h-6 w-px bg-gray-100 mx-1" />
+              <button 
+                onClick={() => {
+                  setCreationChoice('select');
+                  setActiveTab('product');
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-brand-pink/5 hover:bg-brand-pink hover:text-white rounded-xl text-[10px] font-black text-brand-pink uppercase tracking-widest transition-all italic border border-brand-pink/10"
+              >
+                Change Method
+              </button>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -433,6 +554,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
               activeTab={activeTab} 
               onTabChange={(tab) => activeTab === tab ? setActiveTab(null) : setActiveTab(tab)} 
               designMode={(product as any).design_mode}
+              creationChoice={creationChoice}
             />
           </div>
         )}
