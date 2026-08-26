@@ -38,7 +38,7 @@ const SidebarRail = ({ activeTab, onTabChange, designMode = 'standard' }: Sideba
     return item.mode === designMode;
   });
   return (
-    <div className="w-[78px] shrink-0 bg-white/70 backdrop-blur-3xl border-r border-white/20 flex flex-col items-center py-2 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.02)] ring-1 ring-black/5">
+    <div className="w-[78px] shrink-0 bg-white/70 backdrop-blur-3xl border-r border-white/20 flex flex-col items-center py-2 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.02)] ring-1 ring-black/5 h-full overflow-y-auto no-scrollbar">
        <div className="w-full flex flex-col gap-1">
          {filteredItems.map((item: any) => (
            <button

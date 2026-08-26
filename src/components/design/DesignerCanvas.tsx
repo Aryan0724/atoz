@@ -981,7 +981,8 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
       style={{ 
         touchAction: 'none', 
         aspectRatio: `${BASE_WIDTH}/${BASE_HEIGHT}`,
-        maxHeight: 'calc(100dvh - 280px)' 
+        maxHeight: 'calc(100dvh - 280px)',
+        maxWidth: 'calc((100dvh - 280px) * 0.8)'
       }}
       onDragOver={(e) => {
         e.preventDefault();
