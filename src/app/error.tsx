@@ -12,8 +12,18 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
+    // Log the error to console
     console.error('Next.js Global Error Caught:', error);
+
+    // Automatically reload the page if a chunk loading error occurs (common after new deployments)
+    if (
+      error.message &&
+      (error.message.toLowerCase().includes('loading chunk') ||
+        error.message.toLowerCase().includes('chunkloaderror'))
+    ) {
+      console.warn('Chunk load error detected. Reloading page to retrieve latest build chunks...');
+      window.location.reload();
+    }
   }, [error]);
 
   return (
