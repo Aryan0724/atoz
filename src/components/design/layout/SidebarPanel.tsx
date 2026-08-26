@@ -255,6 +255,7 @@ const SidebarPanel = ({
   const [aiLayoutClearFirst, setAiLayoutClearFirst] = useState(true);
   const [generationSteps, setGenerationSteps] = useState<string[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
+  const [useGeminiEnhancement, setUseGeminiEnhancement] = useState(true);
 
   const handleAiLayoutGenerate = async () => {
     if (!aiPrompt.trim()) {
@@ -342,9 +343,55 @@ const SidebarPanel = ({
     }
 
     setIsGenerating(true);
+    let finalPrompt = aiPrompt;
+
+    if (useGeminiEnhancement) {
+      setGenerationSteps([
+        "Connecting to Gemini API...",
+        "Enhancing image prompt requirements...",
+        "Generating optimized image prompt...",
+        "Calling text-to-image engine...",
+        "Finalizing graphic image..."
+      ]);
+      setCurrentStepIndex(0);
+      
+      try {
+        await new Promise(r => setTimeout(r, 450));
+        setCurrentStepIndex(1);
+        
+        const response = await fetch('/api/design/ai-generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            prompt: aiPrompt,
+            mode: 'image-prompt',
+            productCategory
+          })
+        });
+
+        setCurrentStepIndex(2);
+        await new Promise(r => setTimeout(r, 450));
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.prompt) {
+            finalPrompt = data.prompt;
+            console.log("Enhanced prompt from Gemini:", finalPrompt);
+          }
+        } else {
+          console.warn("Gemini prompt enhancement failed. Falling back to raw prompt.");
+        }
+      } catch (e) {
+        console.error("Gemini enhancement failed, falling back to raw prompt:", e);
+      }
+      setCurrentStepIndex(3);
+    }
+
     try {
       const style = aiStylePills.find(s => s.id === selectedStyle);
-      const fullPrompt = style ? `${aiPrompt}, ${style.suffix}` : aiPrompt;
+      const fullPrompt = style ? `${finalPrompt}, ${style.suffix}` : finalPrompt;
       const seed = Math.floor(Math.random() * 1000000);
       
       let width = 1024;
@@ -367,6 +414,10 @@ const SidebarPanel = ({
 
       const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${width}&height=${height}&nologo=true&seed=${seed}`;
       
+      if (useGeminiEnhancement) {
+        setCurrentStepIndex(4);
+      }
+
       const img = new Image();
       img.src = imageUrl;
       await new Promise((resolve, reject) => {
@@ -382,6 +433,8 @@ const SidebarPanel = ({
       toast.error("Generation failed. Please try again.");
     } finally {
       setIsGenerating(false);
+      setGenerationSteps([]);
+      setCurrentStepIndex(-1);
     }
   };
 
@@ -1001,26 +1054,26 @@ const SidebarPanel = ({
                 </div>
               </div>
             ) : (
-              /* EXISTING AI IMAGE GENERATOR MODE */
+              /* EXISTING AI IMAGE GENERATOR MODE WITH GEMINI ENHANCEMENT */
               <div className="p-5 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border border-purple-100 rounded-[28px] shadow-sm relative overflow-hidden group">
                 <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-32 h-32 bg-purple-200/20 blur-3xl rounded-full" />
                 
                 <div className="flex items-center gap-2 mb-3 relative z-10">
-                  <div className="p-2 bg-white rounded-xl shadow-sm">
+                  <div className="p-2 bg-white rounded-xl shadow-sm border border-purple-100">
                     <Sparkles className="h-4 w-4 text-purple-600" />
                   </div>
                   <span className="text-xs font-black text-purple-900 uppercase tracking-widest italic">AI Studio</span>
                 </div>
 
-                <div className="relative z-10">
+                <div className="relative z-10 space-y-4">
                   <textarea
                     className="w-full bg-white/80 backdrop-blur-sm border border-purple-100 rounded-2xl py-3.5 px-4 text-sm resize-none h-28 focus:ring-2 focus:ring-purple-400 outline-none transition-all placeholder:text-gray-400 shadow-inner"
-                    placeholder="Describe your vision (e.g., 'A vintage cosmic jellyfish in neon colors')..."
+                    placeholder="Describe your vision (e.g., 'A vintage cosmic jellyfish in neon colors')...."
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
                   />
                   
-                  <div className="mt-4 space-y-3">
+                  <div className="space-y-3">
                     <p className="text-[9px] font-black text-purple-400 uppercase tracking-widest ml-1">Select a Style</p>
                     <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
                       {aiStylePills.map(style => (
@@ -1040,17 +1093,58 @@ const SidebarPanel = ({
                     </div>
                   </div>
 
-                  <button 
-                    onClick={handleAiGenerate}
-                    disabled={isGenerating}
-                    className="w-full mt-5 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-[11px] rounded-2xl uppercase tracking-[0.2em] shadow-lg shadow-purple-200 hover:shadow-purple-300 transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 disabled:opacity-50 italic"
-                  >
-                    {isGenerating ? (
-                      <><RefreshCcw className="h-4 w-4 animate-spin" /> Weaving Magic...</>
-                    ) : (
-                      <><Wand2 className="h-4 w-4" /> Generate Masterpiece</>
-                    )}
-                  </button>
+                  {/* Gemini Prompt Enhancement Checkbox */}
+                  <div className="flex items-center gap-2 ml-1">
+                    <input
+                      type="checkbox"
+                      id="useGeminiEnhancement"
+                      checked={useGeminiEnhancement}
+                      onChange={(e) => setUseGeminiEnhancement(e.target.checked)}
+                      className="w-3.5 h-3.5 text-purple-600 border-purple-100 rounded focus:ring-purple-400 accent-purple-600 cursor-pointer"
+                    />
+                    <label htmlFor="useGeminiEnhancement" className="text-[10px] font-bold text-purple-800 cursor-pointer select-none">
+                      Enhance prompt with Gemini AI
+                    </label>
+                  </div>
+
+                  {/* Loading Steps Block */}
+                  {isGenerating && generationSteps.length > 0 && (
+                    <div className="p-4 bg-white border border-purple-100 rounded-2xl space-y-2.5 animate-pulse">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 text-purple-600 animate-spin" />
+                        <span className="text-[10px] font-bold text-gray-700">Weaving Magic...</span>
+                      </div>
+                      <div className="space-y-1.5 pl-6">
+                        {generationSteps.map((step, idx) => {
+                          const isPast = idx < currentStepIndex;
+                          const isCurrent = idx === currentStepIndex;
+                          return (
+                            <div key={idx} className="flex items-center gap-2">
+                              <div className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                isPast ? "bg-green-500" : isCurrent ? "bg-purple-600 animate-ping" : "bg-gray-300"
+                              )} />
+                              <span className={cn(
+                                "text-[9px] font-medium tracking-tight",
+                                isPast ? "text-green-600 line-through decoration-1" : isCurrent ? "text-purple-600 font-black" : "text-gray-400"
+                              )}>
+                                {step}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {!isGenerating && (
+                    <button 
+                      onClick={handleAiGenerate}
+                      className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-[11px] rounded-2xl uppercase tracking-[0.2em] shadow-lg shadow-purple-200 hover:shadow-purple-300 transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 disabled:opacity-50 italic"
+                    >
+                      <Wand2 className="h-4 w-4" /> Generate Masterpiece
+                    </button>
+                  )}
                 </div>
               </div>
             )}

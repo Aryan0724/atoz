@@ -13,13 +13,61 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { prompt, productCategory = 'Apparel', canvasWidth = 500, canvasHeight = 625 } = body;
+    const { prompt, mode = 'layout', productCategory = 'Apparel', canvasWidth = 500, canvasHeight = 625 } = body;
 
     if (!prompt || !prompt.trim()) {
       return NextResponse.json(
         { error: 'Prompt is required.' },
         { status: 400 }
       );
+    }
+
+    if (mode === 'image-prompt') {
+      const geminiRequestBody = {
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `You are an expert prompt engineer for text-to-image AI generators.
+Rewrite the following user description into a highly detailed, professional, and descriptive prompt for generating a beautiful design graphic for a "${productCategory}".
+The prompt should focus on style (e.g. vector graphic, digital painting, watercolor, vintage, neon, sticker, pop art), crisp details, specific color schemes, clean lighting, and solid compositions. Keep it as a single paragraph. Do not include introductory text like "Here is the prompt:". Return ONLY the raw rewritten prompt text.
+
+User Description: "${prompt}"`
+              }
+            ]
+          }
+        ]
+      };
+
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(geminiRequestBody)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return NextResponse.json(
+          { error: `Gemini API responded with status ${response.status}: ${errorText}` },
+          { status: response.status }
+        );
+      }
+
+      const data = await response.json();
+      const generatedPrompt = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+      if (!generatedPrompt) {
+        return NextResponse.json(
+          { error: 'Gemini did not return any prompt.' },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ success: true, prompt: generatedPrompt });
     }
 
     // List of allowed fonts from src/lib/fontUtils.ts
