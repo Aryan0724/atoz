@@ -36,3 +36,11 @@ next-env.d.ts
 a to z pass google auth.json
 *.exe
 scratch/
+
+# local asset directories
+/images/
+/template letterhead/
+/template wedding card/
+/templates business card/
+/templates id card/
+

@@ -291,7 +291,8 @@ const SidebarPanel = ({
           prompt: aiPrompt,
           productCategory,
           canvasWidth,
-          canvasHeight
+          canvasHeight,
+          productColor
         })
       });
 

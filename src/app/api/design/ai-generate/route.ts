@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { prompt, mode = 'layout', productCategory = 'Apparel', canvasWidth = 500, canvasHeight = 625 } = body;
+    const { prompt, mode = 'layout', productCategory = 'Apparel', canvasWidth = 500, canvasHeight = 625, productColor = '#FFFFFF' } = body;
 
     if (!prompt || !prompt.trim()) {
       return NextResponse.json(
@@ -91,22 +91,30 @@ User Description: "${prompt}"`
     ];
 
     const systemInstruction = `You are an expert graphic designer. Your job is to create visual design layouts by producing structured canvas elements in JSON format.
-You are designing a "${productCategory}" on a canvas of width ${canvasWidth}px and height ${canvasHeight}px.
+You are designing for product category "${productCategory}" on a canvas of width ${canvasWidth}px and height ${canvasHeight}px.
 The center of the canvas is at (X: ${canvasWidth / 2}, Y: ${canvasHeight / 2}).
 
-Based on the user prompt, compose a beautiful, cohesive, and modern design. You can use text elements, basic geometric shapes, and icons. Ensure the alignment, layout hierarchy, margins, colors, and sizing are professional.
+Background Product Color Constraint:
+- The product background color is "${productColor}".
+- CRITICAL: You MUST choose colors for text, shapes, and icons that contrast sharply with the background color "${productColor}".
+- If the background is dark (e.g. black, charcoal, dark grey, navy), all text, shapes, and icons MUST use bright/light colors (e.g. #FFFFFF, #FFD700 (gold), #E6E6FA (lavender), #00FFFF (cyan)). Never use black (#000000) or dark grey.
+- If the background is light (e.g. white, cream, light grey), use dark/deep colors (e.g. #1A1A1A, #0F172A, #8B0000). Never use white or light yellow.
 
-Constraints:
-1. All elements must stay within the canvas boundaries. Give safe margin offsets of at least 40px from the edges.
-2. Select text fonts ONLY from the following allowed list: ${allowedFonts.join(', ')}.
-3. Select icon names ONLY from the following allowed list: ${allowedIcons.join(', ')}.
-4. Cohesive styling: pick a clear, limited color palette (3-4 colors max) that fits the user's description.
-5. All coordinates must be absolute numbers (e.g. left: 250, top: 150) centered on each element's origin.
-
-Allowed element types:
-- "text": For text copy (headlines, subheadings, details). Can specify text, fontFamily, fontSize, fill, fontWeight, fontStyle, left, top, textAlign, angle.
-- "shape": For background accents, boxes, lines. Can specify shapeType (circle, rect, triangle, line, star, heart), fill, left, top, scaleX, scaleY, width, height, radius, angle.
-- "icon": For vector illustrations or logos. Can specify iconName, fill, left, top, scaleX, scaleY, angle.`;
+Design and Layout Composition Guidelines:
+1. Composition Archetypes:
+   - "Badge/Logo": A central icon (width ~50-80px), title text (fontSize: 24-32) placed directly below it, and subtitle text (fontSize: 14-16) below that.
+   - "Clean Typography": A main bold headline (fontSize: 36-44) at the top, a thin horizontal line accent (shapeType: 'line', width: 100-150, height: 2), and a sub-headline (fontSize: 16-20) below.
+2. Layout Constraints:
+   - Keep design coordinates within safe boundaries: margin offset of at least 50px from all edges (X: 50 to ${canvasWidth - 50}, Y: 50 to ${canvasHeight - 50}).
+   - No giant blocky shapes. Do NOT create shapes (rects/circles/triangles) that cover more than 20% of the canvas. Keep shapes as small design accents (lines, badges, decorative circles/stars/hearts).
+   - Elements must not overlap each other in a messy way. Ensure text is fully readable. If placing text on top of a shape (like a circular badge), the text color must contrast sharply with the shape's fill color.
+3. Allowed List Restrictions:
+   - Select text fonts ONLY from: ${allowedFonts.join(', ')}.
+   - Select icon names ONLY from: ${allowedIcons.join(', ')}.
+4. Element Sizing:
+   - Text elements: fontSize must be between 12 and 44.
+   - Shape elements: width/height/radius must be between 10 and 120.
+   - Icon elements: scaleX and scaleY should be between 0.6 and 1.3 (since baseline target size is 60px).`;
 
     const geminiRequestBody = {
       contents: [

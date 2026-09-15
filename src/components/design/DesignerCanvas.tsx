@@ -945,7 +945,7 @@ const DesignerCanvas = React.forwardRef<DesignerCanvasRef, DesignerCanvasProps>(
                     //@ts-ignore
                     id: `icon_ai_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`
                   });
-                  const targetSize = 120;
+                  const targetSize = 60;
                   const scale = (targetSize / Math.max(obj.width || 1, obj.height || 1)) * (el.scaleX || 1);
                   obj.scale(scale);
                   if (el.fill) {
