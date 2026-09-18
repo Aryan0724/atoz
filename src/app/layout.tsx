@@ -28,8 +28,26 @@ const manrope = Manrope({
 const siteConfig = {
   name: "ATOZPRINTS",
   description: "Bespoke corporate printing and gifting solutions. We engineer tactile experiences that command absolute respect.",
-  url: "https://atozprint.in",
+  url: "https://www.atozprints.in",
 };
+
+const envGoogleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+const googleVerification =
+  envGoogleVerification &&
+  envGoogleVerification !== "your-google-search-console-verification-code" &&
+  !envGoogleVerification.includes("your-google") &&
+  envGoogleVerification.trim() !== ""
+    ? envGoogleVerification
+    : "xiVGcEMR2wlkfThtmzMJwXZA65uTOvVO-nEZ5vED86A";
+
+const envGaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const gaMeasurementId =
+  envGaId &&
+  envGaId !== "G-XXXXXXXXXX" &&
+  !envGaId.includes("XXXX") &&
+  envGaId.trim() !== ""
+    ? envGaId
+    : "G-KRDZRD51N2";
 
 export const viewport: Viewport = {
   themeColor: "#0B1120",
@@ -58,7 +76,7 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     images: [
       {
-        url: "https://atozprint.in/og-image.png",
+        url: "https://www.atozprints.in/og-image.png",
         width: 1200,
         height: 630,
         alt: "AtoZ Print - Premium Printing & Corporate Gifting",
@@ -69,12 +87,12 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ATOZPRINTS | Premium Corporate Solutions",
     description: siteConfig.description,
-    images: ["https://atozprint.in/og-image.png"],
+    images: ["https://www.atozprints.in/og-image.png"],
     creator: "@atozprints",
   },
   manifest: "/site.webmanifest",
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "xiVGcEMR2wlkfThtmzMJwXZA65uTOvVO-nEZ5vED86A",
+    google: googleVerification,
   },
 };
 
@@ -85,6 +103,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="google-site-verification" content={googleVerification} />
+        {/* Google tag (gtag.js) */}
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${gaMeasurementId}');
+            `,
+          }}
+        />
+      </head>
       <body className={`${playfair.variable} ${manrope.variable} font-sans antialiased`}>
         <Suspense fallback={null}>
           <MetaPixel />

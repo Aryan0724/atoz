@@ -3,7 +3,11 @@
 // --- Google Analytics (GA4) Utility ---
 // Standard ecommerce events: page_view, view_item, add_to_cart, begin_checkout, purchase
 
-export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-KRDZRD51N2';
+const envGaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+export const GA_MEASUREMENT_ID =
+  envGaId && envGaId !== 'G-XXXXXXXXXX' && !envGaId.includes('XXXX') && envGaId.trim() !== ''
+    ? envGaId
+    : 'G-KRDZRD51N2';
 
 /**
  * Send a custom event to Google Analytics
