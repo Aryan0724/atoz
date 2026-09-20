@@ -55,6 +55,12 @@ export default function ReturnsPage() {
                 To report an issue, please email <span className="text-brand-pink font-bold">support@atozprint.in</span> within 48 hours of delivery with a clear photo or video showing the defect and your order ID.
               </p>
            </div>
+
+           <div className="pt-6 border-t border-gray-100">
+             <a href="/refund" className="inline-flex items-center gap-2 text-sm font-bold text-brand-dark hover:text-brand-pink transition-colors">
+               View Full Cancellation, Replacement & Refund Policy &rarr;
+             </a>
+           </div>
         </div>
       </div>
     </div>

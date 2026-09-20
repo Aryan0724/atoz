@@ -128,12 +128,15 @@ const Navbar = () => {
               
               <div className="absolute top-full left-0 w-full h-4 bg-transparent" />
 
-              <div className="absolute top-[calc(100%-1rem)] right-0 w-56 bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(11,17,32,0.15)] border border-brand-darkBlue/5 rounded-2xl overflow-hidden legal-menu p-2 origin-top-right">
-                <Link href="/privacy" className="block px-6 py-4 text-[11px] uppercase tracking-widest hover:bg-brand-base hover:text-brand-gold rounded-xl transition-colors font-bold text-brand-darkBlue">
+              <div className="absolute top-[calc(100%-1rem)] right-0 w-64 bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(11,17,32,0.15)] border border-brand-darkBlue/5 rounded-2xl overflow-hidden legal-menu p-2 origin-top-right">
+                <Link href="/privacy" className="block px-6 py-3.5 text-[11px] uppercase tracking-widest hover:bg-brand-base hover:text-brand-gold rounded-xl transition-colors font-bold text-brand-darkBlue">
                   Privacy Policy
                 </Link>
-                <Link href="/terms" className="block px-6 py-4 text-[11px] uppercase tracking-widest hover:bg-brand-base hover:text-brand-gold rounded-xl transition-colors font-bold text-brand-darkBlue">
+                <Link href="/terms" className="block px-6 py-3.5 text-[11px] uppercase tracking-widest hover:bg-brand-base hover:text-brand-gold rounded-xl transition-colors font-bold text-brand-darkBlue">
                   Terms & Conditions
+                </Link>
+                <Link href="/refund" className="block px-6 py-3.5 text-[11px] uppercase tracking-widest hover:bg-brand-base hover:text-brand-gold rounded-xl transition-colors font-bold text-brand-darkBlue">
+                  Refund & Cancellation
                 </Link>
               </div>
             </div>
@@ -222,6 +225,14 @@ const Navbar = () => {
           ) : (
              <Link href="/login" className="px-12 py-5 bg-brand-darkBlue text-white rounded-full text-sm font-bold uppercase tracking-widest shadow-xl">Sign In</Link>
           )}
+
+          <div className="flex flex-wrap justify-center gap-6 text-[11px] font-sans font-bold uppercase tracking-widest text-brand-darkBlue/60 mt-4">
+            <Link href="/privacy" className="hover:text-brand-gold transition-colors">Privacy</Link>
+            <span>•</span>
+            <Link href="/terms" className="hover:text-brand-gold transition-colors">Terms</Link>
+            <span>•</span>
+            <Link href="/refund" className="hover:text-brand-gold transition-colors">Refunds</Link>
+          </div>
         </div>
       </div>
     </nav>
