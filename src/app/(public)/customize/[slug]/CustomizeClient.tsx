@@ -50,6 +50,15 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
   const [isFinishing, setIsFinishing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  const isVisitingCard = 
+    product.slug?.includes('business-card') || 
+    product.slug?.includes('visiting') || 
+    product.name?.toLowerCase().includes('visiting card') || 
+    product.name?.toLowerCase().includes('business card');
+
+  const effectiveMoq = isVisitingCard ? Math.max(product.moq || 100, 100) : (product.moq || 1);
+  const qtyStep = isVisitingCard ? 100 : 1;
+
   const [activeView, setActiveView] = useState<'front' | 'back' | 'left' | 'right' | '3d'>('front');
   const [isPanning, setIsPanning] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
@@ -57,7 +66,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
   const [viewData, setViewData] = useState<{ front: any, back: any, left: any, right: any }>({ front: null, back: null, left: null, right: null });
   const [totalPrice, setTotalPrice] = useState<number>(product.base_price || 0);
   const [unitPrice, setUnitPrice] = useState<number>(product.base_price || 0);
-  const [quantity, setQuantity] = useState<number>(product.moq || 1);
+  const [quantity, setQuantity] = useState<number>(effectiveMoq);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [discountValue, setDiscountValue] = useState<number>(0);
   const [selectedQuality, setSelectedQuality] = useState<string>('Standard');
@@ -107,7 +116,10 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
   }, [product]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    let base = product.base_price || 0;
+    let rawBase = product.base_price || 0;
+    if (isVisitingCard && rawBase >= 50) {
+      rawBase = rawBase / 100;
+    }
     
     // Quality adjustments
     const qualityLevels = product.quality_levels || ['Standard', 'Premium', 'Luxury'];
@@ -115,17 +127,17 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     const multipliers = [1, 1.2, 1.5, 2];
     const multiplier = multipliers[Math.max(0, qualityIndex)] || 1;
     
-    base = Math.round(base * multiplier);
+    let base = Number((rawBase * multiplier).toFixed(2));
 
     // Calculate quality price bonuses for UI display
     const qPrices: Record<string, number> = {};
-    const baseAmount = product.base_price || 0;
+    const baseAmount = rawBase;
     
     qualityLevels.forEach((q, idx) => {
        // Sync with catalog by checking product.quality_prices first
        const dbBonus = (product as any).quality_prices?.[q];
        if (dbBonus !== undefined) {
-         qPrices[q] = dbBonus;
+         qPrices[q] = (isVisitingCard && dbBonus >= 50) ? (dbBonus / 100) : dbBonus;
        } else {
          const multipliers = [1, 1.2, 1.5, 2];
          const m = multipliers[idx] || 1;
@@ -134,23 +146,21 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     });
     setUnitPrice(base);
     setQualityPrices(qPrices);
-  }, [product, selectedQuality]);
+  }, [product, selectedQuality, isVisitingCard]);
 
   useEffect(() => {
     // Calculate base price with quality multiplier locally
-    let base = product.base_price || 0;
+    let rawBase = product.base_price || 0;
+    if (isVisitingCard && rawBase >= 50) {
+      rawBase = rawBase / 100;
+    }
     const qualityLevels = product.quality_levels || ['Standard', 'Premium', 'Luxury'];
     const qualityIndex = qualityLevels.indexOf(selectedQuality);
     const multipliers = [1, 1.2, 1.5, 2];
     const multiplier = multipliers[Math.max(0, qualityIndex)] || 1;
-    base = Math.round(base * multiplier);
+    let base = Number((rawBase * multiplier).toFixed(2));
 
-    // Design adjustments
-    const hasFrontDesign = activeView === 'front' ? layers.length > 0 : (viewData.front?.objects?.length > 0);
-    const hasBackDesign = activeView === 'back' ? layers.length > 0 : (viewData.back?.objects?.length > 0);
-    
-    if (hasFrontDesign) base += 50;
-    if (hasBackDesign) base += 50;
+    // Upload & customization designs are completely free (₹0 fee)
 
     // 1. Calculate Bulk Discount (Dynamic)
     let bulkDiscount = 0;
@@ -165,10 +175,10 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     }
     
     // Calculate total if only bulk discount is applied
-    const totalWithBulk = Math.round(base * (1 - bulkDiscount / 100)) * quantity;
+    const totalWithBulk = Math.round(base * (1 - bulkDiscount / 100) * quantity);
 
     // 2. Calculate Promo Code Discount
-    let totalWithCoupon = base * quantity;
+    let totalWithCoupon = Math.round(base * quantity);
     if (appliedCoupon) {
       if (appliedCoupon.discount_type === 'percentage') {
         totalWithCoupon = Math.round(base * (1 - appliedCoupon.discount_value / 100)) * quantity;
@@ -201,10 +211,10 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
     }
 
     setTotalPrice(finalTotal);
-    setUnitPrice(Math.round(finalTotal / quantity));
+    setUnitPrice(Number((finalTotal / Math.max(1, quantity)).toFixed(2)));
     setDiscountPercent(finalDiscountPercent);
     setDiscountValue(finalDiscountValue);
-  }, [layers, viewData, activeView, product, selectedQuality, quantity, appliedCoupon]);
+  }, [layers, viewData, activeView, product, selectedQuality, quantity, appliedCoupon, isVisitingCard]);
 
   // Deep link support for "Import & Edit"
   useEffect(() => {
@@ -802,7 +812,7 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                        <span className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest">Qty</span>
                        <div className="flex items-center gap-2 md:gap-3 bg-[#f7f7f2] rounded-full p-1 border border-gray-100">
                           <button 
-                            onClick={() => setQuantity(q => Math.max((product.moq || 1), q - 1))}
+                            onClick={() => setQuantity(q => Math.max(effectiveMoq, q - qtyStep))}
                             className="w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center bg-white text-gray-500 hover:text-brand-dark hover:shadow-sm transition-all"
                           >
                             <Minus className="w-2.5 h-2.5 md:w-3 md:h-3" />
@@ -814,11 +824,11 @@ export default function CustomizeClient({ product }: CustomizeClientProps) {
                                const val = parseInt(e.target.value);
                                setQuantity(isNaN(val) ? 0 : Math.max(0, val));
                              }}
-                             onBlur={() => setQuantity(q => Math.max((product.moq || 1), q))}
+                             onBlur={() => setQuantity(q => Math.max(effectiveMoq, q))}
                              className="w-8 md:w-12 bg-transparent text-[10px] md:text-xs font-black text-brand-dark text-center outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                            />
                           <button 
-                            onClick={() => setQuantity(q => q + 1)}
+                            onClick={() => setQuantity(q => q + qtyStep)}
                             className="w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center bg-white text-gray-500 hover:text-brand-dark hover:shadow-sm transition-all"
                           >
                             <Plus className="w-2.5 h-2.5 md:w-3 md:h-3" />

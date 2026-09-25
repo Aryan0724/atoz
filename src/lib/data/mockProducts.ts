@@ -9607,8 +9607,8 @@ export const mockProducts: Product[] = [
     "slug": "business-card-custom",
     "description": "Fully customized, professional-quality product suitable for branding and promotional use.",
     "category": "stationary",
-    "base_price": 4.99,
-    "moq": 50,
+    "base_price": 4.40,
+    "moq": 100,
     "delivery_days": "7–10 Working Days",
     "images": [
       "/images/products/business-card-front.png",
@@ -12199,6 +12199,81 @@ export const mockProducts: Product[] = [
       "design_mode": "template_form",
       "design_config": {},
       "bulk_discount_rules": []
+  },
+  {
+      "id": "b1000000-0000-0000-0000-000000000011",
+      "name": "Bill Book",
+      "slug": "bill-book",
+      "description": "Customized Business Bill Book / Cash Memo / Invoice Book with duplicate/triplicate carbonless copies. High-quality paper, sequential numbering, and clean binding. Price is ₹400 each book.",
+      "category": "Stationery",
+      "base_price": 400,
+      "moq": 1,
+      "delivery_days": "5-7 Days",
+      "images": [
+        "/images/products/bill-book.jpg"
+      ],
+      "template_images": [
+        "/images/products/bill-book.jpg"
+      ],
+      "quality_levels": [
+        "Single (100 Sheets)",
+        "Duplicate Carbonless (50 Sets)",
+        "Triplicate Carbonless (50 Sets)"
+      ],
+      "customization_fields": [
+        "Shop / Business Name",
+        "Logo",
+        "Address & Phone",
+        "GSTIN Number",
+        "Starting Bill Number"
+      ],
+      "packaging_options": [
+        "Standard Shrink Wrap",
+        "Box Packaging"
+      ],
+      "supported_views": [
+        "front"
+      ],
+      "features": [
+        "Premium Carbonless (NCR) Paper",
+        "Crisp Red Sequential Numbering",
+        "Hardboard Backing for Easy Writing",
+        "Perforated Easy-Tear Sheets"
+      ],
+      "specifications": {
+        "Size": "A5 / 1/8 Demy (5.5 x 8.5 in)",
+        "Pages": "100 Sheets / 50 Sets per Book",
+        "Binding": "Hard Pad Binding with Top Perforation",
+        "Paper": "70 GSM Premium / Carbonless NCR"
+      },
+      "stock_quantity": 9999,
+      "is_active": true,
+      "created_at": "2026-09-25T12:00:00.000Z",
+      "wireframe_images": [
+        "/images/products/bill-book.jpg"
+      ],
+      "design_areas": {
+        "front": {
+          "h": 320,
+          "w": 200,
+          "x": 150,
+          "y": 120
+        }
+      },
+      "quality_prices": {
+        "Single (100 Sheets)": 0,
+        "Duplicate Carbonless (50 Sets)": 50,
+        "Triplicate Carbonless (50 Sets)": 100
+      },
+      "color_variants": [],
+      "design_mode": "template_form",
+      "design_config": {},
+      "bulk_discount_rules": [
+        { "quantity": 5, "discount": 5 },
+        { "quantity": 10, "discount": 10 },
+        { "quantity": 25, "discount": 15 },
+        { "quantity": 50, "discount": 20 }
+      ]
   }
 ];
 export const mockPricingCategories = [

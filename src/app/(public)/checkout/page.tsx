@@ -142,10 +142,10 @@ export default function CheckoutPage() {
       ? Math.min(promoDiscountFixed, subtotal)
       : Math.round(subtotal * (promoDiscountPct / 100))
     : 0;
-  const baseShipping = subtotal > 5000 ? 0 : 250;
-  const shipping = shippingMethod === 'express' ? baseShipping + 500 : baseShipping;
-  const tax = Math.round((subtotal - promoDiscount) * 0.18);
-  const total = subtotal - promoDiscount + shipping + tax;
+  const baseShipping = 51;
+  const shipping = shippingMethod === 'express' ? 101 : 51;
+  const tax = 0; // GST removed as requested
+  const total = subtotal - promoDiscount + shipping;
 
   const handlePromoApply = async () => {
     if (!promoCode.trim()) return;
@@ -558,7 +558,7 @@ export default function CheckoutPage() {
                               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Standard</span>
                            </div>
                            <div className="font-black text-brand-dark text-lg uppercase italic leading-tight">Standard Shipping</div>
-                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">7-10 Working Days</p>
+                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">7-10 Working Days (₹51)</p>
                         </button>
                         <button 
                           onClick={() => setShippingMethod('express')}
@@ -575,7 +575,7 @@ export default function CheckoutPage() {
                               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Express</span>
                            </div>
                            <div className="font-black text-brand-dark text-lg uppercase italic leading-tight">Express Delivery</div>
-                           <p className="text-[10px] text-brand-cyan font-black uppercase tracking-widest mt-2">3-5 Working Days (+₹500)</p>
+                           <p className="text-[10px] text-brand-cyan font-black uppercase tracking-widest mt-2">3-5 Working Days (₹101)</p>
                         </button>
                       </div>
                     </div>
@@ -642,7 +642,7 @@ export default function CheckoutPage() {
                               </div>
                               <div className="flex justify-between items-end border-t border-gray-100 pt-4">
                                  <div className="text-gray-400 font-black text-xs uppercase tracking-widest">Quantity: <span className="text-brand-dark text-lg ml-1">{item.quantity}</span></div>
-                                 <div className="font-black text-2xl text-brand-dark tracking-tighter italic">₹{(item.product.base_price || 0) * item.quantity}</div>
+                                 <div className="font-black text-2xl text-brand-dark tracking-tighter italic">₹{Math.round(((item.unitPrice ?? item.product.base_price) || 0) * item.quantity).toLocaleString()}</div>
                               </div>
                            </div>
                          </div>
@@ -807,13 +807,13 @@ export default function CheckoutPage() {
                    )}
                    <div className="flex justify-between items-center text-white/60">
                       <span>Shipping ({shippingMethod})</span>
-                      <span className={cn("font-black tracking-tight", shipping === 0 ? "text-brand-lime" : "text-white")}>
-                        {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                      <span className="font-black tracking-tight text-white">
+                        ₹{shipping}
                       </span>
                    </div>
                    <div className="flex justify-between items-center text-white/60">
-                      <span>GST (18%)</span>
-                      <span className="text-white font-black tracking-tight">₹{tax.toLocaleString()}</span>
+                      <span>All Taxes</span>
+                      <span className="text-brand-lime font-black tracking-tight">INCLUDED</span>
                    </div>
                    <div className="pt-10 border-t border-white/10 flex flex-col gap-3">
                        <div className="flex items-center gap-2">

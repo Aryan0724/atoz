@@ -25,10 +25,12 @@ export default async function ProductsPage() {
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
-  // Fallback to mock products if none found in Supabase
-  const finalProducts = (error || !products || products.length === 0) 
-    ? mockProducts 
-    : products;
+  // Merge Supabase products with mock products (so newly configured products like Bill Book appear seamlessly)
+  const dbSlugs = new Set(((products || []) as any[]).map(p => p.slug));
+  const finalProducts = [
+    ...(products || []),
+    ...mockProducts.filter(mp => !dbSlugs.has(mp.slug) && mp.is_active !== false)
+  ];
 
   return (
     <Suspense fallback={

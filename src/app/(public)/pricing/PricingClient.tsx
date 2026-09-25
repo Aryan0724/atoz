@@ -191,6 +191,7 @@ export default function PricingClient({
                 </thead>
                 <tbody className="divide-y divide-gray-100/80 bg-white">
                   {[
+                    { name: 'Bill Book', qty: 1, quote: 250, price: 400, slug: 'bill-book' },
                     { name: 'Visiting Card Matt', qty: 200, quote: 600, price: 899, slug: 'business-card-matt-200' },
                     { name: 'Visiting Card UV', qty: 200, quote: 800, price: 1199, slug: 'business-card-uv-200' },
                     { name: 'Letterhead', qty: 100, quote: 1000, price: 1499, slug: 'letter-head-100' },
@@ -445,7 +446,7 @@ export default function PricingClient({
                     >
                       ₹{calculateEstimate().toLocaleString()}
                     </motion.span>
-                    <span className="text-sm text-brand-pink font-black mb-1 uppercase tracking-widest">+ 18% GST</span>
+                    <span className="text-sm text-brand-lime font-black mb-1 uppercase tracking-widest">All Taxes Included</span>
                   </div>
                 </div>
 
@@ -543,7 +544,7 @@ export default function PricingClient({
         >
           <Info className="h-5 w-5 text-gray-300 shrink-0 mt-0.5" />
           <p className="text-[11px] text-gray-400 font-black uppercase tracking-widest leading-loose">
-             Prices are exclusive of 18% GST. Designing, delivery, and handling charges may apply. Minimum Order Quantity (MOQ) depends on individual product lines. Standard SLA is 7-10 business days.
+             Prices are inclusive of all taxes. Designing, delivery, and handling charges may apply. Minimum Order Quantity (MOQ) depends on individual product lines. Standard SLA is 7-10 business days.
           </p>
         </motion.div>
       </div>

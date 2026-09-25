@@ -44,11 +44,20 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
   const slug = params.slug as string;
   const { addItem } = useCart();
 
+  const isVisitingCard = 
+    initialProduct.slug?.includes('business-card') || 
+    initialProduct.slug?.includes('visiting') || 
+    initialProduct.name?.toLowerCase().includes('visiting card') || 
+    initialProduct.name?.toLowerCase().includes('business card');
+
+  const effectiveMoq = isVisitingCard ? Math.max(initialProduct.moq || 100, 100) : (initialProduct.moq || 1);
+  const qtyStep = isVisitingCard ? 100 : 1;
+
   const [product, setProduct] = useState<Product>(initialProduct);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedQuality, setSelectedQuality] = useState(initialProduct.quality_levels?.[0] || 'Standard');
-  const [quantity, setQuantity] = useState(initialProduct.moq || 1);
+  const [quantity, setQuantity] = useState(effectiveMoq);
   const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
   const [isChoiceModalOpen, setIsChoiceModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -130,6 +139,24 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
     notFound();
   }
 
+  // Visiting card base price normalization:
+  // E.g. If admin/catalog sets base_price = 440 (representing 100 cards), per-card rate is 4.40
+  // If base_price is already unit rate (< 50, e.g. 4.40 or 4.99), use it directly
+  const unitBasePrice = (isVisitingCard && (product.base_price || 0) >= 50)
+    ? ((product.base_price || 0) / 100)
+    : (product.base_price || 0);
+
+  const rawQualityBonus = product.quality_prices?.[selectedQuality] || 0;
+  const unitQualityBonus = (isVisitingCard && rawQualityBonus >= 50)
+    ? (rawQualityBonus / 100)
+    : rawQualityBonus;
+
+  const currentUnitPrice = Number((unitBasePrice + unitQualityBonus).toFixed(2));
+  const estimatedTotal = Math.round(quantity * currentUnitPrice);
+  const displayStartingPrice = isVisitingCard 
+    ? ((product.base_price || 0) >= 50 ? product.base_price : Math.round((product.base_price || 0) * 100))
+    : product.base_price;
+
   const handleAddToCart = () => {
     const item = {
       id: `${product.id}-${selectedQuality}`,
@@ -137,7 +164,7 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
       quantity: quantity,
       quality_level: selectedQuality,
       design_data: {},
-      unitPrice: product.base_price + (product.quality_prices?.[selectedQuality] || 0)
+      unitPrice: currentUnitPrice
     };
     
     addItem(item);
@@ -232,8 +259,10 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
             
             <div className="flex items-end gap-3 mb-8">
               <span className="text-sm text-gray-400 font-bold mb-1.5 uppercase tracking-tight">Starting from</span>
-              <span className="text-4xl font-bold text-brand-dark tracking-tighter">₹{product.base_price}</span>
-              <span className="text-gray-400 font-medium mb-1.5 text-sm">per unit</span>
+              <span className="text-4xl font-bold text-brand-dark tracking-tighter">₹{displayStartingPrice}</span>
+              <span className="text-gray-400 font-medium mb-1.5 text-sm">
+                {isVisitingCard ? `per 100 cards (₹${currentUnitPrice.toFixed(2)}/card)` : 'per unit'}
+              </span>
             </div>
 
             <p className="text-lg text-gray-500 leading-relaxed mb-12 font-medium border-l-2 border-brand-pink/30 pl-8">
@@ -342,12 +371,12 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
             {/* Quantity Selector */}
             <div className="mb-12">
               <label className="block text-[10px] font-black text-gray-400 mb-5 uppercase tracking-widest">
-                Quantity <span className="text-brand-pink italic ml-2"> (Min. {product.moq} Units)</span>
+                Quantity <span className="text-brand-pink italic ml-2"> (Min. {effectiveMoq} Units)</span>
               </label>
               <div className="flex flex-col sm:flex-row sm:items-center gap-8">
                 <div className="inline-flex items-center border border-gray-100 rounded-xl p-1 bg-gray-50/50">
                   <button 
-                    onClick={() => setQuantity(prev => Math.max(product.moq || 1, prev - 1))}
+                    onClick={() => setQuantity(prev => Math.max(effectiveMoq, prev - qtyStep))}
                     className="p-3 rounded-lg hover:bg-white hover:shadow-sm transition-all text-brand-dark"
                   >
                     <Minus className="h-4 w-4" />
@@ -355,11 +384,11 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                   <input 
                     type="number" 
                     value={quantity}
-                    onChange={(e) => setQuantity(Math.max(product.moq || 1, parseInt(e.target.value) || (product.moq || 1)))}
+                    onChange={(e) => setQuantity(Math.max(effectiveMoq, parseInt(e.target.value) || effectiveMoq))}
                     className="w-16 text-center font-black text-xl focus:outline-none bg-transparent text-brand-dark italic"
                   />
                   <button 
-                    onClick={() => setQuantity(prev => prev + 1)}
+                    onClick={() => setQuantity(prev => prev + qtyStep)}
                     className="p-3 rounded-lg hover:bg-white hover:shadow-sm transition-all text-brand-dark"
                   >
                     <Plus className="h-4 w-4" />
@@ -368,14 +397,14 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                 <div className="flex flex-col">
                   <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Unit Rate</div>
                   <div className="text-xl font-bold text-brand-dark italic">
-                    ₹{product.base_price + (product.quality_prices?.[selectedQuality] || 0)}
+                    ₹{currentUnitPrice} {isVisitingCard ? '/ card' : ''}
                   </div>
                 </div>
                 <div className="h-10 w-px bg-gray-100 hidden sm:block" />
                 <div className="flex flex-col">
                   <div className="text-[9px] font-black text-brand-pink uppercase tracking-widest mb-1">Estimated Total</div>
                   <div className="text-3xl font-black text-brand-pink tracking-tighter italic">
-                    ₹{(quantity * (product.base_price + (product.quality_prices?.[selectedQuality] || 0))).toLocaleString()}
+                    ₹{estimatedTotal.toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -384,7 +413,7 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
             {/* Pricing Tiers */}
             <div className="mb-12">
               <PricingTierTable 
-                basePrice={product.base_price + (product.quality_prices?.[selectedQuality] || 0)} 
+                basePrice={currentUnitPrice} 
                 currentQuantity={quantity}
               />
             </div>
