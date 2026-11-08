@@ -9,6 +9,7 @@ export async function GET() {
     SMTP_PORT_DEFINED: typeof process.env.SMTP_PORT !== 'undefined' && process.env.SMTP_PORT !== '',
     SMTP_SECURE_DEFINED: typeof process.env.SMTP_SECURE !== 'undefined' && process.env.SMTP_SECURE !== '',
     SMTP_FROM_DEFINED: typeof process.env.SMTP_FROM !== 'undefined' && process.env.SMTP_FROM !== '',
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'printsatoz2@gmail.com',
     SMTP_KEYS_FOUND: Object.keys(process.env).filter(key => key.startsWith('SMTP_'))
   });
 }

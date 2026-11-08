@@ -25,6 +25,7 @@ export function getEmailTransporter() {
 }
 
 export async function sendOrderConfirmationEmail(orderData: OrderEmailData) {
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.ADMIN_NOTIFICATION_EMAIL || 'printsatoz2@gmail.com';
   const recipientEmail = orderData.profiles?.email || orderData.shipping_address?.email;
 
   if (!recipientEmail) {
@@ -36,10 +37,11 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData) {
   const htmlContent = generateOrderConfirmationHtml(orderData);
   const subject = `Order Confirmed: #${orderData.id.slice(0, 8).toUpperCase()} - A to Z Prints`;
   const from = process.env.SMTP_FROM || `"A to Z Prints" <${process.env.SMTP_USER || 'orders@atozprints.com'}>`;
+  const replyTo = process.env.SMTP_REPLY_TO || adminEmail;
 
   if (!transporter) {
     console.log('[Mailer Demo/Unconfigured] SMTP credentials not set in .env.local.');
-    console.log(`[Mailer Mock Delivery] To: ${recipientEmail} | Subject: ${subject}`);
+    console.log(`[Mailer Mock Delivery] To: ${recipientEmail} | BCC: ${adminEmail} | Subject: ${subject}`);
     return { 
       success: true, 
       simulated: true, 
@@ -48,14 +50,19 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData) {
   }
 
   try {
+    // BCC admin email so store notifications always reach printsatoz2@gmail.com
+    const bcc = recipientEmail.toLowerCase() !== adminEmail.toLowerCase() ? adminEmail : undefined;
+
     const info = await transporter.sendMail({
       from,
       to: recipientEmail,
+      ...(bcc ? { bcc } : {}),
+      replyTo,
       subject,
       html: htmlContent,
     });
 
-    console.log('[Mailer Success] Order confirmation sent:', info.messageId, 'to:', recipientEmail);
+    console.log('[Mailer Success] Order confirmation sent:', info.messageId, 'to:', recipientEmail, bcc ? `(BCC: ${bcc})` : '');
     return { success: true, messageId: info.messageId };
   } catch (error: any) {
     console.error('[Mailer Error] Failed to send email:', error.message);
@@ -64,6 +71,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData) {
 }
 
 export async function sendOrderStatusEmail(orderData: OrderStatusEmailData) {
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.ADMIN_NOTIFICATION_EMAIL || 'printsatoz2@gmail.com';
   const recipientEmail = orderData.profiles?.email || orderData.shipping_address?.email;
 
   if (!recipientEmail) {
@@ -78,6 +86,7 @@ export async function sendOrderStatusEmail(orderData: OrderStatusEmailData) {
   const formattedStatus = orderData.status.replace(/_/g, ' ').toUpperCase();
   const subject = `Order Update: #${orderData.id.slice(0, 8).toUpperCase()} is now ${formattedStatus} - A to Z Prints`;
   const from = process.env.SMTP_FROM || `"A to Z Prints" <${process.env.SMTP_USER || 'orders@atozprints.com'}>`;
+  const replyTo = process.env.SMTP_REPLY_TO || adminEmail;
 
   if (!transporter) {
     console.log('[Mailer Demo/Unconfigured] SMTP credentials not set in .env.local.');
@@ -93,6 +102,7 @@ export async function sendOrderStatusEmail(orderData: OrderStatusEmailData) {
     const info = await transporter.sendMail({
       from,
       to: recipientEmail,
+      replyTo,
       subject,
       html: htmlContent,
     });
@@ -113,10 +123,10 @@ export async function sendContactFormEmail(contactData: {
   message: string; 
   interests?: string[] 
 }) {
-  const adminEmail = process.env.SMTP_USER || 'atozprints547@gmail.com';
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.ADMIN_NOTIFICATION_EMAIL || 'printsatoz2@gmail.com';
   const transporter = getEmailTransporter();
   const subject = `New Contact Form Submission from ${contactData.name}`;
-  const from = process.env.SMTP_FROM || `"A to Z Prints Support" <${adminEmail}>`;
+  const from = process.env.SMTP_FROM || `"A to Z Prints Support" <${process.env.SMTP_USER || adminEmail}>`;
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #f0f0f0; border-radius: 8px;">
@@ -182,10 +192,10 @@ export async function sendCorporateInquiryEmail(inquiryData: {
   scale: string; 
   requirements: string;
 }) {
-  const adminEmail = process.env.SMTP_USER || 'atozprints547@gmail.com';
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.ADMIN_NOTIFICATION_EMAIL || 'printsatoz2@gmail.com';
   const transporter = getEmailTransporter();
   const subject = `🚀 Enterprise Inquiry: ${inquiryData.companyName}`;
-  const from = process.env.SMTP_FROM || `"A to Z Prints Enterprise" <${adminEmail}>`;
+  const from = process.env.SMTP_FROM || `"A to Z Prints Enterprise" <${process.env.SMTP_USER || adminEmail}>`;
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #f0f0f0; border-radius: 8px;">

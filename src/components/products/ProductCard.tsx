@@ -5,13 +5,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '@/lib/supabase/types';
-import { ShoppingBag, Eye, Zap, X, Heart } from 'lucide-react';
+import { ShoppingBag, Eye, Zap, X, Heart, Sparkles } from 'lucide-react';
 import { useWishlist } from '@/lib/store/useWishlist';
 import { toast } from 'sonner';
 import Button from '@/components/common/Button';
+import { getParentProductBySlug } from '@/lib/data/subProductsData';
 
 interface ProductCardProps {
   product: Product;
+  onSwitchToDesigns?: (productSlug: string) => void;
 }
 
 const categoryGradients: Record<string, string> = {
@@ -24,13 +26,15 @@ const categoryGradients: Record<string, string> = {
   'Electronics': 'from-blue-500 to-indigo-700',
 };
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, onSwitchToDesigns }: ProductCardProps) => {
   const [imgError, setImgError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const { isFavorite, toggleFavorite } = useWishlist();
   const isFav = isFavorite(product.id);
+  const parentInfo = getParentProductBySlug(product.slug);
   const isTemplateForm = product.design_mode === 'template_form' || 
+                        Boolean(parentInfo?.totalDesigns) ||
                         ['id-card', 'letter-head', 'business-card', 'wedding-card', 'custom-calendar', 'corporate-notebook', 'diary-with-logo', 'custom-pen'].includes(product.slug);
   const gradient = product.category ? (categoryGradients[product.category] || 'from-gray-400 to-gray-600') : 'from-gray-400 to-gray-600';
   
@@ -67,9 +71,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
           )}
           
-          {/* MOQ Badge - Minimal */}
-          <div className="absolute top-4 left-4 px-3 py-1.5 rounded-lg bg-white/80 backdrop-blur-md border border-brand-darkBlue/5 text-brand-darkBlue text-[10px] font-sans font-bold uppercase tracking-tight z-10 shadow-sm">
-            Min. {product.moq} Units
+          {/* MOQ & Designs Badges */}
+          <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
+            <div className="px-3 py-1.5 rounded-lg bg-white/85 backdrop-blur-md border border-brand-darkBlue/5 text-brand-darkBlue text-[10px] font-sans font-bold uppercase tracking-tight shadow-sm">
+              Min. {product.moq} Units
+            </div>
+            {parentInfo && parentInfo.totalDesigns > 0 && (
+              <div className="px-2.5 py-1 rounded-lg bg-brand-darkBlue text-brand-gold border border-brand-gold/30 text-[9px] font-sans font-bold uppercase tracking-tight shadow-sm flex items-center gap-1">
+                <Sparkles className="w-2.5 h-2.5 fill-current" />
+                <span>{parentInfo.totalDesigns}+ Designs</span>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons - Subtle Top Right */}

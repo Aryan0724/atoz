@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams, notFound, useRouter } from 'next/navigation';
+import { useParams, notFound, useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '@/lib/store/useCart';
 import { 
   Check, 
@@ -15,6 +15,7 @@ import {
   Info,
   ShieldCheck,
   RotateCcw,
+  RotateCw,
   Plus,
   Truck,
   ShoppingCart,
@@ -23,7 +24,12 @@ import {
   PenTool,
   Star,
   User,
-  Layout
+  Layout,
+  Sparkles,
+  Filter,
+  Layers,
+  Palette,
+  ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '@/components/products/ProductCard';
@@ -37,6 +43,13 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import Button from '@/components/common/Button';
 import { trackViewContent, trackAddToCart } from '@/lib/analytics/meta-pixel';
+import { 
+  getSubProductsForParent, 
+  SubProductDesign, 
+  getParentProductBySlug 
+} from '@/lib/data/subProductsData';
+import SubProductQuickModal from '@/components/products/SubProductQuickModal';
+import SubProductCard from '@/components/products/SubProductCard';
 
 export default function ProductDetailClient({ product: initialProduct }: { product: Product }) {
   const params = useParams();
@@ -53,6 +66,17 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
   const effectiveMoq = isVisitingCard ? Math.max(initialProduct.moq || 100, 100) : (initialProduct.moq || 1);
   const qtyStep = isVisitingCard ? 100 : 1;
 
+  const searchParams = useSearchParams();
+  const templateQueryParam = searchParams.get('template');
+  
+  // Available sub-products for this parent product
+  const subProducts = useMemo(() => getSubProductsForParent(initialProduct.slug), [initialProduct.slug]);
+  const parentProductInfo = useMemo(() => getParentProductBySlug(initialProduct.slug), [initialProduct.slug]);
+
+  const [selectedProfessionFilter, setSelectedProfessionFilter] = useState('All');
+  const [quickViewDesign, setQuickViewDesign] = useState<SubProductDesign | null>(null);
+  const [previewSide, setPreviewSide] = useState<'front' | 'back'>('front');
+
   const [product, setProduct] = useState<Product>(initialProduct);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -64,6 +88,25 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
   const [selectedTemplateIndex, setSelectedTemplateIndex] = useState(0);
   const isTemplateForm = product.design_mode === 'template_form' || 
                         ['id-card', 'letter-head', 'business-card', 'wedding-card', 'custom-calendar', 'corporate-notebook', 'diary-with-logo', 'custom-pen'].some(s => product.slug?.includes(s));
+
+  useEffect(() => {
+    if (templateQueryParam !== null) {
+      const idx = parseInt(templateQueryParam, 10);
+      if (!isNaN(idx) && idx >= 0) {
+        setSelectedTemplateIndex(idx);
+      }
+    }
+  }, [templateQueryParam]);
+
+  const currentSubProduct = useMemo(() => {
+    if (subProducts.length === 0) return null;
+    return subProducts[selectedTemplateIndex] || subProducts[0];
+  }, [subProducts, selectedTemplateIndex]);
+
+  const filteredSubProducts = useMemo(() => {
+    if (selectedProfessionFilter === 'All') return subProducts;
+    return subProducts.filter(p => p.profession.toLowerCase().includes(selectedProfessionFilter.toLowerCase()));
+  }, [subProducts, selectedProfessionFilter]);
 
   useEffect(() => {
     const fetchRelatedData = async () => {
@@ -192,8 +235,34 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
         <div className="lg:grid lg:grid-cols-2 lg:gap-16">
           {/* Image Gallery */}
           <div className="relative pt-6">
-            <div className="aspect-[4/5] bg-gray-50 rounded-[40px] overflow-hidden shadow-sm border border-gray-100/50 p-12 transition-all duration-500">
-              {product.images?.[selectedImageIndex] ? (
+            <div className="aspect-[4/5] bg-gray-50 rounded-[40px] overflow-hidden shadow-sm border border-gray-100/50 p-8 sm:p-12 transition-all duration-500 relative flex items-center justify-center">
+              {currentSubProduct ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <Image 
+                    src={previewSide === 'back' && currentSubProduct.backImage ? currentSubProduct.backImage : currentSubProduct.frontImage} 
+                    alt={currentSubProduct.name} 
+                    fill 
+                    className="object-contain p-2"
+                    priority
+                  />
+                  {/* Side Switcher Badge on Image */}
+                  {currentSubProduct.backImage && (
+                    <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2">
+                      <button
+                        onClick={() => setPreviewSide(prev => prev === 'front' ? 'back' : 'front')}
+                        className="px-3.5 py-2 bg-brand-darkBlue/90 backdrop-blur-md text-white text-[10px] font-sans font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center gap-2 hover:bg-brand-blue transition-colors"
+                      >
+                        <RotateCw className="w-3.5 h-3.5 text-brand-gold" />
+                        <span>View {previewSide === 'front' ? 'Back Side' : 'Front Side'}</span>
+                      </button>
+                    </div>
+                  )}
+                  {/* Active Design Tag */}
+                  <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-brand-dark text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm border border-gray-100">
+                    Template #{selectedTemplateIndex + 1}: {currentSubProduct.profession}
+                  </div>
+                </div>
+              ) : product.images?.[selectedImageIndex] ? (
                 <Image 
                   src={product.images[selectedImageIndex]} 
                   alt={product.name} 
@@ -208,13 +277,15 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
               )}
             </div>
 
-            {/* Thumbnail Gallery */}
+            {/* Thumbnail Gallery (fallback or additional images) */}
             {product.images && product.images.length > 1 && (
               <div className="mt-6 flex gap-4 overflow-x-auto pb-2 no-scrollbar">
                 {product.images.map((image: string, index: number) => (
                   <button 
                     key={index}
-                    onClick={() => setSelectedImageIndex(index)}
+                    onClick={() => {
+                      setSelectedImageIndex(index);
+                    }}
                     className={cn(
                       "relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden border-2 transition-all p-2 bg-gray-50",
                       selectedImageIndex === index ? "border-brand-pink shadow-md" : "border-transparent hover:border-gray-200"
@@ -250,77 +321,98 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
 
           {/* Product Info */}
           <div className="mt-10 lg:mt-0">
-            <div className="text-sm font-bold text-brand-pink uppercase tracking-widest mb-4">
-              {product.category}
+            <div className="text-xs font-sans font-bold text-brand-gold uppercase tracking-[0.25em] mb-3 flex items-center gap-2">
+              <span>{product.category}</span>
+              <span className="h-px w-6 bg-brand-gold/40" />
             </div>
-            <h1 className="text-4xl lg:text-5xl font-bold text-brand-dark mb-6 tracking-tight">
+            <h1 className="text-4xl lg:text-5xl font-serif font-bold text-brand-darkBlue mb-6 tracking-tight">
               {product.name}
             </h1>
             
             <div className="flex items-end gap-3 mb-8">
-              <span className="text-sm text-gray-400 font-bold mb-1.5 uppercase tracking-tight">Starting from</span>
-              <span className="text-4xl font-bold text-brand-dark tracking-tighter">₹{displayStartingPrice}</span>
-              <span className="text-gray-400 font-medium mb-1.5 text-sm">
+              <span className="text-xs font-sans text-slate-400 font-bold mb-1.5 uppercase tracking-wider">Starting from</span>
+              <span className="text-4xl font-serif font-bold text-brand-darkBlue tracking-tight">₹{displayStartingPrice}</span>
+              <span className="text-slate-500 font-sans font-medium mb-1.5 text-sm">
                 {isVisitingCard ? `per 100 cards (₹${currentUnitPrice.toFixed(2)}/card)` : 'per unit'}
               </span>
             </div>
 
-            <p className="text-lg text-gray-500 leading-relaxed mb-12 font-medium border-l-2 border-brand-pink/30 pl-8">
+            <p className="text-base sm:text-lg text-slate-500 font-sans leading-relaxed mb-12 font-light border-l-2 border-brand-gold/40 pl-6">
               {product.description}
             </p>
 
-            {/* Template Selection - Added for Dynamic Template Architecture */}
-            {isTemplateForm && (product as any).color_variants?.length > 0 && (
-              <div className="mb-10">
-                <div className="flex items-center justify-between mb-4">
-                  <label className="block text-sm font-bold text-brand-dark uppercase tracking-wider">
-                    Choose Design Template
-                  </label>
-                  <span className="text-[10px] font-black text-brand-pink uppercase tracking-widest bg-brand-pink/5 px-2 py-1 rounded">
-                    {(product as any).color_variants.length} Layouts Available
+            {/* Template Selection - Added for Dynamic Sub-Product Design Selection */}
+            {(subProducts.length > 0 || (isTemplateForm && (product as any).color_variants?.length > 0)) && (
+              <div className="mb-10 p-5 bg-gray-50/70 rounded-2xl border border-gray-100">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <label className="block text-xs font-black text-brand-dark uppercase tracking-wider">
+                      Choose Sub-Product / Design
+                    </label>
+                    {currentSubProduct && (
+                      <span className="text-[11px] font-bold text-brand-pink truncate block mt-0.5">
+                        {currentSubProduct.name}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-black text-brand-pink uppercase tracking-widest bg-brand-pink/10 px-2.5 py-1 rounded-md border border-brand-pink/20">
+                    {(subProducts.length || (product as any).color_variants?.length)} Designs
                   </span>
                 </div>
-                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
-                  {(product as any).color_variants.map((template: any, idx: number) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        setSelectedTemplateIndex(idx);
-                        // Update preview image if available
-                        if (template.wireframe_images?.[0]) {
-                           // Find if this image exists in product.images to sync gallery
-                           const imgIdx = product.images?.indexOf(template.wireframe_images[0]);
-                           if (imgIdx !== -1 && imgIdx !== undefined) {
-                             setSelectedImageIndex(imgIdx);
-                           }
-                        }
-                      }}
-                      className={cn(
-                        "relative w-32 shrink-0 rounded-2xl overflow-hidden border-2 transition-all group/temp",
-                        product.slug?.includes('id-card') || product.slug?.includes('wedding') ? "aspect-[2/3]" : "aspect-[3.5/2]",
-                        selectedTemplateIndex === idx 
-                          ? "border-brand-pink ring-4 ring-brand-pink/5 shadow-lg" 
-                          : "border-gray-100 hover:border-gray-200 bg-gray-50"
-                      )}
-                    >
-                      <Image 
-                        src={template.wireframe_images?.[0] || template.image_url} 
-                        alt={template.name}
-                        fill
-                        className="object-cover group-hover/temp:scale-110 transition-transform duration-500"
-                      />
-                      <div className={cn(
-                        "absolute inset-0 bg-brand-dark/40 flex items-center justify-center opacity-0 transition-opacity",
-                        selectedTemplateIndex === idx && "opacity-100 bg-brand-pink/20"
-                      )}>
-                        {selectedTemplateIndex === idx && <Check className="w-6 h-6 text-white" />}
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-white/90 backdrop-blur-sm border-t border-gray-100">
-                        <p className="text-[8px] font-black text-brand-dark uppercase truncate">{template.name}</p>
-                      </div>
-                    </button>
-                  ))}
+
+                <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+                  {(subProducts.length > 0 ? subProducts : (product as any).color_variants).map((template: any, idx: number) => {
+                    const isSelected = selectedTemplateIndex === idx;
+                    const previewImg = template.frontImage || template.wireframe_images?.[0] || template.image_url;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setSelectedTemplateIndex(idx);
+                          setPreviewSide('front');
+                        }}
+                        className={cn(
+                          "relative w-28 shrink-0 rounded-xl overflow-hidden border-2 transition-all group/temp bg-white shadow-sm",
+                          product.slug?.includes('id-card') || product.slug?.includes('wedding') ? "aspect-[2/3]" : "aspect-[3.5/2]",
+                          isSelected 
+                            ? "border-brand-pink ring-4 ring-brand-pink/15 shadow-md scale-102" 
+                            : "border-gray-200 hover:border-gray-300"
+                        )}
+                      >
+                        {previewImg && (
+                          <Image 
+                            src={previewImg} 
+                            alt={template.name}
+                            fill
+                            className="object-cover group-hover/temp:scale-105 transition-transform duration-300"
+                          />
+                        )}
+                        <div className={cn(
+                          "absolute inset-0 bg-brand-dark/40 flex items-center justify-center opacity-0 transition-opacity",
+                          isSelected && "opacity-100 bg-brand-pink/20"
+                        )}>
+                          {isSelected && <Check className="w-5 h-5 text-white" />}
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 p-1 bg-white/95 backdrop-blur-sm border-t border-gray-100">
+                          <p className="text-[7.5px] font-black text-brand-dark uppercase truncate">{template.name}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
+
+                {subProducts.length > 0 && (
+                  <div className="mt-2.5 pt-2 border-t border-gray-200/50 flex items-center justify-between">
+                    <a 
+                      href="#subproduct-designs"
+                      className="text-[10px] font-black uppercase tracking-wider text-brand-pink hover:underline flex items-center gap-1"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      <span>Browse All {subProducts.length} Designs with Filter</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </a>
+                  </div>
+                )}
               </div>
             )}
 
@@ -333,9 +425,9 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                 {product.category === 'Apparel' && (
                   <button 
                     onClick={() => setIsSizeChartOpen(true)}
-                    className="text-xs font-bold text-brand-pink uppercase tracking-widest hover:underline flex items-center gap-1.5"
+                    className="text-xs font-sans font-bold text-brand-gold uppercase tracking-widest hover:underline flex items-center gap-1.5"
                   >
-                    <div className="w-4 h-4 rounded-full border-2 border-brand-pink flex items-center justify-center text-[8px]">?</div>
+                    <div className="w-4 h-4 rounded-full border-2 border-brand-gold flex items-center justify-center text-[8px]">?</div>
                     Size Guide
                   </button>
                 )}
@@ -360,7 +452,7 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                         </span>
                       </div>
                       {selectedQuality === level && (
-                        <div className="absolute top-1 right-1 w-2 h-2 bg-brand-pink rounded-full shadow-[0_0_8px_rgba(233,30,99,0.5)]" />
+                        <div className="absolute top-1 right-1 w-2 h-2 bg-brand-gold rounded-full shadow-[0_0_8px_rgba(197,160,89,0.5)]" />
                       )}
                     </button>
                   );
@@ -370,8 +462,8 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
 
             {/* Quantity Selector */}
             <div className="mb-12">
-              <label className="block text-[10px] font-black text-gray-400 mb-5 uppercase tracking-widest">
-                Quantity <span className="text-brand-pink italic ml-2"> (Min. {effectiveMoq} Units)</span>
+              <label className="block text-[10px] font-sans font-bold text-slate-400 mb-5 uppercase tracking-[0.2em]">
+                Quantity <span className="text-brand-gold italic ml-2"> (Min. {effectiveMoq} Units)</span>
               </label>
               <div className="flex flex-col sm:flex-row sm:items-center gap-8">
                 <div className="inline-flex items-center border border-gray-100 rounded-xl p-1 bg-gray-50/50">
@@ -461,6 +553,98 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
           </div>
         </div>
 
+        {/* ─── PRINTASIA SUB-PRODUCT DESIGNS GALLERY SECTION ─── */}
+        {subProducts.length > 0 && (
+          <div id="subproduct-designs" className="mt-20 pt-16 border-t border-gray-100 scroll-mt-32">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-3 py-1 bg-brand-pink/10 text-brand-pink text-[10px] font-black uppercase tracking-widest rounded-full border border-brand-pink/20 flex items-center gap-1.5">
+                    <Sparkles className="w-3 h-3 fill-current" />
+                    PrintAsia Inspired Flow
+                  </span>
+                  <span className="text-xs font-bold text-gray-400">
+                    {subProducts.length} Sub-Product Designs Available
+                  </span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-black text-brand-dark tracking-tight">
+                  Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-cyan italic">Sub-Product Design</span>
+                </h2>
+                <p className="text-sm text-gray-500 font-medium mt-2 max-w-2xl leading-relaxed">
+                  Select your profession or design preference below. Each sub-product features full front & back previews. Choose your design and proceed directly to personalize.
+                </p>
+              </div>
+
+              {/* Upload Custom Design Option */}
+              <button
+                onClick={() => router.push(`/customize/${product.slug}?tab=uploads`)}
+                className="px-5 py-3.5 bg-gray-100 hover:bg-brand-dark hover:text-white text-brand-dark rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all shrink-0 self-start md:self-auto shadow-sm"
+              >
+                <Upload className="w-4 h-4 text-brand-pink" />
+                <span>Upload Custom Artwork</span>
+              </button>
+            </div>
+
+            {/* Profession / Industry Filter Pills */}
+            {parentProductInfo?.professions && parentProductInfo.professions.length > 1 && (
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-3">
+                  <Filter className="w-4 h-4 text-brand-pink" />
+                  <span className="text-xs font-black uppercase tracking-wider text-brand-dark">
+                    Filter by Industry / Specialty
+                  </span>
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none scroll-smooth">
+                  {parentProductInfo.professions.map((prof) => {
+                    const isSelected = selectedProfessionFilter === prof;
+                    const count = prof === 'All' 
+                      ? subProducts.length 
+                      : subProducts.filter(p => p.profession.toLowerCase().includes(prof.toLowerCase())).length;
+                    return (
+                      <button
+                        key={prof}
+                        onClick={() => setSelectedProfessionFilter(prof)}
+                        className={`shrink-0 px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
+                          isSelected
+                            ? 'bg-brand-dark text-white shadow-md ring-2 ring-brand-pink/30'
+                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        <span>{prof}</span>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold ${
+                          isSelected ? 'bg-brand-pink text-white' : 'bg-white text-gray-500'
+                        }`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Sub-Products Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredSubProducts.map((design) => {
+                const isCurrent = selectedTemplateIndex === design.templateIndex;
+                return (
+                  <SubProductCard
+                    key={design.id}
+                    design={design}
+                    isSelected={isCurrent}
+                    onQuickView={(d) => setQuickViewDesign(d)}
+                    onSelectDesign={(d) => {
+                      setSelectedTemplateIndex(d.templateIndex);
+                      toast.success(`Selected "${d.name}"`);
+                      setIsChoiceModalOpen(true);
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Product Specs area */}
         <div className="mt-24">
           <h2 className="text-3xl font-bold text-brand-dark mb-12 tracking-tight">Product Details</h2>
@@ -545,13 +729,13 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                     </div>
                  </div>
                  <div className="flex items-center gap-1 mb-6">
-                    {[1,2,3,4,5].map(i => <Star key={i} className={cn("w-3 h-3 fill-current", i <= review.rating ? "text-brand-pink" : "text-gray-200")} />)}
+                    {[1,2,3,4,5].map(i => <Star key={i} className={cn("w-3 h-3 fill-current", i <= review.rating ? "text-brand-gold" : "text-gray-200")} />)}
                  </div>
                  <p className="text-sm text-gray-500 font-medium leading-relaxed italic uppercase tracking-wide">
                     &quot;{review.text}&quot;
                  </p>
                  <div className="mt-8 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                    <div className="w-2 h-2 rounded-full bg-brand-gold shadow-[0_0_8px_rgba(197,160,89,0.5)]" />
                     <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest">Verified Transaction</span>
                  </div>
               </motion.div>
@@ -563,8 +747,8 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
         {relatedProducts.length > 0 && (
           <div className="mt-32">
             <div className="flex items-center justify-between mb-12">
-              <h2 className="text-3xl font-bold text-brand-dark tracking-tight">You might also like</h2>
-              <Link href="/products" className="text-brand-pink font-bold hover:underline">View Catalog</Link>
+              <h2 className="text-3xl font-serif font-bold text-brand-darkBlue tracking-tight">You might also like</h2>
+              <Link href="/products" className="text-brand-gold font-sans font-bold text-xs uppercase tracking-widest hover:underline">View Catalog</Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.map((p) => (
@@ -606,33 +790,33 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
                 </button>
 
                 <div className="p-10 pt-12">
-                   <div className="w-16 h-16 bg-brand-pink/10 rounded-3xl flex items-center justify-center text-brand-pink mb-8">
-                      <Zap className="w-8 h-8" />
+                   <div className="w-16 h-16 bg-brand-gold/15 rounded-3xl flex items-center justify-center text-brand-darkBlue mb-8">
+                      <Zap className="w-8 h-8 text-brand-gold" />
                    </div>
-                   <h2 className="text-3xl font-bold text-brand-dark mb-4 tracking-tight">Start Designing</h2>
-                   <p className="text-gray-500 font-semibold uppercase text-[10px] tracking-widest mb-10 opacity-70">Choose how you want to start your design.</p>
+                   <h2 className="text-3xl font-serif font-bold text-brand-darkBlue mb-4 tracking-tight">Start Designing</h2>
+                   <p className="text-slate-400 font-sans font-bold uppercase text-[10px] tracking-widest mb-10">Choose how you want to start your design.</p>
                    
                    <div className="grid gap-4">
                       <button 
                         onClick={() => router.push(`/customize/${product.slug}?tab=uploads`)}
-                        className="flex items-center gap-6 p-6 rounded-3xl bg-gray-50 hover:bg-brand-pink hover:text-white transition-all group text-left border border-gray-100"
+                        className="flex items-center gap-6 p-6 rounded-3xl bg-brand-base hover:bg-brand-darkBlue hover:text-white transition-all group text-left border border-brand-darkBlue/8"
                       >
-                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-brand-pink shadow-sm group-hover:bg-white/20 group-hover:text-white transition-colors">
-                            <Upload className="w-6 h-6" />
+                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-brand-gold shadow-sm group-hover:bg-white/20 group-hover:text-white transition-colors">
+                            <Upload className="w-6 h-6 stroke-[2.2]" />
                          </div>
                          <div className="flex-1">
-                            <h4 className="font-bold text-lg mb-1 italic">Upload My Design</h4>
-                            <p className="text-[10px] uppercase font-bold tracking-widest opacity-60">I have my own print-ready file</p>
+                            <h4 className="font-serif font-bold text-lg mb-1">Upload My Design</h4>
+                            <p className="text-[10px] uppercase font-sans font-bold tracking-widest opacity-60">I have my own print-ready file</p>
                          </div>
-                         <ChevronRight className="w-5 h-5 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                         <ChevronRight className="w-5 h-5 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-gold" />
                       </button>
 
                       <button 
                         onClick={() => router.push(`/customize/${product.slug}?template=${selectedTemplateIndex}`)}
-                        className="flex items-center gap-6 p-6 rounded-3xl bg-gray-50 hover:bg-brand-dark hover:text-white transition-all group text-left border border-gray-100"
+                        className="flex items-center gap-6 p-6 rounded-3xl bg-brand-base hover:bg-brand-darkBlue hover:text-white transition-all group text-left border border-brand-darkBlue/8"
                       >
-                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-brand-cyan shadow-sm group-hover:bg-white/20 group-hover:text-white transition-colors">
-                            {isTemplateForm ? <Layout className="w-6 h-6" /> : <PenTool className="w-6 h-6" />}
+                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-brand-gold shadow-sm group-hover:bg-white/20 group-hover:text-white transition-colors">
+                            {isTemplateForm ? <Layout className="w-6 h-6 stroke-[2.2]" /> : <PenTool className="w-6 h-6 stroke-[2.2]" />}
                          </div>
                          <div className="flex-1">
                             <h4 className="font-bold text-lg mb-1 italic">{isTemplateForm ? 'Fill Detail Form' : 'Design Online'}</h4>
@@ -654,6 +838,13 @@ export default function ProductDetailClient({ product: initialProduct }: { produ
           </div>
         )}
       </AnimatePresence>
+
+      {/* Quick View Modal for Sub-Product Designs */}
+      <SubProductQuickModal
+        design={quickViewDesign}
+        isOpen={Boolean(quickViewDesign)}
+        onClose={() => setQuickViewDesign(null)}
+      />
     </div>
   );
 }
